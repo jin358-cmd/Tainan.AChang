@@ -53,14 +53,14 @@ test('公開路線資料具十里、日夜兩時段與來源，且沒有名冊�
   assert.equal(Object.hasOwn(data,'roster'),false);
 });
 
-test('UI 呈現 4/4/2 里別分頁、合併排班區、三狀態與同步標籤',()=>{
-  const html=read('index.html'),app=read('app.js'),css=read('hardening.css');
+test('UI 呈現 4/4/2 里別分頁、原始排班按鈕、三狀態與離線殼層',()=>{
+  const html=read('index.html'),app=read('app.js'),css=read('hardening.css')+read('v04-restore.css');
   for(const id of ['areaPrev','areaNext','areaPageStatus','syncSummary','routeProvenance'])assert.match(html,new RegExp(`id="${id}"`));
   assert.match(app,/AREAS\.slice\(0,4\),AREAS\.slice\(4,8\),AREAS\.slice\(8,10\)/);
-  assert.match(html,/跟巡人員與巡點/);
+  assert.match(html,/依車次順序拜訪/);
   assert.match(html,/已排巡點/);
-  assert.match(app,/\['待訪','進行中','完成'\]/);
-  for(const label of ['待同步','同步衝突','已同步'])assert.ok(app.includes(label));
+  assert.match(app,/\['待拜訪','進行中','完成'\]/);
+  for(const label of ['離線模式','本機保存','連線後需同步'])assert.ok(app.includes(label));
   assert.match(css,/\.action-thin/);
   assert.match(css,/\.compact-action/);
 });
@@ -68,15 +68,15 @@ test('UI 呈現 4/4/2 里別分頁、合併排班區、三狀態與同步標籤'
 test('管理員名冊提供人員授權頁，一般人員個人資料預設唯讀',()=>{
   const html=read('index.html'),app=read('app.js');
   for(const id of ['rosterMainPanel','rosterAuthRefresh','rosterAuthList','workerProfile'])assert.match(html,new RegExp(`id="${id}"`));
-  assert.match(html,/data-tab="map" class="on">地圖<\/button><button data-tab="roster">名冊<\/button><button data-tab="members"/);
-  assert.match(html,/預設只能檢視/);
+  assert.match(html,/data-tab="map" class="on">① 地圖<\/button><button data-tab="roster">② 名冊<\/button><button data-tab="members"/);
+  assert.match(html,/會員管理/);
   assert.match(app,/canEditProfile=false/);
-  assert.match(app,/canEditProfile&&!offlineMode/);
+  assert.match(app,/canEditProfile=role==='volunteer'/);
   assert.match(app,/data-roster-grant/);
   assert.match(html,/href="\/\?entry=volunteer"/);
   assert.match(html,/data-preview-volunteer="1"/);
   assert.match(app,/new URLSearchParams\(location\.search\)/);
-  assert.match(app,/匿名測試站點/);
+  assert.match(app,/匿名示範地址/);
 });
 
 test('v0.4 街道地圖基線與離線邊界 fallback 同時保留',()=>{

@@ -43,8 +43,8 @@ t('個人資料預設唯讀且 grant 不能由志工或離線快取自行取得'
  assert.match(access,/L\.problem\(503,'人員編輯授權後端尚待 Owner 核准 migration'\)/);
  assert.match(access,/account\.status!=='active'\|\|!member\.phone_e164/);
  assert.match(app,/offlineMode=true;role='volunteer'.*canEditProfile=false/);
- assert.match(app,/後端尚待 Owner 核准 migration/);
- assert.match(app,/ready&&x\.accountId/);
+ assert.match(app,/migration 尚待 Owner 核准/);
+ assert.match(app,/filter\(x=>x\.accountId\)/);
 });
 t('窄 RPC 只允許本人非身分欄位，不能改電話或 source id',()=>{
  const migration=fs.readFileSync(path.join(__dirname,'../backend/004_profile_edit_grants.sql'),'utf8');
