@@ -13,15 +13,21 @@ module.exports=L.run(async(req,res)=>{
  const b=L.body(req);
  if(req.method==='POST'){
   if(p.role!=='admin')L.problem(403,'志工不能指定排班');
-  const mid=L.uuid(b.volunteerId),village=L.checkText(b.area,'里別',30),d=L.validDate(b.date),sh=shiftMap[b.shift],truck=L.checkText(b.truck,'車號',30),address=L.checkText(b.address,'巡點地址',240),arrival=L.time(b.time),order=Math.max(1,Math.min(9999,Math.floor(Number(b.stopOrder)||1)));
+  const mid=L.uuid(b.volunteerId),village=L.checkText(b.area,'里別',30),d=L.validDate(b.date),sh=shiftMap[b.shift],truck=L.checkText(b.truck,'車號',30);
+  const source=Array.isArray(b.stops)?b.stops:[{address:b.address,time:b.time,stopOrder:b.stopOrder}];
+  if(source.length<1||source.length>30)L.problem(400,'每組需含 1 至 30 個巡點');
+  const cleaned=source.map(x=>({visit_address:L.checkText(x.address,'巡點地址',240),time:L.time(x.time),stop_order:Math.max(1,Math.min(9999,Math.floor(Number(x.stopOrder)||1)))}));
+  if(new Set(cleaned.map(x=>x.stop_order)).size!==cleaned.length)L.problem(400,'同班次巡點順序不得重複');
+  const arrival=cleaned[0].time;
   if(!AREAS.includes(village)||!sh)L.problem(400,'里別或時段無效');
   const alloc=await L.rest('service_allocations?member_id=eq.'+mid+'&village=eq.'+encodeURIComponent(village)+'&select=member_id&limit=1',p.token);if(!L.need(alloc,'分派里別查核失敗').length)L.problem(400,'請先分派志工到對應服務里');
   const ass=await L.rest('assignments?select=id',p.token,{method:'POST',headers:{Prefer:'return=representation'},body:{member_id:mid,service_date:d,shift:sh,village,route_id:truck,truck_number:truck,starts_at:arrival}});
   if(!ass.ok){if(ass.status===409)L.problem(409,'同日同時段此志工已有跟巡排班');L.problem(502,'新建排班失敗')}
   const id=ass.data?.[0]?.id;if(!id)L.problem(502,'排班資料未取得 ID');
-  const visit=await L.rest('visit_tasks?select=id',p.token,{method:'POST',headers:{Prefer:'return=representation'},body:{assignment_id:id,member_id:mid,visit_address:address,stop_order:order,scheduled_at:`${d}T${arrival}:00+08:00`,status:'incomplete'}});
-  if(!visit.ok){await L.rest('assignments?id=eq.'+id,p.token,{method:'DELETE'});L.problem(502,'站點建立失敗，已回復排班')}
-  return L.json(res,201,{ok:true,taskId:visit.data?.[0]?.id});
+  const records=cleaned.map(x=>({assignment_id:id,member_id:mid,visit_address:x.visit_address,stop_order:x.stop_order,scheduled_at:`${d}T${x.time}:00+08:00`,status:'incomplete'}));
+  const visit=await L.rest('visit_tasks?select=id',p.token,{method:'POST',headers:{Prefer:'return=representation'},body:records});
+  if(!visit.ok){await L.rest('assignments?id=eq.'+id,p.token,{method:'DELETE'});L.problem(502,'巡點建立失敗，已回復排班')}
+  return L.json(res,201,{ok:true,taskIds:(visit.data||[]).map(x=>x.id)});
  }
  const id=L.uuid(b.id),task=await L.getOne('visit_tasks',id,p.token);if(!task)L.problem(404,'找不到站點或無權存取');
  if(req.method==='DELETE'){if(p.role!=='admin')L.problem(403,'只有管理員能取消排班');const r=await L.rest('assignments?id=eq.'+task.assignment_id,p.token,{method:'DELETE'});L.need(r,'取消排班失敗');return L.json(res,200,{ok:true})}
