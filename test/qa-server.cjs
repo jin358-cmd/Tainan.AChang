@@ -19,7 +19,7 @@ const server=http.createServer((req,res)=>{
   if(url.pathname==='/api/roster')return json(res,200,{people:[{id:personId,name:'匿名志工甲',phone:'+886900000001',address:'匿名測試地址',resident_area:'復華里',assignment:'復華里',is_leader:false},{id:'44444444-4444-4444-8444-444444444444',name:'匿名志工乙',phone:'+886900000002',address:'',resident_area:'',assignment:'',is_leader:false}]});
   if(url.pathname==='/api/tasks')return json(res,200,{tasks:m==='admin'?[]:[task]});
   if(url.pathname==='/api/profile')return json(res,200,{profile:{id:personId,name:'匿名志工甲',phone:'+886900000001',address:'匿名測試地址',residentArea:'復華里'},canEdit:editor});
-  if(url.pathname==='/api/roster-access')return json(res,200,{people:[{accountId,memberId:personId,name:'匿名志工甲',phone:'+886900000001',status:'active',canEdit:false,grantedAt:null}]});
+  if(url.pathname==='/api/roster-access')return json(res,200,{featureReady:true,people:[{accountId,memberId:personId,name:'匿名志工甲',phone:'+886900000001',status:'active',canEdit:false,grantedAt:null}]});
   if(url.pathname==='/api/members')return json(res,200,{members:[],devices:[]});
   return json(res,404,{error:'QA endpoint not found'});
  }

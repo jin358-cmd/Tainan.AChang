@@ -18,6 +18,7 @@ test('匿名 loopback fixture 分離 admin、viewer 與 editor 畫面資料',asy
   assert.equal(admin.role,'admin');
   assert.equal(viewer.role,'volunteer');assert.equal(viewer.canEditProfile,false);
   assert.equal(editor.role,'volunteer');assert.equal(editor.canEditProfile,true);
+  assert.equal(access.featureReady,true);
   assert.equal(access.people.length,1);
   assert.match(JSON.stringify(access),/匿名志工甲/);
  }catch(error){
