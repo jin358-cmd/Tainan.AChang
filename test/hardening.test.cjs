@@ -67,11 +67,28 @@ test('UI 呈現 4/4/2 里別分頁、合併排班區、三狀態與同步標籤'
 
 test('管理員名冊提供人員授權頁，一般人員個人資料預設唯讀',()=>{
   const html=read('index.html'),app=read('app.js');
-  for(const id of ['rosterMainPanel','rosterAuthOpen','rosterAuthPanel','rosterAuthList','workerProfile'])assert.match(html,new RegExp(`id="${id}"`));
-  assert.match(html,/預設僅供檢視/);
+  for(const id of ['rosterMainPanel','rosterAuthRefresh','rosterAuthList','workerProfile'])assert.match(html,new RegExp(`id="${id}"`));
+  assert.match(html,/data-tab="map" class="on">地圖<\/button><button data-tab="roster">名冊<\/button><button data-tab="members"/);
+  assert.match(html,/預設只能檢視/);
   assert.match(app,/canEditProfile=false/);
   assert.match(app,/canEditProfile&&!offlineMode/);
   assert.match(app,/data-roster-grant/);
+  assert.match(html,/href="\/\?entry=volunteer"/);
+  assert.match(html,/data-preview-volunteer="1"/);
+  assert.match(app,/new URLSearchParams\(location\.search\)/);
+  assert.match(app,/匿名測試站點/);
+});
+
+test('v0.4 街道地圖基線與離線邊界 fallback 同時保留',()=>{
+  const html=read('index.html'),app=read('app.js'),vercel=read('vercel.json');
+  assert.match(html,/maplibre-gl@5\.15\.0/);
+  assert.match(html,/OpenFreeMap/);
+  assert.match(html,/OpenStreetMap contributors/);
+  assert.match(app,/tiles\.openfreemap\.org\/styles\/liberty/);
+  assert.match(app,/renderMapFallback/);
+  assert.match(app,/village-fill/);
+  assert.match(vercel,/cdn\.jsdelivr\.net/);
+  assert.match(vercel,/tiles\.openfreemap\.org/);
 });
 
 test('排班依日夜分流並防止同人同日同時段重複',()=>{
