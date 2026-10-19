@@ -9,7 +9,7 @@ module.exports=L.run(async(req,res)=>{
  L.method(req,['GET','POST','PATCH']);const p=await L.authorized(req,res,['admin']);
  if(req.method==='GET'){
   const [m,a]=await Promise.all([L.rest('members?select='+mFields+'&order=display_name.asc&limit=2000',p.token),L.rest('service_allocations?select=member_id,village,is_leader&limit=2000',p.token)]);
-  const all=L.need(m,'名冊讀取失敗'),alloc=L.need(a,'服務里讀取失敗'),index=new Map(alloc.map(x=>[x.member_id,x]));
+  const all=L.need(m,'名冊讀取失敗').filter(x=>!String(x.source_member_id||'').startsWith('ADMIN-')),alloc=L.need(a,'服務里讀取失敗'),index=new Map(alloc.map(x=>[x.member_id,x]));
   return L.json(res,200,{people:all.map(x=>map(x,index.get(x.id)))});
  }
  const b=L.body(req),village=b.assignment||null;if(village&&!AREAS.includes(village))L.problem(400,'不支援的里別');
