@@ -1,0 +1,1 @@
+{"name":"tainan-achang-online","version":"0.9.1","private":true,"engines":{"node":">=22"},"scripts":{"test":"node --test test/*.test.cjs"}}

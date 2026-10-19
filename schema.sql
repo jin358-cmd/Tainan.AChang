@@ -1,0 +1,4 @@
+-- This is a non-executable notice.
+-- The authoritative schema lives in Supabase project ctskglmglevronvnkpmm, already migrated.
+-- Actual tables: members, member_accounts, member_devices, service_allocations, assignments, visit_tasks, task_events.
+-- Do not apply the obsolete v0.9 draft schema; it had incompatible table names.

@@ -1,0 +1,1 @@
+'use strict';const L=require('../lib/server');module.exports=L.run(async(req,res)=>{L.method(req,['GET']);L.json(res,200,{app:'Tainan.AChang',release:'online-v0.9.1',database:'configured-publishable-key',authentication:'required',roster:'protected'})});

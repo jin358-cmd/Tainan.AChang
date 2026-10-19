@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "永康十里｜志工分區與垃圾車跟巡",
+  "name": "永康十里｜志工分區與跟巡排班 v0.8",
   "short_name": "永康十里",
-  "description": "手機志工分區、垃圾車跟巡班表、停靠點狀態與地圖檢視。",
+  "description": "手機志工分區、垃圾車跟巡與狀態檢視。手機號碼登入需 OTP 後端；匿名版僅供示範。",
   "lang": "zh-TW",
   "dir": "ltr",
   "start_url": "/?source=pwa",
@@ -12,8 +12,23 @@
   "background_color": "#f3f7fa",
   "theme_color": "#102947",
   "icons": [
-    {"src":"./assets/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
-    {"src":"./assets/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"},
-    {"src":"./assets/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}
+    {
+      "src": "./assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
   ]
 }

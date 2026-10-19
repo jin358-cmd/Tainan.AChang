@@ -1,0 +1,1 @@
+'use strict';const L=require('../lib/server');module.exports=L.run(async(req,res)=>{L.method(req,['GET']);L.json(res,410,{error:'首次管理員須於 Supabase 官方控制台建立身分並授權，不接受公開網頁初始化管理員。'})});

@@ -1,0 +1,9 @@
+.env*
+!.env.example
+node_modules/
+data-private.json
+*private*roster*
+*.csv
+*.xlsx
+.DS_Store
+.vercel/
