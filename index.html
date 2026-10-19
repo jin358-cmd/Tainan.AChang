@@ -1,20 +1,76 @@
-<!doctype html><html lang="zh-Hant"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#12354a"><meta name="description" content="永康十里：志工服務分區、垃圾車跟巡排班與志工任務回報">
-<meta name="robots" content="noindex,nofollow,noarchive">
-<link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/assets/icon-192.png">
-<link rel="stylesheet" href="/styles.css"><title>永康十里｜志工與垃圾車跟巡</title></head><body>
-<div id="app"><header class="topbar"><div class="brand"><span class="brandmark">⌖</span><div><strong>永康十里</strong><small>志工服務 · 垃圾車跟巡</small></div></div><div class="top-actions"><span id="accountBadge"></span><button id="logout" type="button" hidden>登出</button></div></header>
-<div id="notice" class="notice" hidden></div>
-<section id="loginPage" class="login-page"><div class="login-card"><h1>帳號登入</h1><p>管理員使用電子郵件，志工使用已核准的手機號碼登入。</p><form id="loginForm"><label>登入帳號（管理員 Email／志工手機）<input type="text" name="login" placeholder="管理員 Email 或 09xx-xxx-xxx" required autocomplete="username" autocapitalize="none" spellcheck="false"></label><label>密碼<input type="password" name="password" required autocomplete="current-password" placeholder="管理員核准的個人密碼"></label><button class="primary" type="submit">登入我的工作</button></form><p class="tiny">首次開通請聯絡管理員。此為線上帳號系統，僅輸入手機號碼不能取得資料。</p><div id="connectionStatus" class="tiny"></div></div></section>
-<section id="workerPage" hidden><div class="hero worker"><div><h1 id="workerHeading">我的跟巡任務</h1><p>僅顯示本人已分派的任務</p></div><span class="role-pill">志工</span></div><div class="filter-row"><label>日期<input id="workerDate" type="date"></label><button id="workerRefresh">更新任務</button></div><div id="workerList" class="stack"></div><p class="tiny">完成回報會傳回雲端。狀態更新以伺服器回應為準。</p></section>
-<div id="staffApp" hidden><nav class="tabs" aria-label="工作分頁"><button data-tab="map" class="on">地圖</button><button data-tab="areas">服務分區</button><button data-tab="planner">跟巡排班</button><button data-tab="roster">名冊</button><button data-tab="members" id="memberTab" hidden>會員管理</button></nav>
-<main><section class="page active" id="tab-map"><div class="hero"><h1>永康十里服務地圖</h1><p>點選里別檢視分配人數，再切換服務分區</p></div><div class="surface"><div id="districtMap" class="maparea"></div><p class="tiny">十里界線為參考圖資；選錄垃圾車站點資料不是車輛即時位置。</p></div></section>
-<section class="page" id="tab-areas"><div class="hero"><h1>服務里分配</h1><p>點選里別，管理該里工作人員</p></div><div id="areaNav" class="district-buttons"></div><div class="surface"><div class="section-top"><h2 id="currentArea">復華里</h2><b id="areaCount">0 人</b></div><div id="assignedList" class="stack"></div></div><div class="surface"><h2>待分配人員</h2><div id="pendingList" class="stack"></div></div></section>
-<section class="page" id="tab-planner"><div class="hero"><h1>垃圾車跟巡排班</h1><p>依日期、里別、車次及時段安排巡點</p></div><div class="surface filters"><label>日期<input id="planDate" type="date"></label><label>指定里別<select id="planArea"></select></label><label>清運時段<select id="planShift"><option value="日間">☀ 日間</option><option value="夜間">☾ 夜間</option></select></label><label>選擇車次<select id="planTruck"></select></label></div><div class="surface"><div class="section-top"><h2>依車次順序拜訪</h2><span id="taskCount" class="count">0 項</span></div><div id="planStops" class="stack"></div></div><div class="surface"><div class="section-top"><h2>已排跟巡任務</h2><button id="refreshTasks" class="outline">重新讀取</button></div><div id="staffTaskList" class="stack"></div></div></section>
-<section class="page" id="tab-roster"><div class="hero"><h1>志工名冊</h1><p id="rosterRights">名冊基本資料只有管理員可修改</p></div><div class="surface"><div class="filters"><label>服務里<select id="rosterArea"></select></label><label>分配狀態<select id="rosterFilter"><option value="assigned">已分配</option><option value="pending">待分配</option><option value="all">全部人員</option></select></label></div><input id="rosterSearch" type="search" placeholder="搜尋姓名、手機、里別" aria-label="搜尋名冊"><div id="rosterList" class="stack"></div><button id="addPerson" class="primary" hidden>新增人員</button></div></section>
-<section class="page" id="tab-members"><div class="hero"><h1>管理員｜會員授權</h1><p>由管理員核准每支手機帳號的登入權限</p></div><div class="surface"><form id="memberForm"><label>手機號碼<input name="phone" type="tel" placeholder="09xx-xxx-xxx" required></label><label>會員角色<select name="role" id="newRole"><option value="volunteer">志工</option></select></label><label id="memberPersonLabel">對應名冊志工<select id="memberPerson" name="volunteerId"></select></label><label>初始密碼（至少 12 字元）<input name="password" type="password" required minlength="12" autocomplete="new-password"></label><button class="primary">核准建立帳號</button></form></div><div class="surface"><h2>已核准會員</h2><div id="membersList" class="stack"></div></div><div class="surface"><h2>待核准手機裝置</h2><div id="pendingDevices" class="stack"></div></div></section>
-</main></div>
-<nav class="bottom-nav" id="bottomNav" hidden><button data-tab="map" class="on">地圖</button><button data-tab="areas">服務分區</button><button data-tab="planner">跟巡排班</button><button data-tab="roster">名冊</button></nav></div>
-<div id="modal" class="modal" hidden><div class="modal-card"><div class="modal-head"><h2 id="modalTitle">編輯</h2><button id="modalClose" type="button">✕</button></div><div id="modalBody"></div></div></div>
-<script src="/app.js" defer></script></body></html>
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#102947" />
+<meta name="color-scheme" content="light" />
+<meta name="robots" content="noindex,nofollow,noarchive" />
+<meta name="description" content="永康十里志工服務分區、垃圾車跟巡排班與站點狀態管理。正式名冊由授權伺服器提供，不公開放在前端檔案。" />
+<link rel="manifest" href="./manifest.webmanifest" />
+<link rel="icon" type="image/svg+xml" href="./assets/icon.svg" />
+<link rel="apple-touch-icon" href="./assets/icon-192.png" />
+<link rel="stylesheet" href="./styles.css?v=10" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.css" />
+<title>永康十里｜志工與垃圾車跟巡 PWA</title>
+</head>
+<body><section class="login-screen" id="secureLogin"><div class="login-splash"><span class="login-mark">⌖</span><div><strong>永康十里</strong><small>志工分區 · 垃圾車跟巡</small></div></div><div class="login-card"><h1>登入工作系統</h1><p>管理員使用電子郵件，志工使用核准的手機帳號。</p><form id="secureLoginForm"><label>登入帳號<input name="login" required autocomplete="username" placeholder="管理員 Email／志工手機" autocapitalize="none" spellcheck="false"></label><label>密碼<input name="password" type="password" required autocomplete="current-password" placeholder="已設定的個人密碼"></label><button class="primary wide" type="submit">登入並檢視工作</button></form><p id="authStatus" role="status" aria-live="polite">正在檢查登入狀態…</p><small>志工首次登錄須經管理員核准裝置。帳號和巡點進度由伺服器驗證與保存。</small></div></section>
+<div id="app" hidden>
+<header class="topbar">
+ <div class="brand"><div class="brand-icon">⌖</div><div><strong>永康十里</strong><span>志工分區 · 跟巡排班</span></div></div>
+ <div class="top-actions"><button id="volunteerLoginBtn" class="volunteer-login-btn" type="button">🔐 會員授權</button><button id="secureLogout" class="volunteer-login-btn" type="button">登出</button><span id="savedPill" class="saved-pill" hidden></span><button id="installBtn" class="iconbtn" title="安裝手機 App" aria-label="安裝手機 App" hidden>⬇</button><button id="menuBtn" class="iconbtn" title="匯入／備份" aria-label="匯入及備份">⋯</button></div>
+</header>
+<div id="modeBanner" class="mode-banner" hidden></div>
+
+<nav class="desktop-nav" id="desktopNav" aria-label="工作分頁"><button data-page="map" class="on">① 地圖</button><button data-page="areas">② 服務分區</button><button data-page="planner">③ 跟巡排班</button><button data-page="people">④ 名冊</button></nav>
+<main>
+<section id="page-areas" class="page" aria-label="分配服務里">
+ <div class="section-heading"><div><h1>服務里分配</h1></div><div class="inline-actions"></div></div>
+ <div class="area-pager" aria-label="十里選擇，可每次切換四個里">
+<button type="button" id="areaPrev" class="pager-arrow" aria-label="上一組四個里">‹</button>
+<div id="areaPicker" class="area-picker" aria-label="十里清單"></div>
+<button type="button" id="areaNext" class="pager-arrow" aria-label="下一組四個里">›</button>
+</div><div id="areaPageNo" class="pager-indicator" aria-label="目前里別分頁">1 / 3</div>
+ <div class="two-col"><article class="surface"><div class="surface-head area-heading-row"><div class="area-heading-main"><h2 id="areaName" class="area-main-name">復興里</h2><span id="areaAssignedCount" class="count-tag">0 人</span></div><button id="clearArea" class="smallbtn danger" type="button">清除此里分配</button></div>
+<div class="area-summary-wrap"><div class="summary" aria-label="工作統計"><span>志工 <b id="statTotal">0</b></span><span>已分配 <b id="statAssigned">0</b></span><span>待分配 <b id="statPending">0</b></span><span>已排巡點 <b id="statStops">0</b></span></div></div>
+<div id="areaMembers" class="member-stack" hidden></div></article><article class="surface"><div class="surface-head"><h2>待分配人員</h2><span id="pendingCount" class="count-tag warm">0</span></div><div id="pendingMembers" class="member-stack"></div></article></div>
+</section>
+<section id="page-planner" class="page" aria-label="垃圾車跟巡排班">
+ <div class="section-heading"><div><h1>垃圾車跟巡</h1><p>依里別、車次與站點安排。</p></div></div>
+ <div id="plannerGate" class="gate" hidden><div class="gate-symbol">☝</div><strong>請先分配服務里</strong><p>至少指定一名志工的服務里，才可安排車次與拜訪站點。</p><button class="primary" data-go="areas">前往服務里分配</button></div>
+ <div id="plannerContent"><div id="plannerFocus" class="planner-focus surface"></div><div class="surface compact-controls planner-first">
+<label class="planner-field"><span>拜訪日期</span><input type="date" id="planDate" /></label>
+<label class="planner-field"><span>指定里別</span><select id="plannerAreaSelect" aria-label="選擇跟巡里別"><option value="all">全部十里</option></select></label>
+<div class="planner-shifts"><strong>清運時段</strong><div class="shift-row"><button class="shift on" data-shift="日間">☀ 日間</button><button class="shift" data-shift="夜間">☾ 夜間</button></div></div>
+<div class="planner-route-picker"><strong>選擇車次</strong><div id="routeButtons" class="route-buttons" aria-label="本時段車次清單"></div></div>
+</div>
+ <div id="routeSummary" class="route-summary"></div>
+ <div class="surface combined-visit"><div class="surface-head"><h2>里別跟巡人員與車次拜訪</h2></div><div id="areaTeamPicker" class="team-picker"></div><div class="visit-divider"><h2>依車次順序拜訪</h2></div><div id="stopList" class="stop-list"></div></div>
+ </div>
+</section>
+<section id="page-map" class="page map-page active" aria-label="地圖檢視">
+ <div class="section-heading"><div><h1>十里服務地圖</h1><p>MapLibre · 臺南市永康區</p></div><button class="smallbtn" id="mapFit">回到十里</button></div>
+ <div class="map-switches" aria-label="圖層篩選"><label><input id="layerVolunteer" type="checkbox" checked /> <span class="legend-pin volunteer">👤</span>志工服務</label><label><input id="layerDay" type="checkbox" /> <span class="legend-pin day">☀</span>日間</label><label><input id="layerNight" type="checkbox" /> <span class="legend-pin night">☾</span>夜間</label></div>
+ <div class="map-box" id="mapBox"><div id="mapLibre" aria-label="永康十里地圖"></div><div id="mapFallback" class="map-fallback" hidden></div><div id="areaPopup" class="area-popup map-attached-popup" hidden></div><div class="map-float"> <span id="mapLegendStatus">里別分區參考</span></div></div>
+ <p class="map-foot">© OpenStreetMap contributors | MapLibre。未定位站點以里別數量顯示，並非實際停靠位置。人工標點須現場核對。</p>
+ 
+</section>
+<section id="page-volunteer" class="page" aria-label="志工個人跟巡工作台">
+ <div class="section-heading"><div><h1>我的跟巡工作</h1><p>本人跟巡日期、地址、車牌及完成回報</p></div><button id="volunteerLogout" class="smallbtn">登出</button></div>
+ <div id="volunteerWelcome" class="volunteer-welcome surface"></div>
+ <div id="volunteerSchedules" class="volunteer-schedules"></div>
+</section>
+<section id="page-people" class="page" aria-label="人員名冊">
+ <div class="section-heading"><div><h1>志工名冊</h1><p>里別分派與個資修改由管理員處理</p></div><button id="addPerson" class="primary add-person-top">＋ 新增人員</button></div>
+ <div class="surface filter-bar"><input id="peopleSearch" type="search" placeholder="搜尋志工姓名、地址或電話" autocomplete="off" /><div class="select-pair"><select id="peopleAreaFilter" aria-label="篩選服務里別"></select><select id="peopleFilter" aria-label="篩選分配狀態"><option value="assigned">已分配</option><option value="pending">待分配</option><option value="all">全部人員</option></select></div></div>
+ <div id="peopleList" class="people-list"></div>
+</section>
+</main>
+<nav class="bottom-nav" aria-label="手機功能列"><button data-page="map" class="on"><i>◉</i><span>地圖</span></button><button data-page="areas"><i>⌖</i><span>服務分區</span></button><button data-page="planner"><i>🚛</i><span>跟巡排班</span></button><button data-page="people"><i>☷</i><span>名冊</span></button></nav>
+</div>
+<div class="modal-backdrop" id="modal" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="sheet-handle"></div><div class="sheet-head"><h2 id="modalTitle">選擇志工</h2><button id="closeModal" class="iconbtn light" aria-label="關閉">✕</button></div><div id="modalBody" class="sheet-body"></div></div></div>
+<div id="toast" class="toast" role="status" hidden></div>
+<script defer src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.js"></script>
+<script defer src="./app.js?v=10"></script>
+</body>
+</html>
