@@ -1,7 +1,16 @@
+process.env.SUPABASE_URL='https://fhxdpupascsikjsycpbi.supabase.co';
+process.env.SUPABASE_PUBLISHABLE_KEY='sb_publishable_test_only';
+process.env.EXPECTED_SUPABASE_PROJECT_REF='fhxdpupascsikjsycpbi';
+process.env.VERCEL_ENV='preview';
 const t=require('node:test'),assert=require('node:assert/strict');const L=require('../lib/server');
 t('拒絕任意電話格式',()=>{assert.equal(L.phone('0989-098-468'),'+886989098468');assert.throws(()=>L.phone('1234567890'),/手機號碼/)});
 t('日期、時間格式有驗證',()=>{assert.equal(L.validDate('2026-10-19'),'2026-10-19');assert.throws(()=>L.validDate('tomorrow'));assert.throws(()=>L.time('25:00'))});
 t('公鑰可公開但絕不包含 Service Role 密鑰',()=>{assert.match(L.KEY,/^sb_publishable_/);assert.ok(!('SUPABASE_SERVICE_ROLE_KEY' in L))});
+t('Preview backend project ref must match and can never be production',()=>{
+ assert.equal(L.backendConfig().projectRef,'fhxdpupascsikjsycpbi');
+ assert.throws(()=>L.backendConfig({SUPABASE_URL:'https://ctskglmglevronvnkpmm.supabase.co',SUPABASE_PUBLISHABLE_KEY:'sb_publishable_example',EXPECTED_SUPABASE_PROJECT_REF:'ctskglmglevronvnkpmm',VERCEL_ENV:'preview'}),/Preview/);
+ assert.throws(()=>L.backendConfig({SUPABASE_URL:'https://fhxdpupascsikjsycpbi.supabase.co',SUPABASE_PUBLISHABLE_KEY:'sb_publishable_example',EXPECTED_SUPABASE_PROJECT_REF:'wrongref',VERCEL_ENV:'preview'}),/不完整或不一致/);
+});
 t('檢查來路不明的跨網站寫入',()=>{assert.throws(()=>L.originCheck({method:'POST',headers:{origin:'https://evil.invalid',host:'sample.vercel.app'}}),/拒絕跨網站/);assert.doesNotThrow(()=>L.originCheck({method:'POST',headers:{origin:'https://sample.vercel.app',host:'sample.vercel.app'}}))});
 t('任意 token 不能通過 bootstrap 機密比對',()=>{assert.equal(L.safeEqual('bad','correct-secret'),false);assert.equal(L.safeEqual('same','same'),true)});
 t('ID 只接受 UUID',()=>{assert.throws(()=>L.uuid('DEMO-01'));assert.equal(L.uuid('92acbbaf-7e99-4a26-92ab-98297eb5076d'),'92acbbaf-7e99-4a26-92ab-98297eb5076d')});
