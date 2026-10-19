@@ -68,8 +68,9 @@ test('UI 呈現 4/4/2 里別分頁、原始排班按鈕、三狀態與離線殼�
 test('管理員名冊提供人員授權頁，一般人員個人資料預設唯讀',()=>{
   const html=read('index.html'),app=read('app.js');
   for(const id of ['rosterMainPanel','rosterAuthRefresh','rosterAuthList','workerProfile'])assert.match(html,new RegExp(`id="${id}"`));
-  assert.match(html,/data-tab="map" class="on">① 地圖<\/button><button data-tab="roster">② 名冊<\/button><button data-tab="members"/);
-  assert.match(html,/會員管理/);
+  assert.match(html,/data-tab="map" class="on">① 地圖<\/button><button data-tab="areas">② 服務分區<\/button><button data-tab="planner">③ 跟巡排班<\/button><button data-tab="roster">④ 名冊<\/button><button data-tab="members"/);
+  assert.match(html,/⑤ 人員管理/);
+  assert.doesNotMatch(html,/會員管理/);
   assert.match(app,/canEditProfile=false/);
   assert.match(app,/canEditProfile=role==='volunteer'/);
   assert.match(app,/data-roster-grant/);
