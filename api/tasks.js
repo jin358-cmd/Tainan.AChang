@@ -15,6 +15,7 @@ module.exports=L.run(async(req,res)=>{
   if(p.role!=='admin')L.problem(403,'志工不能指定排班');
   const mid=L.uuid(b.volunteerId),village=L.checkText(b.area,'里別',30),d=L.validDate(b.date),sh=shiftMap[b.shift],truck=L.checkText(b.truck,'車號',30),address=L.checkText(b.address,'巡點地址',240),arrival=L.time(b.time),order=Math.max(1,Math.min(9999,Math.floor(Number(b.stopOrder)||1)));
   if(!AREAS.includes(village)||!sh)L.problem(400,'里別或時段無效');
+  const member=await L.getOne('members',mid,p.token);if(!member||L.internalMember(member))L.problem(400,'管理員內部身分不得作為跟巡志工');
   const alloc=await L.rest('service_allocations?member_id=eq.'+mid+'&village=eq.'+encodeURIComponent(village)+'&select=member_id&limit=1',p.token);if(!L.need(alloc,'分派里別查核失敗').length)L.problem(400,'請先分派志工到對應服務里');
   const ass=await L.rest('assignments?select=id',p.token,{method:'POST',headers:{Prefer:'return=representation'},body:{member_id:mid,service_date:d,shift:sh,village,route_id:truck,truck_number:truck,starts_at:arrival}});
   if(!ass.ok){if(ass.status===409)L.problem(409,'同日同時段此志工已有跟巡排班');L.problem(502,'新建排班失敗')}
@@ -27,6 +28,9 @@ module.exports=L.run(async(req,res)=>{
  if(req.method==='DELETE'){if(p.role!=='admin')L.problem(403,'只有管理員能取消排班');const r=await L.rest('assignments?id=eq.'+task.assignment_id,p.token,{method:'DELETE'});L.need(r,'取消排班失敗');return L.json(res,200,{ok:true})}
  if(p.role==='volunteer'&&p.member_id!==task.member_id)L.problem(403,'不可回報其他人的任務');
  const ev=eventMap[b.status];if(!ev)L.problem(400,'站點狀態不合法');if(p.role==='volunteer'&&ev!=='completed')L.problem(403,'志工只可以回報已完成');
- const payload={id:crypto.randomUUID(),task_id:id,member_id:task.member_id,event_type:ev,base_version:task.server_version,server_version:task.server_version+1,client_created_at:new Date().toISOString()};
- const r=await L.rest('task_events?select=id,server_version',p.token,{method:'POST',headers:{Prefer:'return=representation'},body:payload});if(!r.ok)L.problem(r.status===409?409:502,'更新未成功，請重新讀取任務後再試');return L.json(res,200,{ok:true,serverVersion:r.data?.[0]?.server_version})
+ const eventId=b.eventId?L.uuid(b.eventId):crypto.randomUUID(),baseVersion=Number.isSafeInteger(Number(b.baseVersion))&&Number(b.baseVersion)>=0?Number(b.baseVersion):Number(task.server_version)||0,clientCreatedAt=b.clientCreatedAt&&Number.isFinite(Date.parse(b.clientCreatedAt))?new Date(b.clientCreatedAt).toISOString():new Date().toISOString();
+ const payload={id:eventId,task_id:id,member_id:task.member_id,event_type:ev,base_version:baseVersion,server_version:baseVersion+1,client_created_at:clientCreatedAt};
+ const r=await L.rest('task_events?select=id,task_id,member_id,event_type,server_version',p.token,{method:'POST',headers:{Prefer:'return=representation'},body:payload});
+ if(!r.ok){const prior=await L.rest('task_events?id=eq.'+eventId+'&select=id,task_id,member_id,event_type,server_version&limit=1',p.token),seen=prior.ok?prior.data?.[0]:null;if(seen&&seen.task_id===id&&seen.member_id===task.member_id&&seen.event_type===ev)return L.json(res,200,{ok:true,idempotent:true,serverVersion:seen.server_version});if(r.status===409||r.data?.code==='40001')L.problem(409,'任務已在其他裝置更新，請重新讀取後再試');L.problem(502,'更新未成功，請稍後重試')}
+ return L.json(res,200,{ok:true,idempotent:false,serverVersion:r.data?.[0]?.server_version})
 });

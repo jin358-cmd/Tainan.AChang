@@ -7,4 +7,34 @@ t('任意 token 不能通過 bootstrap 機密比對',()=>{assert.equal(L.safeEqu
 t('ID 只接受 UUID',()=>{assert.throws(()=>L.uuid('DEMO-01'));assert.equal(L.uuid('92acbbaf-7e99-4a26-92ab-98297eb5076d'),'92acbbaf-7e99-4a26-92ab-98297eb5076d')});
 const fs=require('node:fs'),path=require('node:path');
 t('管理員電子郵件登入並保留志工手機登入路徑',()=>{const v=fs.readFileSync(path.join(__dirname,'../api/session.js'),'utf8');assert.match(v,/identity\.includes\('@'\)/);assert.match(v,/email:identity\.toLowerCase\(\)/);assert.match(v,/phone:L\.phone\(identity\)/)});
-t('管理員內部紀錄不進入志工名冊',()=>{const v=fs.readFileSync(path.join(__dirname,'../api/roster.js'),'utf8');assert.match(v,/startsWith\('ADMIN-'\)/)});
+t('管理員內部紀錄不進入志工名冊',()=>{const v=fs.readFileSync(path.join(__dirname,'../api/roster.js'),'utf8');assert.match(v,/filter\(x=>!L\.internalMember\(x\)\)/)});
+t('管理員內部身分不能被當作志工修改、開通或排班',()=>{
+ assert.equal(L.internalMember({source_member_id:'ADMIN-PRIMARY-TEST'}),true);
+ assert.equal(L.internalMember({source_member_id:'V-TEST-001'}),false);
+ for(const file of ['api/roster.js','api/members.js','api/tasks.js'])assert.match(fs.readFileSync(path.join(__dirname,'..',file),'utf8'),/L\.internalMember\(/);
+});
+t('個人資料預設唯讀且 grant 不能由志工或離線快取自行取得',()=>{
+ const migration=fs.readFileSync(path.join(__dirname,'../backend/004_profile_edit_grants.sql'),'utf8');
+ const profile=fs.readFileSync(path.join(__dirname,'../api/profile.js'),'utf8');
+ const access=fs.readFileSync(path.join(__dirname,'../api/roster-access.js'),'utf8');
+ const app=fs.readFileSync(path.join(__dirname,'../app.js'),'utf8');
+ assert.match(migration,/can_edit_profile boolean not null default false/i);
+ assert.match(profile,/authorized\(req,res,\['volunteer'\]\)/);
+ assert.match(profile,/if\(!p\.can_edit_profile\)L\.problem\(403/);
+ assert.match(profile,/rpc\/update_own_profile/);
+ assert.match(access,/authorized\(req,res,\['admin'\]\)/);
+ assert.match(access,/role=eq\.volunteer/);
+ assert.match(access,/account\.status!=='active'\|\|!member\.phone_e164/);
+ assert.match(app,/offlineMode=true;role='volunteer'.*canEditProfile=false/);
+});
+t('窄 RPC 只允許本人非身分欄位，不能改電話或 source id',()=>{
+ const migration=fs.readFileSync(path.join(__dirname,'../backend/004_profile_edit_grants.sql'),'utf8');
+ assert.match(migration,/security definer/i);
+ assert.match(migration,/ma\.auth_user_id = auth\.uid\(\)/);
+ assert.match(migration,/ma\.role = 'volunteer'/);
+ assert.match(migration,/ma\.can_edit_profile = true/);
+ assert.match(migration,/m\.source_member_id not like 'ADMIN-%'/);
+ const updateBlock=migration.slice(migration.indexOf('update public.members'));
+ assert.doesNotMatch(updateBlock,/phone_e164\s*=/i);
+ assert.doesNotMatch(updateBlock,/source_member_id\s*=/i);
+});

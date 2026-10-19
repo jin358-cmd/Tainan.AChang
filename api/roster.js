@@ -9,7 +9,7 @@ module.exports=L.run(async(req,res)=>{
  L.method(req,['GET','POST','PATCH']);const p=await L.authorized(req,res,['admin']);
  if(req.method==='GET'){
   const [m,a]=await Promise.all([L.rest('members?select='+mFields+'&order=display_name.asc&limit=2000',p.token),L.rest('service_allocations?select=member_id,village,is_leader&limit=2000',p.token)]);
-  const all=L.need(m,'名冊讀取失敗').filter(x=>!String(x.source_member_id||'').startsWith('ADMIN-')),alloc=L.need(a,'服務里讀取失敗'),index=new Map(alloc.map(x=>[x.member_id,x]));
+  const all=L.need(m,'名冊讀取失敗').filter(x=>!L.internalMember(x)),alloc=L.need(a,'服務里讀取失敗'),index=new Map(alloc.map(x=>[x.member_id,x]));
   return L.json(res,200,{people:all.map(x=>map(x,index.get(x.id)))});
  }
  const b=L.body(req),village=b.assignment||null;if(village&&!AREAS.includes(village))L.problem(400,'不支援的里別');
@@ -20,6 +20,7 @@ module.exports=L.run(async(req,res)=>{
   if(village)await changeArea(item.id,village,p.token);return L.json(res,201,{person:map({...x,id:item.id},village?{village}:null)});
  }
  const id=L.uuid(b.id),old=await L.getOne('members',id,p.token);if(!old)L.problem(404,'名冊沒有這筆人員');
+ if(L.internalMember(old))L.problem(403,'管理員內部身分不得作為志工名冊或服務分派對象');
  const patch={};if('name'in b)patch.display_name=L.checkText(b.name,'姓名',80);
  if('phone'in b)patch.phone_e164=b.phone?L.phone(b.phone):null;
  if('address'in b)patch.address=L.checkText(b.address||'','地址',300,true)||null;
