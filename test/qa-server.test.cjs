@@ -14,7 +14,7 @@ test('匿名 loopback fixture 分離 admin、viewer 與 editor 畫面資料',asy
   const html=await get('/','admin');
   const admin=await get('/api/session','admin'),viewer=await get('/api/session','viewer'),editor=await get('/api/session','editor');
   const access=await get('/api/roster-access','admin');
-  assert.match(html,/人員授權/);
+  assert.match(html,/會員管理/);
   assert.equal(admin.role,'admin');
   assert.equal(viewer.role,'volunteer');assert.equal(viewer.canEditProfile,false);
   assert.equal(editor.role,'volunteer');assert.equal(editor.canEditProfile,true);
