@@ -261,3 +261,11 @@
 .delete-warning{background:#fff4f3;border:1px solid #f4c6c5;padding:12px;border-radius:9px}
 .delete-warning p{margin:0 0 8px}.delete-warning small{color:#77505a}
 .google-login-action{display:flex;align-items:center;justify-content:center;gap:10px}.google-signin-logo{display:inline-block;flex:none}
+
+/* 2026-10-20 Roster header controls */
+#page-people .section-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+#page-people .roster-header-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-left:auto;flex-wrap:wrap}
+#page-people .roster-header-actions .roster-action-btn{display:inline-flex!important;align-items:center;justify-content:center;gap:5px;min-height:42px;padding:10px 17px;font-size:14px;font-weight:800;white-space:nowrap;border-radius:9px}
+#page-people .roster-header-actions .roster-action-btn[hidden]{display:none!important}
+#page-people .roster-header-actions .roster-add-btn{background:#0b7c83;color:#fff;border:1px solid #0b7c83}
+@media(max-width:560px){#page-people .roster-header-actions{width:100%;justify-content:flex-end;gap:8px}#page-people .roster-header-actions .roster-action-btn{font-size:13px;min-height:42px;padding:9px 13px}}
