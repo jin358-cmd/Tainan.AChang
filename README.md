@@ -1,7 +1,8 @@
-# 永康十里 v1.0.3｜v0.4 地圖版型與會員授權列表
+# Tainan.AChang PWA v1.0.4 | verified six-digit volunteer PIN and phone approval
 
-以公開 v0.4 的 MapLibre 十里邊界、選取紅框、橘色人像、日間夜間圖層及里別名單浮窗為介面基準；實際名冊只由登入授權的 API 讀取。
-
-管理員會員授權清單由後端帶入人名／手機，已啟用狀態以綠色勾勾顯示。保留原本的志工登入、已綁定裝置自動恢復、安全雲端進度回報。
-
-不得將正式 38 人資料打包至公開 Repo 或 PWA 靜態檔案。
+- The map, 10-village service allocation UI, route roster and PWA remain aligned to the Owner-approved v0.4 reference.
+- Admins create the volunteer profile and provision a phone-based account with a six-digit numeric PIN; volunteer phone formatting is normalized by the server.
+- Volunteer first login requests device authorization. Admins can approve pending devices in the member authorization modal. An approved device with valid session resumes directly into the volunteer tasks page.
+- Member records are stored in Supabase under RLS; no real roster, PIN, private tokens or access credentials are embedded in this public repo.
+- Only administrators can add/edit volunteers, assign work, and approve/revoke accounts. Server enforces permissions.
+- Deployment can be verified online, but a real admin + volunteer two-device E2E requires the authorized Owner to perform sign-in, creation and approval; never claim otherwise.

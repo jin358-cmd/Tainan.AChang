@@ -280,7 +280,13 @@ async function openMemberAdmin(preselectId=''){
   const list=(x.members||[]).map(m=>{const name=m.name||state.people.find(p=>p.id===m.member_id)?.name||'姓名待補';const approved=m.status==='active'||m.enabled===true;return `<div class="pick-row approved-member-row"><div class="member-label"><strong class="approved-member-name">${esc(name)}</strong><span class="approved-member-phone">${esc(prettyPhone(m.phone))}</span></div>${approved?'<span class="auth-success-check" role="img" aria-label="已完成授權" title="已完成授權">✓</span>':`<span class="auth-pending-label" aria-label="尚未啟用">${esc(m.status==='suspended'?'已停用':'待核准')}</span>`}</div>`}).join('');
   const eligible=state.people.filter(p=>p.phone&&!known.has(p.id));
   const selected=eligible.find(p=>p.id===preselectId)||eligible[0];
-  showModal('管理員｜會員授權',`<form id="memberAdminForm"><label>選擇志工<select name="volunteerId" id="authorizationVolunteer" required>${eligible.map(p=>`<option value="${esc(p.id)}" ${selected?.id===p.id?'selected':''}>${esc(p.name)}｜${esc(prettyPhone(p.phone))}</option>`).join('')}</select></label><label>手機號碼（須與名冊一致）<input name="phone" id="authorizationPhone" required inputmode="tel" value="${esc(selected?prettyPhone(selected.phone):'')}" placeholder="09xx-xxx-xxx"></label><label>初始密碼（至少 12 字元）<input type="password" name="password" required minlength="12" autocomplete="new-password"></label><input type="hidden" name="role" value="volunteer"><button class="primary wide" type="submit" ${eligible.length?'':'disabled'}>核准開通志工帳號</button></form><div class="member-admin-existing"><strong>已完成授權：${active.length} 位</strong>${list||'<p>尚未核准會員</p>'}</div>`);
+  const byAccount=new Map((x.members||[]).map(m=>[m.id,m]));
+  const pendingDevices=(x.devices||[]).filter(d=>d.status==='pending');
+  const approvedDevices=(x.devices||[]).filter(d=>d.status==='approved');
+  const phoneLabel=(m)=>prettyPhone(m?.phone||'');
+  const deviceQueue=pendingDevices.map(d=>{const m=byAccount.get(d.account_id),name=m?.name||state.people.find(p=>p.id===m?.member_id)?.name||'待核對志工';return `<div class="pick-row device-approval-row"><div class="member-label"><strong>${esc(name)}</strong><small>${esc(phoneLabel(m))} · 新裝置待核准</small></div><button type="button" class="approve-device-btn" data-approve-device="${esc(d.id)}">✓ 核准此手機</button></div>`}).join('');
+  const deviceSection=`<section class="device-approval-section"><h3>待核准手機（${pendingDevices.length}）</h3>${deviceQueue||'<p class="mini-note">目前沒有待核准手機</p>'}<p class="mini-note">志工第一次用手機與 PIN 登入後會送出裝置申請。管理員核准後，志工即可重新開啟 PWA 直接進入。</p><p class="mini-note">已核准裝置：${approvedDevices.length}</p></section>`;
+  showModal('管理員｜會員授權',`<form id="memberAdminForm"><label>選擇志工<select name="volunteerId" id="authorizationVolunteer" required>${eligible.map(p=>`<option value="${esc(p.id)}" ${selected?.id===p.id?'selected':''}>${esc(p.name)}｜${esc(prettyPhone(p.phone))}</option>`).join('')}</select></label><label>手機號碼（須與名冊一致）<input name="phone" id="authorizationPhone" required inputmode="tel" value="${esc(selected?prettyPhone(selected.phone):'')}" placeholder="09xx-xxx-xxx"></label><label>志工登入 PIN（6 位數字）<input type="password" name="password" required minlength="6" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="new-password" placeholder="請設定 6 碼數字"></label><input type="hidden" name="role" value="volunteer"><button class="primary wide" type="submit" ${eligible.length?'':'disabled'}>核准開通志工帳號</button></form><div class="member-admin-existing"><strong>已完成授權：${active.length} 位</strong>${list||'<p>尚未核准會員</p>'}</div>${deviceSection}`);
   $('#authorizationVolunteer').onchange=e=>{const person=state.people.find(p=>p.id===e.target.value);$('#authorizationPhone').value=person?prettyPhone(person.phone):''};
  }catch(e){toast('會員授權資料讀取失敗：'+e.message)}
 }
@@ -293,7 +299,7 @@ function openNewMemberForm(){
  <label>手機號碼 *<input name="phone" required type="tel" inputmode="tel" placeholder="0989-098-468"></label>
  <label>原居住里<input name="residentArea" maxlength="40" placeholder="選填，不需重複加「里」"></label>
  <label>地址<input name="address" maxlength="300"></label>
- <label>會員初始密碼 *<input name="password" required type="password" autocomplete="new-password" minlength="12"><small>至少 12 字元，由管理員安全提供給志工</small></label>
+ <label>志工登入 PIN（6 位數字）*<input name="password" required type="password" inputmode="numeric" minlength="6" maxlength="6" pattern="[0-9]{6}" autocomplete="new-password" placeholder="6 碼數字"><small>管理員核對電話後開通；首次登入還需申請裝置授權。勿將 PIN 寫在公開名冊。</small></label>
  <button type="submit" class="primary wide" id="saveNewMember">確認新增並同步會員授權</button>
  <p id="memberCreateStatus" class="form-progress" role="status" aria-live="polite"></p>
  </form>`);
@@ -305,7 +311,7 @@ async function submitNewMemberForm(form){
  const info=$('#memberCreateStatus'), btn=$('#saveNewMember'); btn.disabled=true;
  try{
   const n=phoneDigits(b.phone);if(!/^09\d{8}$/.test(n))throw new Error('請輸入有效的台灣手機號碼');
-  if(String(b.password||'').length<12)throw new Error('初始密碼至少 12 個字元');
+  if(!/^[0-9]{6}$/.test(String(b.password||'')))throw new Error('志工登入 PIN 必須是 6 位數字');
   info.textContent='正在建立正式名冊…';
   const r=await onlineApi('roster','POST',{name:b.name,phone:b.phone,address:b.address,residentArea:b.residentArea,assignment:b.assignment||null});
   p=r.person;
@@ -335,6 +341,7 @@ bind=function(){originalBind();
  $('#openRosterAuthorization').onclick=()=>openMemberAdmin();
  $('#secureLoginForm').onsubmit=async e=>{e.preventDefault();$('#authStatus').textContent='登入驗證中…';const d=Object.fromEntries(new FormData(e.target));try{await onlineApi('session','POST',d);await authStart()}catch(err){$('#authStatus').textContent=err.message}};
  document.addEventListener('click',e=>{const b=e.target.closest('button[data-live-complete]');if(b)completeOnlineTask(b.dataset.liveComplete)});
+ document.addEventListener('click',async e=>{const btn=e.target.closest('button[data-approve-device]');if(!btn)return;if(!assertAdmin())return;btn.disabled=true;try{await onlineApi('members','PATCH',{deviceId:btn.dataset.approveDevice,approved:true});toast('✓ 手機已核准，志工可重新開啟 PWA');await openMemberAdmin()}catch(err){toast('核准手機失敗：'+err.message);btn.disabled=false}});
  $('#modalBody').addEventListener('submit',async e=>{if(e.target.id==='newMemberForm'){e.preventDefault();await submitNewMemberForm(e.target);return}if(e.target.id!=='memberAdminForm')return;e.preventDefault();if(!assertAdmin())return;const d=Object.fromEntries(new FormData(e.target));const x=state.people.find(p=>p.id===d.volunteerId);const normalizePhone=p=>{let n=phoneDigits(p);if(n.startsWith('8869'))n='0'+n.slice(3);return n};if(!x||normalizePhone(x.phone)!==normalizePhone(d.phone)){toast('手機號碼和人員名冊不符');return}try{await onlineApi('members','POST',d);toast('✓ 會員已授權，請透過安全管道通知密碼');await openMemberAdmin()}catch(err){toast('建立會員失敗：'+err.message)}});
 };
 save=function(){renderSummary()}; // never persist authenticated personal data to public browser storage

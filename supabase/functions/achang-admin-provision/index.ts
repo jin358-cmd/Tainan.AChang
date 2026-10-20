@@ -18,7 +18,7 @@ Deno.serve(async (req: Request) => {
     if(adminErr||admin?.role!=='admin'||admin?.status!=='active')return json({error:'Admin only'},403);
     const b=await req.json();
     const memberId=String(b.memberId||'');const phone=String(b.phone||'');const password=String(b.password||'');
-    if(!/^[\da-f]{8}-[\da-f-]{27,}$/i.test(memberId)||!/^\+8869\d{8}$/.test(phone)||password.length<12||password.length>180)return json({error:'Invalid fields'},400);
+    if(!/^[\da-f]{8}-[\da-f-]{27,}$/i.test(memberId)||!/^\+8869\d{8}$/.test(phone)||!(/^[0-9]{6}$/.test(password)||(password.length>=12&&password.length<=180)))return json({error:'Invalid fields'},400);
     const {data:member,error:memberErr}=await supa.from('members').select('id,phone_e164').eq('id',memberId).maybeSingle();
     if(memberErr||!member||member.phone_e164!==phone)return json({error:'Member and phone mismatch'},400);
     const {data:existing}=await supa.from('member_accounts').select('id').eq('member_id',memberId).maybeSingle();
