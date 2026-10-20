@@ -243,3 +243,13 @@
 .member-auth-actions{display:flex;flex-wrap:wrap;gap:6px;margin-left:auto}.approved-member-row{flex-wrap:wrap;gap:10px}.planner-route-inline{margin-top:9px;padding:8px 10px;background:#eaf2f8;color:#274c68;border-radius:9px;font-size:13px;font-weight:700}.visit-divider{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}.visit-area-buttons{flex:1;min-width:160px}.visit-area-buttons .team-areas{display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap;overflow:visible;padding:0}.visit-area-buttons .team-area-btn{font-size:12px}.combined-visit .team-picker{margin-bottom:8px}
 
 .login-screen[hidden]{display:none!important}.google-login-action{display:block;width:100%;background:white;border:1px solid #abc2cf;border-radius:10px;color:#22394a;font-weight:800;padding:12px;margin-top:12px}
+
+/* Owner UI update 2026-10-20: fixed top popup, six-person list, ultra-thin action */
+#addMember,.add-person-top{display:none!important}
+#areaPopup.area-popup{top:10px!important;left:50%!important;transform:translateX(-50%)!important;width:min(340px,calc(100% - 20px));max-height:min(320px,65%);overflow-y:auto;z-index:12;padding:8px 10px}
+#areaPopup .popup-contacts{display:grid;gap:3px;margin:7px 0}
+#areaPopup .popup-contact{padding:4px 7px;min-height:29px;border-radius:6px}
+#areaPopup .popup-contact strong{font-size:12px}
+#areaPopup .popup-detail-btn{padding:4px 9px;min-height:23px;line-height:1.2;border-radius:5px;font-size:11px;font-weight:750}
+#areaPopup .popup-more{display:block;text-align:center;color:#61798a;font-size:10px;padding:3px}
+.roster-header-actions #openRosterAuthorization{display:inline-flex;align-items:center;min-height:28px;padding:5px 9px}
