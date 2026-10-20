@@ -244,3 +244,6 @@
 
 /* v1.0.6 volunteer and shared authorization UI */
 .member-approval-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#e2e6eb;color:#7e8995;font-weight:900;font-size:15px;vertical-align:middle}.member-approval-icon.enabled{background:#15a864;color:#fff}.member-approval-status{display:flex;align-items:center;gap:9px;padding:8px 10px;background:#f5f8fa;border-radius:10px;margin:0 0 11px}.volunteer-run{padding:13px;margin-bottom:13px}.volunteer-run-header{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:9px}.volunteer-run-meta{display:grid;gap:6px;padding:9px 11px;background:#edf7f8;border-radius:10px;font-size:13px}.volunteer-run-stops{margin-top:12px;display:grid;gap:8px}
+
+/* Always honor login overlay visibility regardless of stylesheet ordering */
+.login-screen[hidden]{display:none!important}.login-screen:not([hidden]){display:flex!important;position:fixed;inset:0;z-index:1000;overflow-y:auto}
