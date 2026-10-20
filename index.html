@@ -10,7 +10,7 @@
 <link rel="manifest" href="./manifest.webmanifest" />
 <link rel="icon" type="image/svg+xml" href="./assets/icon.svg" />
 <link rel="apple-touch-icon" href="./assets/icon-192.png" />
-<link rel="stylesheet" href="./styles.css?v=102" />
+<link rel="stylesheet" href="./styles.css?v=103" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.css" />
 <title>永康十里｜志工與垃圾車跟巡 PWA</title>
 </head>
@@ -48,7 +48,7 @@
  <div class="surface combined-visit"><div class="surface-head"><h2>里別跟巡人員與車次拜訪</h2></div><div id="areaTeamPicker" class="team-picker"></div><div class="visit-divider"><h2>依車次順序拜訪</h2></div><div id="stopList" class="stop-list"></div></div>
  </div>
 </section>
-<section id="page-map" class="page map-page active" aria-label="地圖檢視">
+<section id="page-map" class="page map-page map-v04-reference active" aria-label="地圖檢視">
  <div class="section-heading"><div><h1>十里服務地圖</h1><p>MapLibre · 臺南市永康區</p></div><button class="smallbtn" id="mapFit">回到十里</button></div>
  <div class="map-switches" aria-label="圖層篩選"><label><input id="layerVolunteer" type="checkbox" checked /> <span class="legend-pin volunteer">👤</span>志工服務</label><label><input id="layerDay" type="checkbox" /> <span class="legend-pin day">☀</span>日間</label><label><input id="layerNight" type="checkbox" /> <span class="legend-pin night">☾</span>夜間</label></div>
  <div class="map-box" id="mapBox"><div id="mapLibre" aria-label="永康十里地圖"></div><div id="mapFallback" class="map-fallback" hidden></div><div id="areaPopup" class="area-popup map-attached-popup" hidden></div><div class="map-float"> <span id="mapLegendStatus">里別分區參考</span></div></div>
@@ -71,6 +71,6 @@
 <div class="modal-backdrop" id="modal" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="sheet-handle"></div><div class="sheet-head"><h2 id="modalTitle">選擇志工</h2><button id="closeModal" class="iconbtn light" aria-label="關閉">✕</button></div><div id="modalBody" class="sheet-body"></div></div></div>
 <div id="toast" class="toast" role="status" hidden></div>
 <script defer src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.js"></script>
-<script defer src="./app.js?v=102"></script>
+<script defer src="./app.js?v=103"></script>
 </body>
 </html>

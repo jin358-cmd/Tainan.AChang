@@ -202,3 +202,24 @@
 .read-only-visitor [data-edit-person],
 .read-only-visitor .status-select{display:none!important}
 @media(max-width:600px){.roster-header-actions{width:100%;justify-content:flex-start}.roster-header-actions button{min-height:41px}}
+
+/* v1.0.3: v0.4 interactive MapLibre visual baseline + clear toggled layers */
+.map-v04-reference .section-heading h1{font-size:20px;font-weight:900}
+.map-v04-reference .map-switches{display:flex;gap:9px;flex-wrap:wrap;margin:11px 0 12px}
+.map-v04-reference .map-switches label{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:9px 12px;border:1.5px solid #cfdde5;border-radius:11px;background:#fff;color:#546879;font-size:14px;font-weight:850;cursor:pointer}
+.map-v04-reference .map-switches label:has(input:checked){color:#155e5a;background:#e7f6f1;border-color:#62ad9b;box-shadow:inset 0 0 0 1px #84bfad}
+.map-v04-reference .map-switches input{width:17px;height:17px;accent-color:#087e79}
+.map-v04-reference .map-switches .legend-pin.volunteer{background:#ed8120;color:#fff}
+.map-v04-reference .map-box{width:100%;min-height:420px;position:relative;border:1px solid #c9dbe1;border-radius:14px;overflow:hidden}
+.map-v04-reference .map-area-label{font-size:14px;font-weight:950;color:#244b68;pointer-events:none}
+.map-v04-reference .map-area-label.selected{border:3px solid #d62436!important;color:#b51d36!important;background:#fff!important}
+.map-v04-reference .map-marker.volunteer{background:#ed8120!important}
+.map-v04-reference .area-popup.map-attached-popup{border:1px solid #bfd5dc!important;background:#fff;max-width:320px}
+/* Online-only membership data is delivered by an administrator-checked endpoint */
+.approved-member-row{min-height:66px;background:#f7fcfa;border-color:#d0e1d9;gap:12px}
+.approved-member-row .member-label{display:flex;flex-direction:column;align-items:flex-start;min-width:0;gap:4px;flex:1}
+.approved-member-row .approved-member-name{font-size:16px;color:#213f51;font-weight:900;overflow-wrap:anywhere}
+.approved-member-row .approved-member-phone{font-size:15px;color:#2c5b75;font-weight:750;letter-spacing:.01em}
+.approved-member-row .auth-success-check{width:32px;height:32px;flex:none;display:grid;place-items:center;background:#15a76d;border:3px solid #fff;outline:1px solid #75cfa4;color:#fff;border-radius:50%;font-size:20px;font-weight:1000;box-shadow:0 1px 6px #18996925}
+.approved-member-row .auth-pending-label{font-size:12px;color:#946b33;background:#fff2d8;border:1px solid #e8cb8b;border-radius:9px;padding:5px 8px;font-weight:800}
+@media(max-width:640px){.map-v04-reference .map-box{min-height:390px;height:min(65dvh,560px)}.map-v04-reference .map-switches label{font-size:13px;min-height:42px}.approved-member-row .approved-member-name{font-size:16px}}
