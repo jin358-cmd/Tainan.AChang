@@ -293,14 +293,13 @@ async function openMemberAdmin(preselectId=''){
 function openNewMemberForm(){
  if(!assertAdmin())return;
  showModal('新增會員｜名冊與授權同步建立',`<form id="newMemberForm" class="member-create-form">
- <p class="form-hint">此操作將先建立志工名冊，再以管理員權限開通同一人的會員帳號。電話請先向本人核對，初始密碼請以安全方式告知。</p>
+ <p class="form-hint">第一步先新增志工至正式名冊。儲存後會自動開啟會員授權，選定剛新增的志工，再設定 6 碼 PIN 並核准開通。</p>
  <label>分派服務里<select name="assignment"><option value="">待分配</option>${areas.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('')}</select></label>
  <label>姓名 *<input name="name" required maxlength="80" autocomplete="off"></label>
  <label>手機號碼 *<input name="phone" required type="tel" inputmode="tel" placeholder="0989-098-468"></label>
  <label>原居住里<input name="residentArea" maxlength="40" placeholder="選填，不需重複加「里」"></label>
  <label>地址<input name="address" maxlength="300"></label>
- <label>志工登入 PIN（6 位數字）*<input name="password" required type="password" inputmode="numeric" minlength="6" maxlength="6" pattern="[0-9]{6}" autocomplete="new-password" placeholder="6 碼數字"><small>管理員核對電話後開通；首次登入還需申請裝置授權。勿將 PIN 寫在公開名冊。</small></label>
- <button type="submit" class="primary wide" id="saveNewMember">確認新增並同步會員授權</button>
+ <button type="submit" class="primary wide" id="saveNewMember">新增至名冊，下一步設定授權 PIN</button>
  <p id="memberCreateStatus" class="form-progress" role="status" aria-live="polite"></p>
  </form>`);
 }
@@ -311,24 +310,18 @@ async function submitNewMemberForm(form){
  const info=$('#memberCreateStatus'), btn=$('#saveNewMember'); btn.disabled=true;
  try{
   const n=phoneDigits(b.phone);if(!/^09\d{8}$/.test(n))throw new Error('請輸入有效的台灣手機號碼');
-  if(!/^[0-9]{6}$/.test(String(b.password||'')))throw new Error('志工登入 PIN 必須是 6 位數字');
   info.textContent='正在建立正式名冊…';
   const r=await onlineApi('roster','POST',{name:b.name,phone:b.phone,address:b.address,residentArea:b.residentArea,assignment:b.assignment||null});
   p=r.person;
   if(!p?.id)throw new Error('人員已建立，但伺服器未回傳 ID，請至名冊查核');
-  info.textContent='名冊已建立，正在核准會員…';
-  await onlineApi('members','POST',{volunteerId:p.id,phone:b.phone,password:b.password,role:'volunteer'});
-  // Never retain the password in state, logs or local storage.
-  form.reset(); closeModal(); await refreshOnline();
-  toast('✓ 名冊與會員授權同步建立成功');
-  await openMemberAdmin();
+  // Save first. The six-digit PIN is entered only in the subsequent approval form.
+  await refreshOnline();
+  closeModal();
+  toast('✓ 已新增至正式名冊，請選擇志工並設定 6 碼 PIN');
+  await openMemberAdmin(p.id);
  }catch(e){
-  if(p?.id){
-   info.textContent='名冊已新增，但會員開通未完成：'+e.message+'。請至「會員授權」重試；原名冊已保留。';
-   await refreshOnline();
-   btn.hidden=true;
-   const retry=document.createElement('button');retry.type='button';retry.className='primary wide';retry.textContent='前往會員授權補辦';retry.onclick=()=>openMemberAdmin(p.id);info.after(retry);
-  }else{info.textContent='新增失敗：'+e.message;btn.disabled=false}
+  info.textContent='新增失敗：'+e.message;
+  btn.disabled=false;
  }
 }
 
