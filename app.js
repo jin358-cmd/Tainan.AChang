@@ -54,7 +54,7 @@ function highlightMapSelection(){if(!map||!map.getLayer('village-fill'))return;m
 
 function renderSummary(){const planCurrent=state.plans[planId()];$('#statTotal').textContent=state.people.length;$('#statAssigned').textContent=assignedCount();$('#statPending').textContent=state.people.length-assignedCount();$('#statStops').textContent=Object.values(planCurrent?.stops||{}).filter(v=>v.chosen).length;const banner=$('#modeBanner');banner.hidden=true;banner.textContent=''}
 function go(next){page=next;if(next!=='map')$('#areaPopup').hidden=true;$$('.page').forEach(el=>el.classList.toggle('active',el.id==='page-'+next));$$('[data-page]').forEach(el=>{el.classList.toggle('on',el.dataset.page===next);el.setAttribute('aria-current',el.dataset.page===next?'page':'false')});render();window.scrollTo({top:0,behavior:'auto'});if(next==='map')requestAnimationFrame(()=>{initMap();map?.resize();updateMap()})}
-function render(){renderSummary();if(page==='areas')renderAreas();if(page==='planner')renderPlanner();if(page==='people')renderPeople();if(page==='map')updateMap();if(page==='volunteer')renderVolunteer()}
+function render(){document.body.classList.toggle('read-only-visitor',!liveRole);renderSummary();if(page==='areas')renderAreas();if(page==='planner')renderPlanner();if(page==='people')renderPeople();if(page==='map')updateMap();if(page==='volunteer')renderVolunteer()}
 function assignPerson(id,a){const p=state.people.find(x=>x.id===id);if(!p||!areas.includes(a))return false;if(p.assignment===a){toast(`${p.name} 已在 ${a}`);return true}const from=p.assignment;if(from&&!confirm(`將 ${p.name} 從 ${from} 改派到 ${a}？`))return false;if(from)cleanLeader(p.id,from);p.assignment=a;p.serviceLat=null;p.serviceLon=null;for(const v of Object.values(state.plans)){for(const key of Object.keys(v.teams||{}))v.teams[key]=v.teams[key].filter(x=>x!==p.id);for(const r of Object.values(v.stops||{}))r.people=(r.people||[]).filter(x=>x!==p.id)}save();render();toast(`已將 ${p.name} 分配至 ${a}`);return true}
 function removePerson(id){const p=state.people.find(x=>x.id===id);if(!p||!p.assignment)return;const from=p.assignment;cleanLeader(id,from);p.assignment='';p.serviceLat=null;p.serviceLon=null;for(const v of Object.values(state.plans)){for(const [a,ids] of Object.entries(v.teams||{}))v.teams[a]=ids.filter(x=>x!==id);for(const r of Object.values(v.stops||{}))r.people=(r.people||[]).filter(x=>x!==id)}save();render();toast('已移出服務分區及相關跟巡指派')}
 function clearSelectedArea(){const members=assignedPeople(selectedArea);if(!members.length){toast(`${selectedArea} 目前沒有已分配人員`);return}if(!confirm(`只清除「${selectedArea}」的 ${members.length} 位服務分配與其跟巡排班？其他里及總名冊不變。`))return;const ids=new Set(members.map(p=>p.id));for(const p of members){p.assignment='';p.serviceLat=null;p.serviceLon=null}delete state.leaders[selectedArea];for(const entry of Object.values(state.plans)){for(const [a,people] of Object.entries(entry.teams||{}))entry.teams[a]=people.filter(id=>!ids.has(id));for(const r of Object.values(entry.stops||{}))r.people=(r.people||[]).filter(id=>!ids.has(id))}save();render();toast(`已清除 ${selectedArea} 的 ${members.length} 位服務分配`)}
@@ -66,7 +66,7 @@ const an=$('#areaName');an.textContent=selectedArea;an.style.color=data.colors[s
 
 function chooseRoute(){const matching=data.stops.filter(r=>r['時段']===shift&&(plannerArea==='all'||r['里別']===plannerArea));routes=uniq(matching.map(routeKey));if(!routes.includes(chosenRoute))chosenRoute=routes[0]||'';const holder=$('#routeButtons');holder.innerHTML=routes.length?routes.map(k=>`<button class="route-choice ${chosenRoute===k?'on':''}" type="button" data-route="${esc(k)}">${esc(k.split('|')[1])} · ${esc(k.split('|')[2])}</button>`).join(''):'<span class="mini-note">此里於所選時段暫無已選錄車次，請切換里別或時段。</span>'}
 
-function renderPlanner(){const gate=$('#plannerGate'),content=$('#plannerContent');gate.hidden=assignedCount()>0;content.hidden=assignedCount()===0;if(assignedCount()===0)return;$('#planDate').value=date;$('#plannerAreaSelect').value=plannerArea;$$('[data-shift]').forEach(b=>b.classList.toggle('on',b.dataset.shift===shift));chooseRoute();const allRows=chosenRoute?routeRows():[];const rows=plannerArea==='all'?allRows:allRows.filter(r=>r['里別']===plannerArea),regions=uniq(rows.map(r=>r['里別']));if(!regions.includes(teamArea))teamArea=regions[0]||'';const focusArea=plannerArea==='all'?'全部十里':plannerArea;const times=rows.map(x=>x['到達']).filter(Boolean).sort();$('#plannerFocus').innerHTML=`<div class="planner-focus-head"><strong>目前跟巡里別</strong><span class="planner-focus-badge">${esc(focusArea)}</span></div><div class="planner-focus-meta"><span>拜訪日期：<b>${esc(date)}</b></span><span>清運時段：<b>${esc(shift)}</b></span><span>已選車次：<b>${esc(chosenRoute?chosenRoute.split('|')[1]+' · '+chosenRoute.split('|')[2]:'未選擇')}</b></span></div>`;$('#routeSummary').textContent=chosenRoute?`${rows.length} 個停靠點 · ${regions.length} 里 · ${times[0]||'--:--'}～${times.at(-1)||'--:--'}`:'請先選擇有清運車次的時段／里別';if(regions.length)renderAreaTeams(regions);else $('#areaTeamPicker').innerHTML='';renderStops(rows)}
+function renderPlanner(){const gate=$('#plannerGate'),content=$('#plannerContent'),locked=liveRole==='admin'&&assignedCount()===0;gate.hidden=!locked;content.hidden=locked;if(locked)return;$('#planDate').value=date;$('#plannerAreaSelect').value=plannerArea;$$('[data-shift]').forEach(b=>b.classList.toggle('on',b.dataset.shift===shift));chooseRoute();const allRows=chosenRoute?routeRows():[];const rows=plannerArea==='all'?allRows:allRows.filter(r=>r['里別']===plannerArea),regions=uniq(rows.map(r=>r['里別']));if(!regions.includes(teamArea))teamArea=regions[0]||'';const focusArea=plannerArea==='all'?'全部十里':plannerArea;const times=rows.map(x=>x['到達']).filter(Boolean).sort();$('#plannerFocus').innerHTML=`<div class="planner-focus-head"><strong>目前跟巡里別</strong><span class="planner-focus-badge">${esc(focusArea)}</span></div><div class="planner-focus-meta"><span>拜訪日期：<b>${esc(date)}</b></span><span>清運時段：<b>${esc(shift)}</b></span><span>已選車次：<b>${esc(chosenRoute?chosenRoute.split('|')[1]+' · '+chosenRoute.split('|')[2]:'未選擇')}</b></span></div>`;$('#routeSummary').textContent=chosenRoute?`${rows.length} 個停靠點 · ${regions.length} 里 · ${times[0]||'--:--'}～${times.at(-1)||'--:--'}`:'請先選擇有清運車次的時段／里別';if(regions.length)renderAreaTeams(regions);else $('#areaTeamPicker').innerHTML='';renderStops(rows)}
 
 function renderAreaTeams(regions){
  const root=$('#areaTeamPicker'),crew=plan().teams[teamArea]||[],available=rosterAvailable(teamArea);
@@ -166,7 +166,7 @@ function showAreaDetails(a){if(!areas.includes(a))return;const people=assignedPe
 function drawFallback(){mapFailed=true;$('#mapLibre').style.display='none';const root=$('#mapFallback');root.hidden=false;const f=data.geo.features,minX=120.224,maxX=120.256,minY=22.990,maxY=23.022,w=780,h=640;const proj=(lon,lat)=>[(lon-minX)/(maxX-minX)*w,(maxY-lat)/(maxY-minY)*h];let svg=`<svg class="offline-map-svg" viewBox="0 0 ${w} ${h}" role="img" aria-label="十里分區離線參考圖"><rect width="780" height="640" fill="#eaf2f6"/><path d="M0 130H780M0 260H780M0 420H780M0 560H780M130 0V640M320 0V640M520 0V640M680 0V640" stroke="#d1dfe8" stroke-width="11" fill="none"/>`;for(const z of f){const xy=z.geometry.coordinates[0].map(p=>proj(p[0],p[1])),an=z.properties.name,c=areaCentroid(an),ct=proj(c[0],c[1]),sel=an===selectedArea;svg+=`<polygon data-fallback-area="${esc(an)}" points="${xy.map(p=>p.map(n=>n.toFixed(1)).join(',')).join(' ')}" fill="${z.properties.color}" fill-opacity="${sel?.52:.25}" stroke="${sel?'#dc263b':z.properties.color}" stroke-width="${sel?9:3}"/>`;const cnt=assignedPeople(an).length,dayCount=data.stops.filter(r=>r['里別']===an&&r['時段']==='日間').length,nightCount=data.stops.filter(r=>r['里別']===an&&r['時段']==='夜間').length;let badges=[];if(layerState.volunteer)badges.push(['avatar',cnt,'#f28a2f',!!leaderOf(an)]);if(layerState.day&&dayCount)badges.push(['☀',dayCount,'#eab43a',false]);if(layerState.night&&nightCount)badges.push(['☾',nightCount,'#5558ad',false]);svg+=`<text data-fallback-area="${esc(an)}" x="${ct[0]}" y="${ct[1]-31}" text-anchor="middle" class="offline-map-label" fill="${sel?'#0e6374':'#25465f'}">${esc(an)}</text>`;badges.forEach((b,i)=>{const dx=(i-(badges.length-1)/2)*44;svg+=`<g data-fallback-area="${esc(an)}" class="offline-badge"><circle data-fallback-area="${esc(an)}" cx="${ct[0]+dx}" cy="${ct[1]+3}" r="21" fill="${b[2]}" stroke="#fff" stroke-width="3"/><text data-fallback-area="${esc(an)}" x="${ct[0]+dx}" y="${ct[1]+9}" text-anchor="middle" fill="white" font-size="16" font-weight="900">${b[0]==='avatar'?'👤':b[0]}${b[1]}</text>${b[3]?`<text data-fallback-area="${esc(an)}" x="${ct[0]+dx+15}" y="${ct[1]-15}" font-size="17">👑</text>`:''}</g>`})}svg+='</svg>';root.innerHTML=svg;root.onclick=e=>{const a=e.target?.closest('[data-fallback-area]')?.getAttribute('data-fallback-area')||e.target?.getAttribute('data-fallback-area');if(a&&!pinTarget){openAreaPreview(a);$('#mapLegendStatus').textContent='已選取 '+a;drawFallback();requestAnimationFrame(positionAreaPopup);return}if(pinTarget){const box=root.querySelector('svg').getBoundingClientRect(),xx=(e.clientX-box.left)/box.width*w,yy=(e.clientY-box.top)/box.height*h;applyPin(minX+xx/w*(maxX-minX),maxY-yy/h*(maxY-minY))}};$('#mapLegendStatus').textContent='十里分區參考地圖'}
 function mapFit(){if(map){map.fitBounds([[120.226,22.989],[120.253,23.022]],{padding:25,duration:400})}else drawFallback()}
 function bind(){$$('[data-page]').forEach(el=>el.addEventListener('click',()=>go(el.dataset.page)));document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.hasAttribute('data-go'))go(b.dataset.go);if(b.hasAttribute('data-close-area')){$('#areaPopup').hidden=true}if(b.hasAttribute('data-area-details'))showAreaDetails(b.dataset.areaDetails);if(b.hasAttribute('data-view-assignment')){selectedArea=b.dataset.viewAssignment;areaPage=Math.floor(areas.indexOf(selectedArea)/CARD_PAGE_SIZE);closeModal();$('#areaPopup').hidden=true;go('areas')}if(b.hasAttribute('data-area-page')){areaPage=Math.min(Math.ceil(areas.length/CARD_PAGE_SIZE)-1,Math.max(0,Number(b.dataset.areaPage)));renderAreas()}if(b.hasAttribute('data-area')){selectedArea=b.dataset.area;areaPage=Math.floor(areas.indexOf(selectedArea)/CARD_PAGE_SIZE);go('areas')}if(b.hasAttribute('data-assign'))assignPerson(b.dataset.assign,selectedArea);if(b.hasAttribute('data-remove'))removePerson(b.dataset.remove);if(b.hasAttribute('data-leader'))assignLeader(b.dataset.leader,selectedArea);if(b.hasAttribute('data-team-area')){teamArea=b.dataset.teamArea;renderPlanner()}if(b.hasAttribute('data-route')){chosenRoute=b.dataset.route;renderPlanner()}if(b.hasAttribute('data-fill-demo-phone')){const input=$('#volunteerPhoneInput');if(input)input.value=b.dataset.fillDemoPhone}if(b.hasAttribute('data-login-demo'))loginDemoVolunteer();if(b.hasAttribute('data-volunteer-complete'))completeVolunteerStop(b.dataset.volunteerSchedule,b.dataset.volunteerComplete);if(b.id==='addTeam'){pick('team',{title:`${teamArea} 車次跟巡`,allowed:rosterAvailable(teamArea)})}if(b.hasAttribute('data-team-remove'))removeTeam(b.dataset.teamRemove);if(b.hasAttribute('data-add-stop')){const r=data.stops.find(x=>stopKey(x)===b.dataset.addStop);if(r){window.__pendingStop=b.dataset.addStop;pick('stop',{title:`指定 ${r['里別']} · ${r['停靠點原文']}`,allowed:rosterAvailable(r['里別'])})}}if(b.hasAttribute('data-stop-remove')){removeStopMember(b.dataset.stop,b.dataset.stopRemove)}if(b.hasAttribute('data-edit-person'))editPerson(b.dataset.editPerson);if(b.hasAttribute('data-pick-person')){pickerKind='person-area:'+b.dataset.pickPerson;showModal('指定服務里',`<div class="pick-list">${areas.map(a=>`<div class="pick-row"><strong>${esc(a)}</strong><button data-person-area="${esc(a)}">分配</button></div>`).join('')}</div>`)}if(b.hasAttribute('data-person-area')){assignPerson(pickerKind.split(':').slice(1).join(':'),b.dataset.personArea);closeModal()}if(b.hasAttribute('data-pick-leader')){const pId=b.dataset.pickLeader;const ok=assignPerson(pId,selectedArea);if(ok)assignLeader(pId,selectedArea);closeModal()}if(b.hasAttribute('data-pick-id')){if(pickerKind==='area')assignPerson(b.dataset.pickId,selectedArea);if(pickerKind==='team')addTeam(b.dataset.pickId);if(pickerKind==='stop'){const target=window.__pendingStop;if(target)addStopVolunteer(target,b.dataset.pickId)}closeModal()}if(b.hasAttribute('data-export')){exportData(b.dataset.export);closeModal()}});
- $('#clearArea').onclick=clearSelectedArea;$('#areaPrev').onclick=()=>{areaPage=Math.max(0,areaPage-1);renderAreas()};$('#areaNext').onclick=()=>{areaPage=Math.min(Math.ceil(areas.length/CARD_PAGE_SIZE)-1,areaPage+1);renderAreas()};const pickBtn=$('#pickVolunteerBtn'); if(pickBtn) pickBtn.onclick=()=>pick('area',{title:`加入 ${selectedArea}`,allowed:state.people.filter(p=>!p.assignment)});$('#addPerson').onclick=()=>editPerson(null);$('#planDate').onchange=e=>{date=e.target.value||today();renderPlanner();renderSummary()};$('#plannerAreaSelect').onchange=e=>{plannerArea=e.target.value;chosenRoute='';renderPlanner();renderSummary()};$$('[data-shift]').forEach(b=>b.onclick=()=>{shift=b.dataset.shift;chosenRoute='';renderPlanner();renderSummary()});$('#stopList').onchange=e=>{const sel=e.target.closest('[data-status]');if(sel)setStatus(sel.dataset.status,sel.value)};$('#peopleSearch').oninput=renderPeople;$('#peopleFilter').onchange=renderPeople;$('#peopleAreaFilter').onchange=renderPeople;$('#menuBtn').onclick=openMenu;$('#volunteerLoginBtn').onclick=openMemberAdmin;$('#volunteerLogout').onclick=secureSignOut;$('#installBtn').onclick=()=>installPrompt?.prompt();$('#closeModal').onclick=closeModal;$('#modal').onclick=e=>{if(e.target===$('#modal'))closeModal()};$('#modalBody').onclick=e=>{if(e.target.id==='importButton')$('#fileInput').click();const b=e.target.closest('button[data-add-stop]');if(b)window.__pendingStop=b.dataset.addStop};$('#modalBody').onchange=e=>{if(e.target.id==='fileInput')importData(e.target.files?.[0])};$('#modalBody').onsubmit=e=>{if(e.target.matches('form#personForm')){e.preventDefault();savePersonForm(e.target)}};$('#mapFit').onclick=mapFit;for(const [selector,k] of [['#layerVolunteer','volunteer'],['#layerDay','day'],['#layerNight','night']])$(selector).onchange=e=>{layerState[k]=e.target.checked;updateMap()};window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('#installBtn').hidden=false});window.addEventListener('appinstalled',()=>{$('#installBtn').hidden=true;toast('已安裝到裝置')});}
+ $('#clearArea').onclick=clearSelectedArea;$('#areaPrev').onclick=()=>{areaPage=Math.max(0,areaPage-1);renderAreas()};$('#areaNext').onclick=()=>{areaPage=Math.min(Math.ceil(areas.length/CARD_PAGE_SIZE)-1,areaPage+1);renderAreas()};const pickBtn=$('#pickVolunteerBtn'); if(pickBtn) pickBtn.onclick=()=>pick('area',{title:`加入 ${selectedArea}`,allowed:state.people.filter(p=>!p.assignment)});$('#addPerson').onclick=()=>editPerson(null);$('#planDate').onchange=e=>{date=e.target.value||today();renderPlanner();renderSummary()};$('#plannerAreaSelect').onchange=e=>{plannerArea=e.target.value;chosenRoute='';renderPlanner();renderSummary()};$$('[data-shift]').forEach(b=>b.onclick=()=>{shift=b.dataset.shift;chosenRoute='';renderPlanner();renderSummary()});$('#stopList').onchange=e=>{const sel=e.target.closest('[data-status]');if(sel)setStatus(sel.dataset.status,sel.value)};$('#peopleSearch').oninput=renderPeople;$('#peopleFilter').onchange=renderPeople;$('#peopleAreaFilter').onchange=renderPeople;$('#menuBtn').onclick=openMenu;$('#volunteerLoginBtn').onclick=()=>liveRole==='admin'?openMemberAdmin():openSecureLogin();$('#volunteerLogout').onclick=secureSignOut;$('#installBtn').onclick=()=>installPrompt?.prompt();$('#closeModal').onclick=closeModal;$('#modal').onclick=e=>{if(e.target===$('#modal'))closeModal()};$('#modalBody').onclick=e=>{if(e.target.id==='importButton')$('#fileInput').click();const b=e.target.closest('button[data-add-stop]');if(b)window.__pendingStop=b.dataset.addStop};$('#modalBody').onchange=e=>{if(e.target.id==='fileInput')importData(e.target.files?.[0])};$('#modalBody').onsubmit=e=>{if(e.target.matches('form#personForm')){e.preventDefault();savePersonForm(e.target)}};$('#mapFit').onclick=mapFit;for(const [selector,k] of [['#layerVolunteer','volunteer'],['#layerDay','day'],['#layerNight','night']])$(selector).onchange=e=>{layerState[k]=e.target.checked;updateMap()};window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('#installBtn').hidden=false});window.addEventListener('appinstalled',()=>{$('#installBtn').hidden=true;toast('已安裝到裝置')});}
 
 // Online authenticated adapter: v0.4-style UI, server-authoritative roster & dispatch.
 const LIVE_KEY='achang-v10-device-id';
@@ -180,11 +180,33 @@ async function onlineApi(endpoint,method='GET',body){
  return doc;
 }
 function assertAdmin(){if(liveRole!=='admin'){toast('只有管理員可編輯名冊與排班');return false}return true}
-function showAuth(){liveRole='';liveMemberId='';state=makeState([]);liveTasks=[];for(const selector of ['#peopleList','#pendingMembers','#areaMembers','#volunteerSchedules','#areaPopup','#modalBody']){const el=$(selector);if(el)el.innerHTML=''}$('#modal').hidden=true;$('#app').hidden=true;$('#secureLogin').hidden=false;const z=$('#authStatus');z.textContent='請輸入已獲授權的帳號及密碼';}
+function showAuth(){
+ liveRole='';liveMemberId='';state=makeState([]);liveTasks=[];
+ for(const selector of ['#peopleList','#pendingMembers','#areaMembers','#volunteerSchedules','#areaPopup','#modalBody']){const el=$(selector);if(el)el.innerHTML=''}
+ $('#modal').hidden=true;
+ $('#secureLogin').hidden=true;$('#app').hidden=false;
+ $$('.bottom-nav,.desktop-nav').forEach(x=>x.hidden=false);
+ $('#volunteerLoginBtn').hidden=false;$('#volunteerLoginBtn').textContent='🔐 登入';$('#secureLogout').hidden=true;
+ $('#addPerson').hidden=true;$('#addMember').hidden=true;$('#openRosterAuthorization').hidden=true;
+ $('#rosterLocked').hidden=false;$('#peopleList').hidden=true;
+ $('#clearArea').hidden=true;
+ const z=$('#authStatus');z.textContent='首次登入或裝置授權失效時，請輸入已核准的帳號與密碼';
+ render();go('map');
+}
+function openSecureLogin(){if(liveRole==='admin')return openMemberAdmin();$('#secureLogin').hidden=false;$('#secureLoginForm input[name="login"]').focus()}
+function updateAccessControls(){
+ const admin=liveRole==='admin';
+ for(const id of ['addPerson','addMember','openRosterAuthorization','clearArea'])$( '#'+id).hidden=!admin;
+ $('#rosterLocked').hidden=admin;$('#peopleList').hidden=!admin;
+ $('#volunteerLoginBtn').hidden=liveRole==='volunteer';
+ $('#volunteerLoginBtn').textContent=admin?'🔐 會員授權':'🔐 登入';
+ $('#secureLogout').hidden=!liveRole;
+}
+
 async function secureSignOut(){try{await onlineApi('session','DELETE')}catch{}clearInterval(liveTimer);liveTimer=null;liveTasks=[];state=makeState([]);showAuth()}
 async function authStart(){try{
  const session=await onlineApi('session');liveRole=session.role;liveMemberId=session.memberId;
- $('#secureLogin').hidden=true;$('#app').hidden=false;$('#accountBadge')?.remove();
+ $('#secureLogin').hidden=true;$('#app').hidden=false;$('#accountBadge')?.remove();updateAccessControls();
  if(liveRole==='admin'){
   $('#volunteerLoginBtn').hidden=false;
   $$('.bottom-nav,.desktop-nav').forEach(x=>x.hidden=false);
@@ -249,20 +271,96 @@ renderVolunteer=function(){
  $('#volunteerSchedules').innerHTML=jobs.length?jobs.map(t=>`<article class="volunteer-task ${t.status==='完成'?'completed':''}"><div class="volunteer-task-top"><span class="volunteer-task-day">${esc(t.visit_date)} · ${esc(t.shift)} ${esc(t.eta||'')}</span><span class="volunteer-task-status">${esc(t.status)}</span></div><strong>${esc(t.area)} · 車牌 ${esc(t.truck)}</strong><p>${esc(t.stop_address)}</p><div class="volunteer-task-footer"><small>${t.status==='完成'?'已完成回報':'任務尚未完成'}</small><button type="button" data-live-complete="${esc(t.id)}" ${t.status==='完成'?'disabled':''}>${t.status==='完成'?'✓ 已完成':'✓ 回報已完成'}</button></div></article>`).join(''):'<div class="empty">目前沒有指派給你的跟巡巡點</div>';
 };
 async function completeOnlineTask(id){if(liveRole!=='volunteer')return toast('請由志工帳號完成本人任務');try{await onlineApi('tasks','PATCH',{id,status:'完成'});await refreshOnline();toast('✓ 已傳送完成回報')}catch(e){toast('回報失敗：'+e.message)}}
-async function openMemberAdmin(){if(!assertAdmin())return;try{const x=await onlineApi('members');const list=(x.members||[]).map(m=>`<div class="pick-row"><strong>${esc(prettyPhone(m.phone))}</strong><small>${esc(m.status)}</small></div>`).join('');const eligible=state.people.filter(p=>p.phone);showModal('管理員｜會員授權',`<form id="memberAdminForm"><label>選擇志工<select name="volunteerId">${eligible.map(p=>`<option value="${esc(p.id)}" data-phone="${esc(p.phone)}">${esc(p.name)}｜${esc(prettyPhone(p.phone))}</option>`).join('')}</select></label><label>手機號碼（須和名冊一致）<input name="phone" required inputmode="tel" placeholder="09xx-xxx-xxx"></label><label>初始密碼（至少 12 字元）<input type="password" name="password" required minlength="12"></label><input type="hidden" name="role" value="volunteer"><button class="primary wide" type="submit">核准開通志工帳號</button></form><div class="member-admin-existing"><strong>現有會員</strong>${list||'<p>尚未核准會員</p>'}</div>`)}catch(e){toast(e.message)}}
+async function openMemberAdmin(preselectId=''){
+ if(!assertAdmin())return;
+ try{
+  const x=await onlineApi('members');
+  const known=new Set((x.members||[]).map(m=>m.member_id));
+  const list=(x.members||[]).map(m=>`<div class="pick-row"><strong>${esc(prettyPhone(m.phone))}</strong><small>${esc(m.status)}</small></div>`).join('');
+  const eligible=state.people.filter(p=>p.phone&&!known.has(p.id));
+  const selected=eligible.find(p=>p.id===preselectId)||eligible[0];
+  showModal('管理員｜會員授權',`<form id="memberAdminForm"><label>選擇志工<select name="volunteerId" id="authorizationVolunteer" required>${eligible.map(p=>`<option value="${esc(p.id)}" ${selected?.id===p.id?'selected':''}>${esc(p.name)}｜${esc(prettyPhone(p.phone))}</option>`).join('')}</select></label><label>手機號碼（須與名冊一致）<input name="phone" id="authorizationPhone" required inputmode="tel" value="${esc(selected?prettyPhone(selected.phone):'')}" placeholder="09xx-xxx-xxx"></label><label>初始密碼（至少 12 字元）<input type="password" name="password" required minlength="12" autocomplete="new-password"></label><input type="hidden" name="role" value="volunteer"><button class="primary wide" type="submit" ${eligible.length?'':'disabled'}>核准開通志工帳號</button></form><div class="member-admin-existing"><strong>已完成授權：${(x.members||[]).length} 位</strong>${list||'<p>尚未核准會員</p>'}</div>`);
+  $('#authorizationVolunteer').onchange=e=>{const person=state.people.find(p=>p.id===e.target.value);$('#authorizationPhone').value=person?prettyPhone(person.phone):''};
+ }catch(e){toast('會員授權資料讀取失敗：'+e.message)}
+}
+function openNewMemberForm(){
+ if(!assertAdmin())return;
+ showModal('新增會員｜名冊與授權同步建立',`<form id="newMemberForm" class="member-create-form">
+ <p class="form-hint">此操作將先建立志工名冊，再以管理員權限開通同一人的會員帳號。電話請先向本人核對，初始密碼請以安全方式告知。</p>
+ <label>分派服務里<select name="assignment"><option value="">待分配</option>${areas.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('')}</select></label>
+ <label>姓名 *<input name="name" required maxlength="80" autocomplete="off"></label>
+ <label>手機號碼 *<input name="phone" required type="tel" inputmode="tel" placeholder="0989-098-468"></label>
+ <label>原居住里<input name="residentArea" maxlength="40" placeholder="選填，不需重複加「里」"></label>
+ <label>地址<input name="address" maxlength="300"></label>
+ <label>會員初始密碼 *<input name="password" required type="password" autocomplete="new-password" minlength="12"><small>至少 12 字元，由管理員安全提供給志工</small></label>
+ <button type="submit" class="primary wide" id="saveNewMember">確認新增並同步會員授權</button>
+ <p id="memberCreateStatus" class="form-progress" role="status" aria-live="polite"></p>
+ </form>`);
+}
+async function submitNewMemberForm(form){
+ if(!assertAdmin())return;
+ const b=Object.fromEntries(new FormData(form));
+ let p;
+ const info=$('#memberCreateStatus'), btn=$('#saveNewMember'); btn.disabled=true;
+ try{
+  const n=phoneDigits(b.phone);if(!/^09\d{8}$/.test(n))throw new Error('請輸入有效的台灣手機號碼');
+  if(String(b.password||'').length<12)throw new Error('初始密碼至少 12 個字元');
+  info.textContent='正在建立正式名冊…';
+  const r=await onlineApi('roster','POST',{name:b.name,phone:b.phone,address:b.address,residentArea:b.residentArea,assignment:b.assignment||null});
+  p=r.person;
+  if(!p?.id)throw new Error('人員已建立，但伺服器未回傳 ID，請至名冊查核');
+  info.textContent='名冊已建立，正在核准會員…';
+  await onlineApi('members','POST',{volunteerId:p.id,phone:b.phone,password:b.password,role:'volunteer'});
+  // Never retain the password in state, logs or local storage.
+  form.reset(); closeModal(); await refreshOnline();
+  toast('✓ 名冊與會員授權同步建立成功');
+  await openMemberAdmin();
+ }catch(e){
+  if(p?.id){
+   info.textContent='名冊已新增，但會員開通未完成：'+e.message+'。請至「會員授權」重試；原名冊已保留。';
+   await refreshOnline();
+   btn.hidden=true;
+   const retry=document.createElement('button');retry.type='button';retry.className='primary wide';retry.textContent='前往會員授權補辦';retry.onclick=()=>openMemberAdmin(p.id);info.after(retry);
+  }else{info.textContent='新增失敗：'+e.message;btn.disabled=false}
+ }
+}
+
 const originalBind=bind;
 bind=function(){originalBind();
  $('#secureLogout').onclick=secureSignOut;
+ $('#closeSecureLogin').onclick=()=>{$('#secureLogin').hidden=true};
+ $('#loginFromRoster').onclick=openSecureLogin;
+ $('#addMember').onclick=openNewMemberForm;
+ $('#openRosterAuthorization').onclick=()=>openMemberAdmin();
  $('#secureLoginForm').onsubmit=async e=>{e.preventDefault();$('#authStatus').textContent='登入驗證中…';const d=Object.fromEntries(new FormData(e.target));try{await onlineApi('session','POST',d);await authStart()}catch(err){$('#authStatus').textContent=err.message}};
  document.addEventListener('click',e=>{const b=e.target.closest('button[data-live-complete]');if(b)completeOnlineTask(b.dataset.liveComplete)});
- $('#modalBody').addEventListener('submit',async e=>{if(e.target.id!=='memberAdminForm')return;e.preventDefault();if(!assertAdmin())return;const d=Object.fromEntries(new FormData(e.target));const x=state.people.find(p=>p.id===d.volunteerId);const normalizePhone=p=>{let n=phoneDigits(p);if(n.startsWith('8869'))n='0'+n.slice(3);return n};if(!x||normalizePhone(x.phone)!==normalizePhone(d.phone)){toast('手機號碼和人員名冊不符');return}try{await onlineApi('members','POST',d);closeModal();toast('已建立會員，請透過安全管道通知密碼')}catch(err){toast('建立會員失敗：'+err.message)}});
+ $('#modalBody').addEventListener('submit',async e=>{if(e.target.id==='newMemberForm'){e.preventDefault();await submitNewMemberForm(e.target);return}if(e.target.id!=='memberAdminForm')return;e.preventDefault();if(!assertAdmin())return;const d=Object.fromEntries(new FormData(e.target));const x=state.people.find(p=>p.id===d.volunteerId);const normalizePhone=p=>{let n=phoneDigits(p);if(n.startsWith('8869'))n='0'+n.slice(3);return n};if(!x||normalizePhone(x.phone)!==normalizePhone(d.phone)){toast('手機號碼和人員名冊不符');return}try{await onlineApi('members','POST',d);closeModal();toast('已建立會員，請透過安全管道通知密碼')}catch(err){toast('建立會員失敗：'+err.message)}});
 };
 save=function(){renderSummary()}; // never persist authenticated personal data to public browser storage
+
+// Installed PWA quick-enter: re-check the HttpOnly session when the approved device resumes.
+// The phone, password and refresh token are NEVER written to JavaScript storage.
+let lastSessionCheck=0, checkingSavedSession=false;
+async function restoreSavedSessionOnResume(){
+ if(document.visibilityState==='hidden'||checkingSavedSession||!data)return;
+ const now=Date.now();if(now-lastSessionCheck<120000)return;lastSessionCheck=now;
+ checkingSavedSession=true;
+ try {
+   const session=await onlineApi('session');
+   if(session.role!==liveRole||session.memberId!==liveMemberId){await authStart();return}
+   if(liveRole)await refreshOnline(true);
+ }catch(e){
+   if(e.status===401||e.status===403){
+     clearInterval(liveTimer);liveTimer=null;showAuth();
+   }
+ }finally{checkingSavedSession=false}
+}
+
 async function boot(){try{
  const pub=await fetch('./data-public.json',{cache:'no-store'});if(!pub.ok)throw Error('地圖資料無法讀取');data=await pub.json();areas=data.areas;
  state=makeState([]);state.demo=false;areaPage=Math.floor(areas.indexOf(selectedArea)/CARD_PAGE_SIZE);const pa=$('#plannerAreaSelect');pa.innerHTML='<option value="all">全部十里</option>'+areas.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('');
  const sel=$('#peopleAreaFilter');sel.innerHTML='<option value="all">全部里別</option>'+areas.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('');
- $('#peopleFilter').value='assigned';bind();showAuth();await authStart();
+ $('#peopleFilter').value='assigned';bind();showAuth();await authStart();lastSessionCheck=Date.now();document.addEventListener('visibilitychange',restoreSavedSessionOnResume);window.addEventListener('pageshow',e=>{if(e.persisted)restoreSavedSessionOnResume()});
  if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }catch(e){console.error(e);$('#authStatus').textContent='網站載入失敗：'+e.message}
 }

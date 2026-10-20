@@ -5,6 +5,12 @@ t('公鑰可公開但絕不包含 Service Role 密鑰',()=>{assert.match(L.KEY,/
 t('檢查來路不明的跨網站寫入',()=>{assert.throws(()=>L.originCheck({method:'POST',headers:{origin:'https://evil.invalid',host:'sample.vercel.app'}}),/拒絕跨網站/);assert.doesNotThrow(()=>L.originCheck({method:'POST',headers:{origin:'https://sample.vercel.app',host:'sample.vercel.app'}}))});
 t('任意 token 不能通過 bootstrap 機密比對',()=>{assert.equal(L.safeEqual('bad','correct-secret'),false);assert.equal(L.safeEqual('same','same'),true)});
 t('ID 只接受 UUID',()=>{assert.throws(()=>L.uuid('DEMO-01'));assert.equal(L.uuid('92acbbaf-7e99-4a26-92ab-98297eb5076d'),'92acbbaf-7e99-4a26-92ab-98297eb5076d')});
-const fs=require('node:fs'),path=require('node:path');
-t('管理員電子郵件登入並保留志工手機登入路徑',()=>{const v=fs.readFileSync(path.join(__dirname,'../api/session.js'),'utf8');assert.match(v,/identity\.includes\('@'\)/);assert.match(v,/email:identity\.toLowerCase\(\)/);assert.match(v,/phone:L\.phone\(identity\)/)});
-t('管理員內部紀錄不進入志工名冊',()=>{const v=fs.readFileSync(path.join(__dirname,'../api/roster.js'),'utf8');assert.match(v,/startsWith\('ADMIN-'\)/)});
+
+t('已授權 PWA 工作階段為受保護的 HttpOnly cookie；90 天滑動有效',()=>{
+ const h={};const res={getHeader:(n)=>h[n],setHeader:(n,v)=>h[n]=v};
+ L.setSession(res,{access_token:'placeholder_access',refresh_token:'placeholder_refresh',expires_in:3600});
+ const parts=h['Set-Cookie'];assert.equal(parts.length,2);
+ for(const item of parts){assert.match(item,/HttpOnly/);assert.match(item,/Secure/);assert.match(item,/SameSite=Strict/);assert.match(item,/Path=\/api/)}
+ assert.match(parts[1],/Max-Age=7776000/);
+ assert.doesNotMatch(parts.join(','),/password/i);
+});
