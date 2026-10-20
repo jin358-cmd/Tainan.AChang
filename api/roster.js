@@ -6,13 +6,23 @@ const map=(m,alloc)=>({id:m.id,name:m.display_name,phone:m.phone_e164,address:m.
 async function allocation(member,token){const r=await L.rest('service_allocations?member_id=eq.'+member+'&select=member_id,village,is_leader',token);return L.need(r,'分派資料讀取失敗')[0]||null}
 async function changeArea(id,village,token,leader=false){if(village){const r=await L.rest('service_allocations?on_conflict=member_id&select=member_id,village,is_leader',token,{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=representation'},body:{member_id:id,village,is_leader:leader}});L.need(r,'服務里指派失敗')}else{const r=await L.rest('service_allocations?member_id=eq.'+id,token,{method:'DELETE'});L.need(r,'移出服務里失敗')}}
 module.exports=L.run(async(req,res)=>{
- L.method(req,['GET','POST','PATCH']);const p=await L.authorized(req,res,['admin']);
+ L.method(req,['GET','POST','PATCH','DELETE']);const p=await L.authorized(req,res,['admin']);
  if(req.method==='GET'){
   const [m,a]=await Promise.all([L.rest('members?select='+mFields+'&order=display_name.asc&limit=2000',p.token),L.rest('service_allocations?select=member_id,village,is_leader&limit=2000',p.token)]);
   const all=L.need(m,'名冊讀取失敗').filter(x=>!['ADMIN-','ARCHIVED-'].some(prefix=>String(x.source_member_id||'').startsWith(prefix))),alloc=L.need(a,'服務里讀取失敗'),index=new Map(alloc.map(x=>[x.member_id,x]));
   return L.json(res,200,{people:all.map(x=>map(x,index.get(x.id)))});
  }
- const b=L.body(req),village=b.assignment||null;if(village&&!AREAS.includes(village))L.problem(400,'不支援的里別');
+ const b=L.body(req);
+ if(req.method==='DELETE'){
+  const id=L.uuid(b.id),old=await L.getOne('members',id,p.token);
+  if(!old||String(old.source_member_id||'').startsWith('ARCHIVED-'))L.problem(404,'名冊沒有這筆人員');
+  const accounts=await L.rest('member_accounts?member_id=eq.'+id+'&select=id&limit=1',p.token);
+  if(L.need(accounts,'會員授權查詢失敗').length)L.problem(409,'此人員已有會員授權，請先至會員授權完成停用與解除，再刪除名冊');
+  const archived=await L.rest('members?id=eq.'+id+'&select=id',p.token,{method:'PATCH',headers:{Prefer:'return=representation'},body:{source_member_id:'ARCHIVED-'+id}});
+  if(!L.need(archived,'人員封存失敗').length)L.problem(502,'人員未能封存');
+  return L.json(res,200,{deleted:true,archived:true});
+ }
+ const village=b.assignment||null;if(village&&!AREAS.includes(village))L.problem(400,'不支援的里別');
  if(req.method==='POST'){
   const phone=b.phone?L.phone(b.phone):null;
   const x={display_name:L.checkText(b.name,'姓名',80),phone_e164:phone,address:L.checkText(b.address||'','地址',300,true)||null,resident_area:L.checkText(b.residentArea||'','原居住里',40,true)||null};
