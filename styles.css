@@ -269,3 +269,10 @@
 #page-people .roster-header-actions .roster-action-btn[hidden]{display:none!important}
 #page-people .roster-header-actions .roster-add-btn{background:#0b7c83;color:#fff;border:1px solid #0b7c83}
 @media(max-width:560px){#page-people .roster-header-actions{width:100%;justify-content:flex-end;gap:8px}#page-people .roster-header-actions .roster-action-btn{font-size:13px;min-height:42px;padding:9px 13px}}
+
+/* Volunteer roster: assigned village badge immediately left of phone */
+#page-people .person-contact-row{display:flex;align-items:center;justify-content:flex-end;gap:7px;min-width:0;flex-wrap:wrap}
+#page-people .person-contact-row .assign-pill,#page-people .person-contact-row .pending-pill{white-space:nowrap;margin:0;font-size:11px}
+#page-people .person-contact-row .phone-link{white-space:nowrap;margin:0}
+#page-people .person-heading{gap:9px;align-items:center}
+@media(max-width:560px){#page-people .person-contact-row{gap:5px}#page-people .person-contact-row .assign-pill{font-size:10px;padding:4px 6px}}
