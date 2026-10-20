@@ -10,12 +10,12 @@
 <link rel="manifest" href="./manifest.webmanifest" />
 <link rel="icon" type="image/svg+xml" href="./assets/icon.svg" />
 <link rel="apple-touch-icon" href="./assets/icon-192.png" />
-<link rel="stylesheet" href="./styles.css?v=106" />
+<link rel="stylesheet" href="./styles.css?v=107" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.css" />
-<title>永康十里｜志工與垃圾車跟巡 PWA</title>
+<title>【TEST】永康十里｜免簡訊 PIN 隔離測試</title>
 </head>
 <body><section class="login-screen" id="secureLogin" hidden><div class="login-splash"><span class="login-mark">⌖</span><div><strong>永康十里</strong><small>志工分區 · 垃圾車跟巡</small></div></div><div class="login-card"><div class="login-top-row"><h1>首次登入／重新驗證</h1><button type="button" id="closeSecureLogin" class="smallbtn" aria-label="返回分頁">返回</button></div><p>管理員及志工共用此入口。管理員使用電子郵件，志工使用核准的手機號碼與 6 碼 PIN。</p><form id="secureLoginForm"><label>登入帳號<input name="login" required autocomplete="username" placeholder="管理員 Email／志工手機" autocapitalize="none" spellcheck="false"></label><label>密碼<input name="password" type="password" required autocomplete="current-password" placeholder="已設定的個人密碼"></label><button class="primary wide" type="submit">登入並檢視工作</button></form><p id="authStatus" role="status" aria-live="polite">正在檢查登入狀態…</p><small>志工首次登錄須經管理員核准裝置。帳號和巡點進度由伺服器驗證與保存。</small></div></section>
-<div id="app">
+<div id="app"><div style="background:#8a5a00;color:white;text-align:center;padding:7px;font-size:13px;font-weight:800">隔離測試環境｜不連接正式會員資料｜免簡訊 PIN EIPP</div>
 <header class="topbar">
  <div class="brand"><div class="brand-icon">⌖</div><div><strong>永康十里</strong><span>志工分區 · 跟巡排班</span></div></div>
  <div class="top-actions"><button id="volunteerLoginBtn" class="volunteer-login-btn" type="button">🔐 登入</button><button id="secureLogout" class="volunteer-login-btn" type="button" hidden>登出</button><span id="savedPill" class="saved-pill" hidden></span><button id="installBtn" class="iconbtn" title="安裝手機 App" aria-label="安裝手機 App" hidden>⬇</button><button id="menuBtn" class="iconbtn" title="匯入／備份" aria-label="匯入及備份">⋯</button></div>
@@ -71,6 +71,6 @@
 <div class="modal-backdrop" id="modal" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="sheet-handle"></div><div class="sheet-head"><h2 id="modalTitle">選擇志工</h2><button id="closeModal" class="iconbtn light" aria-label="關閉">✕</button></div><div id="modalBody" class="sheet-body"></div></div></div>
 <div id="toast" class="toast" role="status" hidden></div>
 <script defer src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.js"></script>
-<script defer src="./app.js?v=106"></script>
+<script defer src="./app.js?v=107"></script>
 </body>
 </html>
