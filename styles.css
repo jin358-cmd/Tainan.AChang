@@ -239,3 +239,5 @@
 #page-areas .area-pill{border-color:#cbdbe5}
 #page-areas .area-pill.active{border-color:#117e83;background:#e3f5f5}
 @media(max-width:560px){.device-approval-row{align-items:flex-start;flex-wrap:wrap}.approve-device-btn{margin-left:auto}}
+/* v1.0.5 approval and planner layout */
+.member-auth-actions{display:flex;flex-wrap:wrap;gap:6px;margin-left:auto}.approved-member-row{flex-wrap:wrap;gap:10px}.planner-route-inline{margin-top:9px;padding:8px 10px;background:#eaf2f8;color:#274c68;border-radius:9px;font-size:13px;font-weight:700}.visit-divider{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}.visit-area-buttons{flex:1;min-width:160px}.visit-area-buttons .team-areas{display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap;overflow:visible;padding:0}.visit-area-buttons .team-area-btn{font-size:12px}.combined-visit .team-picker{margin-bottom:8px}
