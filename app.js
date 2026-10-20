@@ -184,7 +184,7 @@ function showAuth(){
  liveRole='';liveMemberId='';state=makeState([]);liveTasks=[];
  for(const selector of ['#peopleList','#pendingMembers','#areaMembers','#volunteerSchedules','#areaPopup','#modalBody']){const el=$(selector);if(el)el.innerHTML=''}
  $('#modal').hidden=true;
- $('#secureLogin').hidden=true;$('#app').hidden=false;
+ $('#secureLogin').hidden=true;$('#secureLogin').style.display='none';$('#app').hidden=false;
  $$('.bottom-nav,.desktop-nav').forEach(x=>x.hidden=false);
  $('#volunteerLoginBtn').hidden=false;$('#volunteerLoginBtn').textContent='🔐 登入';$('#secureLogout').hidden=true;
  $('#addMember').hidden=true;$('#openRosterAuthorization').hidden=true;
@@ -366,5 +366,22 @@ async function boot(){try{
  if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }catch(e){console.error(e);$('#authStatus').textContent='網站載入失敗：'+e.message}
 }
+// Login entrypoint must work even if public map data fails to load.
+document.addEventListener('click',e=>{
+ const button=e.target.closest('#volunteerLoginBtn,#loginFromRoster');
+ if(!button)return;
+ if(button.id==='volunteerLoginBtn'&&liveRole==='admin')return;
+ const gate=document.querySelector('#secureLogin');
+ if(!gate)return;
+ gate.hidden=false;
+ gate.style.display='flex';
+ const input=gate.querySelector('input[name="login"]');
+ if(input)input.focus();
+},true);
+document.addEventListener('click',e=>{
+ if(!e.target.closest('#closeSecureLogin'))return;
+ const gate=document.querySelector('#secureLogin');
+ if(gate){gate.hidden=true;gate.style.display='none'}
+},true);
 boot();
 })();
