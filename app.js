@@ -187,7 +187,7 @@ function showAuth(){
  $('#secureLogin').hidden=true;$('#app').hidden=false;
  $$('.bottom-nav,.desktop-nav').forEach(x=>x.hidden=false);
  $('#volunteerLoginBtn').hidden=false;$('#volunteerLoginBtn').textContent='🔐 登入';$('#secureLogout').hidden=true;
- $('#addPerson').hidden=true;$('#addMember').hidden=true;$('#openRosterAuthorization').hidden=true;
+ $('#addMember').hidden=true;$('#openRosterAuthorization').hidden=true;
  $('#rosterLocked').hidden=false;$('#peopleList').hidden=true;
  $('#clearArea').hidden=true;
  const z=$('#authStatus');z.textContent='首次登入或裝置授權失效時，請輸入已核准的帳號與密碼';
@@ -196,7 +196,7 @@ function showAuth(){
 function openSecureLogin(){if(liveRole==='admin')return openMemberAdmin();$('#secureLogin').hidden=false;$('#secureLoginForm input[name="login"]').focus()}
 function updateAccessControls(){
  const admin=liveRole==='admin';
- for(const id of ['addPerson','addMember','openRosterAuthorization','clearArea'])$( '#'+id).hidden=!admin;
+ for(const id of ['addMember','openRosterAuthorization','clearArea'])$( '#'+id).hidden=!admin;
  $('#rosterLocked').hidden=admin;$('#peopleList').hidden=!admin;
  $('#volunteerLoginBtn').hidden=liveRole==='volunteer';
  $('#volunteerLoginBtn').textContent=admin?'🔐 會員授權':'🔐 登入';
