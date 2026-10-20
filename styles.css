@@ -253,3 +253,11 @@
 #areaPopup .popup-detail-btn{padding:4px 9px;min-height:23px;line-height:1.2;border-radius:5px;font-size:11px;font-weight:750}
 #areaPopup .popup-more{display:block;text-align:center;color:#61798a;font-size:10px;padding:3px}
 .roster-header-actions #openRosterAuthorization{display:inline-flex;align-items:center;min-height:28px;padding:5px 9px}
+
+/* Owner requested delete-person title action and Google brand logo */
+.sheet-head .delete-person-title{margin-left:auto;margin-right:10px;background:#c82737;color:#fff;border:0;border-radius:6px;padding:5px 10px;font-size:12px;font-weight:850;line-height:1.25}
+.delete-person-confirm{background:#c82737;color:white;border-radius:7px;padding:9px 13px;font-weight:850}
+.delete-confirm-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
+.delete-warning{background:#fff4f3;border:1px solid #f4c6c5;padding:12px;border-radius:9px}
+.delete-warning p{margin:0 0 8px}.delete-warning small{color:#77505a}
+.google-login-action{display:flex;align-items:center;justify-content:center;gap:10px}.google-signin-logo{display:inline-block;flex:none}
