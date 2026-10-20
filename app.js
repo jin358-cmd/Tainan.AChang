@@ -187,7 +187,7 @@ function showAuth(){
  $('#secureLogin').hidden=true;$('#app').hidden=false;
  $$('.bottom-nav,.desktop-nav').forEach(x=>x.hidden=false);
  $('#volunteerLoginBtn').hidden=false;$('#volunteerLoginBtn').textContent='🔐 登入';$('#secureLogout').hidden=true;
- $('#addPerson').hidden=true;$('#addMember').hidden=true;$('#openRosterAuthorization').hidden=true;
+ $('#addPerson')?.hidden=true;$('#addMember').hidden=true;$('#openRosterAuthorization').hidden=true;
  $('#rosterLocked').hidden=false;$('#peopleList').hidden=true;
  $('#clearArea').hidden=true;
  const z=$('#authStatus');z.textContent='首次登入或裝置授權失效時，請輸入已核准的帳號與密碼';
