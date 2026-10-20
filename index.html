@@ -10,11 +10,11 @@
 <link rel="manifest" href="./manifest.webmanifest" />
 <link rel="icon" type="image/svg+xml" href="./assets/icon.svg" />
 <link rel="apple-touch-icon" href="./assets/icon-192.png" />
-<link rel="stylesheet" href="./styles.css?v=104" />
+<link rel="stylesheet" href="./styles.css?v=110" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.css" />
 <title>永康十里｜志工與垃圾車跟巡 PWA</title>
 </head>
-<body><section class="login-screen" id="secureLogin" hidden><div class="login-splash"><span class="login-mark">⌖</span><div><strong>永康十里</strong><small>志工分區 · 垃圾車跟巡</small></div></div><div class="login-card"><div class="login-top-row"><h1>首次登入／重新驗證</h1><button type="button" id="closeSecureLogin" class="smallbtn" aria-label="返回分頁">返回</button></div><p>管理員使用電子郵件，志工使用核准的手機帳號。</p><form id="secureLoginForm"><label>登入帳號<input name="login" required autocomplete="username" placeholder="管理員 Email／志工手機" autocapitalize="none" spellcheck="false"></label><label>密碼<input name="password" type="password" required autocomplete="current-password" placeholder="已設定的個人密碼"></label><button class="primary wide" type="submit">登入並檢視工作</button></form><p id="authStatus" role="status" aria-live="polite">正在檢查登入狀態…</p><small>志工首次登錄須經管理員核准裝置。帳號和巡點進度由伺服器驗證與保存。</small></div></section>
+<body><section class="login-screen" id="secureLogin" hidden><div class="login-splash"><span class="login-mark">⌖</span><div><strong>永康十里</strong><small>志工分區 · 垃圾車跟巡</small></div></div><div class="login-card"><div class="login-top-row"><h1>首次登入／重新驗證</h1><button type="button" id="closeSecureLogin" class="smallbtn" aria-label="返回分頁">返回</button></div><p>管理員使用電子郵件，志工使用核准的手機帳號。</p><form id="secureLoginForm"><label>登入帳號<input name="login" required autocomplete="username" placeholder="管理員 Email／志工手機" autocapitalize="none" spellcheck="false"></label><label>密碼<input name="password" type="password" required autocomplete="current-password" placeholder="已設定的個人密碼"></label><button class="primary wide" type="submit">登入並檢視工作</button></form><button id="googleOAuthLogin" type="button" class="google-login-action">使用 Google 登入</button><p class="mini-note">Google 登入仍須管理員核准與裝置授權。無 Google 帳號可使用手機＋六碼 PIN。</p><p id="authStatus" role="status" aria-live="polite">正在檢查登入狀態…</p><small>志工首次登錄須經管理員核准裝置。帳號和巡點進度由伺服器驗證與保存。</small></div></section>
 <div id="app">
 <header class="topbar">
  <div class="brand"><div class="brand-icon">⌖</div><div><strong>永康十里</strong><span>志工分區 · 跟巡排班</span></div></div>
@@ -61,7 +61,7 @@
  <div id="volunteerSchedules" class="volunteer-schedules"></div>
 </section>
 <section id="page-people" class="page" aria-label="人員名冊">
- <div class="section-heading"><div><h1>志工名冊</h1><p>新增人員、建立會員與權限授權由管理員操作</p></div><div class="roster-header-actions"><button id="openRosterAuthorization" class="smallbtn" type="button" hidden>會員授權</button><button id="addMember" class="primary add-person-top" type="button" hidden>＋ 新增會員</button><button id="addPerson" class="smallbtn" type="button" hidden>＋ 新增人員</button></div></div>
+ <div class="section-heading"><div><h1>志工名冊</h1><p>新增人員、建立會員與權限授權由管理員操作</p></div><div class="roster-header-actions"><button id="openRosterAuthorization" class="smallbtn" type="button" hidden>會員授權</button><button id="addMember" class="primary add-person-top" type="button" hidden>＋ 新增會員</button></div></div>
  <div class="surface filter-bar"><input id="peopleSearch" type="search" placeholder="搜尋志工姓名、地址或電話" autocomplete="off" /><div class="select-pair"><select id="peopleAreaFilter" aria-label="篩選服務里別"></select><select id="peopleFilter" aria-label="篩選分配狀態"><option value="assigned">已分配</option><option value="pending">待分配</option><option value="all">全部人員</option></select></div></div>
  <div id="rosterLocked" class="access-notice" hidden><strong>正式名冊需授權登入</strong><p>地圖與公開清運站點可以直接瀏覽；姓名、電話、地址及分派操作必須以管理員身分登入。</p><button class="primary" id="loginFromRoster" type="button">管理員登入</button></div><div id="peopleList" class="people-list"></div>
 </section>
@@ -71,6 +71,6 @@
 <div class="modal-backdrop" id="modal" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="sheet-handle"></div><div class="sheet-head"><h2 id="modalTitle">選擇志工</h2><button id="closeModal" class="iconbtn light" aria-label="關閉">✕</button></div><div id="modalBody" class="sheet-body"></div></div></div>
 <div id="toast" class="toast" role="status" hidden></div>
 <script defer src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.js"></script>
-<script defer src="./app.js?v=104"></script>
+<script defer src="./app.js?v=110"></script>
 </body>
 </html>
