@@ -1,10 +1,7 @@
-const CACHE = 'achang-pwa-shell-v110';
+const CACHE = 'achang-pwa-shell-v113-authfix';
 const SHELL=['./','./index.html','./styles.css','./app.js','./data-public.json','./manifest.webmanifest','./assets/icon.svg','./assets/icon-192.png','./assets/icon-512.png'];
-self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
-self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
-self.addEventListener('fetch',e=>{const req=e.request,url=new URL(req.url);if(req.method!=='GET'||url.origin!==self.location.origin)return;
- if(url.pathname.startsWith('/api/')||url.pathname.endsWith('/data-private.json'))return;
- const allow=new Set(SHELL.map(p=>new URL(p,self.registration.scope).pathname));if(!allow.has(url.pathname))return;
- if(req.mode==='navigate'){e.respondWith(fetch(req).catch(()=>caches.match('./index.html')));return}
- e.respondWith(caches.match(req,{ignoreSearch:true}).then(x=>x||fetch(req).then(r=>{if(r.ok)caches.open(CACHE).then(c=>c.put(new Request(url.origin+url.pathname),r.clone()));return r})));
-});
+self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())});
+self.addEventListener('activate',event=>{event.waitUntil((async()=>{const names=await caches.keys();await Promise.all(names.filter(name=>name.startsWith('achang-pwa-shell-')&&name!==CACHE).map(name=>caches.delete(name)));await self.clients.claim()})())});
+self.addEventListener('fetch',event=>{const request=event.request;if(request.method!=='GET')return;const url=new URL(request.url);if(url.origin!==self.location.origin||url.pathname.startsWith('/api/'))return;const paths=new Set(SHELL.map(path=>new URL(path,self.registration.scope).pathname));if(!paths.has(url.pathname))return;
+// Network-first prevents old JavaScript from surviving a new production deployment.
+event.respondWith((async()=>{try{const live=await fetch(request,{cache:'no-store'});if(live.ok&&live.type!=='opaque'){const cache=await caches.open(CACHE);await cache.put(request,live.clone())}return live}catch(err){const cached=await caches.match(request,{ignoreSearch:true});if(cached)return cached;throw err}})())});
