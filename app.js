@@ -217,7 +217,7 @@ async function authStart(){try{
   await refreshOnline();go('volunteer');
  }
  clearInterval(liveTimer);liveTimer=setInterval(()=>refreshOnline(true),20000);
-}catch(e){showAuth();$('#authStatus').textContent=e.status===403?'帳號或裝置尚未獲管理員核准':e.status===401?'請使用正確的帳號與密碼登入':'連線尚未完成，請稍後重新整理'}}
+}catch(e){showAuth();$('#authStatus').textContent=e.message||'無法完成登入，請稍後重試';console.warn('Session authorization failed',e.status||'network')}}
 function syncTaskProjection(){
  state.plans={};const byGroup=new Map();
  for(const t of liveTasks){
