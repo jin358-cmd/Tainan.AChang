@@ -188,7 +188,7 @@ function showAuth(){
  for(const selector of ['#peopleList','#pendingMembers','#areaMembers','#volunteerSchedules','#areaPopup','#modalBody']){const el=$(selector);if(el)el.innerHTML=''}
  $('#modal').hidden=true;
  $('#secureLogin').hidden=true;$('#app').hidden=false;
- $('.bottom-nav,.desktop-nav').forEach(x=>x.hidden=false);
+ $$('.bottom-nav,.desktop-nav').forEach(x=>x.hidden=false);
  $('#volunteerLoginBtn').hidden=true;$('#volunteerLoginBtn').textContent='🔐 登入';$('#secureLogout').hidden=true;const adminTop=$('#adminHeaderAction');if(adminTop)adminTop.hidden=true;
  document.getElementById('addPerson') && ($('#addPerson').hidden=true);$('#addMember').hidden=true;$('#openRosterAuthorization').hidden=true;
  $('#rosterLocked').hidden=false;$('#peopleList').hidden=true;
