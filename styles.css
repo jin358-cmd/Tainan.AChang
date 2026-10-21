@@ -276,3 +276,18 @@
 #page-people .person-contact-row .phone-link{white-space:nowrap;margin:0}
 #page-people .person-heading{gap:9px;align-items:center}
 @media(max-width:560px){#page-people .person-contact-row{gap:5px}#page-people .person-contact-row .assign-pill{font-size:10px;padding:4px 6px}}
+
+/* 2026-10-21 consolidated roster + planner + reference map */
+#page-people .person-actions button{font-size:14px;font-weight:800;min-height:39px}
+#page-areas .assigned-area-inline{display:inline-block;color:var(--area-color);border:1px solid var(--area-color);background:color-mix(in srgb,var(--area-color) 12%,white);border-radius:6px;padding:2px 6px;font-weight:800}
+.planner-focus-head .planner-focus-badge{color:var(--selected-area-color);border:2px solid var(--selected-area-color);background:color-mix(in srgb,var(--selected-area-color) 14%,white);font-weight:900;padding:5px 12px}
+#plannerFocus.planner-focus{position:relative;padding-bottom:48px}
+#plannerRouteInline.planner-route-inline{position:absolute;bottom:9px;right:12px;margin:0;max-width:calc(100% - 24px);background:#dea71e;border:2px solid #fff;color:#fff;border-radius:8px;padding:6px 10px;text-align:right;font-weight:850}
+#page-planner .planner-shifts .shift{display:flex;align-items:center;justify-content:center;gap:7px}
+#page-planner .planner-shifts .legend-pin{height:22px;width:22px;font-size:13px}
+#areaTeamPicker.team-picker[hidden]{display:none!important}
+#page-planner .planner-assign-btn{font-size:13px;font-weight:850}
+#page-planner .visit-divider .visit-area-buttons{flex-basis:100%}
+#page-map .map-box{isolation:isolate}
+#page-map .map-marker.volunteer{background:#ed8120!important;color:white}
+#page-map .map-switches .legend-pin.volunteer{background:#ed8120}
