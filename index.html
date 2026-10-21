@@ -10,7 +10,7 @@
 <link rel="manifest" href="./manifest.webmanifest" />
 <link rel="icon" type="image/svg+xml" href="./assets/icon.svg" />
 <link rel="apple-touch-icon" href="./assets/icon-192.png" />
-<link rel="stylesheet" href="./styles.css?v=116" />
+<link rel="stylesheet" href="./styles.css?v=117" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.css" />
 <title>永康十里｜志工與垃圾車跟巡 PWA</title>
 </head>
@@ -22,7 +22,7 @@
 </header>
 <div id="modeBanner" class="mode-banner" hidden></div>
 
-<nav class="desktop-nav" id="desktopNav" aria-label="工作分頁"><button data-page="map" class="on">① 地圖</button><button data-page="areas">② 服務分區</button><button data-page="planner">③ 跟巡排班</button><button data-page="people">④ 名冊</button></nav>
+<nav class="desktop-nav" id="desktopNav" aria-label="工作分頁"><button data-page="map" class="on">① 地圖</button><button data-page="areas">② 服務分區</button><button data-page="planner">③ 跟巡排班</button><button data-page="people">④ 名冊</button><button data-page="reports">⑤ 任務</button></nav>
 <main>
 <section id="page-areas" class="page" aria-label="分配服務里">
  <div class="section-heading"><div><h1>服務里分配</h1></div><div class="inline-actions"></div></div>
@@ -45,7 +45,7 @@
 <div class="planner-route-picker"><strong>選擇車次</strong><div id="routeButtons" class="route-buttons" aria-label="本時段車次清單"></div></div>
 </div>
  
- <div class="surface combined-visit"><div id="areaTeamPicker" class="team-picker" hidden></div><div class="visit-divider"><h2>依車次順序拜訪</h2><button class="smallbtn planner-assign-btn" id="plannerAssignArea" type="button">指派跟巡人員</button><div id="visitAreaButtons" class="visit-area-buttons"></div></div><div id="stopList" class="stop-list"></div></div>
+ <div class="surface combined-visit"><div id="areaTeamPicker" class="team-picker" hidden></div><div class="visit-divider"><h2>依車次順序拜訪</h2><div id="visitMissingNotice" class="visit-missing-notice"></div><button class="smallbtn planner-assign-btn" id="plannerAssignArea" type="button" hidden>指派跟巡人員</button><div id="visitAreaButtons" class="visit-area-buttons"></div></div><div id="stopList" class="stop-list"></div></div>
  </div>
 </section>
 <section id="page-map" class="page map-page map-v04-reference active" aria-label="地圖檢視">
@@ -65,12 +65,13 @@
  <div class="surface filter-bar"><input id="peopleSearch" type="search" placeholder="搜尋志工姓名、地址或電話" autocomplete="off" /><div class="select-pair"><select id="peopleAreaFilter" aria-label="篩選服務里別"></select><select id="peopleFilter" aria-label="篩選分配狀態"><option value="assigned">已分配</option><option value="pending">待分配</option><option value="all">全部人員</option></select></div></div>
  <div id="rosterLocked" class="access-notice" hidden><strong>正式名冊需授權登入</strong><p>地圖與公開清運站點可以直接瀏覽；姓名、電話、地址及分派操作必須以管理員身分登入。</p><button class="primary" id="loginFromRoster" type="button">管理員登入</button></div><div id="peopleList" class="people-list"></div>
 </section>
+<section id="page-reports" class="page" aria-label="管理員任務回報"><div class="section-heading"><div><h1>任務回報</h1><p>各里別跟巡成員及完成度，資料由後端同步</p></div></div><div id="reportsContent" class="people-list"></div></section>
 </main>
-<nav class="bottom-nav" aria-label="手機功能列"><button data-page="map" class="on"><i>◉</i><span>地圖</span></button><button data-page="areas"><i>⌖</i><span>服務分區</span></button><button data-page="planner"><i>🚛</i><span>跟巡排班</span></button><button data-page="people"><i>☷</i><span>名冊</span></button></nav>
+<nav class="bottom-nav" aria-label="手機功能列"><button data-page="map" class="on"><i>◉</i><span>地圖</span></button><button data-page="areas"><i>⌖</i><span>服務分區</span></button><button data-page="planner"><i>🚛</i><span>跟巡排班</span></button><button data-page="people"><i>☷</i><span>名冊</span></button><button data-page="reports"><i>✓</i><span>任務</span></button></nav>
 </div>
 <div class="modal-backdrop" id="modal" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="sheet-handle"></div><div class="sheet-head"><h2 id="modalTitle">選擇志工</h2><button id="closeModal" class="iconbtn light" aria-label="關閉">✕</button></div><div id="modalBody" class="sheet-body"></div></div></div>
 <div id="toast" class="toast" role="status" hidden></div>
 <script defer src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.js"></script>
-<script defer src="./app.js?v=116"></script>
+<script defer src="./app.js?v=117"></script>
 </body>
 </html>
