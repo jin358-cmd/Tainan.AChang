@@ -187,7 +187,7 @@ function showAuth(){
  liveRole='';liveMemberId='';state=makeState([]);liveTasks=[];
  for(const selector of ['#peopleList','#pendingMembers','#areaMembers','#volunteerSchedules','#areaPopup','#modalBody']){const el=$(selector);if(el)el.innerHTML=''}
  $('#modal').hidden=true;
- $('#secureLogin').hidden=false;$('#app').hidden=true;
+ $('#secureLogin').hidden=true;$('#app').hidden=false;
  $('.bottom-nav,.desktop-nav').forEach(x=>x.hidden=false);
  $('#volunteerLoginBtn').hidden=true;$('#volunteerLoginBtn').textContent='🔐 登入';$('#secureLogout').hidden=true;const adminTop=$('#adminHeaderAction');if(adminTop)adminTop.hidden=true;
  document.getElementById('addPerson') && ($('#addPerson').hidden=true);$('#addMember').hidden=true;$('#openRosterAuthorization').hidden=true;
@@ -211,7 +211,7 @@ async function authStart(){try{
  $('#secureLogin').hidden=true;$('#app').hidden=false;$('#accountBadge')?.remove();const adminTop=$('#adminHeaderAction');if(adminTop){adminTop.hidden=liveRole!=='admin';}updateAccessControls();
  if(liveRole==='admin'){
   $('#volunteerLoginBtn').hidden=true;
-  $('.bottom-nav,.desktop-nav').forEach(x=>x.hidden=false);
+  $$('.bottom-nav,.desktop-nav').forEach(x=>x.hidden=false);
   await refreshOnline();go('map');
  }else{
   $('#volunteerLoginBtn').hidden=true;
