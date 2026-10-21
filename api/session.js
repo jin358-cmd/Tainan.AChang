@@ -15,6 +15,6 @@ module.exports=L.run(async(req,res)=>{
  }
  if(!response.ok||!response.data?.access_token)L.problem(response.status===429?429:response.status===503?503:401,response.status===429?'PIN 嘗試次數過多，請 15 分鐘後再試':response.status===503?'登入安全服務暫時無法使用':'帳號或 PIN 錯誤，或會員尚未核准');
  const r=response;
- const p=await L.accountFromToken(r.data.access_token);L.setSession(res,r.data);await L.deviceCheck(req,p,p.token,true);
+ const p=await L.accountFromToken(r.data.access_token);await L.deviceCheck(req,p,p.token,true);L.setSession(res,r.data);
  L.json(res,200,{role:p.role,memberId:p.member_id,accountId:p.id});
 });
