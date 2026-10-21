@@ -25,7 +25,7 @@
 <nav class="desktop-nav" id="desktopNav" aria-label="工作分頁"><button data-page="map">① 地圖</button><button data-page="areas">② 服務分區</button><button data-page="planner">③ 跟巡排班</button><button data-page="reports">④ 任務</button><button data-page="people">⑤ 名冊</button></nav>
 <main>
 <section id="page-map" class="page map-page map-v04-reference" aria-label="地圖檢視">
- <div class="section-heading"><div><h1>十里服務地圖</h1><p>MapLibre · 臺南市永康區</p></div></div>
+ <div class="section-heading"><div><h1>永康十里服務地圖</h1></div></div>
  <div class="map-switches" aria-label="圖層篩選"><label><input id="layerVolunteer" type="checkbox" checked /> <span class="legend-pin volunteer">👤</span>志工服務</label><label><input id="layerDay" type="checkbox" /> <span class="legend-pin day">☀</span>日間</label><label><input id="layerNight" type="checkbox" /> <span class="legend-pin night">☾</span>夜間</label></div>
  <div class="map-box" id="mapBox"><div id="mapLibre" aria-label="永康十里地圖"></div><div id="mapFallback" class="map-fallback" hidden></div><div id="areaPopup" class="area-popup map-attached-popup" hidden></div><div class="map-float"> <span id="mapLegendStatus">里別分區參考</span></div></div>
  <p class="map-foot">© OpenStreetMap contributors | MapLibre。未定位站點以里別數量顯示，並非實際停靠位置。人工標點須現場核對。</p>
@@ -40,7 +40,7 @@
 </div><div id="areaPageNo" class="pager-indicator" aria-label="目前里別分頁">1 / 3</div>
  <div class="two-col"><article class="surface"><div class="surface-head area-heading-row"><div class="area-heading-main"><h2 id="areaName" class="area-main-name">復興里</h2><span id="areaAssignedCount" class="count-tag">0 人</span></div><button id="clearArea" class="smallbtn danger" type="button">清除此里分配</button></div>
 <div class="area-summary-wrap"><div class="summary" aria-label="工作統計"><span>志工 <b id="statTotal">0</b></span><span>已分配 <b id="statAssigned">0</b></span><span>待分配 <b id="statPending">0</b></span><span>已排巡點 <b id="statStops">0</b></span></div></div>
-<div id="areaMembers" class="member-stack" hidden></div></article><article class="surface"><div class="surface-head"><h2>待分配人員</h2><span id="pendingCount" class="count-tag warm">0</span></div><div id="pendingMembers" class="member-stack"></div></article></div>
+<div id="areaMembers" class="member-stack" hidden></div></article><article class="surface"><div class="surface-head"><h2>待分配人員 <span id="pendingCount" class="count-tag warm">0人</span></h2></div><div id="pendingMembers" class="member-stack"></div></article></div>
 </section>
 <section id="page-planner" class="page" aria-label="垃圾車跟巡排班">
  <div class="section-heading"><div><h1>垃圾車跟巡</h1><p>依里別、車次與站點安排。</p></div></div>
