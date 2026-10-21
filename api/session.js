@@ -3,7 +3,7 @@ const L=require('../lib/server');
 module.exports=L.run(async(req,res)=>{
  L.method(req,['GET','POST','DELETE']);
  if(req.method==='DELETE'){L.clearCookies(res);return L.json(res,200,{ok:true})}
- if(req.method==='GET'){const p=await L.session(req,res);return L.json(res,200,{role:p.role,memberId:p.member_id,accountId:p.id})}
+ if(req.method==='GET'){const p=await L.session(req,res);let displayName='';if(p.member_id){try{const q=await L.rest('members?id=eq.'+encodeURIComponent(p.member_id)+'&select=display_name&limit=1',p.token);if(q.ok)displayName=String(q.data?.[0]?.display_name||'')}catch{}}return L.json(res,200,{role:p.role,memberId:p.member_id,accountId:p.id,displayName})}
  const b=L.body(req),identity=L.checkText(String(b.login||b.phone||''),'登入帳號',254),password=L.checkText(b.password,'密碼',250);
  let response;
  if(identity.includes('@')){
