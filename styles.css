@@ -341,3 +341,6 @@
 #page-reports .task-demo summary,#page-reports .task-day summary{cursor:pointer;font-weight:850;padding:7px 3px}
 #page-reports .task-demo{border-style:dashed;background:#f6f8fb}
 #page-reports .task-preview-row{display:flex;justify-content:space-between;align-items:center;gap:9px;flex-wrap:wrap;border-left:4px solid var(--area-color,#cbd5e1);padding:9px 11px;background:#fff;border-radius:7px;margin:6px 0;font-size:12px}
+
+/* Settings order and prominent install control */
+.install-tip .install-app-large{display:block;width:100%;min-height:48px;margin:10px 0 12px;padding:12px 18px;font-size:16px;font-weight:850;background:#0b7c83;color:white;border-radius:10px}
