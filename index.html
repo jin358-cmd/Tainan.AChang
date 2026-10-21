@@ -10,7 +10,7 @@
 <link rel="manifest" href="./manifest.webmanifest" />
 <link rel="icon" type="image/svg+xml" href="./assets/icon.svg" />
 <link rel="apple-touch-icon" href="./assets/icon-192.png" />
-<link rel="stylesheet" href="./styles.css?v=117" />
+<link rel="stylesheet" href="./styles.css?v=118" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.css" />
 <title>永康十里｜志工與垃圾車跟巡 PWA</title>
 </head>
@@ -18,7 +18,7 @@
 <div id="app">
 <header class="topbar">
  <div class="brand"><div class="brand-icon">⌖</div><div><strong>永康十里</strong><span>志工分區 · 跟巡排班</span></div></div>
- <div class="top-actions"><button id="volunteerLoginBtn" class="volunteer-login-btn" type="button">🔐 登入</button><button id="secureLogout" class="volunteer-login-btn" type="button" hidden>登出</button><span id="savedPill" class="saved-pill" hidden></span><button id="installBtn" class="iconbtn" title="安裝手機 App" aria-label="安裝手機 App" hidden>⬇</button><button id="menuBtn" class="iconbtn" title="匯入／備份" aria-label="匯入及備份">⋯</button></div>
+ <div class="top-actions"><button id="volunteerLoginBtn" class="volunteer-login-btn" type="button" hidden style="display:none!important" aria-hidden="true">🔐 登入</button><button id="secureLogout" class="volunteer-login-btn" type="button" hidden>登出</button><span id="savedPill" class="saved-pill" hidden></span><button id="installBtn" class="iconbtn" title="安裝手機 App" aria-label="安裝手機 App" hidden style="display:none!important">⬇</button><button id="menuBtn" class="iconbtn" title="匯入／備份" aria-label="匯入及備份">⋯</button></div>
 </header>
 <div id="modeBanner" class="mode-banner" hidden></div>
 
@@ -72,6 +72,6 @@
 <div class="modal-backdrop" id="modal" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="sheet-handle"></div><div class="sheet-head"><h2 id="modalTitle">選擇志工</h2><button id="closeModal" class="iconbtn light" aria-label="關閉">✕</button></div><div id="modalBody" class="sheet-body"></div></div></div>
 <div id="toast" class="toast" role="status" hidden></div>
 <script defer src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.js"></script>
-<script defer src="./app.js?v=117"></script>
+<script defer src="./app.js?v=118"></script>
 </body>
 </html>
