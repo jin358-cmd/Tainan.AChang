@@ -323,3 +323,14 @@
 .install-tip .install-app-large{display:block;width:100%;min-height:46px;margin:10px 0 12px;padding:11px 18px;background:#087f81;color:white;border-radius:10px;font-size:16px;font-weight:850}
 
 #volunteerLoginBtn:not([hidden]){display:inline-flex!important;align-items:center;justify-content:center;background:#edf5fc;color:#173b53;padding:8px 12px;border-radius:9px;font-size:13px;font-weight:850}
+
+/* 2026-10-21 dedicated v0.4 map reconstruction: map surface isolation */
+#page-map .map-box{position:relative;isolation:isolate;overflow:hidden;background:#eaf2f6;min-height:420px}
+#page-map #mapLibre{position:absolute;inset:0;height:100%;width:100%;display:block;z-index:1}
+#page-map #mapFallback[hidden]{display:none!important}
+#page-map #mapFallback:not([hidden]){display:block!important;z-index:2}
+#page-map #areaPopup{z-index:10}
+#page-map .map-float{z-index:4}
+#page-map .maplibregl-canvas{width:100%;height:100%}
+#page-map .map-switches .legend-pin.volunteer{background:#ed8120}
+#page-map .map-marker.volunteer{background:#ed8120!important;color:#fff!important}
