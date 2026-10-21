@@ -10,7 +10,7 @@
 <link rel="manifest" href="./manifest.webmanifest" />
 <link rel="icon" type="image/svg+xml" href="./assets/icon.svg" />
 <link rel="apple-touch-icon" href="./assets/icon-192.png" />
-<link rel="stylesheet" href="./styles.css?v=124" />
+<link rel="stylesheet" href="./styles.css?v=125" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.css" />
 <title>永康十里｜志工與垃圾車跟巡 PWA</title>
 </head>
@@ -22,7 +22,7 @@
 </header>
 <div id="modeBanner" class="mode-banner" hidden></div>
 
-<nav class="desktop-nav" id="desktopNav" aria-label="工作分頁"><button data-page="map">① 地圖</button><button data-page="reports">② 任務</button><button data-page="areas">② 服務分區</button><button data-page="planner">③ 跟巡排班</button><button data-page="people">④ 名冊</button></nav>
+<nav class="desktop-nav" id="desktopNav" aria-label="工作分頁"><button data-page="map">① 地圖</button><button data-page="areas">② 服務分區</button><button data-page="planner">③ 跟巡排班</button><button data-page="reports">④ 任務</button><button data-page="people">⑤ 名冊</button></nav>
 <main>
 <section id="page-map" class="page map-page map-v04-reference" aria-label="地圖檢視">
  <div class="section-heading"><div><h1>十里服務地圖</h1><p>MapLibre · 臺南市永康區</p></div></div>
@@ -68,11 +68,11 @@
 </section>
 <section id="page-reports" class="page" aria-label="管理員任務回報"><div class="section-heading"><div><h1>任務回報</h1><p>各里別跟巡成員及完成度，資料由後端同步</p></div></div><div id="reportsContent" class="people-list"></div></section>
 </main>
-<nav class="bottom-nav" aria-label="手機功能列"><button data-page="map"><i>◉</i><span>地圖</span></button><button data-page="reports"><i>✓</i><span>任務</span></button><button data-page="areas"><i>⌖</i><span>服務分區</span></button><button data-page="planner"><i>🚛</i><span>跟巡排班</span></button><button data-page="people"><i>☷</i><span>名冊</span></button></nav>
+<nav class="bottom-nav" aria-label="手機功能列"><button data-page="map"><i>◉</i><span>地圖</span></button><button data-page="areas"><i>⌖</i><span>服務分區</span></button><button data-page="planner"><i>🚛</i><span>跟巡排班</span></button><button data-page="reports"><i>✓</i><span>任務</span></button><button data-page="people"><i>☷</i><span>名冊</span></button></nav>
 </div>
 <div class="modal-backdrop" id="modal" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="sheet-handle"></div><div class="sheet-head"><h2 id="modalTitle">選擇志工</h2><button id="closeModal" class="iconbtn light" aria-label="關閉">✕</button></div><div id="modalBody" class="sheet-body"></div></div></div>
 <div id="toast" class="toast" role="status" hidden></div>
 
-<script defer src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.js"></script><script defer src="./app.js?v=124"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.js"></script><script defer src="./app.js?v=125"></script>
 </body>
 </html>
