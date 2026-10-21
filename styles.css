@@ -315,3 +315,6 @@
 .device-pending{filter:grayscale(1);opacity:.45}
 .device-approved{filter:none;opacity:1}
 #adminHeaderAction:not([hidden]){display:inline-flex!important;align-items:center;background:#e7f5fa;color:#134965;border-radius:8px;padding:8px 11px;font-weight:850}
+
+/* Task navigation and restored v0.4 map surface */
+#page-reports .volunteer-task{background:#fff;padding:13px;border:1px solid #d8e6ec;border-radius:12px;margin:9px 0}#page-reports .volunteer-task-top{display:flex;justify-content:space-between;gap:8px}#page-map .map-box{isolation:isolate}#page-map .map-fallback[hidden]{display:none!important}#page-map .map-fallback:not([hidden]){display:block;z-index:2}#page-map #areaPopup{z-index:5}
