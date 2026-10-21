@@ -334,6 +334,10 @@
 #page-map .maplibregl-canvas{width:100%;height:100%}
 #page-map .map-switches .legend-pin.volunteer{background:#ed8120}
 #page-map .map-marker.volunteer{background:#ed8120!important;color:#fff!important}
+#page-map .map-recovery{position:absolute;z-index:3;left:50%;bottom:42px;transform:translateX(-50%);display:flex;align-items:center;gap:9px;max-width:calc(100% - 24px);padding:9px 11px;border:1px solid #b9cdd7;border-radius:10px;background:#fffffff2;box-shadow:0 4px 18px #18384f26;color:#36576c;font-size:12px}
+#page-map .map-recovery strong{white-space:nowrap}
+#page-map .map-retry{flex:none;padding:8px 11px;border-radius:8px;background:#0b7f82;color:#fff;font-weight:850}
+@media(max-width:560px){#page-map .map-recovery{bottom:38px;align-items:stretch;flex-direction:column;text-align:center;width:min(300px,calc(100% - 24px))}}
 
 /* Task report read-only, date accordion and service area labels */
 #page-areas .member .assigned-area-inline{color:#b91c32;border:1px solid #d53447;background:#fff7f7;padding:2px 7px;border-radius:5px;font-size:12px;white-space:nowrap}
