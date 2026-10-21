@@ -321,3 +321,5 @@
 
 /* Install control and role-safe shared UI */
 .install-tip .install-app-large{display:block;width:100%;min-height:46px;margin:10px 0 12px;padding:11px 18px;background:#087f81;color:white;border-radius:10px;font-size:16px;font-weight:850}
+
+#volunteerLoginBtn:not([hidden]){display:inline-flex!important;align-items:center;justify-content:center;background:#edf5fc;color:#173b53;padding:8px 12px;border-radius:9px;font-size:13px;font-weight:850}
