@@ -348,3 +348,9 @@
 /* Mobile map legend one row, task completion state */
 @media(max-width:640px){#page-map .map-switches{display:flex!important;flex-wrap:nowrap!important;gap:5px!important;overflow-x:auto;scrollbar-width:none}#page-map .map-switches label{flex:1 0 auto;min-width:0;padding:7px 6px;font-size:12px;gap:4px;white-space:nowrap}#page-map .map-switches input{width:14px;height:14px;flex:none}#page-map .map-switches .legend-pin{width:17px;height:17px;font-size:11px}}
 #page-reports .task-progress-status{position:relative;display:inline-flex;align-items:center;justify-content:center;min-width:132px;min-height:29px;overflow:hidden;border-radius:7px;background:#e5ebee;color:#364958;border:1px solid #c9d5db;font-weight:850}#page-reports .task-progress-fill{position:absolute;inset:0 auto 0 0;background:#55bb83;opacity:.75;transition:width .2s}#page-reports .task-progress-label{position:relative;z-index:1;padding:4px 8px;white-space:nowrap}#page-reports .task-progress-status.is-complete{background:#e4f8eb;color:#106c39;border-color:#36a46d}#page-reports .task-progress-status.is-complete .task-progress-fill{background:#8fe0ad;opacity:1}
+
+/* Mobile roster badge below telephone, with clearer typography */
+#page-people .person-contact-row{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+#page-people .person-contact-row .assign-pill{order:2;font-size:15px;font-weight:800;padding:5px 10px}
+#page-people .person-contact-row .roster-phone{order:1}
+#page-areas #pendingCount{font-weight:850;font-size:14px}
