@@ -298,3 +298,8 @@
 #page-planner .planner-assign-btn[hidden]{display:none!important}
 #page-planner .visit-divider{align-items:center}#visitMissingNotice{display:flex;align-items:center;flex:1}#visitMissingNotice .pending-region-summary{margin:0;padding:6px 10px;font-size:12px}
 .task-report{border-left:5px solid var(--area-color)}.task-report-heading,.task-report-progress{display:flex;justify-content:space-between;gap:8px}.task-report-heading strong{color:var(--area-color)}.task-report-progress{font-size:12px;margin:10px 0 4px}.task-report progress{width:100%;accent-color:var(--area-color)}
+
+/* Rebuild map as deterministic offline geometry layer from v0.4 reference */
+#page-map .map-fallback{display:block;z-index:1;background:#eaf2f6}#page-map .offline-map-svg{width:100%;height:100%;touch-action:manipulation;cursor:pointer}#page-map .offline-badge{cursor:pointer}#page-map .map-float{z-index:3}#page-map #areaPopup{z-index:5}#volunteerLoginBtn,#installBtn{display:none!important}
+#page-planner .route-buttons button.on,#page-planner .route-buttons button.active{background:#0b817e;color:#fff;border-color:#0b817e}
+#visitAreaButtons .team-areas{justify-content:flex-start!important}#visitAreaButtons{display:flex;justify-content:flex-start!important}
