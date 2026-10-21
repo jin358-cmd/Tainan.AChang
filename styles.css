@@ -334,3 +334,10 @@
 #page-map .maplibregl-canvas{width:100%;height:100%}
 #page-map .map-switches .legend-pin.volunteer{background:#ed8120}
 #page-map .map-marker.volunteer{background:#ed8120!important;color:#fff!important}
+
+/* Task report read-only, date accordion and service area labels */
+#page-areas .member .assigned-area-inline{color:#b91c32;border:1px solid #d53447;background:#fff7f7;padding:2px 7px;border-radius:5px;font-size:12px;white-space:nowrap}
+#page-reports .task-report-toolbar{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:8px 0}#page-reports .task-report-toolbar small{color:#657d8e}
+#page-reports .task-demo summary,#page-reports .task-day summary{cursor:pointer;font-weight:850;padding:7px 3px}
+#page-reports .task-demo{border-style:dashed;background:#f6f8fb}
+#page-reports .task-preview-row{display:flex;justify-content:space-between;align-items:center;gap:9px;flex-wrap:wrap;border-left:4px solid var(--area-color,#cbd5e1);padding:9px 11px;background:#fff;border-radius:7px;margin:6px 0;font-size:12px}
