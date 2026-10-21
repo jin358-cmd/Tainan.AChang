@@ -10,7 +10,7 @@
 <link rel="manifest" href="./manifest.webmanifest" />
 <link rel="icon" type="image/svg+xml" href="./assets/icon.svg" />
 <link rel="apple-touch-icon" href="./assets/icon-192.png" />
-<link rel="stylesheet" href="./styles.css?v=115" />
+<link rel="stylesheet" href="./styles.css?v=116" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.css" />
 <title>永康十里｜志工與垃圾車跟巡 PWA</title>
 </head>
@@ -40,12 +40,12 @@
  <div id="plannerGate" class="gate" hidden><div class="gate-symbol">☝</div><strong>請先分配服務里</strong><p>至少指定一名志工的服務里，才可安排車次與拜訪站點。</p><button class="primary" data-go="areas">前往服務里分配</button></div>
  <div id="plannerContent"><div id="plannerFocus" class="planner-focus surface"></div><div class="surface compact-controls planner-first">
 <label class="planner-field"><span>拜訪日期</span><input type="date" id="planDate" /></label>
-<label class="planner-field"><span>指定里別</span><select id="plannerAreaSelect" aria-label="選擇跟巡里別"><option value="all">全部十里</option></select></label>
-<div class="planner-shifts"><strong>清運時段</strong><div class="shift-row"><button class="shift on" data-shift="日間">☀ 日間</button><button class="shift" data-shift="夜間">☾ 夜間</button></div></div>
+<label class="planner-field"><span>指定里別</span><select id="plannerAreaSelect" aria-label="選擇跟巡里別"><option value="all">全部</option></select></label>
+<div class="planner-shifts"><strong>清運時段</strong><div class="shift-row"><button class="shift on" data-shift="日間"><span class="legend-pin day">☀</span> 日間</button><button class="shift" data-shift="夜間"><span class="legend-pin night">☾</span> 夜間</button></div></div>
 <div class="planner-route-picker"><strong>選擇車次</strong><div id="routeButtons" class="route-buttons" aria-label="本時段車次清單"></div></div>
 </div>
  
- <div class="surface combined-visit"><div id="areaTeamPicker" class="team-picker"></div><div class="visit-divider"><h2>依車次順序拜訪</h2><div id="visitAreaButtons" class="visit-area-buttons"></div></div><div id="stopList" class="stop-list"></div></div>
+ <div class="surface combined-visit"><div id="areaTeamPicker" class="team-picker" hidden></div><div class="visit-divider"><h2>依車次順序拜訪</h2><button class="smallbtn planner-assign-btn" id="plannerAssignArea" type="button">指派跟巡人員</button><div id="visitAreaButtons" class="visit-area-buttons"></div></div><div id="stopList" class="stop-list"></div></div>
  </div>
 </section>
 <section id="page-map" class="page map-page map-v04-reference active" aria-label="地圖檢視">
@@ -71,6 +71,6 @@
 <div class="modal-backdrop" id="modal" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="sheet-handle"></div><div class="sheet-head"><h2 id="modalTitle">選擇志工</h2><button id="closeModal" class="iconbtn light" aria-label="關閉">✕</button></div><div id="modalBody" class="sheet-body"></div></div></div>
 <div id="toast" class="toast" role="status" hidden></div>
 <script defer src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.js"></script>
-<script defer src="./app.js?v=115"></script>
+<script defer src="./app.js?v=116"></script>
 </body>
 </html>
