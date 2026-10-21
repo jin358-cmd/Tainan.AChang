@@ -10,7 +10,7 @@
 <link rel="manifest" href="./manifest.webmanifest" />
 <link rel="icon" type="image/svg+xml" href="./assets/icon.svg" />
 <link rel="apple-touch-icon" href="./assets/icon-192.png" />
-<link rel="stylesheet" href="./styles.css?v=121" />
+<link rel="stylesheet" href="./styles.css?v=122" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.css" />
 <title>永康十里｜志工與垃圾車跟巡 PWA</title>
 </head>
@@ -63,7 +63,7 @@
 </section>
 <section id="page-people" class="page" aria-label="人員名冊">
  <div class="section-heading"><div><h1>志工名冊</h1><p>會員授權及志工資料由管理員管理</p></div><div class="roster-header-actions"><button id="openRosterAuthorization" class="smallbtn roster-action-btn" type="button" hidden>🔐 會員授權</button><button id="addMember" class="primary roster-action-btn roster-add-btn" type="button" hidden>＋ 新增會員</button></div></div>
- <div class="surface filter-bar"><input id="peopleSearch" type="search" placeholder="搜尋志工姓名、地址或電話" autocomplete="off" /><div class="select-pair"><select id="peopleAreaFilter" aria-label="篩選服務里別"></select><select id="peopleFilter" aria-label="篩選分配狀態"><option value="assigned">已分配</option><option value="pending">待分配</option><option value="all">全部人員</option></select></div></div>
+ <div class="surface filter-bar"><input id="peopleSearch" type="search" placeholder="搜尋志工姓名、地址或電話" autocomplete="off" /><div class="select-pair"><select id="peopleAreaFilter" aria-label="篩選服務里別"></select><select id="peopleFilter" aria-label="篩選分配狀態"><option value="assigned">已分配</option><option value="pending">待分配</option><option value="all">全部人員</option><option value="leader">組長</option></select></div></div>
  <div id="rosterLocked" class="access-notice" hidden><strong>正式名冊需授權登入</strong><p>地圖與公開清運站點可以直接瀏覽；姓名、電話、地址及分派操作必須以管理員身分登入。</p><button class="primary" id="loginFromRoster" type="button">管理員登入</button></div><div id="peopleList" class="people-list"></div>
 </section>
 <section id="page-reports" class="page" aria-label="管理員任務回報"><div class="section-heading"><div><h1>任務回報</h1><p>各里別跟巡成員及完成度，資料由後端同步</p></div></div><div id="reportsContent" class="people-list"></div></section>
@@ -73,6 +73,6 @@
 <div class="modal-backdrop" id="modal" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="sheet-handle"></div><div class="sheet-head"><h2 id="modalTitle">選擇志工</h2><button id="closeModal" class="iconbtn light" aria-label="關閉">✕</button></div><div id="modalBody" class="sheet-body"></div></div></div>
 <div id="toast" class="toast" role="status" hidden></div>
 
-<script defer src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.js"></script><script defer src="./app.js?v=121"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.js"></script><script defer src="./app.js?v=122"></script>
 </body>
 </html>
