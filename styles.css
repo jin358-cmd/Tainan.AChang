@@ -318,3 +318,6 @@
 
 /* Task navigation and restored v0.4 map surface */
 #page-reports .volunteer-task{background:#fff;padding:13px;border:1px solid #d8e6ec;border-radius:12px;margin:9px 0}#page-reports .volunteer-task-top{display:flex;justify-content:space-between;gap:8px}#page-map .map-box{isolation:isolate}#page-map .map-fallback[hidden]{display:none!important}#page-map .map-fallback:not([hidden]){display:block;z-index:2}#page-map #areaPopup{z-index:5}
+
+/* Install control and role-safe shared UI */
+.install-tip .install-app-large{display:block;width:100%;min-height:46px;margin:10px 0 12px;padding:11px 18px;background:#087f81;color:white;border-radius:10px;font-size:16px;font-weight:850}
