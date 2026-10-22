@@ -157,11 +157,12 @@ function renderVolunteerTaskList(root){
  out+='<div class="task-meta"><span class="task-shift-label">☾ '+esc(t.shift)+'</span><span class="task-meta-separator">｜</span><strong class="task-time-highlight">◷ '+esc(label)+'</strong><span class="task-meta-separator">｜</span><span class="task-meta-count">'+stops.length+' 個停靠點</span><span class="task-meta-separator">｜</span><span class="task-meta-count">1 里</span></div>';
  out+='<div class="task-plate-line"><span class="task-plate"><small>車牌</small> '+esc(t.truck||'未提供')+'</span></div>';
  out+='<div class="task-area">跟巡里別　<strong>'+esc(t.area)+'</strong></div>';
+ out+='<div class="task-group-position"><button type="button" class="task-team-btn" data-vol-group="'+esc([t.visit_date,t.shift,t.truck,t.area].join('|'))+'">查看小組</button></div>';
  for(const [i,stop] of stops.entries()){const a=String(stop.stop_address||'').trim(),hasAddress=!!a;
  const url=hasAddress?'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(a.startsWith('台')||a.startsWith('臺')?a:'臺南市永康區'+a)+'&travelmode=driving':'';
- out+='<div class="task-stop"><strong>第 '+(i+1)+' 個停靠點</strong><div class="task-stop-row"><span>'+esc(a||'地址尚未提供')+'</span>'+(hasAddress?'<a class="task-navigate" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer" aria-label="Google Maps 導航">📍 導航</a>':'')+'</div></div>';
+ out+='<div class="task-stop"><strong>第 '+(i+1)+' 個停靠點</strong><div class="task-stop-row"><span>'+esc(a||'地址尚未提供')+'</span>'+(hasAddress?'<a class="task-navigate" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer" aria-label="Google Maps 導航">📍 導航</a>':'')+(i===stops.length-1?'<button type="button" class="task-complete-btn '+(completed?'is-complete':'is-pending')+'" data-vol-complete-group="'+esc(g.filter(x=>x.status!=='完成').map(x=>x.id).join(','))+'" '+(completed||volunteerTaskCategory==='future'?'disabled':'')+'>'+(completed?'✓ 已完成':volunteerTaskCategory==='future'?'尚未開始':'未完成')+'</button>':'')+'</div></div>';
  }
- out+='<div class="volunteer-task-actions"><button type="button" class="task-team-btn" data-vol-group="'+esc([t.visit_date,t.shift,t.truck,t.area].join('|'))+'">查看小組</button><button type="button" class="task-complete-btn '+(completed?'is-complete':'is-pending')+'" data-vol-complete-group="'+esc(g.filter(x=>x.status!=='完成').map(x=>x.id).join(','))+'" '+(completed||volunteerTaskCategory==='future'?'disabled':'')+'>'+(completed?'✓ 已完成':volunteerTaskCategory==='future'?'尚未開始':volunteerTaskCategory==='history'?'未完成':'未完成')+'</button></div></article>';
+ 
  }
  root.innerHTML=out;
 }
