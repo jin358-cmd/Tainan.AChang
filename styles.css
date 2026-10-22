@@ -439,3 +439,8 @@
 #page-reports .volunteer-task-unified-body .task-stop{padding-top:6px!important;padding-bottom:6px!important}
 #page-reports .volunteer-task-unified-body .task-stop-row{margin-top:4px!important}
 #page-reports .volunteer-task-unified-body .task-stop+.task-stop{margin-top:0!important}
+
+/* Owner alignment: stop status button right edge matches group roster button */
+#page-reports .volunteer-task-unified-body .task-stop{padding-right:0!important}
+#page-reports .volunteer-task-unified-body .task-stop-row>.task-complete-btn{margin-right:0!important}
+@media(max-width:420px){#page-reports .volunteer-task-unified-body .task-stop{padding-right:0!important}}
