@@ -473,3 +473,11 @@
 
 /* Admin-only header, sections and six-person map contact popup */
 body.is-admin-ui #adminHeaderAction{display:none!important}body.is-admin-ui .topbar .signed-in-name{display:inline-flex;align-items:center;color:#fff!important;background:transparent!important;font-weight:750;white-space:nowrap}body.is-admin-ui main>.page>.section-heading{display:none!important}#areaPopup .admin-popup-member{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px;padding:10px 4px;border-bottom:1px solid #deebee}#areaPopup .popup-call-action{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:105px;padding:8px 12px;border-radius:9px;background:#e8f3fe;color:#174e83;font-weight:750;text-decoration:none}#areaPopup .popup-detail-btn{display:block;width:100%;min-height:48px;margin-top:12px;border-radius:9px;font-weight:750}
+
+/* Exact v0.4 admin map attached roster, not the volunteer center modal */
+body.is-admin-ui #page-map #areaPopup.map-attached-popup{position:absolute!important;left:12px!important;top:12px!important;transform:none!important;width:min(355px,calc(100% - 24px))!important;max-height:78%!important;z-index:24!important;padding:12px!important}
+body.is-admin-ui #page-map #areaPopup .popup-contacts{display:grid;gap:9px;max-height:min(54vh,420px);overflow-y:auto}
+body.is-admin-ui #page-map #areaPopup .popup-contact{min-height:55px;padding:8px 10px;gap:10px;background:#ecf9f3;border:1px solid #cfebdf}
+body.is-admin-ui #page-map #areaPopup .popup-contact.leader-row{background:#fff4d8;border:1px solid #e2ba60;order:-1}
+body.is-admin-ui #page-map #areaPopup .admin-call{min-height:46px;min-width:115px;padding:9px 12px;display:inline-flex;align-items:center;justify-content:center;border-radius:9px;background:#e5f2ff;color:#174e83;text-decoration:none;font-weight:800}
+body.is-admin-ui #page-map #areaPopup .popup-detail-btn{margin-top:12px;min-height:48px}
