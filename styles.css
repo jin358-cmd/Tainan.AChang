@@ -425,3 +425,7 @@
 #page-reports .volunteer-task-unified-body .task-stop{padding-left:9px!important;padding-right:9px!important}
 #page-reports .volunteer-task-unified-body .task-stop-row>.task-complete-btn{margin-right:0!important}
 @media(max-width:420px){#page-reports .volunteer-task-unified-body .task-stop{padding-left:7px!important;padding-right:7px!important}}
+
+/* Owner inspection: roster button aligned vertically at plate baseline; keep 44px touch target */
+#page-reports .volunteer-task-unified-body .task-plate-line{align-items:flex-end!important;padding-bottom:3px!important;min-height:52px!important}
+#page-reports .volunteer-task-unified-body .task-plate-line .task-team-btn{align-self:flex-end!important;transform:translateY(5px);min-height:44px!important;margin-top:8px!important;margin-bottom:0!important}
