@@ -160,7 +160,7 @@ function renderVolunteerTaskList(root){
  out+='<div class="task-group-position"><button type="button" class="task-team-btn" data-vol-group="'+esc([t.visit_date,t.shift,t.truck,t.area].join('|'))+'">查看小組</button></div>';
  for(const [i,stop] of stops.entries()){const a=String(stop.stop_address||'').trim(),hasAddress=!!a;
  const url=hasAddress?'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(a.startsWith('台')||a.startsWith('臺')?a:'臺南市永康區'+a)+'&travelmode=driving':'';
- out+='<div class="task-stop"><strong>第 '+(i+1)+' 個停靠點</strong><div class="task-stop-row"><span>'+esc(a||'地址尚未提供')+'</span>'+(hasAddress?'<a class="task-navigate" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer" aria-label="Google Maps 導航">📍 導航</a>':'')+(i===stops.length-1?'<button type="button" class="task-complete-btn '+(completed?'is-complete':'is-pending')+'" data-vol-complete-group="'+esc(g.filter(x=>x.status!=='完成').map(x=>x.id).join(','))+'" '+(completed||volunteerTaskCategory==='future'?'disabled':'')+'>'+(completed?'✓ 已完成':volunteerTaskCategory==='future'?'尚未開始':'未完成')+'</button>':'')+'</div></div>';
+ out+='<div class="task-stop"><strong>第 '+(i+1)+' 個停靠點</strong><div class="task-stop-row"><span>'+esc(a||'地址尚未提供')+'</span>'+(hasAddress?'<a class="task-navigate" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer" aria-label="Google Maps 導航">📍 導航</a>':'')+'<button type="button" class="task-complete-btn '+(stop.status==='完成'?'is-complete':'is-pending')+'" data-vol-complete-group="'+esc(stop.status==='完成'?'':stop.id)+'" '+(stop.status==='完成'||volunteerTaskCategory==='future'?'disabled':'')+'>'+(stop.status==='完成'?'✓ 已完成':volunteerTaskCategory==='future'?'尚未開始':'未完成')+'</button>'+'</div></div>';
  }
  
  }
@@ -171,7 +171,7 @@ async function completeVolunteerGroup(ids){
  const pending=entries.map(id=>liveTasks.find(t=>t.id===id&&t.volunteer_id===liveMemberId)).filter(Boolean);
  if(pending.length!==entries.length)return toast('任務身分不符，請重新整理');
  if(pending.some(t=>taskDateCategory(t)==='future'))return toast('尚未開始的任務不可提前完成');
- if(!confirm('確認此趟跟巡已全部執行完成？'))return;
+ if(!confirm('確認這個停靠點已完成跟巡？'))return;
  if(previewDemoMode){pending.forEach(t=>t.status='完成');renderReports();toast('✓ 測試完成（僅更新畫面範例，不寫入資料庫）');return;}
  try{for(const t of pending)await onlineApi('tasks','PATCH',{id:t.id,status:'完成'});await refreshOnline(true);renderReports();toast('✓ 已回報；請核對管理端同步')}catch(e){await refreshOnline(true);renderReports();toast('部分回報未完成，請重新檢查：'+e.message)}
 }
