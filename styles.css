@@ -401,3 +401,6 @@
 
 /* Smaller lower navigation; preserve accessible touch size */
 @media(max-width:900px){.bottom-nav{padding:2px 5px calc(3px + env(safe-area-inset-bottom))!important}.bottom-nav button{padding:4px 8px!important;min-height:44px!important;gap:1px!important;line-height:1.1!important}.bottom-nav button i{font-size:17px!important;line-height:1!important}.bottom-nav button span{font-size:11px!important;line-height:1.1!important}}
+
+/* Inline roster action with license plate, owner 2026-10-22 */
+#page-reports .task-plate-line{display:flex;align-items:center;flex-wrap:wrap;gap:8px;width:100%}#page-reports .task-plate-line .task-team-btn{margin-left:auto;min-height:40px;padding:7px 10px!important;font-size:12px;white-space:nowrap}#page-reports .task-plate-line .task-plate{flex:0 0 auto}
