@@ -429,3 +429,8 @@
 /* Owner inspection: roster button aligned vertically at plate baseline; keep 44px touch target */
 #page-reports .volunteer-task-unified-body .task-plate-line{align-items:flex-end!important;padding-bottom:3px!important;min-height:52px!important}
 #page-reports .volunteer-task-unified-body .task-plate-line .task-team-btn{align-self:flex-end!important;transform:translateY(5px);min-height:44px!important;margin-top:8px!important;margin-bottom:0!important}
+
+/* Owner final: plate and group roster button equal 44px height, 12px type, same baseline */
+#page-reports .volunteer-task-unified-body .task-plate-line{display:flex!important;align-items:center!important;gap:8px!important;min-height:44px!important;padding:0!important}
+#page-reports .volunteer-task-unified-body .task-plate-line .task-plate,#page-reports .volunteer-task-unified-body .task-plate-line .task-team-btn{box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;height:44px!important;min-height:44px!important;line-height:1.2!important;font-size:12px!important;padding:0 10px!important;vertical-align:middle!important;transform:none!important;margin-top:0!important;margin-bottom:0!important}
+#page-reports .volunteer-task-unified-body .task-plate-line .task-team-btn{margin-left:auto!important}
