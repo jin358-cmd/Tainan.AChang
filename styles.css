@@ -460,3 +460,8 @@
 /* Owner 10/22: vertically centered group roster popup */
 #areaPopup.owner-center-popup{position:fixed!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;width:min(90vw,430px)!important;max-height:75vh!important;overflow-y:auto!important;z-index:1005!important;box-shadow:0 20px 70px #092a4770!important}
 #page-reports .task-complete-btn.is-upcoming{background:#e5e8ec!important;color:#687584!important;border:1px solid #d1d9e1!important}
+
+/* Owner: emphasize TOP-RIGHT overall assignment completion, distinct from each stop */
+#page-reports .volunteer-task-top .task-overall-status{display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+#page-reports .volunteer-task-top .task-overall-status.is-done{color:#137445!important;font-weight:850!important;font-size:14px!important;background:#e6f6eb;border:1px solid #8dceaa;border-radius:8px;padding:5px 8px}
+#page-reports .volunteer-task-top .task-overall-check{display:inline-flex;align-items:center;justify-content:center;background:#16824d;color:#fff;border-radius:50%;width:23px;height:23px;min-width:23px;font-size:18px;font-weight:900;line-height:1}
