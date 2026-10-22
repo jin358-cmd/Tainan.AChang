@@ -420,3 +420,8 @@
 /* Owner fine-tuning: breathing room between rightmost stop status and card edge */
 #page-reports .volunteer-task-unified-body .task-stop-row>.task-complete-btn{margin-right:9px!important}
 @media(max-width:420px){#page-reports .volunteer-task-unified-body .task-stop-row>.task-complete-btn{margin-right:7px!important}}
+
+/* Balanced left/right inset for stop rows per Owner */
+#page-reports .volunteer-task-unified-body .task-stop{padding-left:9px!important;padding-right:9px!important}
+#page-reports .volunteer-task-unified-body .task-stop-row>.task-complete-btn{margin-right:0!important}
+@media(max-width:420px){#page-reports .volunteer-task-unified-body .task-stop{padding-left:7px!important;padding-right:7px!important}}
