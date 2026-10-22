@@ -412,8 +412,7 @@
 #page-reports .volunteer-task-unified-body .volunteer-task-top{padding-bottom:5px}
 #page-reports .volunteer-task-unified-body .task-stop:last-child{border-bottom:0}
 
-/* Owner red-line boundaries: one card per date/shift/truck/area */
-#page-reports .volunteer-task-unified-body{display:block!important;background:#fff!important;padding:0 0 4px!important;border-top:1px solid #dce6ee!important}
-#page-reports .volunteer-task-unified-body article.volunteer-task{display:block!important;position:relative!important;margin:0!important;padding:16px 0 15px!important;border:0!important;border-bottom:3px solid #dc3847!important;border-radius:0!important;background:#fff!important;box-shadow:none!important;overflow:visible!important}
-#page-reports .volunteer-task-unified-body article.volunteer-task:last-of-type{border-bottom:0!important}
-#page-reports .volunteer-task-unified-body article.volunteer-task>.task-stop:last-child{padding-bottom:2px!important}
+/* Owner reference lines are guides, not actual red borders. Keep independent task nodes. */
+#page-reports .volunteer-task-unified-body{display:flex!important;flex-direction:column;gap:12px;background:#f5f8fb!important;padding:12px 5px!important;border-top:1px solid #dce6ee!important}
+#page-reports .volunteer-task-unified-body article.volunteer-task{display:block!important;box-sizing:border-box;flex:none!important;margin:0!important;padding:14px 12px!important;background:white!important;border:1px solid #d4e0e9!important;border-radius:11px!important;box-shadow:0 1px 5px #123a6612!important}
+#page-reports .volunteer-task-unified-body article.volunteer-task:last-of-type{border:1px solid #d4e0e9!important}
