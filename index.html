@@ -10,7 +10,7 @@
 <link rel="manifest" href="./manifest.webmanifest" />
 <link rel="icon" type="image/svg+xml" href="./assets/icon.svg" />
 <link rel="apple-touch-icon" href="./assets/icon-192.png" />
-<link rel="stylesheet" href="./styles.css?v=132" />
+<link rel="stylesheet" href="./styles.css?v=135" />
 <title>永康十里｜志工與垃圾車跟巡 PWA</title>
 </head>
 <body><section class="login-screen" id="secureLogin" hidden><div class="login-splash"><span class="login-mark">⌖</span><div><strong>永康十里</strong><small>志工分區 · 垃圾車跟巡</small></div></div><div class="login-card"><div class="login-top-row"><h1>首次登入／重新驗證</h1><button type="button" id="closeSecureLogin" class="smallbtn" aria-label="返回分頁">返回</button></div><p>管理員使用電子郵件，志工使用核准的手機帳號。</p><form id="secureLoginForm"><label>登入帳號<input name="login" required autocomplete="username" placeholder="管理員 Email／志工手機" autocapitalize="none" spellcheck="false"></label><label>密碼<input name="password" type="password" required autocomplete="current-password" placeholder="已設定的個人密碼"></label><button class="primary wide" type="submit">登入並檢視工作</button></form><button id="googleOAuthLogin" type="button" class="google-login-action"><svg class="google-signin-logo" aria-hidden="true" viewBox="0 0 48 48" width="22" height="22"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.22 5.48-4.68 7.18l7.73 6C44.51 38.01 46.98 31.82 46.98 24.55z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.52 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.15 1.45-4.92 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.97 6.19C6.51 42.62 14.62 48 24 48z"/></svg><span>使用 Google 登入</span></button><p class="mini-note">Google 登入仍須管理員核准與裝置授權。無 Google 帳號可使用手機＋六碼 PIN。</p><p id="authStatus" role="status" aria-live="polite">正在檢查登入狀態…</p><small>志工首次登錄須經管理員核准裝置。帳號和巡點進度由伺服器驗證與保存。</small></div></section>
@@ -68,6 +68,6 @@
 <div class="modal-backdrop" id="modal" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="sheet-handle"></div><div class="sheet-head"><h2 id="modalTitle">選擇志工</h2><button id="closeModal" class="iconbtn light" aria-label="關閉">✕</button></div><div id="modalBody" class="sheet-body"></div></div></div>
 <div id="toast" class="toast" role="status" hidden></div>
 
-<script defer src="./app.js?v=134"></script>
+<script defer src="./app.js?v=135"></script>
 </body>
 </html>
