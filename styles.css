@@ -470,3 +470,6 @@
 #page-reports .volunteer-task-heading .volunteer-area-badge{font-size:15px!important;font-weight:750!important;line-height:1.3!important;padding:5px 10px!important}
 #page-reports .volunteer-task-unified-body .task-plate-line .task-plate{background:#62abd7!important;border:1px solid #4292c4!important;color:#fff!important}
 #page-reports .volunteer-task-unified-body .task-plate-line .task-plate small{color:#fff!important}
+
+/* Admin-only header, sections and six-person map contact popup */
+body.is-admin-ui #adminHeaderAction{display:none!important}body.is-admin-ui .topbar .signed-in-name{display:inline-flex;align-items:center;color:#fff!important;background:transparent!important;font-weight:750;white-space:nowrap}body.is-admin-ui main>.page>.section-heading{display:none!important}#areaPopup .admin-popup-member{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px;padding:10px 4px;border-bottom:1px solid #deebee}#areaPopup .popup-call-action{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:105px;padding:8px 12px;border-radius:9px;background:#e8f3fe;color:#174e83;font-weight:750;text-decoration:none}#areaPopup .popup-detail-btn{display:block;width:100%;min-height:48px;margin-top:12px;border-radius:9px;font-weight:750}
