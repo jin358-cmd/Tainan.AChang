@@ -147,16 +147,16 @@ function renderVolunteerTaskList(root){
  const pending=cats.history.filter(g=>g.some(t=>t.status!=='完成')).length;
  const catLabels={history:'歷史',current:'現有',future:'待執行'};
  const selected=cats[volunteerTaskCategory]||[];
- let out='<h2 class="personal-task-title">今日跟巡任務</h2><div class="volunteer-categories" role="tablist" aria-label="任務時段分類">';
+ let out='<div class="volunteer-task-heading"><h2 class="personal-task-title">今日跟巡任務</h2><div class="volunteer-area-badges">'+[...new Set((cats.current||[]).map(g=>g[0].area))].map(a=>'<span class="volunteer-area-badge" style="--area-color:'+esc(data?.colors?.[a]||'#6b8795')+'">執行里別 '+esc(a)+'</span>').join('')+'</div></div><div class="volunteer-categories" role="tablist" aria-label="任務時段分類">';
  for(const k of ['history','current','future'])out+='<button type="button" role="tab" aria-selected="'+(k===volunteerTaskCategory)+'" class="volunteer-category '+(k===volunteerTaskCategory?'on':'')+'" data-vol-category="'+k+'">'+catLabels[k]+(k==='history'&&pending?'<small>尚未確認 '+pending+' 筆</small>':'<small>'+cats[k].length+' 筆</small>')+'</button>';
  out+='</div>';
  if(!selected.length){root.innerHTML=out+'<div class="empty">目前沒有'+catLabels[volunteerTaskCategory]+'跟巡任務</div>';return;}
  for(const g of selected){const t=g[0],stops=[...new Map(g.map(x=>[x.stop_address||x.id,x])).values()].sort((a,b)=>Number(a.stop_order)-Number(b.stop_order)),completed=g.every(x=>x.status==='完成');
  const eta=String(t.eta||'');const label=eta.match(/\d{1,2}:\d{2}\s*[-~～至]\s*\d{1,2}:\d{2}/)?.[0]||eta||'時間待排定';
  out+='<article class="volunteer-task '+(completed?'completed':'')+'"><div class="volunteer-task-top"><strong>'+esc(t.visit_date)+'</strong><span>'+ (completed?'✓ 已完成':volunteerTaskCategory==='history'?'尚未確認':'待執行')+'</span></div>';
- out+='<div class="task-meta"><span class="task-shift-label">☾ '+esc(t.shift)+'</span><span class="task-meta-separator">｜</span><strong class="task-time-highlight">◷ '+esc(label)+'</strong><span class="task-meta-separator">｜</span><span class="task-meta-count">'+stops.length+' 個停靠點</span><span class="task-meta-separator">｜</span><span class="task-meta-count">1 里</span></div>';
+ out+='<div class="task-meta"><span class="task-shift-label '+(/夜/.test(t.shift)?'shift-night':'shift-day')+'"><span class="shift-symbol" aria-hidden="true">'+(/夜/.test(t.shift)?'☾':'☀')+'</span>'+esc(t.shift)+'</span><strong class="task-time-highlight">◷ '+esc(label)+'</strong><span class="task-meta-count">'+stops.length+' 個停靠點</span><span class="task-meta-count">1 里</span></div>';
  out+='<div class="task-plate-line"><span class="task-plate"><small>車牌</small> '+esc(t.truck||'未提供')+'</span></div>';
- out+='<div class="task-area">跟巡里別　<strong>'+esc(t.area)+'</strong></div>';
+ 
  out+='<div class="task-group-position"><button type="button" class="task-team-btn" data-vol-group="'+esc([t.visit_date,t.shift,t.truck,t.area].join('|'))+'">查看小組</button></div>';
  for(const [i,stop] of stops.entries()){const a=String(stop.stop_address||'').trim(),hasAddress=!!a;
  const url=hasAddress?'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(a.startsWith('台')||a.startsWith('臺')?a:'臺南市永康區'+a)+'&travelmode=driving':'';
