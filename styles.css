@@ -456,3 +456,7 @@
 /* Highlight outstanding historical confirmations without resizing tabs */
 #page-reports .volunteer-category .history-pending-count{display:inline-block!important;background:#fff0b7!important;color:#863b08!important;border:1px solid #e8a42e!important;border-radius:5px;padding:3px 5px!important;font-size:11px!important;font-weight:850!important;white-space:nowrap;line-height:1.25!important}
 #page-reports .volunteer-category.on .history-pending-count{background:#fff3cc!important;color:#72320a!important}
+
+/* Owner 10/22: vertically centered group roster popup */
+#areaPopup.owner-center-popup{position:fixed!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;width:min(90vw,430px)!important;max-height:75vh!important;overflow-y:auto!important;z-index:1005!important;box-shadow:0 20px 70px #092a4770!important}
+#page-reports .task-complete-btn.is-upcoming{background:#e5e8ec!important;color:#687584!important;border:1px solid #d1d9e1!important}
