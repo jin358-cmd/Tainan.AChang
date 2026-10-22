@@ -130,7 +130,12 @@ function startPreviewDemo(){
  previewDemoMode=true;liveRole='volunteer';liveMemberId='PREVIEW-VOL-001';liveDisplayName='測試志工';state=makeState([]);
  const d=today(),y=new Date();y.setDate(y.getDate()-1);const past=[y.getFullYear(),String(y.getMonth()+1).padStart(2,'0'),String(y.getDate()).padStart(2,'0')].join('-');
  const item=(id,date,addr,order)=>({id,volunteer_id:liveMemberId,visit_date:date,shift:'夜間8',truck:'KEN-3201',area:'復華里',eta:'00:00～23:59',stop_order:order,stop_address:addr,status:'待訪'});
- liveTasks=[item('PREVIEW-TODAY-1',d,'中山北路125號',1),item('PREVIEW-TODAY-2',d,'中山北路498號',2),item('PREVIEW-HISTORY-1',past,'富強路二段37號',1)];
+ const afterDays=n=>{const x=new Date();x.setDate(x.getDate()+n);return [x.getFullYear(),String(x.getMonth()+1).padStart(2,'0'),String(x.getDate()).padStart(2,'0')].join('-')};
+ const sample=(id,offset,eta,addr,area,truck='433-UG')=>({...item(id,afterDays(offset),addr,1),eta,area,truck,shift:'夜間'});
+ liveTasks=[item('PREVIEW-TODAY-1',d,'中山北路125號',1),item('PREVIEW-TODAY-2',d,'中山北路498號',2),item('PREVIEW-HISTORY-1',past,'富強路二段37號',1),
+ sample('PREVIEW-FUTURE-1',1,'16:22','復國二路142號','復國里'),
+ sample('PREVIEW-FUTURE-2',2,'16:02','復國一路345號','復國里'),
+ sample('PREVIEW-FUTURE-3',4,'19:30','復華一街24號','復華里')];
  $('#secureLogin').hidden=true;$('#app').hidden=false;updateAccessControls();volunteerTaskCategory='current';go('reports');toast('隔離測試已啟動：所有資料均為範例');
 }
 function myTasks(){return liveTasks.filter(t=>t.volunteer_id===liveMemberId);}
