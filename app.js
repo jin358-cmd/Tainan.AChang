@@ -162,7 +162,7 @@ function renderVolunteerTaskList(root){
  const url=hasAddress?'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(a.startsWith('台')||a.startsWith('臺')?a:'臺南市永康區'+a)+'&travelmode=driving':'';
  out+='<div class="task-stop"><strong>第 '+(i+1)+' 個停靠點</strong><div class="task-stop-row"><span>'+esc(a||'地址尚未提供')+'</span>'+(hasAddress?'<a class="task-navigate" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer" aria-label="Google Maps 導航">📍 導航</a>':'')+'<button type="button" class="task-complete-btn '+(stop.status==='完成'?'is-complete':'is-pending')+'" data-vol-complete-group="'+esc(stop.status==='完成'?'':stop.id)+'" '+(stop.status==='完成'||volunteerTaskCategory==='future'?'disabled':'')+'>'+(stop.status==='完成'?'✓ 已完成':volunteerTaskCategory==='future'?'尚未開始':'未完成')+'</button>'+'</div></div>';
  }
- 
+ out+='</article>';
  }
  root.innerHTML=out+'</div></section>';
 }
