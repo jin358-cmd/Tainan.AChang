@@ -448,3 +448,7 @@
 /* Owner completion state: prominent visible check */
 #page-reports .task-complete-btn.is-complete{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;background:#17834c!important;color:white!important;font-weight:850!important}
 #page-reports .task-complete-btn.is-complete .task-done-check{display:inline-flex;align-items:center;justify-content:center;width:25px;height:25px;flex:0 0 25px;border-radius:50%;background:#fff;color:#147d45;font-size:21px;font-weight:900;line-height:1}
+
+/* Owner: larger license plate text, same 44px button height */
+#page-reports .volunteer-task-unified-body .task-plate-line .task-plate{font-size:15px!important;font-weight:850!important;letter-spacing:.15px!important}
+#page-reports .volunteer-task-unified-body .task-plate-line .task-plate small{font-size:12px!important;font-weight:700!important;margin-right:3px}
