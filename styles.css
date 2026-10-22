@@ -452,3 +452,7 @@
 /* Owner: larger license plate text, same 44px button height */
 #page-reports .volunteer-task-unified-body .task-plate-line .task-plate{font-size:15px!important;font-weight:850!important;letter-spacing:.15px!important}
 #page-reports .volunteer-task-unified-body .task-plate-line .task-plate small{font-size:12px!important;font-weight:700!important;margin-right:3px}
+
+/* Highlight outstanding historical confirmations without resizing tabs */
+#page-reports .volunteer-category .history-pending-count{display:inline-block!important;background:#fff0b7!important;color:#863b08!important;border:1px solid #e8a42e!important;border-radius:5px;padding:3px 5px!important;font-size:11px!important;font-weight:850!important;white-space:nowrap;line-height:1.25!important}
+#page-reports .volunteer-category.on .history-pending-count{background:#fff3cc!important;color:#72320a!important}
