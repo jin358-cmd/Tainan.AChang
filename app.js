@@ -109,6 +109,30 @@ let reportAreaSelected='';
 function taskProgress(done,total){const pct=total?Math.round(done/total*100):0,all=total>0&&done===total;return '<span class="task-progress-status '+(all?'is-complete':'')+'"><span class="task-progress-fill" style="width:'+pct+'%"></span><span class="task-progress-label">'+(all?'✅ ':'')+done+'/'+total+' 已完成</span></span>';}
 function navToStop(t){return 'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent('臺南市永康區'+t.stop_address)+'&travelmode=driving';}
 let volunteerTaskCategory='current';
+
+// Isolated preview UI testing: synthetic-only, no API mutation or production credentials.
+let previewDemoMode=false;
+function previewOnly(){return location.hostname.startsWith('tainan-achang-pin-eipp-test-')||location.hostname==='tainan-achang-pin-eipp-test.vercel.app';}
+function previewLoginButton(){
+ if(!previewOnly())return;
+ const anchor=document.getElementById('secureLoginForm');
+ if(anchor&&!document.getElementById('previewDemoLogin')){
+  const b=document.createElement('button');b.id='previewDemoLogin';b.type='button';b.className='primary wide';b.style.margin='12px 0';b.textContent='進入志工測試介面（免帳密）';b.onclick=startPreviewDemo;anchor.before(b);
+  const note=document.createElement('p');note.className='mini-note';note.textContent='此預覽僅使用範例排班資料，不連線寫入正式資料庫。正式帳號登入尚未驗證。';b.after(note);
+ }
+ const entry=document.getElementById('volunteerLoginBtn');
+ if(entry&&!document.getElementById('previewDemoEntry')){
+  const b=document.createElement('button');b.id='previewDemoEntry';b.type='button';b.className='volunteer-login-btn';b.textContent='測試登入';b.onclick=startPreviewDemo;entry.after(b);
+ }
+}
+function startPreviewDemo(){
+ if(!previewOnly())return;
+ previewDemoMode=true;liveRole='volunteer';liveMemberId='PREVIEW-VOL-001';liveDisplayName='測試志工';state=makeState([]);
+ const d=today(),y=new Date();y.setDate(y.getDate()-1);const past=[y.getFullYear(),String(y.getMonth()+1).padStart(2,'0'),String(y.getDate()).padStart(2,'0')].join('-');
+ const item=(id,date,addr,order)=>({id,volunteer_id:liveMemberId,visit_date:date,shift:'夜間8',truck:'KEN-3201',area:'復華里',eta:'00:00～23:59',stop_order:order,stop_address:addr,status:'待訪'});
+ liveTasks=[item('PREVIEW-TODAY-1',d,'中山北路125號',1),item('PREVIEW-TODAY-2',d,'中山北路498號',2),item('PREVIEW-HISTORY-1',past,'富強路二段37號',1)];
+ $('#secureLogin').hidden=true;$('#app').hidden=false;updateAccessControls();volunteerTaskCategory='current';go('reports');toast('隔離測試已啟動：所有資料均為範例');
+}
 function myTasks(){return liveTasks.filter(t=>t.volunteer_id===liveMemberId);}
 function taskDateCategory(t){
  const date=String(t.visit_date||'');const day=today();
@@ -147,6 +171,7 @@ async function completeVolunteerGroup(ids){
  if(pending.length!==entries.length)return toast('任務身分不符，請重新整理');
  if(pending.some(t=>taskDateCategory(t)==='future'))return toast('尚未開始的任務不可提前完成');
  if(!confirm('確認此趟跟巡已全部執行完成？'))return;
+ if(previewDemoMode){pending.forEach(t=>t.status='完成');renderReports();toast('✓ 測試完成（僅更新畫面範例，不寫入資料庫）');return;}
  try{for(const t of pending)await onlineApi('tasks','PATCH',{id:t.id,status:'完成'});await refreshOnline(true);renderReports();toast('✓ 已回報；請核對管理端同步')}catch(e){await refreshOnline(true);renderReports();toast('部分回報未完成，請重新檢查：'+e.message)}
 }
 let taskSelectedDay='';
@@ -266,9 +291,9 @@ function showAuth(){
  $('#rosterLocked').hidden=false;$('#peopleList').hidden=true;
  $('#clearArea').hidden=true;
  const z=$('#authStatus');z.textContent='首次登入或裝置授權失效時，請輸入已核准的帳號與密碼';
- render();go('areas');
+ render();go('areas');previewLoginButton();
 }
-function openSecureLogin(){if(liveRole==='admin')return openMemberAdmin();$('#secureLogin').hidden=false;$('#secureLoginForm input[name="login"]').focus()}
+function openSecureLogin(){if(liveRole==='admin')return openMemberAdmin();previewLoginButton();$('#secureLogin').hidden=false;$('#secureLoginForm input[name="login"]').focus()}
 function updateAccessControls(){
  const admin=liveRole==='admin';
  for(const b of $$('[data-page]')){const pg=b.dataset.page;if(liveRole==='volunteer'){b.hidden=pg==='areas'||pg==='planner'||pg==='people';b.querySelector('span')&&(b.querySelector('span').textContent=pg==='people'?'小組任務':pg==='reports'?'任務':'地圖');}else{b.hidden=false;if(pg==='people'&&b.querySelector('span'))b.querySelector('span').textContent='名冊';}}
@@ -278,7 +303,7 @@ function updateAccessControls(){
  $('#volunteerLoginBtn').textContent='🔐 登入';const adminTop=$('#adminHeaderAction');if(adminTop)adminTop.hidden=!admin;$('#secureLogout').hidden=!liveRole;const nameNode=$('#signedInName');if(nameNode){nameNode.hidden=!liveRole;nameNode.textContent=liveDisplayName||'登入者';}
 }
 
-async function secureSignOut(){try{await onlineApi('session','DELETE')}catch{}clearInterval(liveTimer);liveTimer=null;liveTasks=[];state=makeState([]);showAuth()}
+async function secureSignOut(){if(previewDemoMode){previewDemoMode=false;clearInterval(liveTimer);liveTimer=null;showAuth();return;}try{await onlineApi('session','DELETE')}catch{}clearInterval(liveTimer);liveTimer=null;liveTasks=[];state=makeState([]);showAuth()}
 async function authStart(){try{
  const session=await onlineApi('session');liveRole=session.role;liveMemberId=session.memberId;liveDisplayName=session.displayName||'';
  $('#secureLogin').hidden=true;$('#app').hidden=false;$('#accountBadge')?.remove();const adminTop=$('#adminHeaderAction');if(adminTop){adminTop.hidden=liveRole!=='admin';}updateAccessControls();
@@ -433,7 +458,7 @@ async function boot(){try{
  const pub=await fetch('./data-public.json',{cache:'no-store'});if(!pub.ok)throw Error('地圖資料無法讀取');data=await pub.json();areas=data.areas;
  state=makeState([]);state.demo=false;areaPage=Math.floor(areas.indexOf(selectedArea)/CARD_PAGE_SIZE);const pa=$('#plannerAreaSelect');pa.innerHTML=areas.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('')+'<option value="all">全部</option>';
  const sel=$('#peopleAreaFilter');sel.innerHTML='<option value="all">全部里別</option>'+areas.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('');
- $('#peopleFilter').value='assigned';bind();showAuth();const googleHandled=await completeGoogleOAuth();if(!googleHandled)await authStart();lastSessionCheck=Date.now();document.addEventListener('visibilitychange',restoreSavedSessionOnResume);window.addEventListener('pageshow',e=>{if(e.persisted)restoreSavedSessionOnResume()});
+ $('#peopleFilter').value='assigned';bind();showAuth();const googleHandled=await completeGoogleOAuth();if(!googleHandled&&!previewOnly())await authStart();if(previewOnly())previewLoginButton();lastSessionCheck=Date.now();document.addEventListener('visibilitychange',restoreSavedSessionOnResume);window.addEventListener('pageshow',e=>{if(e.persisted)restoreSavedSessionOnResume()});
  if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }catch(e){console.error(e);openSecureLogin();$('#authStatus').textContent='網站暫時無法完成登入，請重新整理後再試'}
 }
