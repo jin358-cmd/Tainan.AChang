@@ -120,10 +120,7 @@ function previewLoginButton(){
   const b=document.createElement('button');b.id='previewDemoLogin';b.type='button';b.className='primary wide';b.style.margin='12px 0';b.textContent='進入志工測試介面（免帳密）';b.onclick=startPreviewDemo;anchor.before(b);
   const note=document.createElement('p');note.className='mini-note';note.textContent='此預覽僅使用範例排班資料，不連線寫入正式資料庫。正式帳號登入尚未驗證。';b.after(note);
  }
- const entry=document.getElementById('volunteerLoginBtn');
- if(entry&&!document.getElementById('previewDemoEntry')){
-  const b=document.createElement('button');b.id='previewDemoEntry';b.type='button';b.className='volunteer-login-btn';b.textContent='測試登入';b.onclick=startPreviewDemo;entry.after(b);
- }
+
 }
 function startPreviewDemo(){
  if(!previewOnly())return;
