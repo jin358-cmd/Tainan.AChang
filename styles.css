@@ -404,3 +404,10 @@
 
 /* Inline roster action with license plate, owner 2026-10-22 */
 #page-reports .task-plate-line{display:flex;align-items:center;flex-wrap:wrap;gap:8px;width:100%}#page-reports .task-plate-line .task-team-btn{margin-left:auto;min-height:40px;padding:7px 10px!important;font-size:12px;white-space:nowrap}#page-reports .task-plate-line .task-plate{flex:0 0 auto}
+
+/* Owner P0: each date/shift/truck/area is one visually independent card */
+#page-reports .volunteer-task-unified-body{display:flex;flex-direction:column;gap:12px;background:#f5f8fb;padding:12px 4px 12px!important;border-top:2px solid #dce6ee}
+#page-reports .volunteer-task-unified-body article.volunteer-task{display:block!important;position:relative;box-sizing:border-box;align-self:stretch;flex:none;overflow:visible;min-height:0;margin:0!important;padding:14px 12px!important;border:1px solid #cbdbe8!important;border-radius:12px!important;background:#fff!important;box-shadow:0 2px 6px rgba(15,43,76,.07)!important}
+#page-reports .volunteer-task-unified-body article.volunteer-task:last-child{border:1px solid #cbdbe8!important}
+#page-reports .volunteer-task-unified-body .volunteer-task-top{padding-bottom:5px}
+#page-reports .volunteer-task-unified-body .task-stop:last-child{border-bottom:0}
