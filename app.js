@@ -282,7 +282,7 @@ function openShiftStopPopup(area,shiftName){
   const time=r.time??r['到達']??'',address=r.address??r['停靠點原文']??'';
   const destination='台南市永康區'+String(address).replace(/^台南市(?:永康區)?/,'').replace(/^永康區/,'');
   const url='https://www.google.com/maps/dir/?api=1&travelmode=driving&destination='+encodeURIComponent(destination);
-  return '<div class="assigned-stop-row"><span>'+esc(time)+'</span><strong>'+esc(address)+'</strong><a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer" aria-label="導航到第'+(i+1)+'站：'+esc(address)+'">📍</a></div>';
+  return '<div class="assigned-stop-row"><span>'+esc(time)+'</span><strong>'+esc(address)+'</strong><a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer" aria-label="導航到第'+(i+1)+'站：'+esc(address)+'"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg><span>導航到站點</span></a></div>';
  }).join('');
  root.classList.remove('restored-map-popup','map-attached-popup');
  root.classList.add('owner-center-popup','assigned-stops-popup');root.classList.toggle('night-stops-popup',shiftName==='夜間');root.classList.toggle('day-stops-popup',shiftName==='日間');
