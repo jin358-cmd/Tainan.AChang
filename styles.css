@@ -478,3 +478,27 @@ body.restored-admin-map #page-map #areaPopup.restored-map-popup .popup-contact{m
 body.restored-admin-map #page-map #areaPopup.restored-map-popup .popup-contact.leader-row{background:#fff7d9;border-color:#e7ca83}
 body.restored-admin-map #page-map #areaPopup.restored-map-popup .phone-link{min-height:44px;min-width:105px;display:inline-flex;align-items:center;justify-content:center;padding:9px 10px}
 body.restored-admin-map #page-map #areaPopup.restored-map-popup .popup-detail-btn{min-height:48px}
+
+
+/* Volunteer task page: center entire content on desktop and mobile, keep readable width. */
+body.volunteer-session #page-reports {
+ box-sizing:border-box;
+ width:100%;
+ max-width:960px;
+ margin-left:auto!important;
+ margin-right:auto!important;
+}
+body.volunteer-session #page-reports .volunteer-task-unified {
+ width:100%;
+ box-sizing:border-box;
+ margin-inline:auto!important;
+}
+@media(max-width:640px){
+ body.volunteer-session #page-reports {
+  max-width:100%;
+  margin-inline:auto!important;
+ }
+ body.volunteer-session #page-reports .volunteer-task-unified {
+  margin-inline:auto!important;
+ }
+}
