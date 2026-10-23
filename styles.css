@@ -527,3 +527,6 @@ body.volunteer-session #page-map #areaPopup .popup-contact.leader-row strong{fon
 /* Owner 2026-10-23: color-framed scheduled time in the assigned day/night station popup. */
 #areaPopup.assigned-stops-popup .assigned-stop-row>span:first-child{display:inline-flex;justify-content:center;align-items:center;min-width:54px;min-height:36px;padding:5px 8px;box-sizing:border-box;border:2px solid #e4a13b;border-radius:9px;background:#fff1d5;color:#88460c;font-size:16px;font-weight:850;font-variant-numeric:tabular-nums;white-space:nowrap}
 #areaPopup.assigned-stops-popup .assigned-stop-row{grid-template-columns:minmax(64px,max-content) minmax(0,1fr) 46px}
+
+/* Night stops use the existing purple layer color for the time badge only. */
+#areaPopup.assigned-stops-popup.night-stops-popup .assigned-stop-row>span:first-child{border-color:#6553a6!important;background:#f5f0ff!important;color:#463184!important}
