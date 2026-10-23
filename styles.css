@@ -939,3 +939,10 @@ body.volunteer-session #areaPopup.owner-center-popup .popup-contact strong{font-
 body.volunteer-session #areaPopup.owner-center-popup .popup-contact.leader-row{order:-1;background:#fff6d6!important;border:2px solid #e8bd59!important;}
 body.volunteer-session #areaPopup.owner-center-popup .phone-link{min-height:42px!important;font-size:14px!important;padding:6px 8px!important;flex-shrink:0!important;}
 @media(max-width:410px){body.volunteer-session #areaPopup.owner-center-popup .popup-contact strong{font-size:17px!important}}
+
+/* Owner 2026-10-23: replace redundant admin text chip with a compact role icon; keep member-auth action available. */
+#adminHeaderAction.admin-icon-action:not([hidden]){display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 34px!important;width:34px!important;height:34px!important;min-width:34px!important;padding:3px!important;background:transparent!important;border:0!important;box-shadow:none!important;color:#dceeff!important;border-radius:8px!important;}
+#adminHeaderAction.admin-icon-action svg{display:block;width:24px;height:24px}
+#adminHeaderAction.admin-icon-action:hover,#adminHeaderAction.admin-icon-action:focus-visible{background:#ffffff22!important}
+#adminHeaderAction.admin-icon-action[hidden]{display:none!important}
+.device-detail-row .device-approved-time{display:block;margin-top:4px;font-size:12px!important;font-weight:800;color:#32604d!important;font-variant-numeric:tabular-nums}
