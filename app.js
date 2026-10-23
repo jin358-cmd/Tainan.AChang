@@ -155,7 +155,7 @@ function renderVolunteerTaskList(root){
  if(!selected.length){root.innerHTML=out+'<div class="empty">目前沒有'+catLabels[volunteerTaskCategory]+'跟巡任務</div></div></section>';return;}
  for(const g of selected){const t=g[0],stops=[...new Map(g.map(x=>[x.stop_address||x.id,x])).values()].sort((a,b)=>Number(a.stop_order)-Number(b.stop_order)),completed=g.every(x=>x.status==='完成');
  const eta=String(t.eta||'');const label=eta.match(/\d{1,2}:\d{2}\s*[-~～至]\s*\d{1,2}:\d{2}/)?.[0]||eta||'時間待排定';
- out+='<article class="volunteer-task '+(completed?'completed':'')+'"><div class="volunteer-task-top"><strong>'+esc(t.visit_date)+' <span class="task-dot">・</span> '+esc(t.area)+' <span class="task-dot">・</span> '+stops.length+' 個停靠站</strong>'+(completed?'<span class="task-overall-status is-done"><span class="task-overall-check" aria-hidden="true">✓</span><span>已完成</span></span>':'')+'</div>';
+ out+='<article class="volunteer-task '+(completed?'completed':'')+'"><div class="volunteer-task-top"><strong>'+esc(t.visit_date)+' <span class="task-dot">・</span> '+esc(t.area)+'</strong>'+(completed?'<span class="task-overall-status is-done"><span class="task-overall-check" aria-hidden="true">✓</span><span>已完成</span></span>':'')+'</div>';
  out+='<div class="task-meta"><span class="task-shift-label '+(/夜/.test(t.shift)?'shift-night':'shift-day')+'"><span class="shift-symbol" aria-hidden="true">'+(/夜/.test(t.shift)?'☾':'☀')+'</span>'+esc(t.shift)+'</span><strong class="task-time-highlight">◷ '+esc(label)+'</strong><button type="button" class="task-team-btn task-meta-team" data-vol-group="'+esc([t.visit_date,t.shift,t.truck,t.area].join('|'))+'">每日小組</button></div>';
  
  for(const [i,stop] of stops.entries()){const a=String(stop.stop_address||'').trim(),hasAddress=!!a;
