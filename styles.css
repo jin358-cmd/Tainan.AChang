@@ -552,3 +552,13 @@ body.volunteer-session #page-reports .volunteer-task-unified-body .task-meta{dis
 body.volunteer-session #page-reports .volunteer-task-unified-body .task-meta>span,body.volunteer-session #page-reports .volunteer-task-unified-body .task-meta>strong{border:none!important;background:transparent!important;box-shadow:none!important;border-radius:0!important;margin:0!important;padding:9px 10px!important;min-height:44px!important;display:inline-flex!important;align-items:center!important;gap:4px}
 body.volunteer-session #page-reports .volunteer-task-unified-body .task-meta>.task-meta-team{margin-left:auto!important;align-self:center!important;flex:0 0 auto!important;transform:none!important;min-height:44px!important;padding:8px 12px!important;border-left:1px solid #b9ccde!important;border-radius:0!important;background:#e3f0ff!important;white-space:nowrap!important}
 @media(max-width:600px){body.volunteer-session #page-reports .volunteer-task-unified-body .task-meta>span,body.volunteer-session #page-reports .volunteer-task-unified-body .task-meta>strong{padding:7px 6px!important;font-size:12px!important}body.volunteer-session #page-reports .volunteer-task-unified-body .task-meta>.task-meta-team{padding:7px 8px!important;font-size:12px!important}}
+
+/* Owner 2026-10-23: desktop volunteer task container must be centered, never inherited roster columns. */
+body.volunteer-session #page-reports.active #reportsContent.people-list{display:block!important;grid-template-columns:none!important;width:100%!important;max-width:860px!important;margin-left:auto!important;margin-right:auto!important;min-width:0!important;}
+body.volunteer-session #page-reports.active #reportsContent .volunteer-task-unified{width:100%!important;margin-inline:auto!important;}
+body.volunteer-session #page-reports .volunteer-task-top{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;}
+body.volunteer-session #page-reports .volunteer-task-top>strong{font-size:20px!important;}
+body.volunteer-session #page-reports .volunteer-task-unified-body .task-meta{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;overflow-x:auto!important;}
+body.volunteer-session #page-reports .volunteer-task-unified-body .task-meta>.task-meta-team{margin-left:auto!important;flex-shrink:0!important;}
+body.volunteer-session #page-reports .task-stop-heading{display:flex;align-items:center;justify-content:space-between;}
+body.volunteer-session #page-reports .task-stop-row .task-plate{display:inline-flex;align-items:center;background:#62abd7;color:#fff;border:1px solid #4292c4;border-radius:7px;min-height:40px;font-size:15px;font-weight:850;}
