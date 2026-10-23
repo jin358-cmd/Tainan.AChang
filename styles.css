@@ -510,3 +510,16 @@ body.volunteer-session #page-map #areaPopup .popup-contact.leader-row strong{fon
 body.volunteer-session #page-map #areaPopup .popup-contact.leader-row{background:#fff6d6!important;border:2px solid #e8bd59!important}
 body.volunteer-session #page-map #areaPopup .popup-contacts{gap:11px}
 body.volunteer-session #page-map #areaPopup .phone-link{min-height:44px;font-size:17px!important}
+
+/* Volunteer report cards centered independently of surrounding page layout. */
+body.volunteer-session #page-reports #reportsContent{width:100%!important;max-width:860px!important;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box!important}
+body.volunteer-session #page-reports .volunteer-task-unified,body.volunteer-session #page-reports .volunteer-task-unified-body,body.volunteer-session #page-reports article.volunteer-task{width:100%!important;max-width:100%!important;box-sizing:border-box!important;margin-left:auto!important;margin-right:auto!important}
+body.volunteer-session #page-reports .volunteer-task-unified-body{padding-left:12px!important;padding-right:12px!important}
+@media(max-width:600px){body.volunteer-session #page-reports #reportsContent{max-width:100%!important}body.volunteer-session #page-reports .volunteer-task-unified-body{padding-left:8px!important;padding-right:8px!important}}
+body.volunteer-session #page-map #areaPopup .popup-contact strong{font-size:18px!important}
+body.volunteer-session #page-map #areaPopup .popup-contact.leader-row strong{font-size:19px!important}
+#areaPopup.assigned-stops-popup{position:fixed!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;width:min(94vw,500px)!important;z-index:1005!important;max-height:75vh;overflow:auto;background:white}
+#areaPopup .assigned-stop-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+#areaPopup .assigned-stop-row{display:grid;grid-template-columns:55px minmax(0,1fr) 46px;align-items:center;gap:8px;padding:11px 8px;border:1px solid #d9e7ef;border-radius:10px}
+#areaPopup .assigned-stop-row strong{font-size:16px;overflow-wrap:anywhere}
+#areaPopup .assigned-stop-row a{font-size:23px;text-decoration:none;min-height:44px;display:grid;place-items:center}
