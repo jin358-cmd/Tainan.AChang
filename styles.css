@@ -502,3 +502,11 @@ body.volunteer-session #page-reports .volunteer-task-unified {
   margin-inline:auto!important;
  }
 }
+
+/* 2026-10-23 volunteer service map: large readable teammate names and leader crown. */
+body.volunteer-session #page-map #areaPopup .popup-contact strong{font-size:21px!important;font-weight:850!important;line-height:1.45!important;letter-spacing:.02em;display:inline-flex;align-items:center;min-height:34px;overflow-wrap:anywhere}
+body.volunteer-session #page-map #areaPopup .popup-contact{min-height:62px!important;padding:12px 13px!important;gap:10px;align-items:center}
+body.volunteer-session #page-map #areaPopup .popup-contact.leader-row strong{font-size:23px!important}
+body.volunteer-session #page-map #areaPopup .popup-contact.leader-row{background:#fff6d6!important;border:2px solid #e8bd59!important}
+body.volunteer-session #page-map #areaPopup .popup-contacts{gap:11px}
+body.volunteer-session #page-map #areaPopup .phone-link{min-height:44px;font-size:17px!important}
