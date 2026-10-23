@@ -569,3 +569,7 @@ body.volunteer-session #page-reports .task-stop-row .task-plate{display:inline-f
 .modal-backdrop.settings-open .sheet-head{flex:0 0 auto;}
 .modal-backdrop.settings-open .sheet-body{flex:1 1 auto;min-height:0;overflow-y:auto;}
 @media(max-width:600px){.modal-backdrop.settings-open{align-items:flex-start;padding-top:max(8px,env(safe-area-inset-top));}.modal-backdrop.settings-open .sheet{margin-top:0;max-height:calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom));}.modal-backdrop.settings-open .sheet-body{font-size:14px;}}
+
+/* Owner approved header simplification, October 23 */
+.topbar .brand strong{font-size:21px;line-height:1.3;font-weight:850;letter-spacing:.035em}
+@media(max-width:420px){.topbar .brand strong{font-size:20px}}
