@@ -5,6 +5,12 @@ const mFields='id,source_member_id,display_name,phone_e164,address,resident_area
 const map=(m,alloc)=>({id:m.id,name:m.display_name,phone:m.phone_e164,address:m.address||'',resident_area:m.resident_area||'',assignment:alloc?.village||'',is_leader:!!alloc?.is_leader,updated_at:m.updated_at});
 async function allocation(member,token){const r=await L.rest('service_allocations?member_id=eq.'+member+'&select=member_id,village,is_leader',token);return L.need(r,'分派資料讀取失敗')[0]||null}
 async function changeArea(id,village,token,leader=false){if(village){const r=await L.rest('service_allocations?on_conflict=member_id&select=member_id,village,is_leader',token,{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=representation'},body:{member_id:id,village,is_leader:leader}});L.need(r,'服務里指派失敗')}else{const r=await L.rest('service_allocations?member_id=eq.'+id,token,{method:'DELETE'});L.need(r,'移出服務里失敗')}}
+async function ensureUniquePhone(phone,excludedId,token){
+ if(!phone)return;
+ const r=await L.rest('members?phone_e164=eq.'+encodeURIComponent(phone)+'&select=id&limit=10',token);
+ const records=L.need(r,'手機號碼重複檢查失敗');
+ if(records.some(m=>m.id!==excludedId))L.problem(409,'這個手機號碼已存在於志工名冊，請先核對既有會員，避免重複新增');
+}
 module.exports=L.run(async(req,res)=>{
  L.method(req,['GET','POST','PATCH','DELETE']);const p=await L.authorized(req,res,['admin']);
  if(req.method==='GET'){
@@ -25,6 +31,7 @@ module.exports=L.run(async(req,res)=>{
  const village=b.assignment||null;if(village&&!AREAS.includes(village))L.problem(400,'不支援的里別');
  if(req.method==='POST'){
   const phone=b.phone?L.phone(b.phone):null;
+  await ensureUniquePhone(phone,null,p.token);
   const x={display_name:L.checkText(b.name,'姓名',80),phone_e164:phone,address:L.checkText(b.address||'','地址',300,true)||null,resident_area:L.checkText(b.residentArea||'','原居住里',40,true)||null};
   const r=await L.rest('members?select=id',p.token,{method:'POST',headers:{Prefer:'return=representation'},body:x});const item=L.need(r,'新增名冊失敗')[0];
   if(village)await changeArea(item.id,village,p.token);return L.json(res,201,{person:map({...x,id:item.id},village?{village}:null)});
@@ -32,6 +39,7 @@ module.exports=L.run(async(req,res)=>{
  const id=L.uuid(b.id),old=await L.getOne('members',id,p.token);if(!old)L.problem(404,'名冊沒有這筆人員');
  const patch={};if('name'in b)patch.display_name=L.checkText(b.name,'姓名',80);
  if('phone'in b)patch.phone_e164=b.phone?L.phone(b.phone):null;
+ if('phone'in b&&patch.phone_e164!==old.phone_e164)await ensureUniquePhone(patch.phone_e164,id,p.token);
  if('address'in b)patch.address=L.checkText(b.address||'','地址',300,true)||null;
  if('residentArea'in b)patch.resident_area=L.checkText(b.residentArea||'','原居住里',40,true)||null;
  if(Object.keys(patch).length){const r=await L.rest('members?id=eq.'+id,p.token,{method:'PATCH',body:patch});L.need(r,'名冊更新失敗')}
