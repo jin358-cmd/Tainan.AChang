@@ -542,3 +542,7 @@ body.volunteer-session #page-map #areaPopup .popup-contact.leader-row strong{fon
  body.volunteer-session #page-reports.active > #reportsContent{width:min(100%,860px)!important;max-width:860px!important;margin:0 auto!important;flex:0 1 auto!important;align-self:center!important;box-sizing:border-box!important}
  body.volunteer-session #page-reports.active > #reportsContent > *{width:100%!important;max-width:100%!important;box-sizing:border-box!important}
 }
+
+/* Owner: increase task tab labels 歷史 / 現有 / 待執行 on web and mobile. */
+body.volunteer-session #page-reports .volunteer-category{font-size:17px!important;font-weight:850!important;line-height:1.35!important;min-height:54px!important;padding:9px 5px!important}
+body.volunteer-session #page-reports .volunteer-category small{font-size:12px!important}
