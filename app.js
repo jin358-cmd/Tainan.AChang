@@ -285,7 +285,7 @@ function openShiftStopPopup(area,shiftName){
   return '<div class="assigned-stop-row"><span>'+esc(time)+'</span><strong>'+esc(address)+'</strong><a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer" aria-label="導航到第'+(i+1)+'站：'+esc(address)+'">📍</a></div>';
  }).join('');
  root.classList.remove('restored-map-popup','map-attached-popup');
- root.classList.add('owner-center-popup','assigned-stops-popup');
+ root.classList.add('owner-center-popup','assigned-stops-popup');root.classList.toggle('night-stops-popup',shiftName==='夜間');root.classList.toggle('day-stops-popup',shiftName==='日間');
  root.innerHTML='<div class="popup-top"><strong class="popup-area-name">'+esc(area)+' · '+esc(shiftName)+' '+rows.length+'站</strong><button type="button" data-close-area aria-label="關閉站點">✕</button></div><div class="assigned-stop-list">'+items+'</div>';
  root.hidden=false;requestAnimationFrame(positionAreaPopup);
 }
