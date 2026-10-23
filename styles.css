@@ -604,3 +604,15 @@ body.volunteer-session #page-reports .task-stop-heading>strong{font-size:12px!im
 body.volunteer-session #page-reports .task-stop-heading .task-plate{font-size:11px!important;padding:4px 5px!important}
 body.volunteer-session #page-reports .task-stop-heading .task-complete-btn{font-size:12px!important;min-width:70px!important;padding:5px!important}
 }
+
+/* 2026-10-23 refinement: readable time and compact roster, preserve group leader */
+body.volunteer-session #page-reports .task-meta .task-shift-label{font-size:17px!important;font-weight:900!important;line-height:1.3!important}
+body.volunteer-session #page-reports .task-meta .shift-symbol{font-size:25px!important;line-height:1!important}
+body.volunteer-session #page-reports .task-meta .task-time-highlight{font-size:17px!important;font-weight:900!important;line-height:1.3!important}
+body.volunteer-session #page-map #areaPopup .popup-contacts{gap:5px!important;max-height:none!important;overflow:visible!important}
+body.volunteer-session #page-map #areaPopup .popup-contact{min-height:43px!important;padding:5px 8px!important;gap:6px!important;border-radius:9px!important}
+body.volunteer-session #page-map #areaPopup .popup-contact strong{font-size:19px!important;font-weight:900!important;line-height:1.25!important;min-height:0!important}
+body.volunteer-session #page-map #areaPopup .popup-contact.leader-row{order:-1;background:#fff6d6!important;border:2px solid #e8bd59!important}
+body.volunteer-session #page-map #areaPopup .popup-contact.leader-row strong{font-size:19px!important}
+body.volunteer-session #page-map #areaPopup .phone-link{min-height:37px!important;font-size:14px!important;padding:5px 8px!important}
+@media(max-width:420px){body.volunteer-session #page-reports .task-meta .task-shift-label,body.volunteer-session #page-reports .task-meta .task-time-highlight{font-size:15px!important}body.volunteer-session #page-map #areaPopup .popup-contact strong{font-size:18px!important}}
