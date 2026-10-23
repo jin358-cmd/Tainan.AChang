@@ -149,7 +149,7 @@ function renderVolunteerTaskList(root){
  const pending=cats.history.filter(g=>g.some(t=>t.status!=='完成')).length;
  const catLabels={history:'歷史',current:'現有',future:'待執行'};
  const selected=cats[volunteerTaskCategory]||[];
- let out='<section class="volunteer-task-unified"><div class="volunteer-task-heading"><h2 class="personal-task-title">今日跟巡任務</h2><div class="volunteer-area-badges">'+[...new Set((cats.current||[]).map(g=>g[0].area))].map(a=>'<span class="volunteer-area-badge" style="--area-color:'+esc(data?.colors?.[a]||'#6b8795')+'">'+esc(a)+'</span>').join('')+'</div></div><div class="volunteer-categories" role="tablist" aria-label="任務時段分類">';
+ let out='<section class="volunteer-task-unified"><div class="volunteer-task-heading"><h2 class="personal-task-title">今日跟巡任務</h2></div><div class="volunteer-categories" role="tablist" aria-label="任務時段分類">';
  for(const k of ['history','current','future'])out+='<button type="button" role="tab" aria-selected="'+(k===volunteerTaskCategory)+'" class="volunteer-category '+(k===volunteerTaskCategory?'on':'')+'" data-vol-category="'+k+'">'+catLabels[k]+(k==='history'&&pending?'<small class="history-pending-count" role="status">● 尚未確認 '+pending+' 筆</small>':'<small>'+cats[k].length+' 筆</small>')+'</button>';
  out+='</div><div class="volunteer-task-unified-body">';
  if(!selected.length){root.innerHTML=out+'<div class="empty">目前沒有'+catLabels[volunteerTaskCategory]+'跟巡任務</div></div></section>';return;}
