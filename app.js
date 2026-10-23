@@ -274,9 +274,35 @@ function bind(){$$('[data-page]').forEach(el=>el.addEventListener('click',()=>go
 const LIVE_KEY='achang-v10-device-id';
 // A device approval is bound to the browser/PWA storage origin; switching browsers requires separate approval.
 let liveRole='',liveMemberId='',liveDisplayName='',liveTasks=[],liveBusy=false,liveTimer=null;
-let deviceId=localStorage.getItem(LIVE_KEY);
-if(!deviceId){deviceId=crypto.randomUUID();localStorage.setItem(LIVE_KEY,deviceId)}
+// Preserve a previously approved device ID in both localStorage and IndexedDB.
+// Restoring the original ID must never bypass a revoked device's server-side status.
+let deviceId='';
+const deviceReady=(async()=>{
+ let cached='';try{cached=localStorage.getItem(LIVE_KEY)||''}catch{}
+ const backup=await new Promise(resolve=>{
+  if(!('indexedDB' in window))return resolve('');
+  try{
+   const open=indexedDB.open('achang-device-identity',1);
+   open.onupgradeneeded=()=>open.result.createObjectStore('identity');
+   open.onerror=()=>resolve('');
+   open.onsuccess=()=>{
+    const db=open.result,tx=db.transaction('identity','readonly'),q=tx.objectStore('identity').get('deviceId');
+    q.onsuccess=()=>{resolve(typeof q.result==='string'?q.result:'');db.close()};
+    q.onerror=()=>{resolve('');db.close()};
+   };
+  }catch{resolve('')}
+ });
+ deviceId=cached||backup||crypto.randomUUID();
+ try{localStorage.setItem(LIVE_KEY,deviceId)}catch{}
+ if(backup!==deviceId&&'indexedDB' in window)try{
+  const open=indexedDB.open('achang-device-identity',1);
+  open.onupgradeneeded=()=>open.result.createObjectStore('identity');
+  open.onsuccess=()=>{const db=open.result;const tx=db.transaction('identity','readwrite');tx.objectStore('identity').put(deviceId,'deviceId');tx.oncomplete=()=>db.close();tx.onerror=()=>db.close()};
+ }catch{}
+ return deviceId;
+})();
 async function onlineApi(endpoint,method='GET',body){
+ await deviceReady;
  const r=await fetch('/api/'+endpoint,{method,credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json','X-AChang-Device':deviceId},body:body===undefined?undefined:JSON.stringify(body)});
  let doc;try{doc=await r.json()}catch{doc={error:'資料伺服器回傳格式錯誤'}};
  if(!r.ok)throw Object.assign(new Error(doc.error||`HTTP ${r.status}`),{status:r.status});
@@ -284,6 +310,7 @@ async function onlineApi(endpoint,method='GET',body){
 }
 function assertAdmin(){if(liveRole!=='admin'){toast('只有管理員可編輯名冊與排班');return false}return true}
 function showAuth(){
+ document.body.classList.remove('volunteer-session');
  liveRole='';liveMemberId='';liveDisplayName='';state=makeState([]);liveTasks=[];
  for(const selector of ['#peopleList','#pendingMembers','#areaMembers','#volunteerSchedules','#areaPopup','#modalBody']){const el=$(selector);if(el)el.innerHTML=''}
  $('#modal').hidden=true;
@@ -298,6 +325,7 @@ function showAuth(){
 }
 function openSecureLogin(){if(liveRole==='admin')return openMemberAdmin();previewLoginButton();$('#secureLogin').hidden=false;$('#secureLoginForm input[name="login"]').focus()}
 function updateAccessControls(){
+ document.body.classList.toggle('volunteer-session',liveRole==='volunteer');
  const admin=liveRole==='admin';
  for(const b of $$('[data-page]')){const pg=b.dataset.page;if(liveRole==='volunteer'){b.hidden=pg==='areas'||pg==='planner'||pg==='people';b.querySelector('span')&&(b.querySelector('span').textContent=pg==='people'?'小組任務':pg==='reports'?'任務':'地圖');}else{b.hidden=false;if(pg==='people'&&b.querySelector('span'))b.querySelector('span').textContent='名冊';}}
  for(const id of ['addPerson','addMember','openRosterAuthorization','clearArea']){const control=document.getElementById(id);if(control)control.hidden=!admin;}
