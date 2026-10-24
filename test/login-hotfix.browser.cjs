@@ -101,7 +101,7 @@ async function callbackCase(role) {
     assert.equal(observed.api.filter(x=>x==='GET session').length, 1);
     assert.equal(await page.locator('#secureLogin').getAttribute('hidden') !== null, true);
     assert.equal(await page.locator('#secureLogout').getAttribute('hidden') !== null, false);
-    assert.equal(await page.locator('#signedInName').textContent(), role === 'admin' ? '管理員' : '合成志工');
+    assert.equal(await page.locator('#signedInName').textContent(), role === 'admin' ? '合成管理員' : '合成志工');
     assert.equal(await page.locator('#mapLibre').count(), 1);
     assert.equal(await page.locator('#areaPopup').count(), 1);
     const areasHidden = await page.locator('.bottom-nav [data-page="areas"]').getAttribute('hidden') !== null;
@@ -131,7 +131,7 @@ async function passwordLogoutReopenCase() {
     await page.locator('#secureLoginForm input[name="password"]').fill('synthetic-password');
     await page.locator('#secureLoginForm button[type="submit"]').click();
     await page.waitForFunction(() => document.querySelector('#signedInName')?.hidden === false);
-    assert.equal(await page.locator('#signedInName').textContent(), '管理員');
+    assert.equal(await page.locator('#signedInName').textContent(), '合成管理員');
     await page.locator('#secureLogout').click();
     await page.waitForFunction(() => document.querySelector('#secureLogout')?.hidden === true);
     await page.reload({waitUntil:'domcontentloaded'});
@@ -176,6 +176,8 @@ async function mapFallbackCase() {
     latestUiMapFallback:await mapFallbackCase(),
   };
   const expectedConsoleError = {
+    adminCallback: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
+    volunteerCallback: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
     unauthorizedCallback: message => /403 \(Forbidden\)$/.test(message),
     passwordLogoutReopen: message => /401 \(Unauthorized\)$/.test(message),
     visibleBootFailure: message => /500 \(Internal Server Error\)$/.test(message) || /^Error: 地圖資料無法讀取\n/.test(message),
