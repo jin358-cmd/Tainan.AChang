@@ -9,7 +9,7 @@ const valid={
  ACHANG_TEST_ISOLATED:'1',
  EXPECTED_SUPABASE_PROJECT_REF:PROJECTS.test,
  SUPABASE_URL:`https://${PROJECTS.test}.supabase.co`,
- SUPABASE_PUBLISHABLE_KEY:'public-test-key',
+ SUPABASE_PUBLISHABLE_KEY:'sb_publishable_test_only',
  VERCEL_ENV:'preview'
 };
 
