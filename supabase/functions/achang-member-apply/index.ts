@@ -12,11 +12,11 @@ Deno.serve(async(req:Request)=>{
  if(!expected||actual!==expected||!key)return reply({error:'申請服務暫時無法使用'},503);
  try{
   const b=await req.json(),code=String(b.invitationCode||'').trim().toUpperCase(),phone=String(b.contactPhone||''),pin=String(b.pin||'');
-  if(!/^[A-F0-9]{16}$/.test(code)||!/^\+8869\d{8}$/.test(phone)||!/^[0-9]{6}$/.test(pin))return reply({error:'邀請碼、聯絡電話或 PIN 格式不正確'},400);
+  if(!/^[0-9]{4}$/.test(code)||!/^\+8869\d{8}$/.test(phone)||!/^[0-9]{6}$/.test(pin))return reply({error:'邀請碼、聯絡電話或 PIN 格式不正確'},400);
   const supa=createClient(url,key,{auth:{autoRefreshToken:false,persistSession:false}}),codeHash=await sha(code);
   const ip=(req.headers.get('x-real-ip')||req.headers.get('x-forwarded-for')||'unknown').split(',')[0].trim().slice(0,100);
-  const subject=await sha(key+'|application|'+ip);
-  const {data:allowed,error:limitError}=await supa.rpc('achang_try_pin_attempt',{p_subject:subject,p_max_attempts:10,p_window_seconds:900});
+  const subject=await sha(key+'|application|'+ip+'|'+phone);
+  const {data:allowed,error:limitError}=await supa.rpc('achang_try_pin_attempt',{p_subject:subject,p_max_attempts:5,p_window_seconds:900});
   if(limitError)return reply({error:'申請安全檢查暫時無法使用'},503);if(!allowed)return reply({error:'申請嘗試過於頻繁，請稍後再試'},429);
   const {data:member,error:memberError}=await supa.from('members').select('id,phone_e164,deleted_at,application_code_expires_at').eq('application_code_hash',codeHash).maybeSingle();
   if(memberError||!member||member.deleted_at||member.phone_e164!==phone||!member.application_code_expires_at||new Date(member.application_code_expires_at)<=new Date())return reply({error:'邀請碼、聯絡電話或 PIN 不正確'},400);
