@@ -19,6 +19,7 @@ Deno.serve(async (req: Request) => {
     const {data:admin,error:adminErr}=await supa.from('member_accounts').select('role,status').eq('auth_user_id',user.id).maybeSingle();
     if(adminErr||admin?.role!=='admin'||admin?.status!=='active')return json({error:'Admin only'},403);
     const b=await req.json();
+    const directApproval=b.directApproval===true;
     const memberId=String(b.memberId||'');const phone=String(b.phone||'');const password=String(b.password||'');
     if(!/^[\da-f]{8}-[\da-f-]{27,}$/i.test(memberId)||!/^\+8869\d{8}$/.test(phone)||!(/^[0-9]{6}$/.test(password)||(password.length>=12&&password.length<=180)))return json({error:'Invalid fields'},400);
     const {data:member,error:memberErr}=await supa.from('members').select('id,phone_e164,deleted_at').eq('id',memberId).maybeSingle();
@@ -32,7 +33,7 @@ Deno.serve(async (req: Request) => {
     const {data:created,error:createError}=await supa.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{achang_member_id:memberId}});
     if(createError||!created.user)return json({error:'Unable to create account'},createError?.status===422?409:502);
     const uid=created.user.id;
-    const {data:entry,error:entryErr}=await supa.from('member_accounts').insert({member_id:memberId,auth_user_id:uid,login_id:loginId,role:'volunteer',status:'pending',requested_at:new Date().toISOString()}).select('id,member_id,login_id,status').single();
+    const {data:entry,error:entryErr}=await supa.from('member_accounts').insert({member_id:memberId,auth_user_id:uid,login_id:loginId,role:'volunteer',status:directApproval?'active':'pending',requested_at:new Date().toISOString(),approved_at:directApproval?new Date().toISOString():null,approved_by:directApproval?user.id:null}).select('id,member_id,login_id,status').single();
     if(entryErr||!entry){await supa.auth.admin.deleteUser(uid);return json({error:'Account request creation failed'},502)}
     return json({ok:true,member:{...entry,role:'volunteer',enabled:false}},201);
   }catch{ return json({error:'Invalid request'},400)}
