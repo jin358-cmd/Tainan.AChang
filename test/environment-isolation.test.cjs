@@ -34,6 +34,13 @@ test('test preview refuses Production project identity',()=>{
  assert.ok(readEnvironment(env).errors.includes('PROJECT_REF_ENVIRONMENT_MISMATCH'));
 });
 
+test('service-role or secret key cannot be used as the browser/server publishable key',()=>{
+ const secret={...valid,SUPABASE_PUBLISHABLE_KEY:'sb_secret_must_never_be_accepted'};
+ assert.ok(readEnvironment(secret).errors.includes('SUPABASE_PUBLISHABLE_KEY_INVALID'));
+ const legacy={...valid,SUPABASE_PUBLISHABLE_KEY:'service_role.jwt.must.not.be.accepted'};
+ assert.ok(readEnvironment(legacy).errors.includes('SUPABASE_PUBLISHABLE_KEY_INVALID'));
+});
+
 test('test identity refuses Vercel Production target and missing isolation flag',()=>{
  const env={...valid,VERCEL_ENV:'production',ACHANG_TEST_ISOLATED:'0'};
  assert.ok(readEnvironment(env).errors.includes('TEST_ISOLATION_FLAG_MISSING'));
