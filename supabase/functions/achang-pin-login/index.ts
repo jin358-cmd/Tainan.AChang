@@ -1,6 +1,6 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
-const reply=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-AChang-Environment':'production'}});
+const reply=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const encoder=new TextEncoder();
 const hash=async(k:string,v:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',encoder.encode(k+'|'+v)))).map(x=>x.toString(16).padStart(2,'0')).join('');
 const generic=()=>reply({error:'登入代碼或 PIN 不正確'},401);
@@ -8,8 +8,9 @@ const generic=()=>reply({error:'登入代碼或 PIN 不正確'},401);
 Deno.serve(async(req:Request)=>{
  if(req.method!=='POST')return reply({error:'Method not allowed'},405);
  if(Number(req.headers.get('content-length')||0)>1500)return reply({error:'Invalid request'},400);
- const url=Deno.env.get('SUPABASE_URL')||'',key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||'',anon=Deno.env.get('SUPABASE_ANON_KEY')||'';
- if(!url.includes('ctskglmglevronvnkpmm.supabase.co')||!key||!anon)return reply({error:'Authentication service unavailable'},503);
+ const url=Deno.env.get('SUPABASE_URL')||'',key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||'',anon=Deno.env.get('SUPABASE_ANON_KEY')||'',expected=Deno.env.get('ACHANG_EXPECTED_PROJECT_REF')||'';
+ let actual='';try{const parsed=new URL(url);if(parsed.protocol==='https:'&&/^[a-z0-9]+\.supabase\.co$/.test(parsed.hostname))actual=parsed.hostname.split('.')[0]}catch{}
+ if(!expected||actual!==expected||!key||!anon)return reply({error:'Authentication service unavailable'},503);
  try{
   const body=await req.json(),loginId=String(body.loginId||'').trim().toUpperCase(),pin=String(body.pin||'');
   if(!/^ACH-[A-F0-9]{32}$/.test(loginId)||!/^[0-9]{6}$/.test(pin))return generic();

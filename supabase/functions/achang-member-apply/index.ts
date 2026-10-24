@@ -7,8 +7,9 @@ const sha=async(value:string)=>Array.from(new Uint8Array(await crypto.subtle.dig
 Deno.serve(async(req:Request)=>{
  if(req.method!=='POST')return reply({error:'Method not allowed'},405);
  if(Number(req.headers.get('content-length')||0)>1500)return reply({error:'Invalid request'},400);
- const url=Deno.env.get('SUPABASE_URL')||'',key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||'';
- if(!url.includes('ctskglmglevronvnkpmm.supabase.co')||!key)return reply({error:'申請服務暫時無法使用'},503);
+ const url=Deno.env.get('SUPABASE_URL')||'',key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||'',expected=Deno.env.get('ACHANG_EXPECTED_PROJECT_REF')||'';
+ let actual='';try{const parsed=new URL(url);if(parsed.protocol==='https:'&&/^[a-z0-9]+\.supabase\.co$/.test(parsed.hostname))actual=parsed.hostname.split('.')[0]}catch{}
+ if(!expected||actual!==expected||!key)return reply({error:'申請服務暫時無法使用'},503);
  try{
   const b=await req.json(),code=String(b.invitationCode||'').trim().toUpperCase(),phone=String(b.contactPhone||''),pin=String(b.pin||'');
   if(!/^[A-F0-9]{16}$/.test(code)||!/^\+8869\d{8}$/.test(phone)||!/^[0-9]{6}$/.test(pin))return reply({error:'邀請碼、聯絡電話或 PIN 格式不正確'},400);

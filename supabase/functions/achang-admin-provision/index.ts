@@ -9,7 +9,9 @@ Deno.serve(async (req: Request) => {
   if(!/^Bearer\s+\S+$/i.test(bearer))return json({error:'Unauthorized'},401);
   const url=Deno.env.get('SUPABASE_URL')||'';
   const key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||'';
-  if(!url||!key)return json({error:'Not configured'},503);
+  const expected=Deno.env.get('ACHANG_EXPECTED_PROJECT_REF')||'';
+  let actual='';try{const parsed=new URL(url);if(parsed.protocol==='https:'&&/^[a-z0-9]+\.supabase\.co$/.test(parsed.hostname))actual=parsed.hostname.split('.')[0]}catch{}
+  if(!expected||actual!==expected||!key)return json({error:'Not configured'},503);
   const supa=createClient(url,key,{auth:{autoRefreshToken:false,persistSession:false}});
   try{
     const {data:{user},error:authErr}=await supa.auth.getUser(bearer.replace(/^Bearer\s+/i,''));

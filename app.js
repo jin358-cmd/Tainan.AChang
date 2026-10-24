@@ -24,6 +24,7 @@ function loadState(){for(const k of [KEY,PRIOR_KEY,LEGACY_KEY]){try{const raw=lo
 const MAP_LOAD_TIMEOUT_MS=8000;
 const MAPLIBRE_JS='https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.js';
 const MAPLIBRE_CSS='https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.css';
+let runtimeConfig=null;
 let state=loadState(),data=null,areas=[],routes=[],page='areas',selectedArea='復興里',shift='夜間',date=today(),chosenRoute='',plannerArea='復興里',areaPage=0,teamArea='',toastTimer=null,installPrompt=null,map=null,markers=[],mapFailed=false,mapLoaded=false,mapLoadTimer=null,mapAttempt=0,mapInitPromise=null,mapFailureMessage='',pinTarget=null,layerState={volunteer:true,day:false,night:false},pickerKind='',volunteerId='',volunteerPhone='';
 const personNorm=p=>({id:String(p.id||`P${Date.now()}`),name:String(p.name||'').trim().slice(0,80),phone:String(p.phone||'').slice(0,80),address:String(p.address||'').slice(0,300),residentArea:String(p.residentArea||'待確認'),assignment:areas.includes(p.assignment)?p.assignment:'',serviceLat:coord(p.serviceLat)?p.serviceLat:null,serviceLon:coord(p.serviceLon)?p.serviceLon:null});
 const residentLabel=p=>{const s=String(p?.residentArea||'').trim().replace(/里里$/,'里');return /十里以外|十里外|待確認/.test(s)?'十里外':s&&s!=='未填寫'?s:''};
@@ -475,7 +476,18 @@ async function restoreSavedSessionOnResume(){
  }finally{checkingSavedSession=false}
 }
 
+async function loadRuntimeConfig(){
+ const response=await fetch('./api/config',{cache:'no-store'});
+ if(!response.ok)throw Error('環境設定不完整或不一致');
+ const config=await response.json();
+ if(!config||!['test','production'].includes(config.environment)||!config.projectRef||!config.supabaseUrl||!config.googleOAuthUrl)throw Error('環境身分驗證失敗');
+ const parsed=new URL(config.supabaseUrl);
+ if(parsed.protocol!=='https:'||parsed.hostname!==config.projectRef+'.supabase.co')throw Error('環境身分驗證失敗');
+ runtimeConfig=Object.freeze(config);
+}
+
 async function boot(){try{
+ await loadRuntimeConfig();
  const pub=await fetch('./data-public.json',{cache:'no-store'});if(!pub.ok)throw Error('地圖資料無法讀取');data=await pub.json();areas=data.areas;
  state=makeState([]);state.demo=false;areaPage=Math.floor(areas.indexOf(selectedArea)/CARD_PAGE_SIZE);const pa=$('#plannerAreaSelect');pa.innerHTML=areas.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('')+'<option value="all">全部</option>';
  const sel=$('#peopleAreaFilter');sel.innerHTML='<option value="all">全部里別</option>'+areas.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('');
@@ -484,12 +496,12 @@ async function boot(){try{
 }catch(e){console.error(e);openSecureLogin();$('#authStatus').textContent='網站暫時無法完成登入，請重新整理後再試'}
 }
 
-// Production Google OAuth: validated by Supabase and membership authorization API.
-const GOOGLE_AUTH_URL='https://ctskglmglevronvnkpmm.supabase.co/auth/v1/authorize?provider=google&redirect_to=';
+// OAuth is derived from the server-validated runtime environment; there is no Production fallback.
 document.addEventListener('click',event=>{
  const button=event.target.closest('#googleOAuthLogin');if(!button)return;
+ if(!runtimeConfig?.googleOAuthUrl){openSecureLogin();$('#authStatus').textContent='環境設定不完整，已停止登入';return}
  const redirect=location.origin+location.pathname;
- location.assign(GOOGLE_AUTH_URL+encodeURIComponent(redirect));
+ location.assign(runtimeConfig.googleOAuthUrl+encodeURIComponent(redirect));
 });
 async function completeGoogleOAuth(){
  const parsed=new URLSearchParams(location.hash.slice(1));

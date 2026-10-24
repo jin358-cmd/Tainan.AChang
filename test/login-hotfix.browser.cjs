@@ -22,7 +22,9 @@ async function startServer(options = {}) {
       const endpoint = url.pathname.slice(5);
       observed.api.push(`${request.method} ${endpoint}`);
       response.setHeader('Content-Type', 'application/json');
-      if (endpoint === 'oauth-session' && request.method === 'POST') {
+      if (endpoint === 'config' && request.method === 'GET') {
+        response.end(JSON.stringify({environment:'test',projectRef:'fhxdpupascsikjsycpbi',supabaseUrl:'https://fhxdpupascsikjsycpbi.supabase.co',googleOAuthUrl:'https://fhxdpupascsikjsycpbi.supabase.co/auth/v1/authorize?provider=google&redirect_to='}));
+      } else if (endpoint === 'oauth-session' && request.method === 'POST') {
         if (options.oauthFailure) {
           response.statusCode = options.oauthFailure;
           response.end(JSON.stringify({error:'合成帳號尚未授權'}));
@@ -75,7 +77,8 @@ async function startServer(options = {}) {
 
 async function withPage(options, run) {
   const local = await startServer(options);
-  const browser = await chromium.launch({headless:true,executablePath:'/usr/bin/chromium'});
+  const executablePath=process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+  const browser = await chromium.launch({headless:true,...(executablePath?{executablePath}:{})});
   try {
     const context = await browser.newContext({serviceWorkers:'block'});
     await context.route('**/*', route => {
