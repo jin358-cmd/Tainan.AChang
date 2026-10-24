@@ -42,6 +42,12 @@ Production：**🟡 PENDING OWNER APPROVAL（未修改、未部署）**
 
 ## 4. 程式與 Schema 差異
 
+交付位置：
+
+- Branch：`fix/achang-auth-20261024-p0-001`
+- Implementation commit：`8d930cd`
+- Draft PR：`https://github.com/jin358-cmd/Tainan.AChang/pull/2`
+
 - `members`：新增 soft-delete 欄位、一次性申請碼 hash/expiry；電話保持非唯一。
 - `member_accounts`：新增唯一 `login_id`、requested/rejected 時間與拒絕原因；既有志工以 member UUID 回填。
 - `member_devices`：新增 requested/rejection 欄位；撤銷全域 unique，改成只涵蓋 Pending/Approved 的 partial unique；另保留完整 account lookup index。
