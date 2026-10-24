@@ -16,6 +16,6 @@ module.exports=L.run(async(req,res)=>{
  if(!response.ok||!response.data?.access_token)L.problem(response.status===429?429:response.status===503?503:response.status===403?403:401,response.status===429?'PIN 嘗試次數過多，請 15 分鐘後再試':response.status===503?'登入安全服務暫時無法使用':response.status===403&&response.data?.code==='ACCOUNT_PENDING'?'會員申請已送出，請等待管理員核准':'登入代碼或 PIN 不正確');
  const r=response;
  const p=await L.accountFromToken(r.data.access_token);L.setSession(res,r.data);
- try{await L.deviceCheck(req,p,p.token,true)}catch(e){if(e.appCode==='DEVICE_PENDING')return L.json(res,202,{authorization:'device_pending',message:e.message,role:p.role,memberId:p.member_id,accountId:p.id});throw e}
+ try{await L.deviceCheck(req,p,p.token,false)}catch(e){if(['DEVICE_PENDING','DEVICE_APPLICATION_REQUIRED'].includes(e.appCode))return L.json(res,202,{authorization:e.appCode==='DEVICE_PENDING'?'device_pending':'device_application_required',message:e.message,role:p.role,memberId:p.member_id,accountId:p.id});throw e}
  L.json(res,200,{authorization:'approved',role:p.role,memberId:p.member_id,accountId:p.id});
 });

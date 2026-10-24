@@ -24,7 +24,11 @@ alter table public.member_accounts
   add column if not exists login_id text,
   add column if not exists requested_at timestamptz,
   add column if not exists rejected_at timestamptz,
-  add column if not exists rejection_reason text;
+  add column if not exists rejection_reason text,
+  add column if not exists suspended_at timestamptz,
+  add column if not exists suspended_by uuid references auth.users(id) on delete set null,
+  add column if not exists reactivated_at timestamptz,
+  add column if not exists reactivated_by uuid references auth.users(id) on delete set null;
 
 -- Existing accounts receive a stable member-specific identifier. Contact phone is never
 -- used as an account key, so two members may continue sharing the same number.
@@ -73,6 +77,7 @@ create table if not exists public.member_authorization_events (
   device_id uuid references public.member_devices(id) on delete set null,
   event_type text not null check (event_type in (
     'account_requested','account_approved','account_rejected','account_suspended',
+    'account_reactivated',
     'device_requested','device_approved','device_revoked','member_archived'
   )),
   reason text,
@@ -104,6 +109,12 @@ create index if not exists member_authorization_events_device_id_idx
 create index if not exists member_authorization_events_created_at_idx
   on public.member_authorization_events (created_at desc);
 
+create index if not exists member_accounts_suspended_by_idx
+  on public.member_accounts (suspended_by) where suspended_by is not null;
+
+create index if not exists member_accounts_reactivated_by_idx
+  on public.member_accounts (reactivated_by) where reactivated_by is not null;
+
 create or replace function app_private.audit_achang_authorization_change()
 returns trigger
 language plpgsql
@@ -118,7 +129,9 @@ begin
     elsif old.status is distinct from new.status then
       insert into public.member_authorization_events(member_id,account_id,event_type,reason,actor_user_id)
       values(new.member_id,new.id,
-        case new.status when 'active' then 'account_approved' when 'suspended' then
+        case new.status when 'active' then
+          case when old.status = 'suspended' then 'account_reactivated' else 'account_approved' end
+        when 'suspended' then
           case when new.rejected_at is not null then 'account_rejected' else 'account_suspended' end
         else 'account_requested' end,
         new.rejection_reason,auth.uid());
@@ -140,7 +153,8 @@ begin
       set application_code_hash=null, application_code_expires_at=null
       where id=new.id and application_code_hash is not null;
     update public.member_accounts
-      set status='suspended', updated_at=now()
+      set status='suspended', suspended_at=coalesce(suspended_at,now()),
+          suspended_by=coalesce(suspended_by,auth.uid()), updated_at=now()
       where member_id=new.id and status<>'suspended';
     update public.member_devices d
       set status='revoked', revoked_at=coalesce(revoked_at,now())

@@ -108,3 +108,7 @@ Migration：`supabase/migrations/20261024050539_achang_auth_identity_pending_dev
 - Owner 核准前置條件：完成 EIPP-11、review Migration/RLS、確認部署窗口與 rollback owner、在非 Production 或受控 preview 取得真實 Auth/真機證據。
 
 最終判定：**🟠 PARTIAL — 開發與隔離驗證完成；不得部署 Production。**
+
+## 9. v1.1 續行
+
+EIPP-11 能力盤點、TEST 13 多裝置修復、TEST 14 停用會員恢復與更新後部署閘門，詳見 `docs/ACHANG-AUTH-20261024-P0-001-v1.1-gate.md`。EIPP-11 仍因缺少正式 dump credentials、加密公鑰與 off-site destination 而 BLOCKED；Production 仍未獲授權。

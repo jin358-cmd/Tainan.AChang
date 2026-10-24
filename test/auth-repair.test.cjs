@@ -43,7 +43,32 @@ test('migration preserves revoked history and adds auditable soft delete',()=>{
 
 test('application requests a new pending row when only revoked bindings exist',()=>{
  const server=read('lib/server.js');
+ assert.match(server,/DEVICE_APPLICATION_REQUIRED/);
+ assert.match(server,/found\?\.status==='pending'.*DEVICE_PENDING/);
  assert.match(server,/found\?\.status!=='pending'/);
  assert.match(server,/status:'pending',requested_at/);
  assert.doesNotMatch(server,/found\.status='approved'/);
+});
+
+test('second device requires explicit member confirmation before a pending request',()=>{
+ const session=read('api/session.js'),application=read('api/device-application.js'),ui=read('app.js');
+ assert.match(session,/device_application_required/);
+ assert.match(session,/deviceCheck\(req,p,p\.token,false\)/);
+ assert.match(application,/identitySession/);
+ assert.match(application,/deviceCheck\(req,p,p\.token,true\)/);
+ assert.match(ui,/此裝置尚未授權，是否提出申請/);
+ assert.match(ui,/onlineApi\('device-application','POST'/);
+});
+
+test('reactivation keeps account and device authorization as separate states',()=>{
+ const api=read('api/members.js'),migration=read('supabase/migrations/20261024050539_achang_auth_identity_pending_device_soft_delete.sql'),ui=read('app.js');
+ assert.match(api,/action==='reactivate'/);
+ assert.match(api,/只有曾核准後停用的會員可以恢復啟用/);
+ assert.match(api,/會員名冊已封存/);
+ assert.match(api,/只有待核准會員可以執行首次核准/);
+ assert.match(api,/恢復帳號必須使用受控的重新啟用流程/);
+ assert.doesNotMatch(api,/if\(status==='suspended'\).*member_devices/);
+ assert.match(migration,/account_reactivated/);
+ assert.match(ui,/已停用會員/);
+ assert.match(ui,/data-account-reactivate/);
 });

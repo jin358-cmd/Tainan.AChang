@@ -1,7 +1,7 @@
 'use strict';const crypto=require('node:crypto'),L=require('../lib/server');
 module.exports=L.run(async(req,res)=>{
  L.method(req,['GET','POST','PATCH','DELETE']);const p=await L.authorized(req,res,['admin']);
- if(req.method==='GET'){const [r,m,dev]=await Promise.all([L.rest('member_accounts?select=id,member_id,auth_user_id,login_id,role,status,requested_at,approved_at,rejected_at,rejection_reason,created_at&order=created_at.asc',p.token),L.rest('members?select=id,phone_e164,display_name,deleted_at',p.token),L.rest('member_devices?select=id,account_id,status,requested_at,created_at,device_type,operating_system,browser_name,approved_at,revoked_at,rejection_reason,last_seen_at&order=created_at.asc',p.token)]);const by=new Map(L.need(m,'會員資料讀取失敗').map(x=>[x.id,x]));return L.json(res,200,{members:L.need(r,'會員名單讀取失敗').filter(x=>x.role==='volunteer').map(x=>({...x,name:by.get(x.member_id)?.display_name||'',phone:by.get(x.member_id)?.phone_e164||'',deleted_at:by.get(x.member_id)?.deleted_at||null,enabled:x.status==='active'})),devices:L.need(dev,'裝置名單讀取失敗')})}
+ if(req.method==='GET'){const [r,m,dev]=await Promise.all([L.rest('member_accounts?select=id,member_id,auth_user_id,login_id,role,status,requested_at,approved_at,rejected_at,rejection_reason,suspended_at,suspended_by,reactivated_at,reactivated_by,created_at&order=created_at.asc',p.token),L.rest('members?select=id,phone_e164,display_name,deleted_at',p.token),L.rest('member_devices?select=id,account_id,status,requested_at,created_at,device_type,operating_system,browser_name,approved_at,revoked_at,rejection_reason,last_seen_at&order=created_at.asc',p.token)]);const by=new Map(L.need(m,'會員資料讀取失敗').map(x=>[x.id,x]));return L.json(res,200,{members:L.need(r,'會員名單讀取失敗').filter(x=>x.role==='volunteer').map(x=>({...x,name:by.get(x.member_id)?.display_name||'',phone:by.get(x.member_id)?.phone_e164||'',deleted_at:by.get(x.member_id)?.deleted_at||null,enabled:x.status==='active'})),devices:L.need(dev,'裝置名單讀取失敗')})}
  const b=L.body(req);
  if(req.method==='PATCH'&&b.deviceId){
   const id=L.uuid(b.deviceId),found=L.need(await L.rest('member_devices?id=eq.'+id+'&select=id,status&limit=1',p.token),'裝置授權查詢失敗')?.[0];if(!found)L.problem(404,'找不到裝置申請');
@@ -29,10 +29,17 @@ module.exports=L.run(async(req,res)=>{
  }
  if(req.method==='PATCH'){
   const id=L.uuid(b.authUserId),now=new Date().toISOString();let status,patch;
-  if(b.action==='approve'){status='active';patch={status,approved_at:now,approved_by:p.auth_user_id,rejected_at:null,rejection_reason:null}}
-  else if(b.action==='reject'){status='suspended';patch={status,rejected_at:now,rejection_reason:L.checkText(b.reason,'拒絕原因',500)}}
-  else{if(typeof b.enabled!=='boolean')L.problem(400,'啟用狀態錯誤');status=b.enabled?'active':'suspended';patch={status,...(!b.enabled?{rejection_reason:L.checkText(b.reason||'管理員停用帳號','停用原因',500)}:{})}}
-  const r=await L.rest('member_accounts?auth_user_id=eq.'+id+'&role=eq.volunteer&select=id,status,login_id',p.token,{method:'PATCH',headers:{Prefer:'return=representation'},body:patch});const updated=L.need(r,'會員權限更新失敗')?.[0];if(!updated)L.problem(404,'志工會員不存在');if(status==='suspended')await L.rest('member_devices?account_id=eq.'+updated.id+'&status=neq.revoked',p.token,{method:'PATCH',body:{status:'revoked',revoked_at:now,rejection_reason:patch.rejection_reason}});return L.json(res,200,{member:updated})
+  const found=L.need(await L.rest('member_accounts?auth_user_id=eq.'+id+'&role=eq.volunteer&select=id,member_id,status,approved_at&limit=1',p.token),'會員狀態查詢失敗')?.[0];
+  if(!found)L.problem(404,'志工會員不存在');const member=await L.getOne('members',found.member_id,p.token);
+  if(!member||member.deleted_at)L.problem(409,'會員名冊已封存，須先完成封存原因與恢復資格審核');
+  if(b.action==='approve'){if(found.status!=='pending')L.problem(409,'只有待核准會員可以執行首次核准');status='active';patch={status,approved_at:now,approved_by:p.auth_user_id,rejected_at:null,rejection_reason:null}}
+  else if(b.action==='reject'){if(found.status!=='pending')L.problem(409,'只有待核准會員可以拒絕申請');status='suspended';patch={status,rejected_at:now,rejection_reason:L.checkText(b.reason,'拒絕原因',500)}}
+  else if(b.action==='reactivate'){
+   if(found.status!=='suspended'||!found.approved_at)L.problem(409,'只有曾核准後停用的會員可以恢復啟用');
+   status='active';patch={status,reactivated_at:now,reactivated_by:p.auth_user_id,rejection_reason:null,rejected_at:null};
+  }
+  else{if(b.enabled!==false)L.problem(400,'恢復帳號必須使用受控的重新啟用流程');if(found.status!=='active')L.problem(409,'只有已啟用會員可以停用');status='suspended';patch={status,suspended_at:now,suspended_by:p.auth_user_id,rejection_reason:L.checkText(b.reason||'管理員停用帳號','停用原因',500)}}
+  const r=await L.rest('member_accounts?auth_user_id=eq.'+id+'&role=eq.volunteer&select=id,status,login_id,suspended_at,reactivated_at',p.token,{method:'PATCH',headers:{Prefer:'return=representation'},body:patch});const updated=L.need(r,'會員權限更新失敗')?.[0];if(!updated)L.problem(404,'志工會員不存在');return L.json(res,200,{member:updated})
  }
  if(b.role!=='volunteer')L.problem(400,'此版本由管理員管理志工會員');const memberId=L.uuid(b.volunteerId),phone=L.phone(b.phone),password=L.checkText(b.password,'初始密碼',180);if(!(/^[0-9]{6}$/.test(password)||(password.length>=12&&password.length<=180)))L.problem(400,'志工登入 PIN 須為 6 位數字');
  const mem=await L.getOne('members',memberId,p.token);if(!mem||mem.phone_e164!==phone)L.problem(400,'手機號碼與已核對名冊不符');
