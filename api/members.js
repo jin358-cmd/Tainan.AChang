@@ -13,10 +13,23 @@ module.exports=L.run(async(req,res)=>{
   const memberId=L.uuid(b.volunteerId),contact=L.phone(b.phone),mem=await L.getOne('members',memberId,p.token);
   if(!mem||mem.deleted_at||mem.phone_e164!==contact)L.problem(400,'會員與聯絡電話不符');
   const existing=L.need(await L.rest('member_accounts?member_id=eq.'+memberId+'&select=id&limit=1',p.token),'會員帳號查詢失敗');if(existing.length)L.problem(409,'這位會員已有帳號或待核准申請');
-  const invitationCode=crypto.randomBytes(8).toString('hex').toUpperCase(),application_code_hash=crypto.createHash('sha256').update(invitationCode).digest('hex'),expires=new Date(Date.now()+24*60*60*1000).toISOString();
+  const invitationCode=String(crypto.randomInt(0,10000)).padStart(4,'0'),application_code_hash=crypto.createHash('sha256').update(invitationCode).digest('hex'),expires=new Date(Date.now()+24*60*60*1000).toISOString();
   const saved=await L.rest('members?id=eq.'+memberId+'&deleted_at=is.null&select=id',p.token,{method:'PATCH',headers:{Prefer:'return=representation'},body:{application_code_hash,application_code_expires_at:expires}});
   if(!L.need(saved,'申請邀請碼建立失敗')?.length)L.problem(409,'會員已封存或不存在');
   return L.json(res,201,{invitationCode,expiresAt:expires});
+ }
+ if(req.method==='POST'&&b.action==='direct-provision'){
+  // Only an authenticated administrator can provision a named member, in person.
+  // The volunteer chooses their own 6-digit PIN without any invitation code.
+  const memberId=L.uuid(b.volunteerId),phone=L.phone(b.phone),pin=String(b.pin||'');
+  if(!/^[0-9]{6}$/.test(pin))L.problem(400,'請由志工本人設定六碼 PIN');
+  const mem=await L.getOne('members',memberId,p.token);
+  if(!mem||mem.deleted_at||mem.phone_e164!==phone)L.problem(400,'志工身分或聯絡電話不符');
+  const existing=L.need(await L.rest('member_accounts?member_id=eq.'+memberId+'&select=id&limit=1',p.token),'會員帳號查詢失敗');
+  if(existing.length)L.problem(409,'會員已有帳號，請改由待核准清單處理');
+  const provision=await L.request('/functions/v1/achang-admin-provision',{method:'POST',token:p.token,body:{memberId,phone,password:pin,directApproval:true}});
+  if(!provision.ok)L.problem(provision.status===409?409:502,provision.data?.error||'管理員開通失敗');
+  return L.json(res,201,{member:provision.data?.member,action:'direct-provision'});
  }
  if(req.method==='DELETE'){
   const id=L.uuid(b.authUserId);
