@@ -1,5 +1,7 @@
 # ACHANG-AUTH-20261024-P0-001 驗證與部署申請報告
 
+> **歷史快照／已被取代：** 本文件記錄正式部署前的申請狀態。其 EIPP-11 `BLOCKED`、Production 未部署與待核准敘述已不再是現況；請以 `ACHANG-AUTH-20261024-P0-001-v2.0-production-closure.md` 為準。
+
 日期：2026-10-24
 
 範圍：FIX 01–05
