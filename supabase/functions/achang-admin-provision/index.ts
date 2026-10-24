@@ -19,15 +19,19 @@ Deno.serve(async (req: Request) => {
     const b=await req.json();
     const memberId=String(b.memberId||'');const phone=String(b.phone||'');const password=String(b.password||'');
     if(!/^[\da-f]{8}-[\da-f-]{27,}$/i.test(memberId)||!/^\+8869\d{8}$/.test(phone)||!(/^[0-9]{6}$/.test(password)||(password.length>=12&&password.length<=180)))return json({error:'Invalid fields'},400);
-    const {data:member,error:memberErr}=await supa.from('members').select('id,phone_e164').eq('id',memberId).maybeSingle();
-    if(memberErr||!member||member.phone_e164!==phone)return json({error:'Member and phone mismatch'},400);
+    const {data:member,error:memberErr}=await supa.from('members').select('id,phone_e164,deleted_at').eq('id',memberId).maybeSingle();
+    if(memberErr||!member||member.deleted_at||member.phone_e164!==phone)return json({error:'Member and contact phone mismatch'},400);
     const {data:existing}=await supa.from('member_accounts').select('id').eq('member_id',memberId).maybeSingle();
     if(existing)return json({error:'Member already exists'},409);
-    const {data:created,error:createError}=await supa.auth.admin.createUser({phone,password,phone_confirm:true});
+    // Supabase Auth phone identities are unique. Use a member-specific internal alias for
+    // authentication and keep phone_e164 as non-unique contact information only.
+    const loginId='ACH-'+memberId.replaceAll('-','').toUpperCase();
+    const email='volunteer-'+memberId+'@auth.achang.invalid';
+    const {data:created,error:createError}=await supa.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{achang_member_id:memberId}});
     if(createError||!created.user)return json({error:'Unable to create account'},createError?.status===422?409:502);
     const uid=created.user.id;
-    const {data:entry,error:entryErr}=await supa.from('member_accounts').insert({member_id:memberId,auth_user_id:uid,role:'volunteer',status:'active',approved_at:new Date().toISOString(),approved_by:user.id}).select('id').single();
-    if(entryErr||!entry){await supa.auth.admin.deleteUser(uid);return json({error:'Account activation failed'},502)}
-    return json({ok:true,member:{member_id:memberId,role:'volunteer',enabled:true}},201);
+    const {data:entry,error:entryErr}=await supa.from('member_accounts').insert({member_id:memberId,auth_user_id:uid,login_id:loginId,role:'volunteer',status:'pending',requested_at:new Date().toISOString()}).select('id,member_id,login_id,status').single();
+    if(entryErr||!entry){await supa.auth.admin.deleteUser(uid);return json({error:'Account request creation failed'},502)}
+    return json({ok:true,member:{...entry,role:'volunteer',enabled:false}},201);
   }catch{ return json({error:'Invalid request'},400)}
 });
