@@ -189,9 +189,25 @@ async function mapFallbackCase() {
   });
 }
 
+async function memberApplicationModalCase() {
+  return withPage({role:'volunteer'}, async ({page,origin,observed}) => {
+    await page.goto(origin,{waitUntil:'domcontentloaded'});
+    await page.waitForFunction(() => document.querySelector('#openMemberApplication')?.onclick !== null);
+    assert.equal(await page.locator('#closeSecureLogin').count(),0);
+    assert.equal(await page.locator('#openMemberApplication').count(),1);
+    await page.locator('#openMemberApplication').click();
+    await page.locator('#memberApplicationForm').waitFor();
+    assert.equal(await page.locator('#memberApplicationForm input[name="invitationCode"]').getAttribute('maxlength'),'4');
+    assert.equal(await page.locator('#memberApplicationForm input[name="invitationCode"]').getAttribute('pattern'),'[0-9]{4}');
+    assert.equal(await page.locator('#previewDemoLogin').count(),0);
+    return {modal:'PASS',invitationDigits:4,previewBypass:false,external:observed.external};
+  });
+}
+
 (async()=>{
   const results = {
     status:'PASS',
+    memberApplicationModal:await memberApplicationModalCase(),
     network:'local synthetic API only; every external request blocked',
     adminCallback:await callbackCase('admin'),
     volunteerCallback:await callbackCase('volunteer'),
