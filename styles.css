@@ -946,3 +946,4 @@ body.volunteer-session #areaPopup.owner-center-popup .phone-link{min-height:42px
 #adminHeaderAction.admin-icon-action:hover,#adminHeaderAction.admin-icon-action:focus-visible{background:#ffffff22!important}
 #adminHeaderAction.admin-icon-action[hidden]{display:none!important}
 .device-detail-row .device-approved-time{display:block;margin-top:4px;font-size:12px!important;font-weight:800;color:#32604d!important;font-variant-numeric:tabular-nums}
+.modal-backdrop{z-index:120}

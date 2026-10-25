@@ -59,6 +59,9 @@ Therefore:
    Edge Function independently requires the calling administrator's approved device.
 9. The last-administrator guard now counts only administrators who are actually usable under
    the device policy. Administrator audit failure is fail-closed with explicit compensation.
+10. Browser screenshot review found and fixed the login screen covering the member-application
+    sheet; the modal now renders above login on mobile and desktop, with an occlusion regression
+    assertion and PWA cache revision bump.
 
 The Auth user create and database account insert cannot share one ACID transaction. The
 implementation consumes the exposed invitation first, compensates an account-insert failure

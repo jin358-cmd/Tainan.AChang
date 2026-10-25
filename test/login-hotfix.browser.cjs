@@ -200,6 +200,7 @@ async function memberApplicationModalCase() {
     assert.equal(await page.locator('#secureLoginForm input[name="login"]').getAttribute('placeholder'),'09xx-xxx-xxx');
     await page.locator('#openMemberApplication').click();
     await page.locator('#memberApplicationForm').waitFor();
+    assert.equal(await page.evaluate(()=>{const form=document.querySelector('#memberApplicationForm'),rect=form.getBoundingClientRect(),top=document.elementFromPoint(rect.left+rect.width/2,rect.top+Math.min(30,rect.height/2));return !!top?.closest('#memberApplicationForm')}),true);
     assert.equal(await page.locator('#memberApplicationForm input[name="invitationCode"]').getAttribute('maxlength'),'4');
     assert.equal(await page.locator('#memberApplicationForm input[name="invitationCode"]').getAttribute('pattern'),'[0-9]{4}');
     assert.equal(await page.locator('#previewDemoLogin').count(),0);
