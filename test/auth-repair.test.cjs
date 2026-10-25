@@ -10,7 +10,8 @@ test('provisioning separates non-unique contact phone from Auth identity',()=>{
  assert.match(source,/volunteer-'\+memberId\+'@auth\.achang\.invalid/);
  assert.match(source,/loginId='ACH-'\+memberId/);
  assert.doesNotMatch(source,/createUser\(\{phone,password/);
- assert.match(source,/status:'pending'/);
+ assert.match(source,/status:directApproval\?'active':'pending'/);
+ assert.match(source,/approved_by:directApproval\?user\.id:null/);
 });
 
 test('PIN login resolves one account by independent login_id and enforces status',()=>{
@@ -71,4 +72,15 @@ test('reactivation keeps account and device authorization as separate states',()
  assert.match(migration,/account_reactivated/);
  assert.match(ui,/已停用會員/);
  assert.match(ui,/data-account-reactivate/);
+});
+
+test('four-digit invitation has conditional claim and global phone rate limit',()=>{
+ const issue=read('api/members.js'), apply=read('supabase/functions/achang-member-apply/index.ts');
+ assert.match(issue,/crypto\.randomInt\(0,10000\)/);
+ assert.match(issue,/padStart\(4,'0'\)/);
+ assert.match(apply,/\^\[0-9\]\{4\}\$/);
+ assert.match(apply,/application-phone-24h/);
+ assert.match(apply,/p_window_seconds:86400/);
+ assert.match(apply,/\.gt\('application_code_expires_at'/);
+ assert.match(apply,/\.eq\('application_code_hash',codeHash\)/);
 });
