@@ -436,7 +436,7 @@ async function submitNewMemberForm(form){
 }
 
 function openMemberApplicationForm(){
- showModal('志工會員申請',`<form id="memberApplicationForm"><p class="form-hint">請輸入管理員私下提供的 16 碼一次性邀請碼。聯絡電話只用於核對名冊，不是登入帳號。</p><label>申請邀請碼<input name="invitationCode" required minlength="16" maxlength="16" pattern="[A-Fa-f0-9]{16}" autocapitalize="characters" autocomplete="one-time-code"></label><label>名冊聯絡電話<input name="phone" required type="tel" inputmode="tel" placeholder="09xx-xxx-xxx"></label><label>自訂六碼 PIN<input name="pin" required type="password" minlength="6" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="new-password"></label><button class="primary wide" type="submit">送出待核准申請</button><p id="memberApplicationStatus" class="form-progress" role="status" aria-live="polite"></p></form>`);
+ showModal('志工會員申請',`<form id="memberApplicationForm"><p class="form-hint">請輸入管理員提供的四碼邀請碼。</p><label>申請邀請碼<input name="invitationCode" required minlength="4" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" autocapitalize="characters" autocomplete="one-time-code"></label><label>名冊聯絡電話<input name="phone" required type="tel" inputmode="tel" placeholder="09xx-xxx-xxx"></label><label>自訂六碼 PIN<input name="pin" required type="password" minlength="6" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="new-password"></label><button class="primary wide" type="submit">送出待核准申請</button><p id="memberApplicationStatus" class="form-progress" role="status" aria-live="polite"></p></form>`);
 }
 
 const originalBind=bind;
