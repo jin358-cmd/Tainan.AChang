@@ -105,6 +105,10 @@ test('four-digit invitation has conditional claim and global phone rate limit',(
  assert.match(claim,/to service_role/);
  assert.match(claim,/cannot disable the final usable administrator/);
  assert.match(claim,/d\.status = 'approved'/);
+ assert.match(claim,/prevent_last_usable_admin_device_revoke/);
+ assert.match(claim,/cannot revoke the final usable administrator device/);
+ assert.match(claim,/d\.id <> old\.id/);
+ assert.match(claim,/pg_advisory_xact_lock\(hashtext\('achang-active-admin-guard'\)\)/);
 });
 
 test('administrator controls use a protected PIN form and keep a final-admin guard',()=>{

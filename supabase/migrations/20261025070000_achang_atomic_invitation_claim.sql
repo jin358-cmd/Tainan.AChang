@@ -144,3 +144,63 @@ drop trigger if exists member_accounts_last_admin_guard on public.member_account
 create trigger member_accounts_last_admin_guard
 before update of role, status on public.member_accounts
 for each row execute function app_private.prevent_last_active_admin_change();
+
+-- Account-state protection alone is insufficient: revoking the only approved
+-- device of the final usable administrator would also lock out administration.
+create or replace function app_private.prevent_last_usable_admin_device_revoke()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  protected_admin boolean;
+begin
+  if old.status = 'approved' and new.status <> 'approved' then
+    select exists (
+      select 1
+      from public.member_accounts a
+      join public.members m on m.id = a.member_id
+      where a.id = old.account_id
+        and a.role = 'admin'
+        and a.status = 'active'
+        and a.device_approval_required = true
+        and m.deleted_at is null
+    ) into protected_admin;
+
+    if protected_admin then
+      perform pg_advisory_xact_lock(hashtext('achang-active-admin-guard'));
+      if not exists (
+        select 1
+        from public.member_accounts a
+        join public.members m on m.id = a.member_id
+        where a.role = 'admin'
+          and a.status = 'active'
+          and m.deleted_at is null
+          and (
+            a.device_approval_required = false
+            or exists (
+              select 1
+              from public.member_devices d
+              where d.account_id = a.id
+                and d.status = 'approved'
+                and d.id <> old.id
+            )
+          )
+      ) then
+        raise exception using
+          errcode = '23514',
+          message = 'cannot revoke the final usable administrator device';
+      end if;
+    end if;
+  end if;
+  return new;
+end
+$$;
+
+revoke all on function app_private.prevent_last_usable_admin_device_revoke() from public;
+
+drop trigger if exists member_devices_last_admin_guard on public.member_devices;
+create trigger member_devices_last_admin_guard
+before update of status on public.member_devices
+for each row execute function app_private.prevent_last_usable_admin_device_revoke();

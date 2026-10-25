@@ -62,6 +62,9 @@ Therefore:
 10. Browser screenshot review found and fixed the login screen covering the member-application
     sheet; the modal now renders above login on mobile and desktop, with an occlusion regression
     assertion and PWA cache revision bump.
+11. Revoking an approved device now uses the same serialized last-usable-administrator guard.
+    The final approved device cannot be revoked unless another active administrator is actually
+    usable. This closes the device-side lockout path without granting a device exemption.
 
 The Auth user create and database account insert cannot share one ACID transaction. The
 implementation consumes the exposed invitation first, compensates an account-insert failure
@@ -82,6 +85,11 @@ New migration: `20261025070000_achang_atomic_invitation_claim.sql`.
 - Replaces the existing `app_private.prevent_last_active_admin_change()` body and recreates
   its trigger so an active administrator without an approved device cannot be counted as the
   final recovery administrator.
+- Adds `app_private.prevent_last_usable_admin_device_revoke()` as `SECURITY DEFINER` with
+  empty `search_path`, revokes public execute, and attaches it only to a `BEFORE UPDATE OF
+  status` trigger on `member_devices`. It serializes against account-role/status changes with
+  the same transaction advisory lock and rejects only an approved-to-non-approved transition
+  that would leave no usable active administrator.
 - Does not change existing account role, status, or `device_approval_required` values.
 
 The already-applied TEST migration is platform version
@@ -103,6 +111,10 @@ Exact SQL execution scope:
   `member_authorization_events` row in the same transaction.
 - `app_private.prevent_last_active_admin_change()` is `SECURITY DEFINER`, empty
   `search_path`, and runs only before member-account role/status changes.
+- `app_private.prevent_last_usable_admin_device_revoke()` is `SECURITY DEFINER`, empty
+  `search_path`, has no direct execute grant, and runs only before a member-device status
+  change. It reads administrator/account/device state and may reject the row update; it does
+  not write any other row or grant any device exemption.
 - No function is granted to `anon` or `authenticated`; no RLS policy is added or relaxed.
 
 ## Verification
@@ -127,6 +139,11 @@ $ esbuild <each Edge function> --bundle --platform=neutral --external:jsr:*
 
 $ PostgreSQL 17.6 isolated fixture + three migrations + assertions
 MIGRATION_ASSERTIONS_PASS
+
+$ concurrent revoke of the only approved devices for two active administrators
+DEVICE_RACE_EXIT_A=0 DEVICE_RACE_EXIT_B=1
+losing transaction: ERROR: cannot revoke the final usable administrator device
+DEVICE_RACE_ASSERTIONS_PASS
 ```
 
 Compiled Edge artifact SHA-256:
@@ -166,12 +183,14 @@ two-device approval/revocation, wrong PIN, role isolation, administrator creatio
 and Google callback wiring.
 
 Reason: this executor has no Supabase/Vercel deployment connector or CLI authentication.
-Parent has the connected deployment tools. No existing synthetic TEST login identity was
-identified in the handed-off metadata; existence remains **UNKNOWN**, without attempting to
-read or create a credential. `GH_TOKEN` is invalid for API reads, although Git push through
-the configured repository credential succeeds. The blocked operations were **not attempted**
-against TEST or Production and their outcome is known: **not executed**, not denied and not
-uncertain.
+Parent has the connected deployment tools and has submitted one exact authorization request
+covering the new migration, the three Edge Functions, the fixed TEST deployment, and
+identifiable synthetic TEST identities. Owner response is **pending**. No existing synthetic
+TEST login identity was identified in the handed-off metadata; existence remains **UNKNOWN**,
+without attempting to read or create a credential. `GH_TOKEN` is invalid for API reads,
+although Git push through the configured repository credential succeeds. The blocked
+operations were **not attempted** against TEST or Production and their outcome is known:
+**not executed pending authorization**, not denied and not uncertain.
 
 Minimum additional authority/capability needed: parent uses its scoped deployment path to TEST
 project `fhxdpupascsikjsycpbi` to apply only

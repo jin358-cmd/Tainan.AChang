@@ -59,6 +59,48 @@ begin
   end if;
 end $$;
 
+-- The final usable administrator cannot lose its only approved device. Once a
+-- second usable administrator exists, the first device can be revoked.
+insert into auth.users(id) values
+ ('10000000-0000-4000-8000-000000000003'),
+ ('10000000-0000-4000-8000-000000000004');
+insert into public.members(id,source_member_id,display_name,phone_e164) values
+ ('20000000-0000-4000-8000-000000000004','SYNTH-ADMIN-A','Synthetic admin A','+886922222221'),
+ ('20000000-0000-4000-8000-000000000005','SYNTH-ADMIN-B','Synthetic admin B','+886922222222');
+insert into public.member_accounts(id,member_id,auth_user_id,role,status,device_approval_required) values
+ ('30000000-0000-4000-8000-000000000004','20000000-0000-4000-8000-000000000004','10000000-0000-4000-8000-000000000003','admin','active',true),
+ ('30000000-0000-4000-8000-000000000005','20000000-0000-4000-8000-000000000005','10000000-0000-4000-8000-000000000004','admin','active',true);
+insert into public.member_devices(id,account_id,device_id_hash,status,approved_at) values
+ ('40000000-0000-4000-8000-000000000004','30000000-0000-4000-8000-000000000004',repeat('e',64),'approved',now());
+
+do $$
+begin
+  begin
+    update public.member_devices
+    set status='revoked',revoked_at=now()
+    where id='40000000-0000-4000-8000-000000000004';
+    raise exception 'final usable administrator device revoke unexpectedly succeeded';
+  exception when check_violation then
+    if sqlerrm <> 'cannot revoke the final usable administrator device' then raise; end if;
+  end;
+  if (select status from public.member_devices where id='40000000-0000-4000-8000-000000000004') <> 'approved' then
+    raise exception 'failed revoke changed the protected device';
+  end if;
+end $$;
+
+insert into public.member_devices(id,account_id,device_id_hash,status,approved_at) values
+ ('40000000-0000-4000-8000-000000000005','30000000-0000-4000-8000-000000000005',repeat('f',64),'approved',now());
+update public.member_devices
+set status='revoked',revoked_at=now()
+where id='40000000-0000-4000-8000-000000000004';
+
+do $$
+begin
+  if (select status from public.member_devices where id='40000000-0000-4000-8000-000000000004') <> 'revoked' then
+    raise exception 'revoke remained blocked after a second usable administrator existed';
+  end if;
+end $$;
+
 -- Invitation claim checks phone, expiry, account absence and consumes once.
 insert into public.members(id,source_member_id,display_name,phone_e164,application_code_hash,application_code_expires_at)
 values('20000000-0000-4000-8000-000000000003','SYNTH-INVITE','Synthetic invite','+886911111111',repeat('c',64),now()+interval '1 hour');
