@@ -287,7 +287,7 @@ function showAuth(){
  document.getElementById('addPerson') && ($('#addPerson').hidden=true);$('#addMember').hidden=true;$('#openRosterAuthorization').hidden=true;
  $('#rosterLocked').hidden=false;$('#peopleList').hidden=true;
  $('#clearArea').hidden=true;
- const z=$('#authStatus');z.textContent='首次登入或裝置授權失效時，請輸入已核准的帳號與密碼';
+ const z=$('#authStatus');z.textContent='';
  render();go('areas');previewLoginButton();
 }
 function openSecureLogin(){if(liveRole==='admin')return openMemberAdmin();previewLoginButton();$('#secureLogin').hidden=false;$('#secureLoginForm input[name="login"]').focus()}
