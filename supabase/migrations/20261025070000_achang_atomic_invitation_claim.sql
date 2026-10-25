@@ -144,4 +144,3 @@ drop trigger if exists member_accounts_last_admin_guard on public.member_account
 create trigger member_accounts_last_admin_guard
 before update of role, status on public.member_accounts
 for each row execute function app_private.prevent_last_active_admin_change();
-

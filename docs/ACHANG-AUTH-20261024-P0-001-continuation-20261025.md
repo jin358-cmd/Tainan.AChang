@@ -1,7 +1,7 @@
 # ACHANG-AUTH-20261024-P0-001｜Continuation report
 
-Evidence time: 2026-10-25 UTC  
-Executor branch: `fix/achang-auth-20261024-p0-001-continuation`  
+Evidence time: 2026-10-25 UTC
+Executor branch: `fix/achang-auth-20261024-p0-001-continuation`
 Initial continuation SHA: `d5635d6b66841e2876e72aba2afc5ae1f42d082f`
 Final evidence SHA: recorded in the bundled manifest after commit
 
@@ -196,4 +196,3 @@ change because deployment state can move.
 Immediately before push, a fresh remote fetch showed no head newer than `cd61b703` and the
 local process list showed no Vercel/Supabase deployment process. This does not prove that no
 separate cloud executor exists; cloud-side exclusivity remains **UNCERTAIN**.
-
