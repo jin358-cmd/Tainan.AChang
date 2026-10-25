@@ -10,7 +10,8 @@ test('provisioning separates non-unique contact phone from Auth identity',()=>{
  assert.match(source,/volunteer-'\+memberId\+'@auth\.achang\.invalid/);
  assert.match(source,/loginId='ACH-'\+memberId/);
  assert.doesNotMatch(source,/createUser\(\{phone,password/);
- assert.match(source,/status:'pending'/);
+ assert.match(source,/status:directApproval\?'active':'pending'/);
+ assert.match(source,/approved_by:directApproval\?user\.id:null/);
 });
 
 test('PIN login resolves one account by independent login_id and enforces status',()=>{
@@ -71,4 +72,15 @@ test('reactivation keeps account and device authorization as separate states',()
  assert.match(migration,/account_reactivated/);
  assert.match(ui,/已停用會員/);
  assert.match(ui,/data-account-reactivate/);
+});
+
+test('four-digit invitation and genuine sign-in interface are wired without demo bypass',()=>{
+ const member=read('api/members.js'), apply=read('supabase/functions/achang-member-apply/index.ts'),ui=read('app.js'),html=read('index.html');
+ assert.match(member,/crypto\.randomInt\(0,10000\)/);
+ assert.match(member,/padStart\(4,'0'\)/);
+ assert.match(apply,/\^\[0-9\]\{4\}\$/);
+ assert.match(html,/id="openMemberApplication"/);
+ assert.match(ui,/\$\('#openMemberApplication'\)\.onclick=openMemberApplicationForm/);
+ assert.doesNotMatch(ui,/進入志工測試介面（免帳密）/);
+ assert.doesNotMatch(ui,/\$\('#closeSecureLogin'\)\.onclick/);
 });
