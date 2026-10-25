@@ -218,6 +218,13 @@ async function adminNavigationSmokeCase() {
    }
    assert.equal(visited.length,5);
    assert.equal(await page.locator('#previewDemoLogin').count(),0);
+   await page.locator('#openRosterAuthorization').click();
+   await page.locator('#memberAdminForm').waitFor();
+   assert.match(await page.locator('#modalTitle').textContent(),/會員授權/);
+   await page.locator('#closeModal').click();
+   await page.locator('#addMember').click();
+   await page.locator('#newMemberForm').waitFor();
+   await page.locator('#closeModal').click();
    return {pages:visited,api:observed.api,consoleErrors:observed.consoleErrors,pageErrors:observed.pageErrors,external:observed.external};
  });
 }
