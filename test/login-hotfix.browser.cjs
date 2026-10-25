@@ -206,10 +206,27 @@ async function memberApplicationModalCase() {
   });
 }
 
+async function adminNavigationSmokeCase() {
+ return withPage({role:'admin'},async({page,origin,observed})=>{
+   await page.goto(origin+'/#access_token=synthetic_access&refresh_token=synthetic_refresh',{waitUntil:'domcontentloaded'});
+   await page.waitForFunction(()=>document.querySelector('#signedInName')?.hidden===false);
+   const visited=[];
+   for(const name of ['map','areas','planner','reports','people']){
+     await page.locator('.desktop-nav [data-page="'+name+'"]').click();
+     await page.waitForFunction(n=>document.querySelector('#page-'+n)?.classList.contains('active'),name);
+     visited.push(name);
+   }
+   assert.equal(visited.length,5);
+   assert.equal(await page.locator('#previewDemoLogin').count(),0);
+   return {pages:visited,api:observed.api,consoleErrors:observed.consoleErrors,pageErrors:observed.pageErrors,external:observed.external};
+ });
+}
+
 (async()=>{
   const results = {
     status:'PASS',
     memberApplicationModal:await memberApplicationModalCase(),
+    adminNavigationSmoke:await adminNavigationSmokeCase(),
     network:'local synthetic API only; every external request blocked',
     adminCallback:await callbackCase('admin'),
     volunteerCallback:await callbackCase('volunteer'),
@@ -221,6 +238,7 @@ async function memberApplicationModalCase() {
   };
   const expectedConsoleError = {
     memberApplicationModal: message => /401 \(Unauthorized\)$/.test(message),
+    adminNavigationSmoke: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
     adminCallback: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
     volunteerCallback: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
     unauthorizedCallback: message => /403 \(Forbidden\)$/.test(message),
