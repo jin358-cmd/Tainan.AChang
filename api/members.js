@@ -13,9 +13,19 @@ module.exports=L.run(async(req,res)=>{
   const memberId=L.uuid(b.volunteerId),contact=L.phone(b.phone),mem=await L.getOne('members',memberId,p.token);
   if(!mem||mem.deleted_at||mem.phone_e164!==contact)L.problem(400,'會員與聯絡電話不符');
   const existing=L.need(await L.rest('member_accounts?member_id=eq.'+memberId+'&select=id&limit=1',p.token),'會員帳號查詢失敗');if(existing.length)L.problem(409,'這位會員已有帳號或待核准申請');
-  const invitationCode=String(crypto.randomInt(0,10000)).padStart(4,'0'),application_code_hash=crypto.createHash('sha256').update(invitationCode).digest('hex'),expires=new Date(Date.now()+24*60*60*1000).toISOString();
-  const saved=await L.rest('members?id=eq.'+memberId+'&deleted_at=is.null&select=id',p.token,{method:'PATCH',headers:{Prefer:'return=representation'},body:{application_code_hash,application_code_expires_at:expires}});
-  if(!L.need(saved,'申請邀請碼建立失敗')?.length)L.problem(409,'會員已封存或不存在');
+  let invitationCode='',expires='',saved=false;
+  // The four-digit namespace is intentionally small. Retry a bounded number of
+  // cryptographically-random candidates when another active/expired row still
+  // occupies the same unique hash; never weaken the database uniqueness guard.
+  for(let attempt=0;attempt<8;attempt++){
+   invitationCode=String(crypto.randomInt(0,10000)).padStart(4,'0');
+   const application_code_hash=crypto.createHash('sha256').update(invitationCode).digest('hex');
+   expires=new Date(Date.now()+24*60*60*1000).toISOString();
+   const result=await L.rest('members?id=eq.'+memberId+'&deleted_at=is.null&select=id',p.token,{method:'PATCH',headers:{Prefer:'return=representation'},body:{application_code_hash,application_code_expires_at:expires}});
+   if(result.ok&&result.data?.length){saved=true;break}
+   if(result.status!==409)L.need(result,'申請邀請碼建立失敗');
+  }
+  if(!saved)L.problem(503,'邀請碼暫時無法建立，請稍後再試');
   return L.json(res,201,{invitationCode,expiresAt:expires});
  }
  if(req.method==='POST'&&b.action==='direct-provision'){

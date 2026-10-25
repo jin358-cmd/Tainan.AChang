@@ -23,12 +23,21 @@ test('PIN login resolves one account by independent login_id and enforces status
 });
 
 test('volunteer application requires a one-time invitation and creates Pending',()=>{
- const source=read('supabase/functions/achang-member-apply/index.ts');
- assert.match(source,/application_code_hash/);
- assert.match(source,/application_code_expires_at/);
+ const source=read('supabase/functions/achang-member-apply/index.ts'),claim=read('supabase/migrations/20261025070000_achang_atomic_invitation_claim.sql');
+ assert.match(claim,/application_code_hash/);
+ assert.match(claim,/application_code_expires_at/);
  assert.match(source,/status:'pending'/);
  assert.match(source,/achang_try_pin_attempt/);
  assert.doesNotMatch(source,/createUser\(\{phone,password/);
+});
+
+test('member application confirms and clears the six-digit PIN',()=>{
+ const ui=read('app.js');
+ assert.match(ui,/name="confirmPin"/);
+ assert.match(ui,/d\.pin!==d\.confirmPin/);
+ assert.match(ui,/delete d\.confirmPin/);
+ assert.match(ui,/form\.elements\.pin\.value=''/);
+ assert.match(ui,/form\.elements\.confirmPin\.value=''/);
 });
 
 test('migration preserves revoked history and adds auditable soft delete',()=>{
@@ -75,12 +84,19 @@ test('reactivation keeps account and device authorization as separate states',()
 });
 
 test('four-digit invitation has conditional claim and global phone rate limit',()=>{
- const issue=read('api/members.js'), apply=read('supabase/functions/achang-member-apply/index.ts');
+ const issue=read('api/members.js'), apply=read('supabase/functions/achang-member-apply/index.ts'),claim=read('supabase/migrations/20261025070000_achang_atomic_invitation_claim.sql');
  assert.match(issue,/crypto\.randomInt\(0,10000\)/);
  assert.match(issue,/padStart\(4,'0'\)/);
  assert.match(apply,/\^\[0-9\]\{4\}\$/);
  assert.match(apply,/application-phone-24h/);
  assert.match(apply,/p_window_seconds:86400/);
- assert.match(apply,/\.gt\('application_code_expires_at'/);
- assert.match(apply,/\.eq\('application_code_hash',codeHash\)/);
+ assert.match(issue,/attempt<8/);
+ assert.match(apply,/achang_claim_member_invitation/);
+ assert.match(claim,/m\.phone_e164 = p_phone/);
+ assert.match(claim,/m\.deleted_at is null/);
+ assert.match(claim,/m\.application_code_expires_at > statement_timestamp\(\)/);
+ assert.match(claim,/not exists \(\s*select 1 from public\.member_accounts/);
+ assert.match(claim,/invite_consumed/);
+ assert.match(claim,/revoke all on function public\.achang_claim_member_invitation\(text,text,text\)/);
+ assert.match(claim,/to service_role/);
 });
