@@ -27,6 +27,7 @@ Deno.serve(async(req:Request)=>{
   const {data:account,error:accountError}=await supa.from('member_accounts').insert({member_id:member.id,auth_user_id:created.user.id,login_id:loginId,role:'volunteer',status:'pending',requested_at:new Date().toISOString()}).select('id,login_id,status').single();
   if(accountError||!account){await supa.auth.admin.deleteUser(created.user.id);return reply({error:'會員申請建立失敗'},accountError?.code==='23505'?409:502)}
   await supa.from('members').update({application_code_hash:null,application_code_expires_at:null}).eq('id',member.id).eq('application_code_hash',codeHash);
-  return reply({ok:true,loginId:account.login_id,status:account.status,message:'申請已送出，請等待管理員核准'},201);
+  await supa.from('member_authorization_events').insert({member_id:member.id,account_id:account.id,event_type:'invite_consumed',subject_hash:await sha(key+'|invite|'+codeHash)});
+  return reply({ok:true,status:account.status,message:'申請已送出，請等待管理員核准'},201);
  }catch{return reply({error:'申請資料格式錯誤'},400)}
 });

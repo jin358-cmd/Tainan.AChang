@@ -7,19 +7,22 @@ const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 
 test('provisioning separates non-unique contact phone from Auth identity',()=>{
  const source=read('supabase/functions/achang-admin-provision/index.ts');
- assert.match(source,/volunteer-'\+memberId\+'@auth\.achang\.invalid/);
+ assert.match(source,/role==='admin'\?'admin-':'volunteer-'/);
  assert.match(source,/loginId='ACH-'\+memberId/);
  assert.doesNotMatch(source,/createUser\(\{phone,password/);
- assert.match(source,/status:directApproval\?'active':'pending'/);
- assert.match(source,/approved_by:directApproval\?user\.id:null/);
+ assert.match(source,/status:'active'/);
+ assert.match(source,/device_approval_required:true/);
+ assert.match(source,/approved_by:user\.id/);
 });
 
-test('PIN login resolves one account by independent login_id and enforces status',()=>{
+test('phone plus PIN resolves a unique account without treating phone as Auth identity',()=>{
  const source=read('supabase/functions/achang-pin-login/index.ts');
- assert.match(source,/\.eq\('login_id',loginId\)/);
+ assert.match(source,/\.eq\('phone_e164',phone\)/);
+ assert.match(source,/matches\.length!==1/);
+ assert.match(source,/auth\.admin\.getUserById/);
  assert.match(source,/ACCOUNT_PENDING/);
- assert.match(source,/acct\.status!=='active'/);
- assert.doesNotMatch(source,/\.eq\('phone_e164'/);
+ assert.match(source,/match\.account\.status!=='active'/);
+ assert.doesNotMatch(source,/createUser\(\{phone/);
 });
 
 test('volunteer application requires a one-time invitation and creates Pending',()=>{
@@ -83,4 +86,14 @@ test('four-digit invitation and genuine sign-in interface are wired without demo
  assert.match(ui,/\$\('#openMemberApplication'\)\.onclick=openMemberApplicationForm/);
  assert.doesNotMatch(ui,/進入志工測試介面（免帳密）/);
  assert.doesNotMatch(ui,/\$\('#closeSecureLogin'\)\.onclick/);
+});
+
+test('administrator controls use a protected PIN form and keep a final-admin guard',()=>{
+ const ui=read('app.js'),api=read('api/members.js'),migration=read('supabase/migrations/20261025034848_achang_phone_pin_admin_controls.sql');
+ assert.match(ui,/id="directProvisionForm"/);
+ assert.match(ui,/id="directAdminBtn"/);
+ assert.doesNotMatch(ui,/prompt\('請讓志工本人當面設定六碼 PIN/);
+ assert.match(api,/\['volunteer','admin'\]\.includes\(role\)/);
+ assert.match(migration,/prevent_last_active_admin_change/);
+ assert.match(migration,/device_approval_required boolean not null default true/);
 });

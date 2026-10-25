@@ -159,7 +159,7 @@ async function secondDeviceApplicationCase() {
     await page.goto(origin, {waitUntil:'domcontentloaded'});
     await page.waitForFunction(() => document.querySelector('#volunteerLoginBtn')?.hidden === false);
     await page.locator('#volunteerLoginBtn').click();
-    await page.locator('#secureLoginForm input[name="login"]').fill('ACH-'+'A'.repeat(32));
+    await page.locator('#secureLoginForm input[name="login"]').fill('0912345678');
     await page.locator('#secureLoginForm input[name="password"]').fill('123456');
     await page.locator('#secureLoginForm button[type="submit"]').click();
     await page.waitForFunction(() => /申請已送出/.test(document.querySelector('#authStatus')?.textContent||''));
@@ -197,6 +197,7 @@ async function memberApplicationModalCase() {
     await page.waitForFunction(() => document.querySelector('#secureLogin')?.hidden === false);
     assert.equal(await page.locator('#closeSecureLogin').count(),0);
     assert.equal(await page.locator('#openMemberApplication').count(),1);
+    assert.equal(await page.locator('#secureLoginForm input[name="login"]').getAttribute('placeholder'),'09xx-xxx-xxx');
     await page.locator('#openMemberApplication').click();
     await page.locator('#memberApplicationForm').waitFor();
     assert.equal(await page.locator('#memberApplicationForm input[name="invitationCode"]').getAttribute('maxlength'),'4');
