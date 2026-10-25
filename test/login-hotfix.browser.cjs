@@ -192,7 +192,9 @@ async function mapFallbackCase() {
 async function memberApplicationModalCase() {
   return withPage({role:'volunteer'}, async ({page,origin,observed}) => {
     await page.goto(origin,{waitUntil:'domcontentloaded'});
-    await page.waitForFunction(() => document.querySelector('#openMemberApplication')?.onclick !== null);
+    await page.waitForFunction(() => document.querySelector('#volunteerLoginBtn')?.hidden === false);
+    await page.locator('#volunteerLoginBtn').click();
+    await page.waitForFunction(() => document.querySelector('#secureLogin')?.hidden === false);
     assert.equal(await page.locator('#closeSecureLogin').count(),0);
     assert.equal(await page.locator('#openMemberApplication').count(),1);
     await page.locator('#openMemberApplication').click();
