@@ -62,6 +62,7 @@ test('second device requires explicit member confirmation before a pending reque
  assert.match(application,/deviceCheck\(req,p,p\.token,true\)/);
  assert.match(ui,/此裝置尚未授權，是否提出申請/);
  assert.match(ui,/onlineApi\('device-application','POST'/);
+ assert.doesNotMatch(application,/role!=='volunteer'/);
 });
 
 test('reactivation keeps account and device authorization as separate states',()=>{
