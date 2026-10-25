@@ -220,6 +220,7 @@ async function memberApplicationModalCase() {
     latestUiMapFallback:await mapFallbackCase(),
   };
   const expectedConsoleError = {
+    memberApplicationModal: message => /401 \(Unauthorized\)$/.test(message),
     adminCallback: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
     volunteerCallback: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
     unauthorizedCallback: message => /403 \(Forbidden\)$/.test(message),
