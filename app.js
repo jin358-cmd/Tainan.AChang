@@ -435,7 +435,7 @@ function openMemberApplicationForm(){
 const originalBind=bind;
 bind=function(){originalBind();
  $('#secureLogout').onclick=secureSignOut;
- $('#closeSecureLogin').onclick=()=>{$('#secureLogin').hidden=true};
+ // Login screen has no return button; secure navigation requires authentication.
  $('#openMemberApplication').onclick=openMemberApplicationForm;
  $('#loginFromRoster').onclick=openSecureLogin;
  $('#addMember').onclick=openNewMemberForm;
