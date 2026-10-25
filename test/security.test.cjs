@@ -1,6 +1,6 @@
 const t=require('node:test'),assert=require('node:assert/strict');const L=require('../lib/server'),{readEnvironment}=require('../lib/environment');
 t('拒絕任意電話格式',()=>{assert.equal(L.phone('0989-098-468'),'+886989098468');assert.throws(()=>L.phone('1234567890'),/手機號碼/)});
-t('會員登入代碼與聯絡電話分離',()=>{const id='ACH-92ACBBAF7E994A2692AB98297EB5076D';assert.equal(L.loginId(id.toLowerCase()),id);assert.throws(()=>L.loginId('0912345678'),/登入代碼/)});
+t('手機號碼只做聯絡比對，不直接成為 Auth identity',()=>{assert.equal(L.phone('0912-345-678'),'+886912345678');assert.throws(()=>L.phone('member@example.invalid'),/手機號碼/)});
 t('日期、時間格式有驗證',()=>{assert.equal(L.validDate('2026-10-19'),'2026-10-19');assert.throws(()=>L.validDate('tomorrow'));assert.throws(()=>L.time('25:00'))});
 t('公鑰由環境注入且絕不接受 Service Role 密鑰',()=>{const env=readEnvironment({ACHANG_ENVIRONMENT:'test',ACHANG_TEST_ISOLATED:'1',EXPECTED_SUPABASE_PROJECT_REF:'fhxdpupascsikjsycpbi',SUPABASE_URL:'https://fhxdpupascsikjsycpbi.supabase.co',SUPABASE_PUBLISHABLE_KEY:'sb_publishable_test_only',VERCEL_ENV:'preview'});assert.equal(env.valid,true);assert.match(env.publishableKey,/^sb_publishable_/);assert.ok(!('serviceRoleKey' in env));assert.ok(!('SUPABASE_SERVICE_ROLE_KEY' in L))});
 t('檢查來路不明的跨網站寫入',()=>{assert.throws(()=>L.originCheck({method:'POST',headers:{origin:'https://evil.invalid',host:'sample.vercel.app'}}),/拒絕跨網站/);assert.doesNotThrow(()=>L.originCheck({method:'POST',headers:{origin:'https://sample.vercel.app',host:'sample.vercel.app'}}))});

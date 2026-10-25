@@ -5,7 +5,8 @@ alter table public.member_authorization_events
   add column if not exists subject_hash text;
 
 alter table public.member_authorization_events
-  drop constraint if exists member_authorization_events_event_type_check;
+  drop constraint if exists member_authorization_events_event_type_check,
+  drop constraint if exists member_authorization_events_subject_hash_format;
 
 alter table public.member_authorization_events
   add constraint member_authorization_events_event_type_check
