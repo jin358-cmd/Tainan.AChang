@@ -146,24 +146,40 @@ function taskDateCategory(t){
 }
 function volunteerGroups(){const groups=new Map();for(const t of myTasks()){const key=[t.visit_date,t.shift,t.truck,t.area].join('|');if(!groups.has(key))groups.set(key,[]);groups.get(key).push(t)}return [...groups.values()].sort((a,b)=>a[0].visit_date.localeCompare(b[0].visit_date));}
 function renderVolunteerTaskList(root){
- const groups=volunteerGroups(),cats={history:[],current:[],future:[]};for(const g of groups)cats[taskDateCategory(g[0])].push(g);
+ const groups=volunteerGroups(),cats={history:[],current:[],future:[]};
+ for(const g of groups)cats[taskDateCategory(g[0])].push(g);
  const pending=cats.history.filter(g=>g.some(t=>t.status!=='完成')).length;
  const catLabels={history:'歷史',current:'現有',future:'待執行'};
  const selected=cats[volunteerTaskCategory]||[];
- let out='<section class="volunteer-task-unified"><div class="volunteer-task-heading"><h2 class="personal-task-title">今日跟巡任務</h2><div class="volunteer-area-badges">'+[...new Set((cats.current||[]).map(g=>g[0].area))].map(a=>'<span class="volunteer-area-badge" style="--area-color:'+esc(data?.colors?.[a]||'#6b8795')+'">'+esc(a)+'</span>').join('')+'</div></div><div class="volunteer-categories" role="tablist" aria-label="任務時段分類">';
- for(const k of ['history','current','future'])out+='<button type="button" role="tab" aria-selected="'+(k===volunteerTaskCategory)+'" class="volunteer-category '+(k===volunteerTaskCategory?'on':'')+'" data-vol-category="'+k+'">'+catLabels[k]+(k==='history'&&pending?'<small class="history-pending-count" role="status">● 尚未確認 '+pending+' 筆</small>':'<small>'+cats[k].length+' 筆</small>')+'</button>';
+ let out='<section class="volunteer-task-unified"><div class="volunteer-task-heading"><h2 class="personal-task-title">今日跟巡任務</h2></div><div class="volunteer-categories" role="tablist" aria-label="任務時段分類">';
+ for(const k of ['history','current','future'])
+  out+='<button type="button" role="tab" aria-selected="'+(k===volunteerTaskCategory)+'" class="volunteer-category '+(k===volunteerTaskCategory?'on':'')+'" data-vol-category="'+k+'">'+catLabels[k]+(k==='history'&&pending?'<small class="history-pending-count" role="status">● 尚未確認 '+pending+' 筆</small>':'<small>'+cats[k].length+' 筆</small>')+'</button>';
  out+='</div><div class="volunteer-task-unified-body">';
  if(!selected.length){root.innerHTML=out+'<div class="empty">目前沒有'+catLabels[volunteerTaskCategory]+'跟巡任務</div></div></section>';return;}
- for(const g of selected){const t=g[0],stops=[...new Map(g.map(x=>[x.stop_address||x.id,x])).values()].sort((a,b)=>Number(a.stop_order)-Number(b.stop_order)),completed=g.every(x=>x.status==='完成');
- const eta=String(t.eta||'');const label=eta.match(/\d{1,2}:\d{2}\s*[-~～至]\s*\d{1,2}:\d{2}/)?.[0]||eta||'時間待排定';
- out+='<article class="volunteer-task '+(completed?'completed':'')+'"><div class="volunteer-task-top"><strong>'+esc(t.visit_date)+'</strong><span class="task-overall-status '+(completed?'is-done':'is-open')+'">'+(completed?'<span class="task-overall-check" aria-hidden="true">✓</span><span>已完成</span>':volunteerTaskCategory==='history'?'尚未確認':'待執行')+'</span></div>';
- out+='<div class="task-meta"><span class="task-shift-label '+(/夜/.test(t.shift)?'shift-night':'shift-day')+'"><span class="shift-symbol" aria-hidden="true">'+(/夜/.test(t.shift)?'☾':'☀')+'</span>'+esc(t.shift)+'</span><strong class="task-time-highlight">◷ '+esc(label)+'</strong><span class="task-meta-count">'+stops.length+' 個停靠點</span><span class="task-meta-count">1 里</span></div>';
- out+='<div class="task-plate-line"><span class="task-plate"><small>車牌</small> '+esc(t.truck||'未提供')+'</span><button type="button" class="task-team-btn" data-vol-group="'+esc([t.visit_date,t.shift,t.truck,t.area].join('|'))+'">每日小組</button></div>';
- for(const [i,stop] of stops.entries()){const a=String(stop.stop_address||'').trim(),hasAddress=!!a;
- const url=hasAddress?'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(a.startsWith('台')||a.startsWith('臺')?a:'臺南市永康區'+a)+'&travelmode=driving':'';
- out+='<div class="task-stop"><strong>第 '+(i+1)+' 個停靠點</strong><div class="task-stop-row"><span>'+esc(a||'地址尚未提供')+'</span>'+(hasAddress?'<a class="task-navigate" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer" aria-label="Google Maps 導航">📍 導航</a>':'')+'<button type="button" class="task-complete-btn '+(stop.status==='完成'?'is-complete':volunteerTaskCategory==='future'?'is-upcoming':'is-pending')+'" data-vol-complete-group="'+esc(stop.status==='完成'?'':stop.id)+'" '+(stop.status==='完成'||volunteerTaskCategory==='future'?'disabled':'')+'>'+(stop.status==='完成'?'<span class="task-done-check" aria-hidden="true">✓</span><span>已完成</span>':volunteerTaskCategory==='future'?'尚未開始':'未完成')+'</button>'+'</div></div>';
- }
- out+='</article>';
+ for(const [groupIndex,g] of selected.entries()){
+  const t=g[0],stops=[...new Map(g.map(x=>[x.id,x])).values()].sort((a,b)=>Number(a.stop_order)-Number(b.stop_order));
+  const completed=g.every(x=>x.status==='完成'),groupKey=[t.visit_date,t.shift,t.truck,t.area].join('|');
+  const expanded=volunteerExpandedGroups.has(groupKey),panelId='volunteer-stops-'+volunteerTaskCategory+'-'+groupIndex;
+  const shiftIsNight=/夜/.test(t.shift),isHistory=volunteerTaskCategory==='history';
+  const times=stops.map(s=>String(s.eta||'').match(/\d{1,2}:\d{2}/)?.[0]).filter(Boolean);
+  const period=times.length>1?times[0]+'～'+times[times.length-1]:(times[0]||'時間待排定');
+  const status=completed?'已完成':isHistory?'尚未確認':'待執行';
+  out+='<div class="volunteer-task-pair"><article class="volunteer-task volunteer-task-summary '+(completed?'completed':'')+'" data-vol-summary="'+esc(groupKey)+'">';
+  out+='<div class="task-summary-head"><strong>目前跟巡里別</strong><span class="task-area-pill" style="--area-color:'+esc(data?.colors?.[t.area]||'#b89ad5')+'">'+esc(t.area)+'</span></div>';
+  out+='<div class="task-summary-details"><span class="task-summary-date">拜訪日期：<b>'+esc(t.visit_date)+'</b></span><span>清運時段：<b>'+esc(t.shift)+'</b></span></div>';
+  out+='<div class="task-summary-truck">已選車次：<strong>'+esc(t.truck||'車牌待提供')+'</strong><span class="task-overall-status '+(completed?'is-done':'is-open')+'">'+(completed?'<span class="task-overall-check" aria-hidden="true">✓</span>':'')+esc(status)+'</span></div>';
+  out+='<div class="task-summary-strip"><button type="button" class="volunteer-expander" data-vol-expand="'+esc(groupKey)+'" aria-expanded="'+expanded+'" aria-controls="'+panelId+'" aria-label="'+(expanded?'收合':'展開')+esc(t.visit_date)+'停靠點列表"><span class="task-summary-clock" aria-hidden="true">◷</span><span class="task-summary-period">'+esc(period)+'</span><span class="task-summary-chevron" aria-hidden="true">'+(expanded?'⌃':'⌄')+'</span></button><button type="button" class="task-team-btn task-meta-team" data-vol-group="'+esc(groupKey)+'" aria-label="'+esc(t.area)+'每日小組名單">每日小組</button></div>';
+  out+='</article>';
+  out+='<section class="volunteer-stop-panel" id="'+panelId+'" aria-label="'+esc(t.visit_date)+'停靠點列表" '+(expanded?'':'hidden')+'><div class="volunteer-stop-panel-head"><strong>📍 停靠點列表</strong><span>共 '+stops.length+' 個停靠點</span></div><div class="volunteer-stop-cards">';
+  for(const [i,stop] of stops.entries()){
+   const a=String(stop.stop_address||'').trim(),hasAddress=!!a;
+   const url=hasAddress?'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(a.startsWith('台')||a.startsWith('臺')?a:'臺南市永康區'+a)+'&travelmode=driving':'';
+   const done=stop.status==='完成',future=taskDateCategory(stop)==='future';
+   out+='<div class="volunteer-stop-item"><span class="volunteer-stop-number">'+(i+1)+'</span><div class="volunteer-stop-main"><strong>第 '+(i+1)+' 個停靠點</strong><span class="volunteer-stop-address">📍 '+esc(a||'地址尚未提供')+'</span>';
+   if(hasAddress)out+='<a class="task-navigate" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer" aria-label="使用 Google Maps 導航到站點"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M21.3 2.8 2.7 10.2c-.9.35-.85 1.63.1 1.9l7.9 2.2 2.2 7.9c.28.95 1.55 1 1.9.1l7.4-18.6c.28-.7-.21-1.18-.9-.9Z"/></svg>導航到站點</a>';
+   out+='</div><div class="volunteer-stop-result"><button type="button" class="task-complete-btn '+(done?'is-complete':future?'is-upcoming':'is-pending')+'" data-vol-complete-group="'+esc(done?'':stop.id)+'" '+(done||future?'disabled':'')+'>'+(done?'<span class="task-done-check" aria-hidden="true">✓</span> 已完成':future?'尚未開始':'未完成')+'</button></div></div>';
+  }
+  out+='</div></section></div>';
  }
  root.innerHTML=out+'</div></section>';
 }
