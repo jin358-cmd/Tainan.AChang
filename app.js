@@ -24,6 +24,7 @@ function loadState(){for(const k of [KEY,PRIOR_KEY,LEGACY_KEY]){try{const raw=lo
 const MAP_LOAD_TIMEOUT_MS=8000;
 const MAPLIBRE_JS='https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.js';
 const MAPLIBRE_CSS='https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.css';
+let runtimeConfig=null;
 let state=loadState(),data=null,areas=[],routes=[],page='areas',selectedArea='復興里',shift='夜間',date=today(),chosenRoute='',plannerArea='復興里',areaPage=0,teamArea='',toastTimer=null,installPrompt=null,map=null,markers=[],mapFailed=false,mapLoaded=false,mapLoadTimer=null,mapAttempt=0,mapInitPromise=null,mapFailureMessage='',pinTarget=null,layerState={volunteer:true,day:false,night:false},pickerKind='',volunteerId='',volunteerPhone='';
 const personNorm=p=>({id:String(p.id||`P${Date.now()}`),name:String(p.name||'').trim().slice(0,80),phone:String(p.phone||'').slice(0,80),address:String(p.address||'').slice(0,300),residentArea:String(p.residentArea||'待確認'),assignment:areas.includes(p.assignment)?p.assignment:'',serviceLat:coord(p.serviceLat)?p.serviceLat:null,serviceLon:coord(p.serviceLon)?p.serviceLon:null});
 const residentLabel=p=>{const s=String(p?.residentArea||'').trim().replace(/里里$/,'里');return /十里以外|十里外|待確認/.test(s)?'十里外':s&&s!=='未填寫'?s:''};
@@ -112,16 +113,9 @@ let volunteerTaskCategory='current';
 
 // Isolated preview UI testing: synthetic-only, no API mutation or production credentials.
 let previewDemoMode=false;
-function previewOnly(){return location.hostname.startsWith('tainan-achang-pin-eipp-test-')||location.hostname==='tainan-achang-pin-eipp-test.vercel.app';}
-function previewLoginButton(){
- if(!previewOnly())return;
- const anchor=document.getElementById('secureLoginForm');
- if(anchor&&!document.getElementById('previewDemoLogin')){
-  const b=document.createElement('button');b.id='previewDemoLogin';b.type='button';b.className='primary wide';b.style.margin='12px 0';b.textContent='進入志工測試介面（免帳密）';b.onclick=startPreviewDemo;anchor.before(b);
-  const note=document.createElement('p');note.className='mini-note';note.textContent='此預覽僅使用範例排班資料，不連線寫入正式資料庫。正式帳號登入尚未驗證。';b.after(note);
- }
+function previewOnly(){return false;}
+function previewLoginButton(){ /* No demo or authentication bypass in Test. */ }
 
-}
 function startPreviewDemo(){
  if(!previewOnly())return;
  previewDemoMode=true;liveRole='volunteer';liveMemberId='PREVIEW-VOL-001';liveDisplayName='測試志工';state=makeState([]);
@@ -293,7 +287,7 @@ function showAuth(){
  document.getElementById('addPerson') && ($('#addPerson').hidden=true);$('#addMember').hidden=true;$('#openRosterAuthorization').hidden=true;
  $('#rosterLocked').hidden=false;$('#peopleList').hidden=true;
  $('#clearArea').hidden=true;
- const z=$('#authStatus');z.textContent='首次登入或裝置授權失效時，請輸入已核准的帳號與密碼';
+ const z=$('#authStatus');z.textContent='';
  render();go('areas');previewLoginButton();
 }
 function openSecureLogin(){if(liveRole==='admin')return openMemberAdmin();previewLoginButton();$('#secureLogin').hidden=false;$('#secureLoginForm input[name="login"]').focus()}
@@ -374,30 +368,48 @@ async function openMemberAdmin(preselectId=''){
  try{
   const x=await onlineApi('members');
   const known=new Set((x.members||[]).map(m=>m.member_id));
-  const active=(x.members||[]).filter(m=>m.enabled||m.status==='active');
-  const list=(x.members||[]).map(m=>{const devices=(x.devices||[]).filter(d=>d.account_id===m.id);const deviceApproved=devices.some(d=>d.status==='approved');const deviceMarker=deviceApproved?'<span class="device-marker device-approved" title="手機已核准">📱</span>':'<span class="device-marker device-pending" title="尚未核准手機">📱</span>';const name=m.name||state.people.find(p=>p.id===m.member_id)?.name||'姓名待補';const approved=m.status==='active'||m.enabled===true;return `<div class="pick-row approved-member-row"><div class="member-label"><strong class="approved-member-name">${esc(name)}</strong>${deviceMarker}<span class="approved-member-phone">${esc(prettyPhone(m.phone))}</span></div>${approved?'<span class="auth-success-check" role="img" aria-label="已完成授權" title="已完成授權">✓</span>':`<span class="auth-pending-label" aria-label="尚未啟用">${esc(m.status==='suspended'?'已停用':'待核准')}</span>`}<div class="member-auth-actions">${approved?`<button type="button" class="smallbtn" data-member-revoke="${esc(m.auth_user_id)}">解除授權</button>`:''}<button type="button" class="smallbtn danger" data-member-remove="${esc(m.auth_user_id)}">刪除會員</button></div></div>`}).join('');
+  const active=(x.members||[]).filter(m=>m.status==='active'&&!m.deleted_at),pendingAccounts=(x.members||[]).filter(m=>m.status==='pending'&&!m.deleted_at),suspended=(x.members||[]).filter(m=>m.status==='suspended'&&m.approved_at&&!m.deleted_at);
+  const memberName=m=>m.name||state.people.find(p=>p.id===m.member_id)?.name||'姓名待補';
+  const roleLabel=m=>m.role==='admin'?'管理員':'志工';
+  const pendingRows=pendingAccounts.map(m=>`<div class="pick-row approved-member-row"><div class="member-label"><strong>${esc(memberName(m))}</strong><small>${esc(prettyPhone(m.phone))} · ${roleLabel(m)}</small></div><div class="member-auth-actions"><button type="button" class="smallbtn" data-account-approve="${esc(m.auth_user_id)}">核准帳號</button><button type="button" class="smallbtn danger" data-account-reject="${esc(m.auth_user_id)}">拒絕</button></div></div>`).join('');
+  const list=active.map(m=>{const devices=(x.devices||[]).filter(d=>d.account_id===m.id),deviceApproved=m.device_approval_required===false||devices.some(d=>d.status==='approved');const deviceMarker=deviceApproved?'<span class="device-marker device-approved" title="裝置已核准">📱</span>':'<span class="device-marker device-pending" title="裝置待核准">📱</span>';return `<div class="pick-row approved-member-row"><div class="member-label"><strong class="approved-member-name">${esc(memberName(m))}</strong>${deviceMarker}<span class="approved-member-phone">${esc(prettyPhone(m.phone))}</span><small>${roleLabel(m)}</small></div><span class="auth-success-check" role="img" aria-label="帳號已核准">✓</span><div class="member-auth-actions"><button type="button" class="smallbtn" data-member-revoke="${esc(m.auth_user_id)}">停用帳號</button><button type="button" class="smallbtn danger" data-member-remove="${esc(m.auth_user_id)}">封存會員</button></div></div>`}).join('');
+  const suspendedRows=suspended.map(m=>{const devices=(x.devices||[]).filter(d=>d.account_id===m.id),approved=devices.filter(d=>d.status==='approved').length,pending=devices.filter(d=>d.status==='pending').length,revoked=devices.filter(d=>d.status==='revoked').length,when=m.suspended_at?new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(m.suspended_at)):'時間未記錄';return `<div class="pick-row approved-member-row"><div class="member-label"><strong>${esc(memberName(m))}</strong><small>${roleLabel(m)} · 已停用：${esc(when)}</small><small>裝置 Approved ${approved}／Pending ${pending}／Revoked ${revoked}</small></div><button type="button" class="smallbtn" data-account-reactivate="${esc(m.auth_user_id)}">恢復啟用</button></div>`}).join('');
   const eligible=state.people.filter(p=>p.phone&&!known.has(p.id));
   const selected=eligible.find(p=>p.id===preselectId)||eligible[0];
   const byAccount=new Map((x.members||[]).map(m=>[m.id,m]));
   const pendingDevices=(x.devices||[]).filter(d=>d.status==='pending');
   const approvedDevices=(x.devices||[]).filter(d=>d.status==='approved');
+  const revokedDevices=(x.devices||[]).filter(d=>d.status==='revoked');
+  const deviceLabel=d=>{const kind=({phone:'📱 手機',tablet:'📱 平板',computer:'💻 電腦',unknown:'❔ 未知設備'})[d.device_type]||'❔ 未知設備';return kind+' · '+esc(d.operating_system||'系統未知')+' · '+esc(d.browser_name||'瀏覽器未知')};
+  const approvalDate=d=>{if(!d.approved_at)return '核准時間未記錄';const time=new Date(d.approved_at);return Number.isNaN(time.getTime())?'核准時間無效':'核准：'+new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(time)};
+  approvedDevices.sort((a,b)=>String(a.approved_at||a.created_at||'').localeCompare(String(b.approved_at||b.created_at||'')));
+  const deviceRows=approvedDevices.map(d=>{const m=byAccount.get(d.account_id);return '<div class="pick-row device-detail-row"><div class="member-label"><strong>'+esc(m?.name||'志工')+'</strong><small>'+deviceLabel(d)+' · 已核准</small><small class="device-approved-time">'+esc(approvalDate(d))+'</small></div><button type="button" class="smallbtn" data-revoke-device="'+esc(d.id)+'">撤銷此設備</button></div>'}).join('');
   const phoneLabel=(m)=>prettyPhone(m?.phone||'');
-  const deviceQueue=pendingDevices.map(d=>{const m=byAccount.get(d.account_id),name=m?.name||state.people.find(p=>p.id===m?.member_id)?.name||'待核對志工';return `<div class="pick-row device-approval-row"><div class="member-label"><strong>${esc(name)}</strong><small>${esc(phoneLabel(m))} · 新裝置待核准</small></div><button type="button" class="approve-device-btn" data-approve-device="${esc(d.id)}">✓ 核准此手機</button></div>`}).join('');
-  const deviceSection=`<section class="device-approval-section"><h3>待核准手機（${pendingDevices.length}）</h3>${deviceQueue||'<p class="mini-note">目前沒有待核准手機</p>'}<p class="mini-note">志工第一次用手機與 PIN 登入後會送出裝置申請。管理員核准後，志工即可重新開啟 PWA 直接進入。</p><p class="mini-note">已核准裝置：${approvedDevices.length}</p></section>`;
-  showModal('管理員｜會員授權',`<form id="memberAdminForm"><label>選擇志工<select name="volunteerId" id="authorizationVolunteer" required>${eligible.map(p=>`<option value="${esc(p.id)}" ${selected?.id===p.id?'selected':''}>${esc(p.name)}｜${esc(prettyPhone(p.phone))}</option>`).join('')}</select></label><label>手機號碼（須與名冊一致）<input name="phone" id="authorizationPhone" required inputmode="tel" value="${esc(selected?prettyPhone(selected.phone):'')}" placeholder="09xx-xxx-xxx"></label><label>志工登入 PIN（6 位數字）<input type="password" name="password" required minlength="6" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="new-password" placeholder="請設定 6 碼數字"></label><input type="hidden" name="role" value="volunteer"><button class="primary wide" type="submit" ${eligible.length?'':'disabled'}>核准開通志工帳號</button></form><div class="member-admin-existing"><strong>已完成授權：${active.length} 位</strong>${list||'<p>尚未核准會員</p>'}</div>${deviceSection}`);
+  const deviceQueue=pendingDevices.map(d=>{const m=byAccount.get(d.account_id),name=m?.name||state.people.find(p=>p.id===m?.member_id)?.name||'待核對志工';return `<div class="pick-row device-approval-row"><div class="member-label"><strong>${esc(name)}</strong><small>${esc(phoneLabel(m))} · ${deviceLabel(d)} · 新裝置待核准</small></div><button type="button" class="approve-device-btn" data-approve-device="${esc(d.id)}">✓ 核准此手機</button></div>`}).join('');
+  const noDevice=active.filter(m=>m.device_approval_required!==false&&!(x.devices||[]).some(d=>d.account_id===m.id&&d.status==='approved'));
+  const rebindRows=noDevice.map(m=>`<div class="pick-row"><div class="member-label"><strong>${esc(memberName(m))}</strong><small>帳號有效，但目前沒有可用裝置；請由志工登入後送出重新綁定申請。</small></div></div>`).join('');
+  const deviceSection=`<section class="device-approval-section"><h3>待核准手機（${pendingDevices.length}）</h3>${deviceQueue||'<p class="mini-note">目前沒有待核准手機</p>'}<p class="mini-note">志工第一次登入或撤銷後重新登入，會建立新的待核准紀錄；系統不會恢復舊 Revoked 紀錄。</p><h3>裝置失效／重新綁定（${noDevice.length}）</h3>${rebindRows||'<p class="mini-note">目前沒有需重新綁定的會員</p>'}<p class="mini-note">已核准裝置：${approvedDevices.length}；撤銷歷史：${revokedDevices.length}</p>${deviceRows}</section>`;
+  showModal('管理員｜會員授權',`<form id="memberAdminForm"><h3>① 選擇會員</h3><label>尚未建立登入授權的名冊成員<select name="volunteerId" id="authorizationVolunteer" required>${eligible.map(p=>`<option value="${esc(p.id)}" ${selected?.id===p.id?'selected':''}>${esc(p.name)}｜${esc(prettyPhone(p.phone))}</option>`).join('')}</select></label><label>聯絡電話（可多人共用）<input name="phone" id="authorizationPhone" required inputmode="tel" value="${esc(selected?prettyPhone(selected.phone):'')}" placeholder="09xx-xxx-xxx"></label><button class="primary wide" type="submit" ${eligible.length?'':'disabled'}>產生四碼邀請碼（24 小時）</button><button type="button" class="smallbtn" id="directProvisionBtn" ${eligible.length?'':'disabled'}>當面直接開通志工</button><button type="button" class="smallbtn" id="directAdminBtn" ${eligible.length?'':'disabled'}>新增管理員</button><p class="mini-note">本人須在受控表單設定六碼 PIN；新帳號首次裝置仍須另外核准。</p><p class="mini-note">四碼邀請碼只供指定志工使用，有效 24 小時且只能核銷一次。</p></form><section class="member-admin-existing"><h3>② 待核准會員（${pendingAccounts.length}）</h3>${pendingRows||'<p class="mini-note">目前沒有待核准會員</p>'}<h3>④ 已授權會員（${active.length}）</h3>${list||'<p class="mini-note">尚未核准會員</p>'}<h3>⑤ 已停用會員（${suspended.length}）</h3>${suspendedRows||'<p class="mini-note">目前沒有可恢復的停用會員</p>'}</section>${deviceSection}`);
+  $('#directProvisionBtn').onclick=()=>openDirectProvisionForm($('#authorizationVolunteer').value,'volunteer',$('#authorizationPhone').value);
+  $('#directAdminBtn').onclick=()=>openDirectProvisionForm($('#authorizationVolunteer').value,'admin',$('#authorizationPhone').value);
   $('#authorizationVolunteer').onchange=e=>{const person=state.people.find(p=>p.id===e.target.value);$('#authorizationPhone').value=person?prettyPhone(person.phone):''};
  }catch(e){toast('會員授權資料讀取失敗：'+e.message)}
+}
+function openDirectProvisionForm(memberId,role,phone){
+ const person=state.people.find(p=>p.id===memberId),label=role==='admin'?'管理員':'志工';
+ if(!person||!phone){toast('請先選擇名冊成員');return}
+ showModal(`當面開通${label}`,`<form id="directProvisionForm"><input type="hidden" name="volunteerId" value="${esc(memberId)}"><input type="hidden" name="phone" value="${esc(phone)}"><input type="hidden" name="role" value="${esc(role)}"><p class="form-hint">已核對：${esc(person.name)}｜${esc(prettyPhone(phone))}</p><label>由本人輸入六碼 PIN<input name="pin" type="password" required minlength="6" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="new-password"></label><label>再次輸入六碼 PIN<input name="pinConfirm" type="password" required minlength="6" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="new-password"></label><button type="submit" class="primary wide">確認建立${label}帳號</button><p class="mini-note">PIN 不會顯示或寫入頁面紀錄；首次裝置仍須管理員另外核准。</p><p id="directProvisionStatus" class="form-progress" role="status" aria-live="polite"></p></form>`);
 }
 function openNewMemberForm(){
  if(!assertAdmin())return;
  showModal('新增會員｜名冊與授權同步建立',`<form id="newMemberForm" class="member-create-form">
- <p class="form-hint">第一步先新增志工至正式名冊。儲存後會自動開啟會員授權，選定剛新增的志工，再設定 6 碼 PIN 並核准開通。</p>
+ <p class="form-hint">第一步先新增志工至正式名冊。儲存後會自動開啟會員授權，由管理員產生一次性邀請碼；PIN 由志工本人設定。</p>
  <label>分派服務里<select name="assignment"><option value="">待分配</option>${areas.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('')}</select></label>
  <label>姓名 *<input name="name" required maxlength="80" autocomplete="off"></label>
  <label>手機號碼 *<input name="phone" required type="tel" inputmode="tel" placeholder="0989-098-468"></label>
  <label>原居住里<input name="residentArea" maxlength="40" placeholder="選填，不需重複加「里」"></label>
  <label>地址<input name="address" maxlength="300"></label>
- <button type="submit" class="primary wide" id="saveNewMember">新增至名冊，下一步設定授權 PIN</button>
+ <button type="submit" class="primary wide" id="saveNewMember">新增至名冊，下一步產生邀請碼</button>
  <p id="memberCreateStatus" class="form-progress" role="status" aria-live="polite"></p>
  </form>`);
 }
@@ -412,10 +424,10 @@ async function submitNewMemberForm(form){
   const r=await onlineApi('roster','POST',{name:b.name,phone:b.phone,address:b.address,residentArea:b.residentArea,assignment:b.assignment||null});
   p=r.person;
   if(!p?.id)throw new Error('人員已建立，但伺服器未回傳 ID，請至名冊查核');
-  // Save first. The six-digit PIN is entered only in the subsequent approval form.
+  // Save the roster first; the volunteer chooses the PIN through the invitation flow.
   await refreshOnline();
   closeModal();
-  toast('✓ 已新增至正式名冊，請選擇志工並設定 6 碼 PIN');
+  toast('✓ 已新增至正式名冊，請產生一次性申請邀請碼');
   await openMemberAdmin(p.id);
  }catch(e){
   info.textContent='新增失敗：'+e.message;
@@ -423,19 +435,28 @@ async function submitNewMemberForm(form){
  }
 }
 
+function openMemberApplicationForm(){
+ $('#secureLogin').hidden=true;
+ showModal('志工會員申請',`<form id="memberApplicationForm"><p class="form-hint">請輸入管理員提供的四碼邀請碼。</p><label>申請邀請碼<input name="invitationCode" required minlength="4" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" autocapitalize="characters" autocomplete="one-time-code"></label><label>名冊聯絡電話<input name="phone" required type="tel" inputmode="tel" placeholder="09xx-xxx-xxx"></label><label>自訂六碼 PIN<input name="pin" required type="password" minlength="6" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="new-password"></label><button class="primary wide" type="submit">送出待核准申請</button><p id="memberApplicationStatus" class="form-progress" role="status" aria-live="polite"></p></form>`);
+}
+
 const originalBind=bind;
 bind=function(){originalBind();
  $('#secureLogout').onclick=secureSignOut;
- $('#closeSecureLogin').onclick=()=>{$('#secureLogin').hidden=true};
+ // Login screen has no return button; secure navigation requires authentication.
+ $('#openMemberApplication').onclick=openMemberApplicationForm;
  $('#loginFromRoster').onclick=openSecureLogin;
  $('#addMember').onclick=openNewMemberForm;
  $('#openRosterAuthorization').onclick=()=>openMemberAdmin();
  document.addEventListener('click',async e=>{const del=e.target.closest('[data-delete-person]');if(del){if(!assertAdmin())return;const id=del.dataset.deletePerson;const person=state.people.find(p=>p.id===id);if(!person)return;showModal('確認刪除人員',`<div class="delete-warning"><p>確定將「<strong>${esc(person.name)}</strong>」從志工名冊移除？</p><small>這項操作須管理員權限；若帳號仍有會員授權，將先停止刪除以保障資料安全。</small></div><div class="delete-confirm-actions"><button type="button" class="smallbtn" data-cancel-person-delete>取消</button><button type="button" class="delete-person-confirm" data-confirm-delete-person="${esc(id)}">確認刪除</button></div>`);return;}if(e.target.closest('[data-cancel-person-delete]')){closeModal();return;}const confirm=e.target.closest('[data-confirm-delete-person]');if(!confirm)return;if(!assertAdmin())return;const id=confirm.dataset.confirmDeletePerson;confirm.disabled=true;confirm.textContent='刪除處理中…';try{await onlineApi('roster','DELETE',{id});await refreshOnline(true);closeModal();toast('人員已從名冊移除');}catch(err){confirm.disabled=false;confirm.textContent='確認刪除';toast('刪除未完成：'+err.message)}});
- $('#secureLoginForm').onsubmit=async e=>{e.preventDefault();$('#authStatus').textContent='登入驗證中…';const d=Object.fromEntries(new FormData(e.target));try{await onlineApi('session','POST',d);await authStart()}catch(err){$('#authStatus').textContent=err.message}};
+ $('#secureLoginForm').onsubmit=async e=>{e.preventDefault();$('#authStatus').textContent='登入驗證中…';const d=Object.fromEntries(new FormData(e.target));try{const result=await onlineApi('session','POST',d);if(result.authorization==='device_application_required'){if(!confirm('此裝置尚未授權，是否提出申請？')){$('#authStatus').textContent='尚未送出裝置申請；未核准前不能存取會員資料。';return}const application=await onlineApi('device-application','POST',{});$('#authStatus').textContent=application.message+'；核准後重新開啟 PWA 即可登入。';return}if(result.authorization==='device_pending'){$('#authStatus').textContent=result.message+'；核准後重新開啟 PWA 即可登入。';return}await authStart()}catch(err){$('#authStatus').textContent=err.message}};
+ document.addEventListener('click',async e=>{const approve=e.target.closest('[data-account-approve]'),reject=e.target.closest('[data-account-reject]');if(!approve&&!reject)return;if(!assertAdmin())return;const reason=reject?prompt('請輸入拒絕原因（必填）','資料需重新核對'):'';if(reject&&!reason)return;const btn=approve||reject;btn.disabled=true;try{await onlineApi('members','PATCH',{authUserId:btn.dataset.accountApprove||btn.dataset.accountReject,action:approve?'approve':'reject',...(reject?{reason}:{})});toast(approve?'✓ 會員帳號已核准':'會員申請已拒絕並記錄原因');await openMemberAdmin()}catch(err){toast('帳號審核失敗：'+err.message);btn.disabled=false}});
+ document.addEventListener('click',async e=>{const btn=e.target.closest('[data-account-reactivate]');if(!btn)return;if(!assertAdmin())return;if(!confirm('確定恢復此會員帳號？裝置狀態會保持原樣，Revoked 裝置不會自動恢復。'))return;btn.disabled=true;try{await onlineApi('members','PATCH',{authUserId:btn.dataset.accountReactivate,action:'reactivate'});toast('✓ 會員帳號已恢復啟用；裝置授權狀態未變更');await openMemberAdmin()}catch(err){toast('恢復啟用失敗：'+err.message);btn.disabled=false}});
  document.addEventListener('click',e=>{const b=e.target.closest('button[data-live-complete]');if(b)completeOnlineTask(b.dataset.liveComplete)});
- document.addEventListener('click',async e=>{const btn=e.target.closest('button[data-member-revoke],button[data-member-remove]');if(!btn)return;if(!assertAdmin())return;const remove=btn.hasAttribute('data-member-remove');if(!confirm(remove?'確定刪除此會員帳號？帳號將停用並自授權清單移除，歷史排班紀錄保留。':'確定解除此會員授權？此帳號將無法再登入。'))return;btn.disabled=true;try{await onlineApi('members',remove?'DELETE':'PATCH',{authUserId:remove?btn.dataset.memberRemove:btn.dataset.memberRevoke,...(remove?{}:{enabled:false})});toast(remove?'會員已自授權名單移除（歷史紀錄保留）':'會員授權已解除');await openMemberAdmin()}catch(err){toast('操作失敗：'+err.message);btn.disabled=false}});
+ document.addEventListener('click',async e=>{const btn=e.target.closest('button[data-member-revoke],button[data-member-remove]');if(!btn)return;if(!assertAdmin())return;const remove=btn.hasAttribute('data-member-remove'),reason=prompt(remove?'請輸入封存原因（歷史資料會保留）':'請輸入停用原因',remove?'管理員自會員授權頁封存':'管理員停用帳號');if(!reason)return;btn.disabled=true;try{await onlineApi('members',remove?'DELETE':'PATCH',{authUserId:remove?btn.dataset.memberRemove:btn.dataset.memberRevoke,reason,...(remove?{}:{enabled:false})});toast(remove?'會員已軟刪除，歷史紀錄保留':'會員帳號已停用；裝置授權紀錄保持不變');await refreshOnline(true);await openMemberAdmin()}catch(err){toast('操作失敗：'+err.message);btn.disabled=false}});
+ document.addEventListener('click',async e=>{const btn=e.target.closest('button[data-revoke-device]');if(!btn)return;if(!assertAdmin())return;if(!confirm('確定撤銷這台設備？'))return;btn.disabled=true;try{await onlineApi('members','PATCH',{deviceId:btn.dataset.revokeDevice,approved:false});toast('已撤銷指定設備');await openMemberAdmin()}catch(err){toast('撤銷設備失敗：'+err.message);btn.disabled=false}});
  document.addEventListener('click',async e=>{const btn=e.target.closest('button[data-approve-device]');if(!btn)return;if(!assertAdmin())return;btn.disabled=true;try{await onlineApi('members','PATCH',{deviceId:btn.dataset.approveDevice,approved:true});toast('✓ 手機已核准，志工可重新開啟 PWA');await openMemberAdmin()}catch(err){toast('核准手機失敗：'+err.message);btn.disabled=false}});
- $('#modalBody').addEventListener('submit',async e=>{if(e.target.id==='newMemberForm'){e.preventDefault();await submitNewMemberForm(e.target);return}if(e.target.id!=='memberAdminForm')return;e.preventDefault();if(!assertAdmin())return;const d=Object.fromEntries(new FormData(e.target));const x=state.people.find(p=>p.id===d.volunteerId);const normalizePhone=p=>{let n=phoneDigits(p);if(n.startsWith('8869'))n='0'+n.slice(3);return n};if(!x||normalizePhone(x.phone)!==normalizePhone(d.phone)){toast('手機號碼和人員名冊不符');return}try{await onlineApi('members','POST',d);toast('✓ 會員已授權，請透過安全管道通知密碼');await openMemberAdmin()}catch(err){toast('建立會員失敗：'+err.message)}});
+ $('#modalBody').addEventListener('submit',async e=>{if(e.target.id==='memberApplicationForm'){e.preventDefault();const d=Object.fromEntries(new FormData(e.target)),status=$('#memberApplicationStatus'),button=e.target.querySelector('button[type="submit"]');button.disabled=true;status.textContent='正在安全送出申請…';try{const result=await onlineApi('application','POST',d);status.textContent='✓ '+result.message+'。核准後即可用手機號碼與 PIN 登入。';toast('✓ 會員申請已送出')}catch(err){status.textContent='申請失敗：'+err.message;button.disabled=false}return}if(e.target.id==='directProvisionForm'){e.preventDefault();if(!assertAdmin())return;const d=Object.fromEntries(new FormData(e.target)),status=$('#directProvisionStatus'),button=e.target.querySelector('button[type="submit"]');if(d.pin!==d.pinConfirm){status.textContent='兩次 PIN 不一致';return}if(!/^[0-9]{6}$/.test(d.pin)){status.textContent='PIN 必須是六碼數字';return}button.disabled=true;status.textContent='正在安全建立帳號…';try{await onlineApi('members','POST',{action:'direct-provision',volunteerId:d.volunteerId,phone:d.phone,pin:d.pin,role:d.role});toast(d.role==='admin'?'✓ 管理員已建立，首次裝置待核准':'✓ 志工帳號已開通，首次裝置待核准');await openMemberAdmin()}catch(err){status.textContent='建立失敗：'+err.message;button.disabled=false}return}if(e.target.id==='newMemberForm'){e.preventDefault();await submitNewMemberForm(e.target);return}if(e.target.id!=='memberAdminForm')return;e.preventDefault();if(!assertAdmin())return;const d=Object.fromEntries(new FormData(e.target));const x=state.people.find(p=>p.id===d.volunteerId);const normalizePhone=p=>{let n=phoneDigits(p);if(n.startsWith('8869'))n='0'+n.slice(3);return n};if(!x||normalizePhone(x.phone)!==normalizePhone(d.phone)){toast('聯絡電話和人員名冊不符');return}try{const invite=await onlineApi('members','POST',{...d,action:'issue-invite'});showModal('會員申請邀請碼',`<section style="text-align:center;padding:22px"><p>四碼邀請碼，只供指定志工一次使用</p><div style="font-size:36px;font-weight:800;letter-spacing:0.22em;margin:14px">${esc(invite.invitationCode)}</div><p>有效至：${esc(new Date(invite.expiresAt).toLocaleString('zh-TW',{timeZone:'Asia/Taipei'}))}</p><button class="primary wide" type="button" id="copyInviteBtn">複製邀請碼</button><p>請妥善私下交給志工。關閉視窗後不再顯示；重新產生後舊碼立即失效。</p></section>`);$('#copyInviteBtn').onclick=async()=>{try{await navigator.clipboard.writeText(invite.invitationCode);toast('邀請碼已複製')}catch{toast('無法自動複製，請長按上方數字複製')}}}catch(err){toast('建立申請邀請碼失敗：'+err.message)}});
 };
 save=function(){renderSummary()}; // never persist authenticated personal data to public browser storage
 
@@ -457,7 +478,18 @@ async function restoreSavedSessionOnResume(){
  }finally{checkingSavedSession=false}
 }
 
+async function loadRuntimeConfig(){
+ const response=await fetch('./api/config',{cache:'no-store'});
+ if(!response.ok)throw Error('環境設定不完整或不一致');
+ const config=await response.json();
+ if(!config||!['test','production'].includes(config.environment)||!config.projectRef||!config.supabaseUrl||!config.googleOAuthUrl)throw Error('環境身分驗證失敗');
+ const parsed=new URL(config.supabaseUrl);
+ if(parsed.protocol!=='https:'||parsed.hostname!==config.projectRef+'.supabase.co')throw Error('環境身分驗證失敗');
+ runtimeConfig=Object.freeze(config);
+}
+
 async function boot(){try{
+ await loadRuntimeConfig();
  const pub=await fetch('./data-public.json',{cache:'no-store'});if(!pub.ok)throw Error('地圖資料無法讀取');data=await pub.json();areas=data.areas;
  state=makeState([]);state.demo=false;areaPage=Math.floor(areas.indexOf(selectedArea)/CARD_PAGE_SIZE);const pa=$('#plannerAreaSelect');pa.innerHTML=areas.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('')+'<option value="all">全部</option>';
  const sel=$('#peopleAreaFilter');sel.innerHTML='<option value="all">全部里別</option>'+areas.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('');
@@ -466,12 +498,12 @@ async function boot(){try{
 }catch(e){console.error(e);openSecureLogin();$('#authStatus').textContent='網站暫時無法完成登入，請重新整理後再試'}
 }
 
-// Production Google OAuth: validated by Supabase and membership authorization API.
-const GOOGLE_AUTH_URL='https://ctskglmglevronvnkpmm.supabase.co/auth/v1/authorize?provider=google&redirect_to=';
+// OAuth is derived from the server-validated runtime environment; there is no Production fallback.
 document.addEventListener('click',event=>{
  const button=event.target.closest('#googleOAuthLogin');if(!button)return;
+ if(!runtimeConfig?.googleOAuthUrl){openSecureLogin();$('#authStatus').textContent='環境設定不完整，已停止登入';return}
  const redirect=location.origin+location.pathname;
- location.assign(GOOGLE_AUTH_URL+encodeURIComponent(redirect));
+ location.assign(runtimeConfig.googleOAuthUrl+encodeURIComponent(redirect));
 });
 async function completeGoogleOAuth(){
  const parsed=new URLSearchParams(location.hash.slice(1));

@@ -22,7 +22,9 @@ async function startServer(options = {}) {
       const endpoint = url.pathname.slice(5);
       observed.api.push(`${request.method} ${endpoint}`);
       response.setHeader('Content-Type', 'application/json');
-      if (endpoint === 'oauth-session' && request.method === 'POST') {
+      if (endpoint === 'config' && request.method === 'GET') {
+        response.end(JSON.stringify({environment:'test',projectRef:'fhxdpupascsikjsycpbi',supabaseUrl:'https://fhxdpupascsikjsycpbi.supabase.co',googleOAuthUrl:'https://fhxdpupascsikjsycpbi.supabase.co/auth/v1/authorize?provider=google&redirect_to='}));
+      } else if (endpoint === 'oauth-session' && request.method === 'POST') {
         if (options.oauthFailure) {
           response.statusCode = options.oauthFailure;
           response.end(JSON.stringify({error:'合成帳號尚未授權'}));
@@ -32,7 +34,13 @@ async function startServer(options = {}) {
         }
       } else if (endpoint === 'session' && request.method === 'POST') {
         state.loggedIn = true;
-        response.end(JSON.stringify({ok:true}));
+        if (options.secondDevice) {
+          response.statusCode = 202;
+          response.end(JSON.stringify({authorization:'device_application_required',message:'此裝置尚未授權，可提出申請'}));
+        } else response.end(JSON.stringify({ok:true}));
+      } else if (endpoint === 'device-application' && request.method === 'POST') {
+        response.statusCode = 202;
+        response.end(JSON.stringify({authorization:'device_pending',message:'裝置授權申請已送出，請等待管理員核准'}));
       } else if (endpoint === 'session' && request.method === 'DELETE') {
         state.loggedIn = false;
         response.end(JSON.stringify({ok:true}));
@@ -69,7 +77,8 @@ async function startServer(options = {}) {
 
 async function withPage(options, run) {
   const local = await startServer(options);
-  const browser = await chromium.launch({headless:true,executablePath:'/usr/bin/chromium'});
+  const executablePath=process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+  const browser = await chromium.launch({headless:true,...(executablePath?{executablePath}:{})});
   try {
     const context = await browser.newContext({serviceWorkers:'block'});
     await context.route('**/*', route => {
@@ -101,7 +110,7 @@ async function callbackCase(role) {
     assert.equal(observed.api.filter(x=>x==='GET session').length, 1);
     assert.equal(await page.locator('#secureLogin').getAttribute('hidden') !== null, true);
     assert.equal(await page.locator('#secureLogout').getAttribute('hidden') !== null, false);
-    assert.equal(await page.locator('#signedInName').textContent(), role === 'admin' ? '管理員' : '合成志工');
+    assert.equal(await page.locator('#signedInName').textContent(), role === 'admin' ? '合成管理員' : '合成志工');
     assert.equal(await page.locator('#mapLibre').count(), 1);
     assert.equal(await page.locator('#areaPopup').count(), 1);
     const areasHidden = await page.locator('.bottom-nav [data-page="areas"]').getAttribute('hidden') !== null;
@@ -131,7 +140,7 @@ async function passwordLogoutReopenCase() {
     await page.locator('#secureLoginForm input[name="password"]').fill('synthetic-password');
     await page.locator('#secureLoginForm button[type="submit"]').click();
     await page.waitForFunction(() => document.querySelector('#signedInName')?.hidden === false);
-    assert.equal(await page.locator('#signedInName').textContent(), '管理員');
+    assert.equal(await page.locator('#signedInName').textContent(), '合成管理員');
     await page.locator('#secureLogout').click();
     await page.waitForFunction(() => document.querySelector('#secureLogout')?.hidden === true);
     await page.reload({waitUntil:'domcontentloaded'});
@@ -141,6 +150,22 @@ async function passwordLogoutReopenCase() {
     assert.ok(observed.api.includes('POST session'));
     assert.ok(observed.api.includes('DELETE session'));
     assert.ok(observed.api.filter(x=>x==='GET session').length >= 2);
+  });
+}
+
+async function secondDeviceApplicationCase() {
+  return withPage({role:'volunteer',secondDevice:true}, async ({page,origin,observed}) => {
+    page.on('dialog', dialog => dialog.accept());
+    await page.goto(origin, {waitUntil:'domcontentloaded'});
+    await page.waitForFunction(() => document.querySelector('#volunteerLoginBtn')?.hidden === false);
+    await page.locator('#volunteerLoginBtn').click();
+    await page.locator('#secureLoginForm input[name="login"]').fill('0912345678');
+    await page.locator('#secureLoginForm input[name="password"]').fill('123456');
+    await page.locator('#secureLoginForm button[type="submit"]').click();
+    await page.waitForFunction(() => /申請已送出/.test(document.querySelector('#authStatus')?.textContent||''));
+    assert.ok(observed.api.includes('POST session'));
+    assert.ok(observed.api.includes('POST device-application'));
+    assert.equal(observed.api.includes('GET tasks'), false);
   });
 }
 
@@ -164,20 +189,70 @@ async function mapFallbackCase() {
   });
 }
 
+async function memberApplicationModalCase() {
+  return withPage({role:'volunteer'}, async ({page,origin,observed}) => {
+    await page.goto(origin,{waitUntil:'domcontentloaded'});
+    await page.waitForFunction(() => document.querySelector('#volunteerLoginBtn')?.hidden === false);
+    await page.locator('#volunteerLoginBtn').click();
+    await page.waitForFunction(() => document.querySelector('#secureLogin')?.hidden === false);
+    assert.equal(await page.locator('#closeSecureLogin').count(),0);
+    assert.equal(await page.locator('#openMemberApplication').count(),1);
+    assert.equal(await page.locator('#secureLoginForm input[name="login"]').getAttribute('placeholder'),'09xx-xxx-xxx');
+    await page.locator('#openMemberApplication').click();
+    await page.locator('#memberApplicationForm').waitFor();
+    assert.equal(await page.locator('#secureLogin').getAttribute('hidden')!==null,true);
+    assert.equal(await page.locator('#memberApplicationForm input[name="invitationCode"]').getAttribute('maxlength'),'4');
+    assert.equal(await page.locator('#memberApplicationForm input[name="invitationCode"]').getAttribute('pattern'),'[0-9]{4}');
+    assert.equal(await page.locator('#previewDemoLogin').count(),0);
+    return {modal:'PASS',invitationDigits:4,previewBypass:false,external:observed.external};
+  });
+}
+
+async function adminNavigationSmokeCase() {
+ return withPage({role:'admin'},async({page,origin,observed})=>{
+   await page.goto(origin+'/#access_token=synthetic_access&refresh_token=synthetic_refresh',{waitUntil:'domcontentloaded'});
+   await page.waitForFunction(()=>document.querySelector('#signedInName')?.hidden===false);
+   const visited=[];
+   for(const name of ['map','areas','planner','reports','people']){
+     await page.locator('.desktop-nav [data-page="'+name+'"]').click();
+     await page.waitForFunction(n=>document.querySelector('#page-'+n)?.classList.contains('active'),name);
+     visited.push(name);
+   }
+   assert.equal(visited.length,5);
+   assert.equal(await page.locator('#previewDemoLogin').count(),0);
+   await page.locator('#openRosterAuthorization').click();
+   await page.locator('#memberAdminForm').waitFor();
+   assert.match(await page.locator('#modalTitle').textContent(),/會員授權/);
+   await page.locator('#closeModal').click();
+   await page.locator('#addMember').click();
+   await page.locator('#newMemberForm').waitFor();
+   await page.locator('#closeModal').click();
+   return {pages:visited,api:observed.api,consoleErrors:observed.consoleErrors,pageErrors:observed.pageErrors,external:observed.external};
+ });
+}
+
 (async()=>{
   const results = {
     status:'PASS',
+    memberApplicationModal:await memberApplicationModalCase(),
+    adminNavigationSmoke:await adminNavigationSmokeCase(),
     network:'local synthetic API only; every external request blocked',
     adminCallback:await callbackCase('admin'),
     volunteerCallback:await callbackCase('volunteer'),
     unauthorizedCallback:await oauthFailureCase(),
     passwordLogoutReopen:await passwordLogoutReopenCase(),
+    secondDeviceApplication:await secondDeviceApplicationCase(),
     visibleBootFailure:await bootFailureCase(),
     latestUiMapFallback:await mapFallbackCase(),
   };
   const expectedConsoleError = {
+    memberApplicationModal: message => /401 \(Unauthorized\)$/.test(message),
+    adminNavigationSmoke: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
+    adminCallback: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
+    volunteerCallback: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
     unauthorizedCallback: message => /403 \(Forbidden\)$/.test(message),
     passwordLogoutReopen: message => /401 \(Unauthorized\)$/.test(message),
+    secondDeviceApplication: message => /401 \(Unauthorized\)$/.test(message),
     visibleBootFailure: message => /500 \(Internal Server Error\)$/.test(message) || /^Error: 地圖資料無法讀取\n/.test(message),
     latestUiMapFallback: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
   };
