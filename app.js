@@ -113,16 +113,9 @@ let volunteerTaskCategory='current';
 
 // Isolated preview UI testing: synthetic-only, no API mutation or production credentials.
 let previewDemoMode=false;
-function previewOnly(){return location.hostname.startsWith('tainan-achang-pin-eipp-test-')||location.hostname==='tainan-achang-pin-eipp-test.vercel.app';}
-function previewLoginButton(){
- if(!previewOnly())return;
- const anchor=document.getElementById('secureLoginForm');
- if(anchor&&!document.getElementById('previewDemoLogin')){
-  const b=document.createElement('button');b.id='previewDemoLogin';b.type='button';b.className='primary wide';b.style.margin='12px 0';b.textContent='進入志工測試介面（免帳密）';b.onclick=startPreviewDemo;anchor.before(b);
-  const note=document.createElement('p');note.className='mini-note';note.textContent='此預覽僅使用範例排班資料，不連線寫入正式資料庫。正式帳號登入尚未驗證。';b.after(note);
- }
+function previewOnly(){return false;}
+function previewLoginButton(){ /* No demo or authentication bypass in Test. */ }
 
-}
 function startPreviewDemo(){
  if(!previewOnly())return;
  previewDemoMode=true;liveRole='volunteer';liveMemberId='PREVIEW-VOL-001';liveDisplayName='測試志工';state=makeState([]);
