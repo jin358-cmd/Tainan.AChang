@@ -100,3 +100,48 @@ revoke all on function public.achang_claim_member_invitation(text,text,text)
 grant execute on function public.achang_claim_member_invitation(text,text,text)
   to service_role;
 
+-- A newly-created active administrator is not a viable recovery administrator
+-- until it has an approved device. Prevent disabling the last administrator who
+-- can actually pass the device gate.
+create or replace function app_private.prevent_last_active_admin_change()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if old.role = 'admin' and old.status = 'active'
+     and (new.role <> 'admin' or new.status <> 'active') then
+    perform pg_advisory_xact_lock(hashtext('achang-active-admin-guard'));
+    if not exists (
+      select 1
+      from public.member_accounts a
+      join public.members m on m.id = a.member_id
+      where a.id <> old.id
+        and a.role = 'admin'
+        and a.status = 'active'
+        and m.deleted_at is null
+        and (
+          a.device_approval_required = false
+          or exists (
+            select 1 from public.member_devices d
+            where d.account_id = a.id and d.status = 'approved'
+          )
+        )
+    ) then
+      raise exception using
+        errcode = '23514',
+        message = 'cannot disable the final usable administrator';
+    end if;
+  end if;
+  return new;
+end
+$$;
+
+revoke all on function app_private.prevent_last_active_admin_change() from public;
+
+drop trigger if exists member_accounts_last_admin_guard on public.member_accounts;
+create trigger member_accounts_last_admin_guard
+before update of role, status on public.member_accounts
+for each row execute function app_private.prevent_last_active_admin_change();
+

@@ -1,5 +1,6 @@
 create role anon;
 create role authenticated;
+create role service_role;
 create schema auth;
 create schema app_private;
 
@@ -22,6 +23,7 @@ create table public.member_accounts (
   auth_user_id uuid not null unique references auth.users(id),
   role text not null check (role in ('admin','volunteer')),
   status text not null default 'pending' check (status in ('pending','active','suspended')),
+  device_approval_required boolean not null default true,
   approved_at timestamptz,
   approved_by uuid,
   created_at timestamptz not null default now(),

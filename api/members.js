@@ -20,8 +20,11 @@ module.exports=L.run(async(req,res)=>{
   if(!found)L.problem(404,'找不到裝置申請');
   if(b.approved&&found.status!=='pending')L.problem(409,'只能核准待審核裝置，不得直接恢復已撤銷裝置');
   const reason=b.approved?null:L.checkText(b.reason||'管理員撤銷裝置','撤銷原因',500),status=b.approved?'approved':'revoked',now=new Date().toISOString();
-  const result=await L.rest('member_devices?id=eq.'+id+'&select=id,status',p.token,{method:'PATCH',headers:{Prefer:'return=representation'},body:{status,approved_at:b.approved?now:null,approved_by:b.approved?p.auth_user_id:null,revoked_at:b.approved?null:now,rejection_reason:reason}});
-  return L.json(res,200,{device:L.need(result,'裝置授權修改失敗')[0]});
+  const stateGuard=b.approved?'&status=eq.pending':'&status=neq.revoked';
+  const result=await L.rest('member_devices?id=eq.'+id+stateGuard+'&select=id,status',p.token,{method:'PATCH',headers:{Prefer:'return=representation'},body:{status,approved_at:b.approved?now:null,approved_by:b.approved?p.auth_user_id:null,revoked_at:b.approved?null:now,rejection_reason:reason}});
+  const updated=L.need(result,'裝置授權修改失敗')?.[0];
+  if(!updated)L.problem(409,b.approved?'裝置已不是待核准狀態':'裝置已撤銷');
+  return L.json(res,200,{device:updated});
  }
 
  if(req.method==='POST'&&b.action==='issue-invite'){
@@ -35,6 +38,7 @@ module.exports=L.run(async(req,res)=>{
   for(let attempt=0;attempt<8;attempt++){
    invitationCode=String(crypto.randomInt(0,10000)).padStart(4,'0');
    const application_code_hash=crypto.createHash('sha256').update(invitationCode).digest('hex');
+   if(application_code_hash===mem.application_code_hash)continue;
    expires=new Date(Date.now()+24*60*60*1000).toISOString();
    const result=await L.rest('members?id=eq.'+memberId+'&deleted_at=is.null&select=id',p.token,{method:'PATCH',headers:{Prefer:'return=representation'},body:{application_code_hash,application_code_expires_at:expires}});
    if(result.ok&&result.data?.length){saved=true;break}
@@ -52,7 +56,11 @@ module.exports=L.run(async(req,res)=>{
   if(!member||member.deleted_at||member.phone_e164!==phone)L.problem(400,'會員身分或聯絡電話不符');
   const existing=L.need(await L.rest('member_accounts?member_id=eq.'+memberId+'&select=id&limit=1',p.token),'會員帳號查詢失敗');
   if(existing.length)L.problem(409,'會員已有帳號，請改由待核准清單處理');
-  const provision=await L.request('/functions/v1/achang-admin-provision',{method:'POST',token:p.token,body:{memberId,phone,password:pin,role,directApproval:true}});
+  // Sensitive role provisioning requires an independently approved device,
+  // including for migration-time recovery administrators.
+  await L.deviceCheck(req,p,p.token,true);
+  const deviceId=String(req.headers['x-achang-device']||'');
+  const provision=await L.request('/functions/v1/achang-admin-provision',{method:'POST',token:p.token,headers:{'X-AChang-Device':deviceId},body:{memberId,phone,password:pin,role,directApproval:true}});
   if(!provision.ok)L.problem(provision.status===409?409:502,provision.data?.error||'管理員開通失敗');
   return L.json(res,201,{member:provision.data?.member,action:'direct-provision'});
  }

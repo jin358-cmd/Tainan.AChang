@@ -1,6 +1,8 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const json=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
+const encoder=new TextEncoder();
+const sha=async(value:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',encoder.encode(value)))).map(x=>x.toString(16).padStart(2,'0')).join('');
 Deno.serve(async(req:Request)=>{
  if(req.method!=='POST')return json({error:'Method not allowed'},405);
  const bearer=req.headers.get('authorization')||'';
@@ -12,8 +14,16 @@ Deno.serve(async(req:Request)=>{
  try{
   const {data:{user},error:authErr}=await supa.auth.getUser(bearer.replace(/^Bearer\s+/i,''));
   if(authErr||!user)return json({error:'Unauthorized'},401);
-  const {data:admin,error:adminErr}=await supa.from('member_accounts').select('role,status').eq('auth_user_id',user.id).maybeSingle();
+  const {data:admin,error:adminErr}=await supa.from('member_accounts').select('id,role,status,device_approval_required').eq('auth_user_id',user.id).maybeSingle();
   if(adminErr||admin?.role!=='admin'||admin?.status!=='active')return json({error:'Admin only'},403);
+  // This check is intentionally unconditional: a caller cannot bypass device
+  // approval by calling the Edge Function directly or by retaining a migration-
+  // era administrator token.
+  const deviceId=String(req.headers.get('x-achang-device')||'');
+  if(!/^[0-9a-f-]{32,64}$/i.test(deviceId))return json({error:'Approved administrator device required'},403);
+  const deviceHash=await sha(deviceId);
+  const {data:device,error:deviceError}=await supa.from('member_devices').select('id').eq('account_id',admin.id).eq('device_id_hash',deviceHash).eq('status','approved').limit(1).maybeSingle();
+  if(deviceError||!device)return json({error:'Approved administrator device required'},403);
   const b=await req.json(),directApproval=b.directApproval===true,role=String(b.role||'volunteer');
   const memberId=String(b.memberId||''),phone=String(b.phone||''),password=String(b.password||'');
   if(!['volunteer','admin'].includes(role)||!directApproval||!/^[\da-f]{8}-[\da-f-]{27,}$/i.test(memberId)||!/^\+8869\d{8}$/.test(phone)||!/^\d{6}$/.test(password))return json({error:'Invalid fields'},400);
@@ -26,8 +36,14 @@ Deno.serve(async(req:Request)=>{
   if(createError||!created.user)return json({error:'Unable to create account'},createError?.status===422?409:502);
   const now=new Date().toISOString(),uid=created.user.id;
   const {data:entry,error:entryErr}=await supa.from('member_accounts').insert({member_id:memberId,auth_user_id:uid,login_id:loginId,role,status:'active',requested_at:now,approved_at:now,approved_by:user.id,device_approval_required:true}).select('id,member_id,status,role').single();
-  if(entryErr||!entry){await supa.auth.admin.deleteUser(uid);return json({error:'Account creation failed'},entryErr?.code==='23505'?409:502)}
-  if(role==='admin')await supa.from('member_authorization_events').insert({member_id:memberId,account_id:entry.id,event_type:'admin_created',actor_user_id:user.id});
+  if(entryErr||!entry){const {error:cleanupError}=await supa.auth.admin.deleteUser(uid);return json({error:cleanupError?'Account creation failed; Auth cleanup required':'Account creation failed'},entryErr?.code==='23505'?409:502)}
+  if(role==='admin'){
+   const {error:auditError}=await supa.from('member_authorization_events').insert({member_id:memberId,account_id:entry.id,event_type:'admin_created',actor_user_id:user.id});
+   if(auditError){
+    const [{error:accountCleanupError},{error:authCleanupError}]=await Promise.all([supa.from('member_accounts').delete().eq('id',entry.id),supa.auth.admin.deleteUser(uid)]);
+    return json({error:accountCleanupError||authCleanupError?'Administrator audit failed; cleanup required':'Administrator audit failed'},502);
+   }
+  }
   return json({ok:true,member:{...entry,enabled:true}},201);
  }catch{return json({error:'Invalid request'},400)}
 });

@@ -59,6 +59,33 @@ begin
   end if;
 end $$;
 
+-- Invitation claim checks phone, expiry, account absence and consumes once.
+insert into public.members(id,source_member_id,display_name,phone_e164,application_code_hash,application_code_expires_at)
+values('20000000-0000-4000-8000-000000000003','SYNTH-INVITE','Synthetic invite','+886911111111',repeat('c',64),now()+interval '1 hour');
+
+do $$
+declare
+  claimed uuid;
+  replayed uuid;
+begin
+  select member_id into claimed
+  from public.achang_claim_member_invitation(repeat('c',64),'+886911111111',repeat('d',64));
+  if claimed <> '20000000-0000-4000-8000-000000000003'::uuid then
+    raise exception 'atomic invitation claim did not return the intended member';
+  end if;
+  select member_id into replayed
+  from public.achang_claim_member_invitation(repeat('c',64),'+886911111111',repeat('d',64));
+  if replayed is not null then
+    raise exception 'consumed invitation was replayed';
+  end if;
+  if not exists (
+    select 1 from public.member_authorization_events
+    where member_id=claimed and event_type='invite_consumed' and subject_hash=repeat('d',64)
+  ) then
+    raise exception 'invite consumption audit event missing';
+  end if;
+end $$;
+
 update public.members
 set deleted_at=now(),deletion_reason='isolated migration verification'
 where id='20000000-0000-4000-8000-000000000001';

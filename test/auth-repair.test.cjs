@@ -94,6 +94,7 @@ test('four-digit invitation has conditional claim and global phone rate limit',(
  assert.match(apply,/application-phone-24h/);
  assert.match(apply,/p_window_seconds:86400/);
  assert.match(issue,/attempt<8/);
+ assert.match(issue,/application_code_hash===mem\.application_code_hash/);
  assert.match(apply,/achang_claim_member_invitation/);
  assert.match(claim,/m\.phone_e164 = p_phone/);
  assert.match(claim,/m\.deleted_at is null/);
@@ -102,14 +103,29 @@ test('four-digit invitation has conditional claim and global phone rate limit',(
  assert.match(claim,/invite_consumed/);
  assert.match(claim,/revoke all on function public\.achang_claim_member_invitation\(text,text,text\)/);
  assert.match(claim,/to service_role/);
+ assert.match(claim,/cannot disable the final usable administrator/);
+ assert.match(claim,/d\.status = 'approved'/);
 });
 
 test('administrator controls use a protected PIN form and keep a final-admin guard',()=>{
- const ui=read('app.js'),api=read('api/members.js'),migration=read('supabase/migrations/20261025034848_achang_phone_pin_admin_controls.sql');
+ const ui=read('app.js'),api=read('api/members.js'),edge=read('supabase/functions/achang-admin-provision/index.ts');
  assert.match(ui,/id="directProvisionForm"/);
  assert.match(ui,/id="directAdminBtn"/);
  assert.doesNotMatch(ui,/prompt\('請讓志工本人當面設定六碼 PIN/);
  assert.match(api,/\['volunteer','admin'\]\.includes\(role\)/);
- assert.match(migration,/prevent_last_active_admin_change/);
- assert.match(migration,/device_approval_required boolean not null default true/);
+ assert.match(api,/'X-AChang-Device':deviceId/);
+ assert.doesNotMatch(edge,/device_approval_required!==false/);
+ assert.match(edge,/intentionally unconditional/);
+ assert.match(edge,/\.eq\('account_id',admin\.id\)/);
+ assert.match(edge,/\.eq\('device_id_hash',deviceHash\)/);
+ assert.match(edge,/\.eq\('status','approved'\)/);
+ assert.match(edge,/Administrator audit failed/);
+ assert.match(edge,/member_accounts'\)\.delete\(\)/);
+ assert.match(api,/await L\.deviceCheck\(req,p,p\.token,true\)/);
+});
+
+test('device approval is conditional so a late approval cannot revive a revoke',()=>{
+ const api=read('api/members.js');
+ assert.match(api,/b\.approved\?'&status=eq\.pending':'&status=neq\.revoked'/);
+ assert.match(api,/if\(!updated\)L\.problem\(409/);
 });

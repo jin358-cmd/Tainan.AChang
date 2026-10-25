@@ -2,8 +2,8 @@
 
 Evidence time: 2026-10-25 UTC  
 Executor branch: `fix/achang-auth-20261024-p0-001-continuation`  
-Continuation SHA: `d5635d6b66841e2876e72aba2afc5ae1f42d082f`  
-Tree: `816773e151e53d970ceac8cce99aea9cb4a0b1fa`
+Initial continuation SHA: `d5635d6b66841e2876e72aba2afc5ae1f42d082f`
+Final evidence SHA: recorded in the bundled manifest after commit
 
 ## Outcome
 
@@ -23,18 +23,23 @@ Production data, OAuth, credentials, or paid services.
 ## Owner claim readback
 
 Source inspection confirms that `cd61b703` changed `api/application.js` from a 16-character
-gate to exactly four numeric digits. GitHub shows only a successful `Vercel Preview Comments`
-check for that commit; it does not prove that the fixed Production alias currently serves that
-SHA. Direct reads of the Vercel alias were denied by the executor network proxy. Therefore:
+gate to exactly four numeric digits. The parent independently read Vercel deployment metadata
+through its connected Vercel account and supplied the following readback evidence:
+
+- alias: `tainan-achang-online.vercel.app`
+- deployment: `dpl_AYrXFycxhMwMZAZ9Kh9K4yT7dctY`
+- project: `prj_fGn6iRK8V1aGiBS1vikT5xEs5wTC`
+- team: `team_Aep4PXnmiXE5276HRkoQrHtF`
+- state/target: `READY` / `production`
+- source SHA: `cd61b703c687ad1240e94707929afed60fe157a3`
+
+Therefore:
 
 - `CD61_SOURCE_FIX=PASS`
-- `CD61_PRODUCTION_ALIAS_SHA=UNCERTAIN`
+- `CD61_PRODUCTION_ALIAS_SHA=PASS_METADATA_READBACK`
 - `CD61_FUNCTIONAL_CLOSED_LOOP=NOT_PROVEN`
 
-The most recent retained Production evidence before `cd61b703` records deployment
-`dpl_DNhLKr3MhJe2hUjsBamu29mZ2Gn9` at source SHA
-`925503f2fb01325be438cce3a57647bf5b932d91`. This is evidence, not a claim about the
-current alias.
+`READY` and alias metadata are deployment evidence, not HTTP/E2E functional PASS.
 
 ## Changes in this continuation
 
@@ -48,6 +53,12 @@ current alias.
 6. Phone + PIN login for administrators and volunteers, audited administrator creation,
    new-admin device approval, and last-active-admin protection re-integrated without
    overwriting the October 23 UI or four-digit hardening.
+7. Device approve/revoke writes now use conditional status predicates so a late approval
+   cannot revive a concurrently revoked device.
+8. Sensitive direct provisioning is checked at both the Vercel API and Edge Function; the
+   Edge Function independently requires the calling administrator's approved device.
+9. The last-administrator guard now counts only administrators who are actually usable under
+   the device policy. Administrator audit failure is fail-closed with explicit compensation.
 
 The Auth user create and database account insert cannot share one ACID transaction. The
 implementation consumes the exposed invitation first, compensates an account-insert failure
@@ -65,11 +76,31 @@ New migration: `20261025070000_achang_atomic_invitation_claim.sql`.
 - Revokes RPC execute from `public`, `anon`, and `authenticated`.
 - Grants RPC execute only to `service_role`.
 - Adds no RLS policy and grants no client-table write privilege.
+- Replaces the existing `app_private.prevent_last_active_admin_change()` body and recreates
+  its trigger so an active administrator without an approved device cannot be counted as the
+  final recovery administrator.
+- Does not change existing account role, status, or `device_approval_required` values.
 
-TEST catalog readback showed `achang_try_pin_attempt` exists with execute restricted to
+The already-applied TEST migration is platform version
+`20261025035324 achang_phone_pin_admin_controls`. The earlier candidate repository migration
+with timestamp `20261025034848` was removed from this continuation so it cannot be reapplied
+or bulk-set administrator device exemptions.
+
+Parent connector evidence at approximately 06:30 UTC showed `achang_try_pin_attempt` exists with execute restricted to
 `postgres/service_role`; the new claim RPC is not yet present. Its fixed-window limiter is
 atomic per bucket, but a boundary can allow a short double burst. This limitation remains
 open for a later rolling-window design.
+
+Exact SQL execution scope:
+
+- `app_private.audit_achang_invite_issue()` is `SECURITY DEFINER`, empty `search_path`, and
+  runs only from `members_invite_issue_audit` after `application_code_hash` changes.
+- `public.achang_claim_member_invitation(...)` is `SECURITY DEFINER`, empty `search_path`,
+  executable only by `service_role`; it updates one matching `members` row and inserts one
+  `member_authorization_events` row in the same transaction.
+- `app_private.prevent_last_active_admin_change()` is `SECURITY DEFINER`, empty
+  `search_path`, and runs only before member-account role/status changes.
+- No function is granted to `anon` or `authenticated`; no RLS policy is added or relaxed.
 
 ## Verification
 
@@ -77,7 +108,7 @@ Commands and actual results:
 
 ```text
 $ npm test
-tests 28; pass 28; fail 0
+tests 29; pass 29; fail 0
 
 $ PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:browser
 status PASS
@@ -90,39 +121,59 @@ $ git diff --check
 
 $ esbuild <each Edge function> --bundle --platform=neutral --external:jsr:*
 3/3 compiled
+
+$ PostgreSQL 17.6 isolated fixture + three migrations + assertions
+MIGRATION_ASSERTIONS_PASS
 ```
 
 Compiled Edge artifact SHA-256:
 
-- admin provision: `02e50f48ab4211f8cb0b1b2531988d35d3434b0d6fe9c3e583b642186d574623`
+- admin provision: `ff27844d2112a7b0c6feef3d61a163fb3f619a4887c9a31e84f207077aa5e16c`
 - member apply: `782d5ae8a2e7a83993ebdb45acd5be57b7077932522667bc31763ed6d7a3ea96`
 - PIN login: `4f63e12eb91f97cfe58712ab61eeb8b41434fc3bfb33269f853350f8b45daaea`
 
-Migration SHA-256:
-
-- phone/admin controls: `7ca62a86073f84c1feba38ed82ca1a044225fb7feefb4983ea3da2159dbe4ef7`
-- atomic invitation claim: `34de24c5c9584c1fae4b2304addbe6d1c81291d8576b00582a97d3c567329615`
+The final source/migration/evidence SHA-256 values are generated after the final commit and
+listed in `MANIFEST.sha256` inside the Library evidence bundle.
 
 These are static/synthetic results, not real backend or physical-device PASS.
+
+Known functional limit: phone login tries at most five candidate accounts and succeeds only
+when exactly one PIN matches. It does not yet implement issue #4's masked identity-selection
+step for shared-phone members. This continuation does not expand that separate UX/data-flow
+requirement inside the four-digit emergency fix; it remains `ISSUE_4_SHARED_PHONE=PARTIAL`.
 
 ## Required TEST gate and exact blocker
 
 Target: approved isolated TEST project `fhxdpupascsikjsycpbi`.
 
-Blocked actions: apply the two reviewed migrations, deploy the three Edge Functions, deploy
+Previously verified fixed TEST Vercel identity:
+
+- project: `tjc1/tainan-achang-pin-eipp-test`
+- project ID: `prj_QN5VsDGuchs2QiJV6H8ldj3PCtE7`
+- fixed alias: `https://tainan-achang-pin-eipp-test.vercel.app/`
+- last retained live-test deployment evidence: `dpl_8skTySKKGQKtSLivZ5WqzT4FKRJF`
+
+These retained identifiers must be read back before mutation; they are not evidence that the
+alias currently serves the continuation SHA.
+
+Blocked actions: apply the one new narrow migration, deploy the three Edge Functions, deploy
 the fixed TEST alias, create identifiable synthetic fixture accounts, and run real Auth/API/RLS
 tests for wrong/expired/replayed/concurrent codes, distributed attempts, account approval,
 two-device approval/revocation, wrong PIN, role isolation, administrator creation/revocation,
 and Google callback wiring.
 
-Reason: this executor has no Supabase/Vercel deployment connector, CLI authentication, or
-existing TEST login credential. `GH_TOKEN` is invalid for API reads, although Git push through
+Reason: this executor has no Supabase/Vercel deployment connector or CLI authentication.
+Parent has the connected deployment tools. No existing synthetic TEST login identity was
+identified in the handed-off metadata; existence remains **UNKNOWN**, without attempting to
+read or create a credential. `GH_TOKEN` is invalid for API reads, although Git push through
 the configured repository credential succeeds. The blocked operations were **not attempted**
 against TEST or Production and their outcome is known: **not executed**, not denied and not
 uncertain.
 
-Minimum additional authority/capability needed: a scoped deployment path to TEST project
-`fhxdpupascsikjsycpbi` that can apply the named migrations, deploy only the three named Edge
+Minimum additional authority/capability needed: parent uses its scoped deployment path to TEST
+project `fhxdpupascsikjsycpbi` to apply only
+`20261025070000_achang_atomic_invitation_claim.sql`, deploy only the Edge Functions
+`achang-member-apply`, `achang-pin-login`, and `achang-admin-provision`,
 Functions, manage only identifiable synthetic TEST rows/Auth users, and deploy/read the fixed
 TEST Vercel alias. No secret should be pasted into chat. No Production permission is needed
 until the TEST gate passes.
@@ -131,14 +182,14 @@ until the TEST gate passes.
 
 No Production deploy occurred from this executor. No new deployment ID exists.
 
-Known prior rollback evidence:
+Current Production rollback point read back by parent:
 
-- Production deployment `dpl_DNhLKr3MhJe2hUjsBamu29mZ2Gn9`
-- Source SHA `925503f2fb01325be438cce3a57647bf5b932d91`
+- Production deployment `dpl_AYrXFycxhMwMZAZ9Kh9K4yT7dctY`
+- Source SHA `cd61b703c687ad1240e94707929afed60fe157a3`
 - Earlier database recovery evidence remains in the retained v1.9/v2.0 reports.
 
-Any later Production promotion must record the pre-promotion alias/deployment again because
-the current alias-to-SHA mapping could not be independently read here.
+Any later Production promotion must read this alias/deployment again immediately before the
+change because deployment state can move.
 
 ## Active executor check
 
