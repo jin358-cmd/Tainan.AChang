@@ -85,13 +85,30 @@ test('application requests a new pending row when only revoked bindings exist',(
 });
 
 test('second device requires explicit member confirmation before a pending request',()=>{
- const session=read('api/session.js'),application=read('api/device-application.js'),ui=read('app.js');
+ const session=read('api/session.js'),application=read('api/device-application.js'),ui=read('app.js'),server=read('lib/server.js');
  assert.match(session,/device_application_required/);
  assert.match(session,/deviceCheck\(req,p,p\.token,false\)/);
  assert.match(application,/identitySession/);
  assert.match(application,/deviceCheck\(req,p,p\.token,true\)/);
+ assert.match(application,/\['admin','volunteer'\]\.includes\(p\.role\)/);
+ assert.doesNotMatch(application,/p\.role!=='volunteer'/);
+ assert.match(session,/await L\.revokeLocalSession\(req,res\);L\.clearCookies\(res\)/);
+ assert.match(server,/scope=local/);
+ assert.match(server,/setSession\(res,refreshed\.data\)/);
+ assert.doesNotMatch(server,/scope=global/);
+ assert.doesNotMatch(ui,/onlineApi\('session','DELETE'\)\.catch/);
+ assert.match(ui,/登出未完成/);
  assert.match(ui,/此裝置尚未授權，是否提出申請/);
  assert.match(ui,/onlineApi\('device-application','POST'/);
+});
+
+test('a required-device admin with only a pending device cannot approve it',()=>{
+ const members=read('api/members.js'),server=read('lib/server.js');
+ assert.match(members,/authorized\(req,res,\['admin'\]\)/);
+ assert.match(server,/async function authorized\(req,res,roles\)\{const p=await session\(req,res\)/);
+ assert.match(server,/async function session\(req,res\)\{const p=await identitySession\(req,res\);await deviceCheck\(req,p,p\.token\)/);
+ assert.match(server,/if\(found\?\.status==='pending'\)problem\(403,[^\n]+,'DEVICE_PENDING'\)/);
+ assert.match(server,/account\.role==='admin'&&account\.device_approval_required===false&&!requestApproval/);
 });
 
 test('reactivation keeps account and device authorization as separate states',()=>{

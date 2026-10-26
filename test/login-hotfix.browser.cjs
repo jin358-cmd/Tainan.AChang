@@ -14,7 +14,7 @@ function contentType(file) {
 
 async function startServer(options = {}) {
   const observed = {api:[],external:[],consoleErrors:[],pageErrors:[]};
-  const state = {loggedIn:false,role:options.role || 'admin',selectionPosts:0};
+  const state = {loggedIn:false,role:options.role || 'admin',selectionPosts:0,logoutDeletes:0};
   const server = http.createServer(async (request, response) => {
     const url = new URL(request.url, 'http://127.0.0.1');
     response.setHeader('Cache-Control', 'no-store');
@@ -52,6 +52,8 @@ async function startServer(options = {}) {
         response.statusCode = 202;
         response.end(JSON.stringify({authorization:'device_pending',message:'裝置授權申請已送出，請等待管理員核准'}));
       } else if (endpoint === 'session' && request.method === 'DELETE') {
+        state.logoutDeletes++;
+        if(state.logoutDeletes<=(options.logoutFailures||0)){response.statusCode=503;response.end(JSON.stringify({error:'合成登出失敗'}));return}
         state.loggedIn = false;
         response.end(JSON.stringify({ok:true}));
       } else if (endpoint === 'session' && request.method === 'GET') {
@@ -163,8 +165,26 @@ async function passwordLogoutReopenCase() {
   });
 }
 
-async function secondDeviceApplicationCase() {
-  return withPage({role:'volunteer',secondDevice:true}, async ({page,origin,observed}) => {
+async function logoutFailureCase(){
+ return withPage({role:'admin',logoutFailures:1},async({page,origin,observed})=>{
+  await page.goto(origin,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelector('#volunteerLoginBtn')?.hidden===false);await page.locator('#volunteerLoginBtn').click();
+  await page.locator('#secureLoginForm input[name="login"]').fill('synthetic-admin@example.invalid');await page.locator('#secureLoginForm input[name="password"]').fill('synthetic-password');await page.locator('#secureLoginForm button[type="submit"]').click();
+  await page.waitForFunction(()=>document.querySelector('#signedInName')?.hidden===false);await page.locator('#secureLogout').click();await page.waitForFunction(()=>/登出未完成：合成登出失敗/.test(document.querySelector('#toast')?.textContent||''));
+  assert.equal(await page.locator('#signedInName').isVisible(),true);assert.equal(await page.locator('#secureLogout').isVisible(),true);assert.equal(observed.api.filter(x=>x==='DELETE session').length,1);
+  await page.locator('#secureLogout').click();await page.waitForFunction(()=>document.querySelector('#secureLogout')?.hidden===true);assert.equal(observed.api.filter(x=>x==='DELETE session').length,2);
+ });
+}
+
+async function deviceCancelCleanupFailureCase(){
+ return withPage({role:'volunteer',secondDevice:true,logoutFailures:1},async({page,origin,observed})=>{
+  page.on('dialog',dialog=>dialog.dismiss());await page.goto(origin,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelector('#volunteerLoginBtn')?.hidden===false);await page.locator('#volunteerLoginBtn').click();
+  await page.locator('#secureLoginForm input[name="login"]').fill('0912345678');await page.locator('#secureLoginForm input[name="password"]').fill('123456');await page.locator('#secureLoginForm button[type="submit"]').click();
+  await page.waitForFunction(()=>document.querySelector('#authStatus')?.textContent==='合成登出失敗');assert.doesNotMatch(await page.locator('#authStatus').textContent(),/暫存已清除/);assert.equal(observed.api.includes('POST device-application'),false);
+ });
+}
+
+async function secondDeviceApplicationCase(role='volunteer') {
+  return withPage({role,secondDevice:true}, async ({page,origin,observed}) => {
     page.on('dialog', dialog => dialog.accept());
     await page.goto(origin, {waitUntil:'domcontentloaded'});
     await page.waitForFunction(() => document.querySelector('#volunteerLoginBtn')?.hidden === false);
@@ -274,7 +294,10 @@ async function adminNavigationSmokeCase() {
     volunteerCallback:await callbackCase('volunteer'),
     unauthorizedCallback:await oauthFailureCase(),
     passwordLogoutReopen:await passwordLogoutReopenCase(),
-    secondDeviceApplication:await secondDeviceApplicationCase(),
+    logoutFailure:await logoutFailureCase(),
+    deviceCancelCleanupFailure:await deviceCancelCleanupFailureCase(),
+    secondDeviceApplication:await secondDeviceApplicationCase('volunteer'),
+    adminDeviceApplication:await secondDeviceApplicationCase('admin'),
     sharedPhoneIdentitySelection:await sharedPhoneIdentitySelectionCase(),
     visibleBootFailure:await bootFailureCase(),
     latestUiMapFallback:await mapFallbackCase(),
@@ -286,7 +309,10 @@ async function adminNavigationSmokeCase() {
     volunteerCallback: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
     unauthorizedCallback: message => /403 \(Forbidden\)$/.test(message),
     passwordLogoutReopen: message => /401 \(Unauthorized\)$/.test(message),
+    logoutFailure: message => /(?:401 \(Unauthorized\)|503 \(Service Unavailable\))$/.test(message),
+    deviceCancelCleanupFailure: message => /(?:401 \(Unauthorized\)|503 \(Service Unavailable\))$/.test(message),
     secondDeviceApplication: message => /401 \(Unauthorized\)$/.test(message),
+    adminDeviceApplication: message => /401 \(Unauthorized\)$/.test(message),
     sharedPhoneIdentitySelection: message => /(?:401 \(Unauthorized\)|503 \(Service Unavailable\))$/.test(message),
     visibleBootFailure: message => /500 \(Internal Server Error\)$/.test(message) || /^Error: 地圖資料無法讀取\n/.test(message),
     latestUiMapFallback: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
