@@ -42,7 +42,7 @@ async function startServer(options = {}) {
           response.end(JSON.stringify({authorization:'identity_selection_required',identities:[{token:'opaque-token-admin',label:'測•••員',role:'管理員'},{token:'opaque-token-volunteer',label:'測•••甲',role:'志工'}]}));
           return;
         }
-        if(options.identitySelection&&payload.selectionToken&&options.selectionDelays){const delay=options.selectionDelays[Math.min(state.selectionPosts++,options.selectionDelays.length-1)];await new Promise(resolve=>setTimeout(resolve,delay))}
+        if(options.identitySelection&&payload.selectionToken&&options.selectionDelays){const index=state.selectionPosts++,delay=options.selectionDelays[Math.min(index,options.selectionDelays.length-1)];await new Promise(resolve=>setTimeout(resolve,delay));if(index<(options.selectionFailures||0)){response.statusCode=503;response.end(JSON.stringify({error:'合成登入清理失敗'}));return}}
         state.loggedIn = true;
         if (options.secondDevice) {
           response.statusCode = 202;
@@ -180,7 +180,7 @@ async function secondDeviceApplicationCase() {
 }
 
 async function sharedPhoneIdentitySelectionCase(){
- return withPage({role:'volunteer',identitySelection:true,selectionDelays:[80,220]},async({page,origin,observed})=>{
+ return withPage({role:'volunteer',identitySelection:true,selectionDelays:[80,80],selectionFailures:1},async({page,origin,observed})=>{
   await page.goto(origin,{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>document.querySelector('#volunteerLoginBtn')?.hidden===false);
   await page.locator('#volunteerLoginBtn').click();
@@ -192,10 +192,13 @@ async function sharedPhoneIdentitySelectionCase(){
   await page.locator('[data-login-identity-cancel]').click();
   assert.equal(await pin.inputValue(),'');assert.equal(await login.getAttribute('readonly'),null);assert.equal(await page.locator('#loginIdentityChoices').isHidden(),true);
   await pin.fill('123456');await form.locator('button[type="submit"]').click();await page.waitForFunction(()=>document.querySelectorAll('[data-login-identity]').length===2);
-  await page.locator('[data-login-identity]').first().click();await page.locator('[data-login-identity-cancel]').click();
+  await page.locator('[data-login-identity]').first().click();
+  assert.equal(await page.locator('[data-login-identity-cancel]').isDisabled(),true);assert.equal(await page.locator('[data-login-identity]').first().isDisabled(),true);
+  await page.locator('[data-login-identity-cancel]').evaluate(node=>node.click());await page.locator('[data-login-identity]').first().evaluate(node=>node.click());await form.evaluate(node=>node.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true})));
+  await page.waitForFunction(()=>document.querySelector('#authStatus')?.textContent==='合成登入清理失敗');
   assert.equal(await form.locator('button[type="submit"]').isEnabled(),true);assert.equal(await page.locator('#signedInName').isHidden(),true);
   await pin.fill('123456');await form.locator('button[type="submit"]').click();await page.waitForFunction(()=>document.querySelectorAll('[data-login-identity]').length===2);
-  await page.locator('[data-login-identity]').first().click();await page.waitForTimeout(110);
+  await page.locator('[data-login-identity]').first().click();await page.waitForTimeout(20);
   assert.equal(await form.locator('button[type="submit"]').isDisabled(),true);assert.equal(await page.locator('#signedInName').isHidden(),true);
   await page.waitForFunction(()=>document.querySelector('#signedInName')?.hidden===false);
   assert.equal(observed.api.filter(x=>x==='POST session').length,5);
@@ -284,7 +287,7 @@ async function adminNavigationSmokeCase() {
     unauthorizedCallback: message => /403 \(Forbidden\)$/.test(message),
     passwordLogoutReopen: message => /401 \(Unauthorized\)$/.test(message),
     secondDeviceApplication: message => /401 \(Unauthorized\)$/.test(message),
-    sharedPhoneIdentitySelection: message => /401 \(Unauthorized\)$/.test(message),
+    sharedPhoneIdentitySelection: message => /(?:401 \(Unauthorized\)|503 \(Service Unavailable\))$/.test(message),
     visibleBootFailure: message => /500 \(Internal Server Error\)$/.test(message) || /^Error: 地圖資料無法讀取\n/.test(message),
     latestUiMapFallback: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
     memberApplicationModal: message => /401 \(Unauthorized\)$/.test(message),

@@ -18,10 +18,10 @@ test('provisioning separates non-unique contact phone from Auth identity',()=>{
 test('phone plus PIN resolves a unique account without treating phone as Auth identity',()=>{
  const source=read('supabase/functions/achang-pin-login/index.ts');
  assert.match(source,/\.eq\('phone_e164',phone\)/);
- assert.match(source,/matches\.length!==1/);
+ assert.match(source,/authenticateAccountCandidates/);
  assert.match(source,/auth\.admin\.getUserById/);
  assert.match(source,/ACCOUNT_PENDING/);
- assert.match(source,/match\.account\.status!=='active'/);
+ assert.match(source,/decision\.kind==='blocked'/);
  assert.doesNotMatch(source,/createUser\(\{phone/);
 });
 
@@ -34,15 +34,16 @@ test('shared phone identity choices are encrypted, masked and short lived',()=>{
  assert.match(source,/IDENTITY_SELECTION_REQUIRED/);
  assert.match(source,/v4-selection-context/);
  assert.match(source,/v4-selection-nonce/);
- assert.match(source,/signOut\(\{scope:'local'\}\)/);
- assert.match(source,/response\.ok\|\|response\.status===401/);
- assert.match(source,/if\(!await revokeMatches\(url,anon,matches\)\)return reply\(\{error:'登入安全清理暫時無法完成'\},503\)/);
+ assert.match(source,/authenticateAccountCandidates/);
+ assert.match(source,/admin\.auth\.admin\.signOut\(session\.access_token,'local'\)/);
+ assert.match(source,/if\(decision\.kind==='error'\)return reply\(\{error:'Authentication service unavailable'\},503\)/);
  assert.ok(source.indexOf('signInWithPassword')<source.indexOf("return reply({code:'IDENTITY_SELECTION_REQUIRED'"),'PIN must be verified before identities are returned');
  assert.match(session,/identity_selection_required/);
  assert.match(ui,/loginAttemptSerial/);
- assert.match(ui,/new FormData\(form\).*submit\.disabled=true/);
+ assert.match(ui,/new FormData\(form\).*setLoginFormLocked\(form,true\)/);
  assert.match(ui,/登入暫存已清除/);
- assert.match(ui,/finally\{if\(serial===loginAttemptSerial\)\{loginInFlight=false;submit\.disabled=false\}\}/);
+ assert.match(ui,/if\(loginInFlight\)return;loginAttemptSerial\+\+/);
+ assert.match(ui,/finally\{if\(serial===loginAttemptSerial\)\{loginInFlight=false;setLoginFormLocked\(form,false\)\}\}/);
 });
 
 test('volunteer application requires a one-time invitation and creates Pending',()=>{

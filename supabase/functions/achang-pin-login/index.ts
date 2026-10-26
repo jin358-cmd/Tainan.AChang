@@ -1,4 +1,5 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { authenticateAccountCandidates,returnAuthenticatedSession } from '../_shared/identity-selection.mjs';
 
 const reply=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const encoder=new TextEncoder(),decoder=new TextDecoder();
@@ -12,9 +13,8 @@ const openSelection=async(secret:string,token:string)=>{if(!/^[A-Za-z0-9_-]{40,1
 const maskName=(value:string)=>{const chars=Array.from(value.trim());if(!chars.length)return '未命名身分';if(chars.length===1)return chars[0]+'•';if(chars.length===2)return chars[0]+'•';return chars[0]+'•'.repeat(Math.min(3,chars.length-2))+chars.at(-1)};
 type Member={id:string,display_name:string|null};
 type Account={id:string,auth_user_id:string,member_id:string,status:string,role:string};
-type LoginMatch={account:Account,session:{access_token:string,refresh_token:string,expires_in:number},client:ReturnType<typeof createClient>};
-const revokeMatch=async(url:string,anon:string,match:LoginMatch)=>{try{const {error}=await match.client.auth.signOut({scope:'local'});if(!error)return true}catch{}try{const response=await fetch(url+'/auth/v1/logout?scope=local',{method:'POST',headers:{apikey:anon,Authorization:'Bearer '+match.session.access_token}});return response.ok||response.status===401}catch{return false}};
-const revokeMatches=async(url:string,anon:string,matches:LoginMatch[])=>(await Promise.all(matches.map(match=>revokeMatch(url,anon,match)))).every(Boolean);
+type LoginSession={access_token:string,refresh_token:string,expires_in:number};
+type LoginDecision={kind:'error'}|{kind:'invalid'}|{kind:'selection',accounts:Account[]}|{kind:'blocked',code:'ACCOUNT_PENDING'|'ACCOUNT_SUSPENDED'}|{kind:'selected',account:Account,session:LoginSession};
 
 Deno.serve(async(req:Request)=>{
  if(req.method!=='POST')return reply({error:'Method not allowed'},405);
@@ -35,39 +35,42 @@ Deno.serve(async(req:Request)=>{
   const {data:accountRows,error:accountError}=await admin.from('member_accounts').select('id,auth_user_id,member_id,status,role').in('member_id',members.map(m=>m.id)).in('role',['admin','volunteer']).limit(6),accounts=(accountRows||[]) as Account[];
   if(accountError||!accounts?.length||accounts.length>5){await admin.from('member_authorization_events').insert({event_type:'login_failed',subject_hash:subject});return generic()}
   const selectionContext=await hash(key,'v4-selection-context:'+subject+':'+ip);
-  let candidates=accounts;
+  let selectedAccountId:string|null=null;
   if(selectionToken){
    let selected;try{selected=await openSelection(key,selectionToken)}catch{await admin.from('member_authorization_events').insert({event_type:'login_failed',subject_hash:subject});return generic()}
    if(selected.subject!==subject||selected.context!==selectionContext||!selected.nonce||!selected.expiresAt||selected.expiresAt<Date.now()){await admin.from('member_authorization_events').insert({event_type:'login_failed',subject_hash:subject});return generic()}
    const {data:freshChallenge,error:challengeError}=await admin.rpc('achang_try_pin_attempt',{p_subject:await hash(key,'v4-selection-nonce:'+selected.nonce),p_max_attempts:1,p_window_seconds:300});
    if(challengeError)return reply({error:'登入安全檢查暫時無法使用'},503);
    if(!freshChallenge)return generic();
-   candidates=accounts.filter(account=>account.id===selected.accountId);
-   if(candidates.length!==1){await admin.from('member_authorization_events').insert({event_type:'login_failed',subject_hash:subject});return generic()}
+   selectedAccountId=selected.accountId||null;
+   if(!selectedAccountId||accounts.filter(account=>account.id===selectedAccountId).length!==1){await admin.from('member_authorization_events').insert({event_type:'login_failed',subject_hash:subject});return generic()}
   }
   const {data:allowed,error:rateError}=await admin.rpc('achang_try_pin_attempt',{p_subject:subject,p_max_attempts:5,p_window_seconds:900});
   if(rateError)return reply({error:'登入安全檢查暫時無法使用'},503);
   if(!allowed)return reply({error:'嘗試次數過多，請稍後再試'},429);
-  const matches:LoginMatch[]=[];
-  for(const account of candidates){
-   const {data:userResult,error:userError}=await admin.auth.admin.getUserById(account.auth_user_id),email=userResult.user?.email;
-   if(userError||!email)continue;
-   const client=createClient(url,anon,{auth:{persistSession:false,autoRefreshToken:false}});
-   try{const {data:login,error:authError}=await client.auth.signInWithPassword({email,password:pin});if(!authError&&login.user?.id===account.auth_user_id&&login.session)matches.push({account,session:login.session,client})}catch{}
+  const client=createClient(url,anon,{auth:{persistSession:false,autoRefreshToken:false}});
+  const revokeSession=async(session:LoginSession)=>{const {error}=await admin.auth.admin.signOut(session.access_token,'local');return !error};
+  const decision=await authenticateAccountCandidates({
+   accounts,selectedAccountId,
+   getEmail:async(account:Account)=>{const {data,error}=await admin.auth.admin.getUserById(account.auth_user_id);return error?'':data.user?.email||''},
+   signIn:async(account:Account,email:string)=>{const {data,error}=await client.auth.signInWithPassword({email,password:pin});return error||!data.session?null:{session:data.session,verified:data.user?.id===account.auth_user_id}},
+   revokeSession
+  }) as LoginDecision;
+  if(decision.kind==='error')return reply({error:'Authentication service unavailable'},503);
+  if(decision.kind==='invalid'){await admin.from('member_authorization_events').insert({event_type:'login_failed',subject_hash:subject});return generic()}
+  if(decision.kind==='selection'){
+   const names=new Map(members.map(member=>[member.id,String(member.display_name||'')]));
+   const identities=await Promise.all(decision.accounts.map(async(account:Account)=>({token:await sealSelection(key,{accountId:account.id,subject,context:selectionContext,nonce:crypto.randomUUID(),expiresAt:Date.now()+120*1000}),label:maskName(names.get(account.member_id)||''),role:account.role==='admin'?'管理員':'志工'})));
+   return reply({code:'IDENTITY_SELECTION_REQUIRED',identities},409);
   }
-  try{
-   if(!selectionToken&&matches.length>1){
-    if(!await revokeMatches(url,anon,matches))return reply({error:'登入安全清理暫時無法完成'},503);
-    const names=new Map(members.map(member=>[member.id,String(member.display_name||'')]));
-    const identities=await Promise.all(matches.map(async({account})=>({token:await sealSelection(key,{accountId:account.id,subject,context:selectionContext,nonce:crypto.randomUUID(),expiresAt:Date.now()+120*1000}),label:maskName(names.get(account.member_id)||''),role:account.role==='admin'?'管理員':'志工'})));
-    return reply({code:'IDENTITY_SELECTION_REQUIRED',identities},409);
-   }
-   if(matches.length!==1){if(!await revokeMatches(url,anon,matches))return reply({error:'登入安全清理暫時無法完成'},503);await admin.from('member_authorization_events').insert({event_type:'login_failed',subject_hash:subject});return generic()}
-   const match=matches[0];
-   if(match.account.status==='pending'){if(!await revokeMatches(url,anon,matches))return reply({error:'登入安全清理暫時無法完成'},503);return reply({error:'會員申請已送出，請等待管理員核准',code:'ACCOUNT_PENDING'},403)}
-   if(match.account.status!=='active'){if(!await revokeMatches(url,anon,matches))return reply({error:'登入安全清理暫時無法完成'},503);return reply({error:'會員帳號已停用',code:'ACCOUNT_SUSPENDED'},403)}
-   await admin.from('member_authorization_events').insert({member_id:match.account.member_id,account_id:match.account.id,event_type:'login_succeeded',subject_hash:subject});
-   return reply({access_token:match.session.access_token,refresh_token:match.session.refresh_token,expires_in:match.session.expires_in,token_type:'bearer'});
-  }catch{await revokeMatches(url,anon,matches);throw new Error('login finalization failed')}
+  if(decision.kind==='blocked')return decision.code==='ACCOUNT_PENDING'?reply({error:'會員申請已送出，請等待管理員核准',code:decision.code},403):reply({error:'會員帳號已停用',code:decision.code},403);
+  const delivered=await returnAuthenticatedSession({
+   session:decision.session,
+   audit:async()=>{const {error}=await admin.from('member_authorization_events').insert({member_id:decision.account.member_id,account_id:decision.account.id,event_type:'login_succeeded',subject_hash:subject});return !error},
+   revokeSession,
+   buildResult:async(session:LoginSession)=>reply({access_token:session.access_token,refresh_token:session.refresh_token,expires_in:session.expires_in,token_type:'bearer'})
+  });
+  if(!delivered.ok)return reply({error:'Authentication service unavailable'},503);
+  return delivered.result;
  }catch{return reply({error:'請求資料格式錯誤'},400)}
 });
