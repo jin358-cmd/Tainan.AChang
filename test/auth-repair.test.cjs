@@ -52,6 +52,14 @@ test('TEST preview hosts still restore an authenticated server session on boot',
  assert.doesNotMatch(ui,/if\(!googleHandled&&!previewOnly\(\)\)await authStart\(\)/);
 });
 
+test('volunteer task expansion state exists and is cleared between sessions',()=>{
+ const ui=read('app.js');
+ assert.match(ui,/const volunteerExpandedGroups=new Set\(\)/);
+ assert.match(ui,/data-vol-expand/);
+ assert.match(ui,/if\(volunteerExpandedGroups\.has\(key\)\)volunteerExpandedGroups\.delete\(key\);else volunteerExpandedGroups\.add\(key\)/);
+ assert.match(ui,/function showAuth\(\)\{[\s\S]*volunteerTaskCategory='current';volunteerExpandedGroups\.clear\(\)/);
+});
+
 test('volunteer application requires a one-time invitation and creates Pending',()=>{
  const source=read('supabase/functions/achang-member-apply/index.ts'),claim=read('supabase/migrations/20261025070000_achang_atomic_invitation_claim.sql');
  assert.match(claim,/application_code_hash/);

@@ -63,7 +63,7 @@ async function startServer(options = {}) {
         } else {
           response.end(JSON.stringify({role:state.role,memberId:state.role === 'volunteer' ? 'synthetic-member' : null,accountId:'synthetic-account',displayName:state.role === 'volunteer' ? '合成志工' : '合成管理員'}));
         }
-      } else if (endpoint === 'tasks') response.end(JSON.stringify({tasks:[]}));
+      } else if (endpoint === 'tasks') response.end(JSON.stringify({tasks:options.tasks||[]}));
       else if (endpoint === 'roster') response.end(JSON.stringify({people:[]}));
       else response.end(JSON.stringify({ok:true}));
       return;
@@ -177,6 +177,37 @@ async function previewSavedSessionReloadCase(){
   await second.waitForFunction(()=>document.querySelector('#signedInName')?.hidden===false);
   assert.equal(await second.locator('#signedInName').textContent(),'合成志工');await second.close();
   assert.ok(observed.api.filter(x=>x==='GET session').length>=3);
+ });
+}
+
+async function volunteerTaskExpansionAndResetCase(){
+ const day=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ const tasks=[
+  {id:'synthetic-task-1',volunteer_id:'synthetic-member',visit_date:day,shift:'夜間',area:'成功里',truck:'KEB-5939',stop_address:'中山南路1號',eta:'00:00',stop_order:1,status:'待訪'},
+  {id:'synthetic-task-2',volunteer_id:'synthetic-member',visit_date:day,shift:'夜間',area:'成功里',truck:'KEB-5939',stop_address:'中山南路2號',eta:'00:05',stop_order:2,status:'待訪'}
+ ];
+ return withPage({role:'volunteer',initiallyLoggedIn:true,previewHost:true,tasks},async({page,origin,observed})=>{
+  await page.goto(origin,{waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>document.querySelector('#signedInName')?.hidden===false);
+  const expander=page.locator('[data-vol-expand]');
+  await expander.waitFor();
+  assert.equal(await expander.getAttribute('aria-expanded'),'false');
+  assert.equal(await page.locator('.volunteer-stop-panel').isHidden(),true);
+  await expander.click();
+  assert.equal(await page.locator('[data-vol-expand]').getAttribute('aria-expanded'),'true');
+  assert.equal(await page.locator('.volunteer-stop-panel').isVisible(),true);
+  assert.equal(await page.locator('.volunteer-stop-item').count(),2);
+  await page.locator('#secureLogout').click();
+  await page.waitForFunction(()=>document.querySelector('#secureLogout')?.hidden===true);
+  await page.locator('#volunteerLoginBtn').click();
+  await page.locator('#secureLoginForm input[name="login"]').fill('0912345678');
+  await page.locator('#secureLoginForm input[name="password"]').fill('123456');
+  await page.locator('#secureLoginForm button[type="submit"]').click();
+  await page.waitForFunction(()=>document.querySelector('#signedInName')?.hidden===false);
+  await page.locator('[data-vol-expand]').waitFor();
+  assert.equal(await page.locator('[data-vol-expand]').getAttribute('aria-expanded'),'false');
+  assert.equal(await page.locator('.volunteer-stop-panel').isHidden(),true);
+  assert.equal(observed.api.filter(x=>x==='GET tasks').length,2);
  });
 }
 
@@ -310,6 +341,7 @@ async function adminNavigationSmokeCase() {
     unauthorizedCallback:await oauthFailureCase(),
     passwordLogoutReopen:await passwordLogoutReopenCase(),
     previewSavedSessionReload:await previewSavedSessionReloadCase(),
+    volunteerTaskExpansionAndReset:await volunteerTaskExpansionAndResetCase(),
     logoutFailure:await logoutFailureCase(),
     deviceCancelCleanupFailure:await deviceCancelCleanupFailureCase(),
     secondDeviceApplication:await secondDeviceApplicationCase('volunteer'),
@@ -326,6 +358,7 @@ async function adminNavigationSmokeCase() {
     unauthorizedCallback: message => /403 \(Forbidden\)$/.test(message),
     passwordLogoutReopen: message => /401 \(Unauthorized\)$/.test(message),
     previewSavedSessionReload: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
+    volunteerTaskExpansionAndReset: message => /(?:401 \(Unauthorized\)|net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector))$/.test(message),
     logoutFailure: message => /(?:401 \(Unauthorized\)|503 \(Service Unavailable\))$/.test(message),
     deviceCancelCleanupFailure: message => /(?:401 \(Unauthorized\)|503 \(Service Unavailable\))$/.test(message),
     secondDeviceApplication: message => /401 \(Unauthorized\)$/.test(message),
