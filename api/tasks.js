@@ -9,7 +9,13 @@ async function loadAll(token){const [a,t]=await Promise.all([L.rest('assignments
  }).filter(Boolean)}
 module.exports=L.run(async(req,res)=>{
  L.method(req,['GET','POST','PATCH','DELETE']);const p=await L.authorized(req,res,['admin','volunteer']);
- if(req.method==='GET')return L.json(res,200,{tasks:await loadAll(p.token)});
+ if(req.method==='GET'){
+  const tasks=await loadAll(p.token);
+  if(p.role!=='volunteer')return L.json(res,200,{tasks});
+  const group=await L.request('/functions/v1/achang-group-contacts',{method:'POST',token:p.token,headers:{'x-achang-device':String(req.headers['x-achang-device']||'')}});
+  if(!group.ok)L.problem(group.status===401?401:group.status===403?403:503,group.data?.error||'小組名冊讀取失敗');
+  return L.json(res,200,{tasks,groupContacts:Array.isArray(group.data?.contacts)?group.data.contacts:[]});
+ }
  const b=L.body(req);
  if(req.method==='POST'){
   if(p.role!=='admin')L.problem(403,'志工不能指定排班');

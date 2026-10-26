@@ -63,7 +63,7 @@ async function startServer(options = {}) {
         } else {
           response.end(JSON.stringify({role:state.role,memberId:state.role === 'volunteer' ? 'synthetic-member' : null,accountId:'synthetic-account',displayName:state.role === 'volunteer' ? '合成志工' : '合成管理員'}));
         }
-      } else if (endpoint === 'tasks') {if(request.method==='PATCH'&&options.taskPatchDelay)await new Promise(resolve=>setTimeout(resolve,options.taskPatchDelay));response.end(JSON.stringify(request.method==='GET'?{tasks:options.tasks||[]}:{ok:true}));}
+      } else if (endpoint === 'tasks') {if(request.method==='PATCH'&&options.taskPatchDelay)await new Promise(resolve=>setTimeout(resolve,options.taskPatchDelay));response.end(JSON.stringify(request.method==='GET'?{tasks:options.tasks||[],groupContacts:options.groupContacts||[]}:{ok:true}));}
       else if (endpoint === 'roster') {
         if(request.method==='PATCH'){
           const person=state.roster.find(item=>item.id===payload.id);
@@ -195,7 +195,12 @@ async function volunteerTaskExpansionAndResetCase(){
   {id:'synthetic-task-1',volunteer_id:'synthetic-member',visit_date:day,shift:'夜間',area:'成功里',truck:'KEB-5939',stop_address:'中山南路1號',eta:'00:00',stop_order:1,status:'待訪'},
   {id:'synthetic-task-2',volunteer_id:'synthetic-member',visit_date:day,shift:'夜間',area:'成功里',truck:'KEB-5939',stop_address:'中山南路2號',eta:'00:05',stop_order:2,status:'待訪'}
  ];
- return withPage({role:'volunteer',initiallyLoggedIn:true,previewHost:true,tasks,taskPatchDelay:120},async({page,origin,observed})=>{
+ const groupContacts=[
+  {visit_date:day,shift:'夜間',area:'成功里',truck:'KEB-5939',name:'合成志工',phone:'+886989098468'},
+  {visit_date:day,shift:'夜間',area:'成功里',truck:'KEB-5939',name:'同組志工',phone:'+886903225788'},
+  {visit_date:day,shift:'日間',area:'成功里',truck:'KEB-5939',name:'跨班志工',phone:'+886911111111'}
+ ];
+ return withPage({role:'volunteer',initiallyLoggedIn:true,previewHost:true,tasks,groupContacts,taskPatchDelay:120},async({page,origin,observed})=>{
   await page.goto(origin,{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>document.querySelector('#signedInName')?.hidden===false);
   const expander=page.locator('[data-vol-expand]');
@@ -207,8 +212,11 @@ async function volunteerTaskExpansionAndResetCase(){
   assert.equal(await page.locator('.volunteer-stop-panel').isVisible(),true);
   assert.equal(await page.locator('.volunteer-stop-item').count(),2);
   await page.locator('[data-vol-group]').click();
-  assert.match(await page.locator('#areaPopup').textContent(),/已授權 1 人/);
+  assert.match(await page.locator('#areaPopup').textContent(),/已授權 2 人/);
   assert.match(await page.locator('#areaPopup').textContent(),/合成志工/);
+  assert.match(await page.locator('#areaPopup').textContent(),/同組志工/);
+  assert.match(await page.locator('#areaPopup').textContent(),/0989-098-468/);
+  assert.doesNotMatch(await page.locator('#areaPopup').textContent(),/跨班志工/);
   await page.locator('[data-close-area]').click();
   await page.locator('.task-complete-btn').first().click();
   await page.locator('#confirmationModal').waitFor();

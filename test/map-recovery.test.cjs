@@ -33,7 +33,7 @@ test('map startup has bounded failure, cleanup and retry guards', () => {
 });
 
 test('map asset revision and service-worker cache advance together', () => {
-  assert.match(html, /styles\.css\?v=190/);
-  assert.match(html, /app\.js\?v=190/);
-  assert.match(sw, /achang-pwa-shell-v123-live-regression-fixes/);
+  assert.match(html, /styles\.css\?v=191/);
+  assert.match(html, /app\.js\?v=191/);
+  assert.match(sw, /achang-pwa-shell-v124-group-contacts/);
 });
