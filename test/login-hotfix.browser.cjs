@@ -14,7 +14,7 @@ function contentType(file) {
 
 async function startServer(options = {}) {
   const observed = {api:[],external:[],consoleErrors:[],pageErrors:[]};
-  const state = {loggedIn:false,role:options.role || 'admin'};
+  const state = {loggedIn:false,role:options.role || 'admin',selectionPosts:0};
   const server = http.createServer(async (request, response) => {
     const url = new URL(request.url, 'http://127.0.0.1');
     response.setHeader('Cache-Control', 'no-store');
@@ -42,7 +42,7 @@ async function startServer(options = {}) {
           response.end(JSON.stringify({authorization:'identity_selection_required',identities:[{token:'opaque-token-admin',label:'測•••員',role:'管理員'},{token:'opaque-token-volunteer',label:'測•••甲',role:'志工'}]}));
           return;
         }
-        if(options.identitySelection&&payload.selectionToken&&options.selectionDelay)await new Promise(resolve=>setTimeout(resolve,options.selectionDelay));
+        if(options.identitySelection&&payload.selectionToken&&options.selectionDelays){const delay=options.selectionDelays[Math.min(state.selectionPosts++,options.selectionDelays.length-1)];await new Promise(resolve=>setTimeout(resolve,delay))}
         state.loggedIn = true;
         if (options.secondDevice) {
           response.statusCode = 202;
@@ -180,7 +180,7 @@ async function secondDeviceApplicationCase() {
 }
 
 async function sharedPhoneIdentitySelectionCase(){
- return withPage({role:'volunteer',identitySelection:true,selectionDelay:120},async({page,origin,observed})=>{
+ return withPage({role:'volunteer',identitySelection:true,selectionDelays:[80,220]},async({page,origin,observed})=>{
   await page.goto(origin,{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>document.querySelector('#volunteerLoginBtn')?.hidden===false);
   await page.locator('#volunteerLoginBtn').click();
@@ -192,10 +192,12 @@ async function sharedPhoneIdentitySelectionCase(){
   await page.locator('[data-login-identity-cancel]').click();
   assert.equal(await pin.inputValue(),'');assert.equal(await login.getAttribute('readonly'),null);assert.equal(await page.locator('#loginIdentityChoices').isHidden(),true);
   await pin.fill('123456');await form.locator('button[type="submit"]').click();await page.waitForFunction(()=>document.querySelectorAll('[data-login-identity]').length===2);
-  await page.locator('[data-login-identity]').first().click();await page.locator('[data-login-identity-cancel]').click();await page.waitForTimeout(180);
+  await page.locator('[data-login-identity]').first().click();await page.locator('[data-login-identity-cancel]').click();
   assert.equal(await form.locator('button[type="submit"]').isEnabled(),true);assert.equal(await page.locator('#signedInName').isHidden(),true);
   await pin.fill('123456');await form.locator('button[type="submit"]').click();await page.waitForFunction(()=>document.querySelectorAll('[data-login-identity]').length===2);
-  await page.locator('[data-login-identity]').first().click();await page.waitForFunction(()=>document.querySelector('#signedInName')?.hidden===false);
+  await page.locator('[data-login-identity]').first().click();await page.waitForTimeout(110);
+  assert.equal(await form.locator('button[type="submit"]').isDisabled(),true);assert.equal(await page.locator('#signedInName').isHidden(),true);
+  await page.waitForFunction(()=>document.querySelector('#signedInName')?.hidden===false);
   assert.equal(observed.api.filter(x=>x==='POST session').length,5);
  });
 }

@@ -12,6 +12,9 @@ const openSelection=async(secret:string,token:string)=>{if(!/^[A-Za-z0-9_-]{40,1
 const maskName=(value:string)=>{const chars=Array.from(value.trim());if(!chars.length)return '未命名身分';if(chars.length===1)return chars[0]+'•';if(chars.length===2)return chars[0]+'•';return chars[0]+'•'.repeat(Math.min(3,chars.length-2))+chars.at(-1)};
 type Member={id:string,display_name:string|null};
 type Account={id:string,auth_user_id:string,member_id:string,status:string,role:string};
+type LoginMatch={account:Account,session:{access_token:string,refresh_token:string,expires_in:number},client:ReturnType<typeof createClient>};
+const revokeMatch=async(url:string,anon:string,match:LoginMatch)=>{try{const {error}=await match.client.auth.signOut({scope:'local'});if(!error)return true}catch{}try{const response=await fetch(url+'/auth/v1/logout?scope=local',{method:'POST',headers:{apikey:anon,Authorization:'Bearer '+match.session.access_token}});return response.ok||response.status===401}catch{return false}};
+const revokeMatches=async(url:string,anon:string,matches:LoginMatch[])=>(await Promise.all(matches.map(match=>revokeMatch(url,anon,match)))).every(Boolean);
 
 Deno.serve(async(req:Request)=>{
  if(req.method!=='POST')return reply({error:'Method not allowed'},405);
@@ -45,24 +48,26 @@ Deno.serve(async(req:Request)=>{
   const {data:allowed,error:rateError}=await admin.rpc('achang_try_pin_attempt',{p_subject:subject,p_max_attempts:5,p_window_seconds:900});
   if(rateError)return reply({error:'登入安全檢查暫時無法使用'},503);
   if(!allowed)return reply({error:'嘗試次數過多，請稍後再試'},429);
-  const matches:Array<{account:Account,session:{access_token:string,refresh_token:string,expires_in:number},client:ReturnType<typeof createClient>}>=[];
+  const matches:LoginMatch[]=[];
   for(const account of candidates){
    const {data:userResult,error:userError}=await admin.auth.admin.getUserById(account.auth_user_id),email=userResult.user?.email;
    if(userError||!email)continue;
    const client=createClient(url,anon,{auth:{persistSession:false,autoRefreshToken:false}});
    try{const {data:login,error:authError}=await client.auth.signInWithPassword({email,password:pin});if(!authError&&login.user?.id===account.auth_user_id&&login.session)matches.push({account,session:login.session,client})}catch{}
   }
-  if(!selectionToken&&matches.length>1){
-   await Promise.allSettled(matches.map(match=>match.client.auth.signOut({scope:'local'})));
-   const names=new Map(members.map(member=>[member.id,String(member.display_name||'')]));
-   const identities=await Promise.all(matches.map(async({account})=>({token:await sealSelection(key,{accountId:account.id,subject,context:selectionContext,nonce:crypto.randomUUID(),expiresAt:Date.now()+120*1000}),label:maskName(names.get(account.member_id)||''),role:account.role==='admin'?'管理員':'志工'})));
-   return reply({code:'IDENTITY_SELECTION_REQUIRED',identities},409);
-  }
-  if(matches.length!==1){await Promise.allSettled(matches.map(match=>match.client.auth.signOut({scope:'local'})));await admin.from('member_authorization_events').insert({event_type:'login_failed',subject_hash:subject});return generic()}
-  const match=matches[0];
-  if(match.account.status==='pending'){await match.client.auth.signOut({scope:'local'});return reply({error:'會員申請已送出，請等待管理員核准',code:'ACCOUNT_PENDING'},403)}
-  if(match.account.status!=='active'){await match.client.auth.signOut({scope:'local'});return reply({error:'會員帳號已停用',code:'ACCOUNT_SUSPENDED'},403)}
-  await admin.from('member_authorization_events').insert({member_id:match.account.member_id,account_id:match.account.id,event_type:'login_succeeded',subject_hash:subject});
-  return reply({access_token:match.session.access_token,refresh_token:match.session.refresh_token,expires_in:match.session.expires_in,token_type:'bearer'});
+  try{
+   if(!selectionToken&&matches.length>1){
+    if(!await revokeMatches(url,anon,matches))return reply({error:'登入安全清理暫時無法完成'},503);
+    const names=new Map(members.map(member=>[member.id,String(member.display_name||'')]));
+    const identities=await Promise.all(matches.map(async({account})=>({token:await sealSelection(key,{accountId:account.id,subject,context:selectionContext,nonce:crypto.randomUUID(),expiresAt:Date.now()+120*1000}),label:maskName(names.get(account.member_id)||''),role:account.role==='admin'?'管理員':'志工'})));
+    return reply({code:'IDENTITY_SELECTION_REQUIRED',identities},409);
+   }
+   if(matches.length!==1){if(!await revokeMatches(url,anon,matches))return reply({error:'登入安全清理暫時無法完成'},503);await admin.from('member_authorization_events').insert({event_type:'login_failed',subject_hash:subject});return generic()}
+   const match=matches[0];
+   if(match.account.status==='pending'){if(!await revokeMatches(url,anon,matches))return reply({error:'登入安全清理暫時無法完成'},503);return reply({error:'會員申請已送出，請等待管理員核准',code:'ACCOUNT_PENDING'},403)}
+   if(match.account.status!=='active'){if(!await revokeMatches(url,anon,matches))return reply({error:'登入安全清理暫時無法完成'},503);return reply({error:'會員帳號已停用',code:'ACCOUNT_SUSPENDED'},403)}
+   await admin.from('member_authorization_events').insert({member_id:match.account.member_id,account_id:match.account.id,event_type:'login_succeeded',subject_hash:subject});
+   return reply({access_token:match.session.access_token,refresh_token:match.session.refresh_token,expires_in:match.session.expires_in,token_type:'bearer'});
+  }catch{await revokeMatches(url,anon,matches);throw new Error('login finalization failed')}
  }catch{return reply({error:'請求資料格式錯誤'},400)}
 });

@@ -35,11 +35,14 @@ test('shared phone identity choices are encrypted, masked and short lived',()=>{
  assert.match(source,/v4-selection-context/);
  assert.match(source,/v4-selection-nonce/);
  assert.match(source,/signOut\(\{scope:'local'\}\)/);
+ assert.match(source,/response\.ok\|\|response\.status===401/);
+ assert.match(source,/if\(!await revokeMatches\(url,anon,matches\)\)return reply\(\{error:'登入安全清理暫時無法完成'\},503\)/);
  assert.ok(source.indexOf('signInWithPassword')<source.indexOf("return reply({code:'IDENTITY_SELECTION_REQUIRED'"),'PIN must be verified before identities are returned');
  assert.match(session,/identity_selection_required/);
  assert.match(ui,/loginAttemptSerial/);
  assert.match(ui,/new FormData\(form\).*submit\.disabled=true/);
  assert.match(ui,/登入暫存已清除/);
+ assert.match(ui,/finally\{if\(serial===loginAttemptSerial\)\{loginInFlight=false;submit\.disabled=false\}\}/);
 });
 
 test('volunteer application requires a one-time invitation and creates Pending',()=>{
