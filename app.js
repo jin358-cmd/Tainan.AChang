@@ -518,7 +518,7 @@ async function boot(){try{
  const pub=await fetch('./data-public.json',{cache:'no-store'});if(!pub.ok)throw Error('地圖資料無法讀取');data=await pub.json();areas=data.areas;
  state=makeState([]);state.demo=false;areaPage=Math.floor(areas.indexOf(selectedArea)/CARD_PAGE_SIZE);const pa=$('#plannerAreaSelect');pa.innerHTML=areas.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('')+'<option value="all">全部</option>';
  const sel=$('#peopleAreaFilter');sel.innerHTML='<option value="all">全部里別</option>'+areas.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('');
- $('#peopleFilter').value='assigned';bind();showAuth();const googleHandled=await completeGoogleOAuth();if(!googleHandled&&!previewOnly())await authStart();if(previewOnly())previewLoginButton();lastSessionCheck=Date.now();document.addEventListener('visibilitychange',restoreSavedSessionOnResume);window.addEventListener('pageshow',e=>{if(e.persisted)restoreSavedSessionOnResume()});
+ $('#peopleFilter').value='assigned';bind();showAuth();const googleHandled=await completeGoogleOAuth();if(!googleHandled)await authStart();if(previewOnly())previewLoginButton();lastSessionCheck=Date.now();document.addEventListener('visibilitychange',restoreSavedSessionOnResume);window.addEventListener('pageshow',e=>{if(e.persisted)restoreSavedSessionOnResume()});
  if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }catch(e){console.error(e);openSecureLogin();$('#authStatus').textContent='網站暫時無法完成登入，請重新整理後再試'}
 }

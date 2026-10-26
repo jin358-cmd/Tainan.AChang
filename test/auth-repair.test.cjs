@@ -46,6 +46,12 @@ test('shared phone identity choices are encrypted, masked and short lived',()=>{
  assert.match(ui,/finally\{if\(serial===loginAttemptSerial\)\{loginInFlight=false;setLoginFormLocked\(form,false\)\}\}/);
 });
 
+test('TEST preview hosts still restore an authenticated server session on boot',()=>{
+ const ui=read('app.js');
+ assert.match(ui,/if\(!googleHandled\)await authStart\(\);if\(previewOnly\(\)\)previewLoginButton\(\)/);
+ assert.doesNotMatch(ui,/if\(!googleHandled&&!previewOnly\(\)\)await authStart\(\)/);
+});
+
 test('volunteer application requires a one-time invitation and creates Pending',()=>{
  const source=read('supabase/functions/achang-member-apply/index.ts'),claim=read('supabase/migrations/20261025070000_achang_atomic_invitation_claim.sql');
  assert.match(claim,/application_code_hash/);

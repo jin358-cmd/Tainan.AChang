@@ -14,7 +14,7 @@ function contentType(file) {
 
 async function startServer(options = {}) {
   const observed = {api:[],external:[],consoleErrors:[],pageErrors:[]};
-  const state = {loggedIn:false,role:options.role || 'admin',selectionPosts:0,logoutDeletes:0};
+  const state = {loggedIn:!!options.initiallyLoggedIn,role:options.role || 'admin',selectionPosts:0,logoutDeletes:0};
   const server = http.createServer(async (request, response) => {
     const url = new URL(request.url, 'http://127.0.0.1');
     response.setHeader('Cache-Control', 'no-store');
@@ -84,7 +84,8 @@ async function startServer(options = {}) {
     }
   });
   await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',resolve)});
-  return {server,origin:`http://127.0.0.1:${server.address().port}`,observed,state};
+  const host=options.previewHost?'tainan-achang-pin-eipp-test-localhost.localhost':'127.0.0.1';
+  return {server,origin:`http://${host}:${server.address().port}`,observed,state};
 }
 
 async function withPage(options, run) {
@@ -163,6 +164,20 @@ async function passwordLogoutReopenCase() {
     assert.ok(observed.api.includes('DELETE session'));
     assert.ok(observed.api.filter(x=>x==='GET session').length >= 2);
   });
+}
+
+async function previewSavedSessionReloadCase(){
+ return withPage({role:'volunteer',initiallyLoggedIn:true,previewHost:true},async({page,context,origin,observed})=>{
+  await page.goto(origin,{waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>document.querySelector('#signedInName')?.hidden===false);
+  assert.equal(await page.locator('#signedInName').textContent(),'合成志工');
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>document.querySelector('#signedInName')?.hidden===false);
+  const second=await context.newPage();await second.goto(origin,{waitUntil:'domcontentloaded'});
+  await second.waitForFunction(()=>document.querySelector('#signedInName')?.hidden===false);
+  assert.equal(await second.locator('#signedInName').textContent(),'合成志工');await second.close();
+  assert.ok(observed.api.filter(x=>x==='GET session').length>=3);
+ });
 }
 
 async function logoutFailureCase(){
@@ -294,6 +309,7 @@ async function adminNavigationSmokeCase() {
     volunteerCallback:await callbackCase('volunteer'),
     unauthorizedCallback:await oauthFailureCase(),
     passwordLogoutReopen:await passwordLogoutReopenCase(),
+    previewSavedSessionReload:await previewSavedSessionReloadCase(),
     logoutFailure:await logoutFailureCase(),
     deviceCancelCleanupFailure:await deviceCancelCleanupFailureCase(),
     secondDeviceApplication:await secondDeviceApplicationCase('volunteer'),
@@ -309,6 +325,7 @@ async function adminNavigationSmokeCase() {
     volunteerCallback: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
     unauthorizedCallback: message => /403 \(Forbidden\)$/.test(message),
     passwordLogoutReopen: message => /401 \(Unauthorized\)$/.test(message),
+    previewSavedSessionReload: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
     logoutFailure: message => /(?:401 \(Unauthorized\)|503 \(Service Unavailable\))$/.test(message),
     deviceCancelCleanupFailure: message => /(?:401 \(Unauthorized\)|503 \(Service Unavailable\))$/.test(message),
     secondDeviceApplication: message => /401 \(Unauthorized\)$/.test(message),
