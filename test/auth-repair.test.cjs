@@ -60,6 +60,16 @@ test('volunteer task expansion state exists and is cleared between sessions',()=
  assert.match(ui,/function showAuth\(\)\{[\s\S]*volunteerTaskCategory='current';volunteerExpandedGroups\.clear\(\)/);
 });
 
+test('destructive confirmations use an in-app accessible dialog',()=>{
+ const ui=read('app.js'),html=read('index.html');
+ assert.doesNotMatch(ui,/\bconfirm\(/);
+ assert.match(ui,/function askConfirmation/);
+ assert.match(ui,/cancelPendingConfirmation\(\)/);
+ assert.match(ui,/e\.key==='Escape'/);
+ assert.match(html,/role="alertdialog"/);
+ assert.match(html,/aria-describedby="confirmationMessage"/);
+});
+
 test('volunteer application requires a one-time invitation and creates Pending',()=>{
  const source=read('supabase/functions/achang-member-apply/index.ts'),claim=read('supabase/migrations/20261025070000_achang_atomic_invitation_claim.sql');
  assert.match(claim,/application_code_hash/);

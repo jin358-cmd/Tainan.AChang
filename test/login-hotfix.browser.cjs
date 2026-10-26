@@ -181,7 +181,7 @@ async function previewSavedSessionReloadCase(){
 }
 
 async function volunteerTaskExpansionAndResetCase(){
- const day=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ const day=new Date().toISOString().slice(0,10);
  const tasks=[
   {id:'synthetic-task-1',volunteer_id:'synthetic-member',visit_date:day,shift:'夜間',area:'成功里',truck:'KEB-5939',stop_address:'中山南路1號',eta:'00:00',stop_order:1,status:'待訪'},
   {id:'synthetic-task-2',volunteer_id:'synthetic-member',visit_date:day,shift:'夜間',area:'成功里',truck:'KEB-5939',stop_address:'中山南路2號',eta:'00:05',stop_order:2,status:'待訪'}
@@ -197,6 +197,15 @@ async function volunteerTaskExpansionAndResetCase(){
   assert.equal(await page.locator('[data-vol-expand]').getAttribute('aria-expanded'),'true');
   assert.equal(await page.locator('.volunteer-stop-panel').isVisible(),true);
   assert.equal(await page.locator('.volunteer-stop-item').count(),2);
+  await page.locator('.task-complete-btn').first().click();
+  await page.locator('#confirmationModal').waitFor();
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(()=>document.querySelector('#confirmationModal')?.hidden===true);
+  assert.equal(observed.api.filter(x=>x==='PATCH tasks').length,0);
+  await page.locator('.task-complete-btn').first().click();
+  await page.locator('#confirmationAccept').click({clickCount:2});
+  await page.waitForFunction(()=>document.querySelector('#confirmationModal')?.hidden===true);
+  assert.equal(observed.api.filter(x=>x==='PATCH tasks').length,1);
   await page.locator('#secureLogout').click();
   await page.waitForFunction(()=>document.querySelector('#secureLogout')?.hidden===true);
   await page.locator('#volunteerLoginBtn').click();
@@ -207,7 +216,7 @@ async function volunteerTaskExpansionAndResetCase(){
   await page.locator('[data-vol-expand]').waitFor();
   assert.equal(await page.locator('[data-vol-expand]').getAttribute('aria-expanded'),'false');
   assert.equal(await page.locator('.volunteer-stop-panel').isHidden(),true);
-  assert.equal(observed.api.filter(x=>x==='GET tasks').length,2);
+  assert.equal(observed.api.filter(x=>x==='GET tasks').length,3);
  });
 }
 
@@ -223,21 +232,22 @@ async function logoutFailureCase(){
 
 async function deviceCancelCleanupFailureCase(){
  return withPage({role:'volunteer',secondDevice:true,logoutFailures:1},async({page,origin,observed})=>{
-  page.on('dialog',dialog=>dialog.dismiss());await page.goto(origin,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelector('#volunteerLoginBtn')?.hidden===false);await page.locator('#volunteerLoginBtn').click();
+  await page.goto(origin,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelector('#volunteerLoginBtn')?.hidden===false);await page.locator('#volunteerLoginBtn').click();
   await page.locator('#secureLoginForm input[name="login"]').fill('0912345678');await page.locator('#secureLoginForm input[name="password"]').fill('123456');await page.locator('#secureLoginForm button[type="submit"]').click();
+  await page.locator('#confirmationCancel').click();
   await page.waitForFunction(()=>document.querySelector('#authStatus')?.textContent==='合成登出失敗');assert.doesNotMatch(await page.locator('#authStatus').textContent(),/暫存已清除/);assert.equal(observed.api.includes('POST device-application'),false);
  });
 }
 
 async function secondDeviceApplicationCase(role='volunteer') {
   return withPage({role,secondDevice:true}, async ({page,origin,observed}) => {
-    page.on('dialog', dialog => dialog.accept());
     await page.goto(origin, {waitUntil:'domcontentloaded'});
     await page.waitForFunction(() => document.querySelector('#volunteerLoginBtn')?.hidden === false);
     await page.locator('#volunteerLoginBtn').click();
     await page.locator('#secureLoginForm input[name="login"]').fill('0912345678');
     await page.locator('#secureLoginForm input[name="password"]').fill('123456');
     await page.locator('#secureLoginForm button[type="submit"]').click();
+    await page.locator('#confirmationAccept').click();
     await page.waitForFunction(() => /申請已送出/.test(document.querySelector('#authStatus')?.textContent||''));
     assert.ok(observed.api.includes('POST session'));
     assert.ok(observed.api.includes('POST device-application'));
