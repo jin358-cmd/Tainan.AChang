@@ -66,6 +66,9 @@ test('destructive confirmations use an in-app accessible dialog',()=>{
  assert.match(ui,/function askConfirmation/);
  assert.match(ui,/cancelPendingConfirmation\(\)/);
  assert.match(ui,/e\.key==='Escape'/);
+ assert.match(ui,/confirmationSnapshot/);
+ assert.match(ui,/taskCompletionInFlight/);
+ assert.match(ui,/async function authStart\(\)\{cancelPendingConfirmation\(\);const generation=\+\+authGeneration/);
  assert.match(html,/role="alertdialog"/);
  assert.match(html,/aria-describedby="confirmationMessage"/);
 });

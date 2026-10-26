@@ -63,7 +63,7 @@ async function startServer(options = {}) {
         } else {
           response.end(JSON.stringify({role:state.role,memberId:state.role === 'volunteer' ? 'synthetic-member' : null,accountId:'synthetic-account',displayName:state.role === 'volunteer' ? '合成志工' : '合成管理員'}));
         }
-      } else if (endpoint === 'tasks') response.end(JSON.stringify({tasks:options.tasks||[]}));
+      } else if (endpoint === 'tasks') {if(request.method==='PATCH'&&options.taskPatchDelay)await new Promise(resolve=>setTimeout(resolve,options.taskPatchDelay));response.end(JSON.stringify(request.method==='GET'?{tasks:options.tasks||[]}:{ok:true}));}
       else if (endpoint === 'roster') response.end(JSON.stringify({people:[]}));
       else response.end(JSON.stringify({ok:true}));
       return;
@@ -186,7 +186,7 @@ async function volunteerTaskExpansionAndResetCase(){
   {id:'synthetic-task-1',volunteer_id:'synthetic-member',visit_date:day,shift:'夜間',area:'成功里',truck:'KEB-5939',stop_address:'中山南路1號',eta:'00:00',stop_order:1,status:'待訪'},
   {id:'synthetic-task-2',volunteer_id:'synthetic-member',visit_date:day,shift:'夜間',area:'成功里',truck:'KEB-5939',stop_address:'中山南路2號',eta:'00:05',stop_order:2,status:'待訪'}
  ];
- return withPage({role:'volunteer',initiallyLoggedIn:true,previewHost:true,tasks},async({page,origin,observed})=>{
+ return withPage({role:'volunteer',initiallyLoggedIn:true,previewHost:true,tasks,taskPatchDelay:120},async({page,origin,observed})=>{
   await page.goto(origin,{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>document.querySelector('#signedInName')?.hidden===false);
   const expander=page.locator('[data-vol-expand]');
@@ -199,12 +199,26 @@ async function volunteerTaskExpansionAndResetCase(){
   assert.equal(await page.locator('.volunteer-stop-item').count(),2);
   await page.locator('.task-complete-btn').first().click();
   await page.locator('#confirmationModal').waitFor();
+  await page.locator('#secureLogout').evaluate(node=>node.click());
+  await page.waitForFunction(()=>document.querySelector('#confirmationModal')?.hidden===true);
+  await page.waitForFunction(()=>document.querySelector('#secureLogout')?.hidden===true);
+  assert.equal(observed.api.filter(x=>x==='PATCH tasks').length,0);
+  await page.locator('#volunteerLoginBtn').click();
+  await page.locator('#secureLoginForm input[name="login"]').fill('0912345678');
+  await page.locator('#secureLoginForm input[name="password"]').fill('123456');
+  await page.locator('#secureLoginForm button[type="submit"]').click();
+  await page.waitForFunction(()=>document.querySelector('#signedInName')?.hidden===false);
+  await page.locator('[data-vol-expand]').click();
+  await page.locator('.task-complete-btn').first().click();
+  await page.locator('#confirmationModal').waitFor();
   await page.keyboard.press('Escape');
   await page.waitForFunction(()=>document.querySelector('#confirmationModal')?.hidden===true);
   assert.equal(observed.api.filter(x=>x==='PATCH tasks').length,0);
   await page.locator('.task-complete-btn').first().click();
-  await page.locator('#confirmationAccept').click({clickCount:2});
+  await page.locator('#confirmationAccept').click();
   await page.waitForFunction(()=>document.querySelector('#confirmationModal')?.hidden===true);
+  await page.locator('.task-complete-btn').first().click();
+  await page.waitForTimeout(180);
   assert.equal(observed.api.filter(x=>x==='PATCH tasks').length,1);
   await page.locator('#secureLogout').click();
   await page.waitForFunction(()=>document.querySelector('#secureLogout')?.hidden===true);
@@ -216,7 +230,7 @@ async function volunteerTaskExpansionAndResetCase(){
   await page.locator('[data-vol-expand]').waitFor();
   assert.equal(await page.locator('[data-vol-expand]').getAttribute('aria-expanded'),'false');
   assert.equal(await page.locator('.volunteer-stop-panel').isHidden(),true);
-  assert.equal(observed.api.filter(x=>x==='GET tasks').length,3);
+  assert.equal(observed.api.filter(x=>x==='GET tasks').length,4);
  });
 }
 
