@@ -14,7 +14,7 @@ function contentType(file) {
 
 async function startServer(options = {}) {
   const observed = {api:[],external:[],consoleErrors:[],pageErrors:[]};
-  const state = {loggedIn:!!options.initiallyLoggedIn,role:options.role || 'admin',selectionPosts:0,logoutDeletes:0};
+  const state = {loggedIn:!!options.initiallyLoggedIn,role:options.role || 'admin',selectionPosts:0,logoutDeletes:0,roster:(options.roster||[]).map(person=>({...person}))};
   const server = http.createServer(async (request, response) => {
     const url = new URL(request.url, 'http://127.0.0.1');
     response.setHeader('Cache-Control', 'no-store');
@@ -64,7 +64,16 @@ async function startServer(options = {}) {
           response.end(JSON.stringify({role:state.role,memberId:state.role === 'volunteer' ? 'synthetic-member' : null,accountId:'synthetic-account',displayName:state.role === 'volunteer' ? '合成志工' : '合成管理員'}));
         }
       } else if (endpoint === 'tasks') {if(request.method==='PATCH'&&options.taskPatchDelay)await new Promise(resolve=>setTimeout(resolve,options.taskPatchDelay));response.end(JSON.stringify(request.method==='GET'?{tasks:options.tasks||[]}:{ok:true}));}
-      else if (endpoint === 'roster') response.end(JSON.stringify({people:[]}));
+      else if (endpoint === 'roster') {
+        if(request.method==='PATCH'){
+          const person=state.roster.find(item=>item.id===payload.id);
+          if(person){
+            if('assignment' in payload)person.assignment=payload.assignment||'';
+            if('isLeader' in payload)person.is_leader=!!payload.isLeader;
+          }
+          response.end(JSON.stringify({ok:true}));
+        } else response.end(JSON.stringify({people:state.roster}));
+      }
       else response.end(JSON.stringify({ok:true}));
       return;
     }
@@ -197,6 +206,10 @@ async function volunteerTaskExpansionAndResetCase(){
   assert.equal(await page.locator('[data-vol-expand]').getAttribute('aria-expanded'),'true');
   assert.equal(await page.locator('.volunteer-stop-panel').isVisible(),true);
   assert.equal(await page.locator('.volunteer-stop-item').count(),2);
+  await page.locator('[data-vol-group]').click();
+  assert.match(await page.locator('#areaPopup').textContent(),/已授權 1 人/);
+  assert.match(await page.locator('#areaPopup').textContent(),/合成志工/);
+  await page.locator('[data-close-area]').click();
   await page.locator('.task-complete-btn').first().click();
   await page.locator('#confirmationModal').waitFor();
   await page.locator('#secureLogout').evaluate(node=>node.click());
@@ -356,6 +369,34 @@ async function adminNavigationSmokeCase() {
    return {pages:visited,api:observed.api,consoleErrors:observed.consoleErrors,pageErrors:observed.pageErrors,external:observed.external};
  });
 }
+
+async function rosterPhoneAndLeaderToggleCase() {
+ const roster=[
+  {id:'synthetic-member',name:'合成志工甲',phone:'+886989098468',address:'合成地址一',resident_area:'成功里',assignment:'復興里',is_leader:true},
+  {id:'synthetic-member-2',name:'合成志工乙',phone:'+886903225788',address:'合成地址二',resident_area:'成功里',assignment:'成功里',is_leader:false},
+  {id:'synthetic-admin',name:'合成管理員',phone:'+886900000000',address:'',resident_area:'',assignment:'',is_leader:false},
+ ];
+ return withPage({role:'admin',initiallyLoggedIn:true,roster},async({page,origin,state,observed})=>{
+  await page.goto(origin,{waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>document.querySelector('#signedInName')?.hidden===false);
+  await page.locator('.desktop-nav [data-page="people"]').click();
+  await page.locator('#peopleFilter').selectOption('all');
+  await page.locator('#peopleSearch').fill('0989-098-468');
+  assert.equal(await page.locator('#peopleList .person-card').count(),1);
+  assert.match(await page.locator('#peopleList').textContent(),/合成志工甲/);
+  await page.locator('#peopleSearch').fill('0989098468');
+  assert.equal(await page.locator('#peopleList .person-card').count(),1);
+  await page.locator('.desktop-nav [data-page="areas"]').click();
+  const leader=page.locator('button[data-leader="synthetic-member"]');
+  assert.equal((await leader.textContent()).trim(),'取消組長');
+  await leader.click();
+  assert.match(await page.locator('#confirmationMessage').textContent(),/取消.*組長/);
+  await page.locator('#confirmationAccept').click();
+  await page.waitForFunction(()=>document.querySelector('button[data-leader="synthetic-member"]')?.textContent.includes('設組長'));
+  assert.equal(state.roster[0].is_leader,false);
+  assert.ok(observed.api.includes('PATCH roster'));
+ });
+}
 (async()=>{
   const results = {
     status:'PASS',
@@ -375,6 +416,7 @@ async function adminNavigationSmokeCase() {
     latestUiMapFallback:await mapFallbackCase(),
     memberApplicationModal:await memberApplicationModalCase(),
     adminNavigationSmoke:await adminNavigationSmokeCase(),
+    rosterPhoneAndLeaderToggle:await rosterPhoneAndLeaderToggleCase(),
   };
   const expectedConsoleError = {
     adminCallback: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
@@ -392,6 +434,7 @@ async function adminNavigationSmokeCase() {
     latestUiMapFallback: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
     memberApplicationModal: message => /401 \(Unauthorized\)$/.test(message),
     adminNavigationSmoke: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
+    rosterPhoneAndLeaderToggle: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
   };
   for (const [name,result] of Object.entries(results)) {
     if (!result || typeof result !== 'object') continue;
