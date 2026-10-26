@@ -25,6 +25,19 @@ test('phone plus PIN resolves a unique account without treating phone as Auth id
  assert.doesNotMatch(source,/createUser\(\{phone/);
 });
 
+test('shared phone identity choices are encrypted, masked and short lived',()=>{
+ const source=read('supabase/functions/achang-pin-login/index.ts'),session=read('api/session.js'),ui=read('app.js');
+ assert.match(source,/AES-GCM/);
+ assert.match(source,/sealSelection/);
+ assert.match(source,/expiresAt:Date\.now\(\)\+5\*60\*1000/);
+ assert.match(source,/maskName/);
+ assert.match(source,/IDENTITY_SELECTION_REQUIRED/);
+ assert.match(session,/identity_selection_required/);
+ assert.match(ui,/loginAttemptSerial/);
+ assert.match(ui,/new FormData\(form\).*submit\.disabled=true/);
+ assert.match(ui,/登入暫存已清除/);
+});
+
 test('volunteer application requires a one-time invitation and creates Pending',()=>{
  const source=read('supabase/functions/achang-member-apply/index.ts'),claim=read('supabase/migrations/20261025070000_achang_atomic_invitation_claim.sql');
  assert.match(claim,/application_code_hash/);

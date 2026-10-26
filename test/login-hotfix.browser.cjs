@@ -15,11 +15,16 @@ function contentType(file) {
 async function startServer(options = {}) {
   const observed = {api:[],external:[],consoleErrors:[],pageErrors:[]};
   const state = {loggedIn:false,role:options.role || 'admin'};
-  const server = http.createServer((request, response) => {
+  const server = http.createServer(async (request, response) => {
     const url = new URL(request.url, 'http://127.0.0.1');
     response.setHeader('Cache-Control', 'no-store');
     if (url.pathname.startsWith('/api/')) {
       const endpoint = url.pathname.slice(5);
+      let payload={};
+      if (!['GET','HEAD'].includes(request.method)) {
+        let raw='';for await(const chunk of request)raw+=chunk;
+        try{payload=raw?JSON.parse(raw):{}}catch{}
+      }
       observed.api.push(`${request.method} ${endpoint}`);
       response.setHeader('Content-Type', 'application/json');
       if (endpoint === 'config' && request.method === 'GET') {
@@ -33,6 +38,10 @@ async function startServer(options = {}) {
           response.end(JSON.stringify({ok:true}));
         }
       } else if (endpoint === 'session' && request.method === 'POST') {
+        if(options.identitySelection&&!payload.selectionToken){
+          response.end(JSON.stringify({authorization:'identity_selection_required',identities:[{token:'opaque-token-admin',label:'測•••員',role:'管理員'},{token:'opaque-token-volunteer',label:'測•••甲',role:'志工'}]}));
+          return;
+        }
         state.loggedIn = true;
         if (options.secondDevice) {
           response.statusCode = 202;
@@ -169,6 +178,24 @@ async function secondDeviceApplicationCase() {
   });
 }
 
+async function sharedPhoneIdentitySelectionCase(){
+ return withPage({role:'volunteer',identitySelection:true},async({page,origin,observed})=>{
+  await page.goto(origin,{waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>document.querySelector('#volunteerLoginBtn')?.hidden===false);
+  await page.locator('#volunteerLoginBtn').click();
+  const form=page.locator('#secureLoginForm'),login=form.locator('[name="login"]'),pin=form.locator('[name="password"]');
+  await login.fill('0903225788');await pin.fill('123456');await form.locator('button[type="submit"]').click();
+  await page.waitForFunction(()=>document.querySelectorAll('[data-login-identity]').length===2);
+  assert.equal(await login.inputValue(),'0903225788');assert.equal(await login.getAttribute('readonly'),'');assert.equal(await pin.inputValue(),'123456');
+  assert.match(await page.locator('#loginIdentityChoices').textContent(),/測•••員/);
+  await page.locator('[data-login-identity-cancel]').click();
+  assert.equal(await pin.inputValue(),'');assert.equal(await login.getAttribute('readonly'),null);assert.equal(await page.locator('#loginIdentityChoices').isHidden(),true);
+  await pin.fill('123456');await form.locator('button[type="submit"]').click();await page.waitForFunction(()=>document.querySelectorAll('[data-login-identity]').length===2);
+  await page.locator('[data-login-identity]').first().click();await page.waitForFunction(()=>document.querySelector('#signedInName')?.hidden===false);
+  assert.equal(observed.api.filter(x=>x==='POST session').length,3);
+ });
+}
+
 async function bootFailureCase() {
   return withPage({failPublicData:true}, async ({page,origin}) => {
     await page.goto(origin, {waitUntil:'domcontentloaded'});
@@ -239,6 +266,7 @@ async function adminNavigationSmokeCase() {
     unauthorizedCallback:await oauthFailureCase(),
     passwordLogoutReopen:await passwordLogoutReopenCase(),
     secondDeviceApplication:await secondDeviceApplicationCase(),
+    sharedPhoneIdentitySelection:await sharedPhoneIdentitySelectionCase(),
     visibleBootFailure:await bootFailureCase(),
     latestUiMapFallback:await mapFallbackCase(),
     memberApplicationModal:await memberApplicationModalCase(),
@@ -250,6 +278,7 @@ async function adminNavigationSmokeCase() {
     unauthorizedCallback: message => /403 \(Forbidden\)$/.test(message),
     passwordLogoutReopen: message => /401 \(Unauthorized\)$/.test(message),
     secondDeviceApplication: message => /401 \(Unauthorized\)$/.test(message),
+    sharedPhoneIdentitySelection: message => /401 \(Unauthorized\)$/.test(message),
     visibleBootFailure: message => /500 \(Internal Server Error\)$/.test(message) || /^Error: 地圖資料無法讀取\n/.test(message),
     latestUiMapFallback: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
     memberApplicationModal: message => /401 \(Unauthorized\)$/.test(message),
