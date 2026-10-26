@@ -29,9 +29,13 @@ test('shared phone identity choices are encrypted, masked and short lived',()=>{
  const source=read('supabase/functions/achang-pin-login/index.ts'),session=read('api/session.js'),ui=read('app.js');
  assert.match(source,/AES-GCM/);
  assert.match(source,/sealSelection/);
- assert.match(source,/expiresAt:Date\.now\(\)\+5\*60\*1000/);
+ assert.match(source,/expiresAt:Date\.now\(\)\+120\*1000/);
  assert.match(source,/maskName/);
  assert.match(source,/IDENTITY_SELECTION_REQUIRED/);
+ assert.match(source,/v4-selection-context/);
+ assert.match(source,/v4-selection-nonce/);
+ assert.match(source,/signOut\(\{scope:'local'\}\)/);
+ assert.ok(source.indexOf('signInWithPassword')<source.indexOf("return reply({code:'IDENTITY_SELECTION_REQUIRED'"),'PIN must be verified before identities are returned');
  assert.match(session,/identity_selection_required/);
  assert.match(ui,/loginAttemptSerial/);
  assert.match(ui,/new FormData\(form\).*submit\.disabled=true/);
