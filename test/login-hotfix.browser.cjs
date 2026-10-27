@@ -133,6 +133,7 @@ async function callbackCase(role) {
     assert.equal(await page.locator('#secureLogin').getAttribute('hidden') !== null, true);
     assert.equal(await page.locator('#secureLogout').getAttribute('hidden') !== null, false);
     assert.equal(await page.locator('#signedInName').textContent(), role === 'admin' ? '合成管理員' : '合成志工');
+    assert.equal(await page.locator('body').evaluate((node)=>node.classList.contains('volunteer-session')),role==='volunteer');
     assert.equal(await page.locator('#mapLibre').count(), 1);
     assert.equal(await page.locator('#areaPopup').count(), 1);
     const areasHidden = await page.locator('.bottom-nav [data-page="areas"]').getAttribute('hidden') !== null;
@@ -165,6 +166,7 @@ async function passwordLogoutReopenCase() {
     assert.equal(await page.locator('#signedInName').textContent(), '合成管理員');
     await page.locator('#secureLogout').click();
     await page.waitForFunction(() => document.querySelector('#secureLogout')?.hidden === true);
+    assert.equal(await page.locator('body').evaluate((node)=>node.classList.contains('volunteer-session')),false);
     await page.reload({waitUntil:'domcontentloaded'});
     await page.waitForFunction(() => document.querySelector('#volunteerLoginBtn')?.hidden === false);
     await page.locator('#volunteerLoginBtn').click();

@@ -315,6 +315,7 @@ async function onlineApi(endpoint,method='GET',body){
 function assertAdmin(){if(liveRole!=='admin'){toast('只有管理員可編輯名冊與排班');return false}return true}
 function showAuth(){
  cancelPendingConfirmation();authGeneration++;liveRole='';liveMemberId='';liveDisplayName='';state=makeState([]);liveTasks=[];liveGroupContacts=[];volunteerTaskCategory='current';volunteerExpandedGroups.clear();
+ document.body.classList.remove('volunteer-session');
  for(const selector of ['#peopleList','#pendingMembers','#areaMembers','#volunteerSchedules','#areaPopup','#modalBody']){const el=$(selector);if(el)el.innerHTML=''}
  $('#modal').hidden=true;
  $('#secureLogin').hidden=true;$('#app').hidden=false;
@@ -330,6 +331,7 @@ function openSecureLogin(){if(liveRole==='admin')return openMemberAdmin();previe
 function setLoginFormLocked(form,locked){for(const node of form.querySelectorAll('input,button'))node.disabled=locked}
 function resetLoginIdentitySelection(form,{clearPin=false}={}){const choices=$('#loginIdentityChoices');if(choices){choices.hidden=true;choices.innerHTML=''}if(form?.elements?.selectionToken)form.elements.selectionToken.value='';if(form?.elements?.login)form.elements.login.readOnly=false;if(clearPin&&form?.elements?.password)form.elements.password.value=''}
 function updateAccessControls(){
+ document.body.classList.toggle('volunteer-session',liveRole==='volunteer');
  const admin=liveRole==='admin';
  for(const b of $$('[data-page]')){const pg=b.dataset.page;if(liveRole==='volunteer'){b.hidden=pg==='areas'||pg==='planner'||pg==='people';b.querySelector('span')&&(b.querySelector('span').textContent=pg==='people'?'小組任務':pg==='reports'?'任務':'地圖');}else{b.hidden=false;if(pg==='people'&&b.querySelector('span'))b.querySelector('span').textContent='名冊';}}
  for(const id of ['addPerson','addMember','openRosterAuthorization','clearArea']){const control=document.getElementById(id);if(control)control.hidden=!admin;}

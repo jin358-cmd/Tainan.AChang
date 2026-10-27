@@ -54,6 +54,8 @@ test('TEST preview hosts still restore an authenticated server session on boot',
 
 test('volunteer task expansion state exists and is cleared between sessions',()=>{
  const ui=read('app.js');
+ assert.match(ui,/document\.body\.classList\.toggle\('volunteer-session',liveRole==='volunteer'\)/);
+ assert.match(ui,/document\.body\.classList\.remove\('volunteer-session'\)/);
  assert.match(ui,/const volunteerExpandedGroups=new Set\(\)/);
  assert.match(ui,/data-vol-expand/);
  assert.match(ui,/if\(volunteerExpandedGroups\.has\(key\)\)volunteerExpandedGroups\.delete\(key\);else volunteerExpandedGroups\.add\(key\)/);
