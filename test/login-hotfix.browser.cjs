@@ -426,7 +426,11 @@ async function memberApplicationModalCase() {
     await page.waitForFunction(() => document.querySelector('#secureLogin')?.hidden === false);
     assert.equal(await page.locator('#closeSecureLogin').count(),0);
     assert.equal(await page.locator('#openMemberApplication').count(),1);
-    assert.equal(await page.locator('#secureLoginForm input[name="login"]').getAttribute('placeholder'),'09xx-xxx-xxx');
+    assert.equal(await page.locator('#secureLoginForm input[name="login"]').getAttribute('placeholder'),'管理員 Email／志工手機');
+    assert.equal(await page.locator('#secureLoginForm input[name="login"]').getAttribute('inputmode'),null);
+    assert.equal(await page.locator('#secureLoginForm input[name="password"]').getAttribute('placeholder'),'管理員密碼／志工六碼 PIN');
+    assert.equal(await page.locator('#secureLoginForm input[name="password"]').getAttribute('inputmode'),null);
+    assert.equal(await page.locator('#loginIdentityChoices').count(),1);
     await page.locator('#openMemberApplication').click();
     await page.locator('#memberApplicationForm').waitFor();
     assert.equal(await page.evaluate(()=>{const form=document.querySelector('#memberApplicationForm'),rect=form.getBoundingClientRect(),top=document.elementFromPoint(rect.left+rect.width/2,rect.top+Math.min(30,rect.height/2));return !!top?.closest('#memberApplicationForm')}),true);

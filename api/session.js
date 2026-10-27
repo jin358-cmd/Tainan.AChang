@@ -14,7 +14,7 @@ module.exports=L.run(async(req,res)=>{
   response=await L.request('/functions/v1/achang-pin-login',{method:'POST',body:{phone:L.phone(identity),pin:password,...(selectionToken?{selectionToken}:{})}});
  }
  if(response.status===409&&response.data?.code==='IDENTITY_SELECTION_REQUIRED'&&Array.isArray(response.data.identities))return L.json(res,200,{authorization:'identity_selection_required',identities:response.data.identities.slice(0,5).map(x=>({token:String(x.token||''),label:String(x.label||''),role:String(x.role||'')}))});
- if(!response.ok||!response.data?.access_token)L.problem(response.status===429?429:response.status===503?503:response.status===403?403:401,response.status===429?'PIN 嘗試次數過多，請 15 分鐘後再試':response.status===503?'登入安全服務暫時無法使用':response.status===403&&response.data?.code==='ACCOUNT_PENDING'?'會員申請已送出，請等待管理員核准':'手機號碼或 PIN 不正確');
+ if(!response.ok||!response.data?.access_token)L.problem(response.status===429?429:response.status===503?503:response.status===403?403:401,response.status===429?'PIN 嘗試次數過多，請 15 分鐘後再試':response.status===503?'登入安全服務暫時無法使用':response.status===403&&response.data?.code==='ACCOUNT_PENDING'?'會員申請已送出，請等待管理員核准':response.status===403&&response.data?.code==='ACCOUNT_SUSPENDED'?'會員帳號已停用':'手機號碼或 PIN 不正確');
  const r=response;
  const p=await L.accountFromToken(r.data.access_token);L.setSession(res,r.data);
  try{await L.deviceCheck(req,p,p.token,false)}catch(e){if(['DEVICE_PENDING','DEVICE_APPLICATION_REQUIRED'].includes(e.appCode))return L.json(res,202,{authorization:e.appCode==='DEVICE_PENDING'?'device_pending':'device_application_required',message:e.message,role:p.role,memberId:p.member_id,accountId:p.id});throw e}

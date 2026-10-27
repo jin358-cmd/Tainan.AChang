@@ -16,13 +16,15 @@ test('provisioning separates non-unique contact phone from Auth identity',()=>{
 });
 
 test('phone plus PIN resolves a unique account without treating phone as Auth identity',()=>{
- const source=read('supabase/functions/achang-pin-login/index.ts');
+ const source=read('supabase/functions/achang-pin-login/index.ts'),session=read('api/session.js');
  assert.match(source,/\.eq\('phone_e164',phone\)/);
  assert.match(source,/authenticateAccountCandidates/);
  assert.match(source,/auth\.admin\.getUserById/);
  assert.match(source,/ACCOUNT_PENDING/);
  assert.match(source,/decision\.kind==='blocked'/);
  assert.doesNotMatch(source,/createUser\(\{phone/);
+ assert.match(session,/response\.data\?\.code==='ACCOUNT_PENDING'\?'會員申請已送出，請等待管理員核准'/);
+ assert.match(session,/response\.data\?\.code==='ACCOUNT_SUSPENDED'\?'會員帳號已停用'/);
 });
 
 test('shared phone identity choices are encrypted, masked and short lived',()=>{
