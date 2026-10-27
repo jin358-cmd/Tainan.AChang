@@ -60,6 +60,21 @@ test('volunteer task expansion state exists and is cleared between sessions',()=
  assert.match(ui,/data-vol-expand/);
  assert.match(ui,/if\(volunteerExpandedGroups\.has\(key\)\)volunteerExpandedGroups\.delete\(key\);else volunteerExpandedGroups\.add\(key\)/);
  assert.match(ui,/function showAuth\(\)\{[\s\S]*volunteerTaskCategory='current';volunteerExpandedGroups\.clear\(\)/);
+ assert.match(ui,/function visibleShiftStops\(area,shiftName\)/);
+ assert.match(ui,/const mine=myTasks\(\)\.filter\(t=>t\.visit_date===today\(\)&&t\.area===area&&t\.shift===shiftName\)/);
+ assert.match(ui,/function openShiftStopPopup\(area,shiftName\)/);
+ assert.match(ui,/openShiftStopPopup\(a,shiftName\)/);
+ assert.match(ui,/const owned=myTasks\(\)\.filter\(t=>t\.area===a&&\(taskGroup\?/);
+ assert.match(ui,/const key=\[t\.visit_date,t\.shift,t\.truck,t\.area\]\.join\('\|'\)/);
+ assert.match(ui,/liveGroupContacts\.filter\(p=>\[p\.visit_date,p\.shift,p\.truck,p\.area\]\.join\('\|'\)===key\)/);
+ assert.match(ui,/time:t\.eta\|\|row\?\.\['到達'\]\|\|''/);
+ assert.doesNotMatch(ui,/\|\|rows\.find\(r=>r\['停靠點原文'\]===t\.stop_address\);/);
+ assert.match(ui,/data-fallback-shift="\$\{b\[4\]\}"/);
+ assert.match(ui,/if\(liveRole==='volunteer'&&a&&shiftName&&!pinTarget\)\{e\.stopPropagation\(\);openShiftStopPopup\(a,shiftName\);return\}/);
+ assert.match(ui,/!state\.pins\[stopKey\(r\)\]/);
+ assert.match(ui,/｜人工標點待核對',\(\)=>toast\('人工標點：'/);
+ assert.match(ui,/class="popup-contact .*telLink\((?:p|person)\)/);
+ assert.match(ui,/classList\.toggle\('settings-open',title==='設定與安裝應用程式'\)/);
 });
 
 test('destructive confirmations use an in-app accessible dialog',()=>{

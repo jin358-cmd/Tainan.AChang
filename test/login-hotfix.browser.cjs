@@ -86,7 +86,9 @@ async function startServer(options = {}) {
     }
     try {
       response.setHeader('Content-Type', contentType(relative));
-      response.end(fs.readFileSync(path.join(root, relative)));
+      let body=fs.readFileSync(path.join(root, relative));
+      if(options.exposeAppTestHooks&&relative==='app.js')body=Buffer.from(body.toString().replace('boot();\n})();',`window.__appTestHooks={visibleShiftStops,openShiftStopPopup,openAreaPreview,prepareAdminPinnedMap(){const r=data.stops[0],key=stopKey(r);state.pins={[key]:{lon:120.24,lat:23.005}};layerState.day=r['時段']==='日間';layerState.night=r['時段']==='夜間';page='map';mapFailed=false;mapLoaded=true;map={getLayer:()=>true,setPaintProperty(){}};updateMap();return {area:r['里別'],shift:r['時段'],address:r['停靠點原文'],remaining:data.stops.filter(x=>x['里別']===r['里別']&&x['時段']===r['時段']&&!state.pins[stopKey(x)]).length}}};\nboot();\n})();`));
+      response.end(body);
     } catch {
       response.statusCode=404;
       response.end('not found');
@@ -195,31 +197,85 @@ async function volunteerTaskExpansionAndResetCase(){
  const day=new Date().toISOString().slice(0,10);
  const tasks=[
   {id:'synthetic-task-1',volunteer_id:'synthetic-member',visit_date:day,shift:'夜間',area:'成功里',truck:'KEB-5939',stop_address:'中山南路1號',eta:'00:00',stop_order:1,status:'待訪'},
-  {id:'synthetic-task-2',volunteer_id:'synthetic-member',visit_date:day,shift:'夜間',area:'成功里',truck:'KEB-5939',stop_address:'中山南路2號',eta:'00:05',stop_order:2,status:'待訪'}
+  {id:'synthetic-task-2',volunteer_id:'synthetic-member',visit_date:day,shift:'夜間',area:'成功里',truck:'KEB-5939',stop_address:'中山南路2號',eta:'00:05',stop_order:2,status:'待訪'},
+  {id:'synthetic-task-3',volunteer_id:'synthetic-member',visit_date:day,shift:'日間',area:'成功里',truck:'OTHER-1',stop_address:'中山南路1號',eta:'10:30',stop_order:1,status:'待訪'},
+  {id:'synthetic-task-4',volunteer_id:'synthetic-member',visit_date:day,shift:'日間',area:'成功里',truck:'OTHER-1',stop_address:'自訂集合點',eta:'10:45',stop_order:2,status:'待訪'}
  ];
  const groupContacts=[
   {visit_date:day,shift:'夜間',area:'成功里',truck:'KEB-5939',name:'合成志工',phone:'+886989098468'},
   {visit_date:day,shift:'夜間',area:'成功里',truck:'KEB-5939',name:'同組志工',phone:'+886903225788'},
-  {visit_date:day,shift:'日間',area:'成功里',truck:'KEB-5939',name:'跨班志工',phone:'+886911111111'}
+  {visit_date:day,shift:'日間',area:'成功里',truck:'KEB-5939',name:'跨班志工',phone:'+886911111111'},
+  {visit_date:day,shift:'夜間',area:'成功里',truck:'OTHER-1',name:'跨車志工',phone:'+886922222222'},
+  {visit_date:day,shift:'日間',area:'成功里',truck:'OTHER-1',name:'日間本人',phone:'+886933333333'},
+  {visit_date:day,shift:'日間',area:'成功里',truck:'OTHER-1',name:'日間同組',phone:'+886944444444'}
  ];
- return withPage({role:'volunteer',initiallyLoggedIn:true,previewHost:true,tasks,groupContacts,taskPatchDelay:120},async({page,origin,observed})=>{
+ return withPage({role:'volunteer',initiallyLoggedIn:true,previewHost:true,tasks,groupContacts,taskPatchDelay:120,exposeAppTestHooks:true},async({page,origin,observed})=>{
   await page.goto(origin,{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>document.querySelector('#signedInName')?.hidden===false);
-  const expander=page.locator('[data-vol-expand]');
+  const expander=page.locator('[data-vol-expand]').first();
   await expander.waitFor();
   assert.equal(await expander.getAttribute('aria-expanded'),'false');
-  assert.equal(await page.locator('.volunteer-stop-panel').isHidden(),true);
+  assert.equal(await page.locator('.volunteer-stop-panel').first().isHidden(),true);
   await expander.click();
-  assert.equal(await page.locator('[data-vol-expand]').getAttribute('aria-expanded'),'true');
-  assert.equal(await page.locator('.volunteer-stop-panel').isVisible(),true);
-  assert.equal(await page.locator('.volunteer-stop-item').count(),2);
-  await page.locator('[data-vol-group]').click();
+  assert.equal(await page.locator('[data-vol-expand]').first().getAttribute('aria-expanded'),'true');
+  assert.equal(await page.locator('.volunteer-stop-panel').first().isVisible(),true);
+  assert.equal(await page.locator('.volunteer-stop-panel:not([hidden]) .volunteer-stop-item').count(),2);
+  await page.locator('[data-vol-group]').first().click();
   assert.match(await page.locator('#areaPopup').textContent(),/已授權 2 人/);
   assert.match(await page.locator('#areaPopup').textContent(),/合成志工/);
   assert.match(await page.locator('#areaPopup').textContent(),/同組志工/);
   assert.match(await page.locator('#areaPopup').textContent(),/0989-098-468/);
+  assert.equal(await page.locator('#areaPopup a[href^="tel:"]').count(),2);
   assert.doesNotMatch(await page.locator('#areaPopup').textContent(),/跨班志工/);
+  assert.doesNotMatch(await page.locator('#areaPopup').textContent(),/跨車志工/);
   await page.locator('[data-close-area]').click();
+  await page.evaluate(()=>window.__appTestHooks.openAreaPreview('成功里'));
+  const scopedMapRoster=await page.locator('#areaPopup').textContent();
+  assert.match(scopedMapRoster,/合成志工/);
+  assert.match(scopedMapRoster,/同組志工/);
+  assert.match(scopedMapRoster,/日間本人/);
+  assert.match(scopedMapRoster,/日間同組/);
+  assert.doesNotMatch(scopedMapRoster,/跨班志工|跨車志工/);
+  assert.equal(await page.locator('#areaPopup .popup-group-section').count(),2);
+  const nightGroup=page.locator(`#areaPopup [data-popup-group="${day}|夜間|KEB-5939|成功里"]`),dayGroup=page.locator(`#areaPopup [data-popup-group="${day}|日間|OTHER-1|成功里"]`);
+  assert.match(await nightGroup.textContent(),/夜間 · KEB-5939/);
+  assert.match(await nightGroup.textContent(),/合成志工/);
+  assert.doesNotMatch(await nightGroup.textContent(),/日間本人|日間同組/);
+  assert.match(await dayGroup.textContent(),/日間 · OTHER-1/);
+  assert.match(await dayGroup.textContent(),/日間本人/);
+  assert.doesNotMatch(await dayGroup.textContent(),/合成志工|同組志工/);
+  await page.locator('[data-close-area]').click();
+  await page.locator('.desktop-nav [data-page="map"]').click();
+  await page.waitForFunction(()=>!document.querySelector('#mapFallback')?.hidden);
+  const stops=await page.evaluate(()=>window.__appTestHooks.visibleShiftStops('成功里','夜間'));
+  assert.deepEqual(stops.map(row=>row.address),['中山南路1號','中山南路2號']);
+  assert.deepEqual(stops.map(row=>row.time),['00:00','00:05']);
+  const dayStops=await page.evaluate(()=>window.__appTestHooks.visibleShiftStops('成功里','日間'));
+  assert.deepEqual(dayStops.map(row=>[row.address,row.time]),[['中山南路1號','10:30'],['自訂集合點','10:45']]);
+  await page.evaluate(()=>window.__appTestHooks.openShiftStopPopup('成功里','夜間'));
+  assert.equal(await page.locator('#areaPopup .assigned-stop-row').count(),2);
+  assert.equal(await page.locator('#areaPopup a[href^="https://www.google.com/maps/dir/"]').count(),2);
+  assert.equal(await page.locator('#areaPopup a[target="_blank"][rel="noopener noreferrer"]').count(),2);
+  await page.locator('[data-close-area]').click();
+  await page.locator('#layerNight').check();
+  await page.locator('#mapFallback [data-fallback-area="成功里"][data-fallback-shift="夜間"]').click();
+  assert.equal(await page.locator('#areaPopup .assigned-stop-row').count(),2);
+  assert.match(await page.locator('#areaPopup').textContent(),/夜間 2站/);
+  await page.locator('[data-close-area]').click();
+  await page.locator('#layerDay').check();
+  await page.locator('#mapFallback [data-fallback-area="成功里"][data-fallback-shift="日間"]').click();
+  assert.match(await page.locator('#areaPopup').textContent(),/日間 2站/);
+  assert.match(await page.locator('#areaPopup').textContent(),/10:30/);
+  assert.match(await page.locator('#areaPopup').textContent(),/自訂集合點/);
+  await page.locator('[data-close-area]').click();
+  await page.locator('#mapFallback [data-fallback-area="成功里"][data-fallback-shift=""]').click();
+  assert.equal(await page.locator('#areaPopup .popup-group-section').count(),2);
+  await page.locator('[data-close-area]').click();
+  await page.locator('.desktop-nav [data-page="reports"]').click();
+  await page.locator('#menuBtn').click();
+  assert.equal(await page.locator('#modal').evaluate(node=>node.classList.contains('settings-open')),true);
+  await page.locator('#closeModal').click();
+  assert.equal(await page.locator('#modal').evaluate(node=>node.classList.contains('settings-open')),false);
   await page.locator('.task-complete-btn').first().click();
   await page.locator('#confirmationModal').waitFor();
   await page.locator('#secureLogout').evaluate(node=>node.click());
@@ -231,7 +287,7 @@ async function volunteerTaskExpansionAndResetCase(){
   await page.locator('#secureLoginForm input[name="password"]').fill('123456');
   await page.locator('#secureLoginForm button[type="submit"]').click();
   await page.waitForFunction(()=>document.querySelector('#signedInName')?.hidden===false);
-  await page.locator('[data-vol-expand]').click();
+  await page.locator('[data-vol-expand]').first().click();
   await page.locator('.task-complete-btn').first().click();
   await page.locator('#confirmationModal').waitFor();
   await page.keyboard.press('Escape');
@@ -250,9 +306,9 @@ async function volunteerTaskExpansionAndResetCase(){
   await page.locator('#secureLoginForm input[name="password"]').fill('123456');
   await page.locator('#secureLoginForm button[type="submit"]').click();
   await page.waitForFunction(()=>document.querySelector('#signedInName')?.hidden===false);
-  await page.locator('[data-vol-expand]').waitFor();
-  assert.equal(await page.locator('[data-vol-expand]').getAttribute('aria-expanded'),'false');
-  assert.equal(await page.locator('.volunteer-stop-panel').isHidden(),true);
+  await page.locator('[data-vol-expand]').first().waitFor();
+  assert.equal(await page.locator('[data-vol-expand]').first().getAttribute('aria-expanded'),'false');
+  assert.equal(await page.locator('.volunteer-stop-panel').first().isHidden(),true);
   assert.equal(observed.api.filter(x=>x==='GET tasks').length,4);
  });
 }
@@ -335,7 +391,31 @@ async function mapFallbackCase() {
     assert.match(await page.locator('#mapFallback').textContent(), /互動地圖/);
     assert.ok(observed.external.some(url=>url.startsWith('https://cdn.jsdelivr.net/npm/maplibre-gl@')));
     assert.equal(observed.external.some(url=>url.includes('supabase.co')), false);
+    await page.locator('#layerDay').check();
+    const badge=page.locator('#mapFallback [data-fallback-shift="日間"]').first(),area=await badge.getAttribute('data-fallback-area');
+    await badge.click();
+    assert.equal(await page.locator('#areaPopup .assigned-stop-list').count(),0);
+    assert.equal(await page.locator('#areaPopup').isVisible(),true);
+    assert.match(await page.locator('#areaPopup').textContent(),new RegExp(area));
+    assert.match(await page.locator('#areaPopup').textContent(),/已分配/);
   });
+}
+
+async function adminPinnedMapRegressionCase(){
+ return withPage({role:'admin',initiallyLoggedIn:true,exposeAppTestHooks:true},async({page,origin,observed})=>{
+  await page.goto(origin,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelector('#signedInName')?.hidden===false);
+  const info=await page.evaluate(()=>{window.maplibregl={Marker:class{constructor({element}){this.element=element}setLngLat(){return this}addTo(){document.querySelector('#mapBox').append(this.element);return this}remove(){this.element.remove()}}};return window.__appTestHooks.prepareAdminPinnedMap()});
+  const pinned=page.locator('.map-marker[title*="｜人工標點待核對"]');
+  assert.equal(await pinned.count(),1);
+  assert.match(await pinned.getAttribute('title'),new RegExp(info.address.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+  const aggregate=page.locator(`.map-marker[title*="${info.area}｜${info.shift}選錄"]`);
+  assert.equal(await aggregate.count(),info.remaining?1:0);
+  if(info.remaining)assert.match(await aggregate.getAttribute('title'),new RegExp(`選錄 ${info.remaining} 站`));
+  await pinned.evaluate(node=>node.click());
+  assert.match(await page.locator('#toast').textContent(),/人工標點：/);
+  assert.equal(await page.locator('#areaPopup').isHidden(),true);
+  return {info,api:observed.api,consoleErrors:observed.consoleErrors,pageErrors:observed.pageErrors,external:observed.external};
+ });
 }
 
 async function memberApplicationModalCase() {
@@ -424,6 +504,7 @@ async function rosterPhoneAndLeaderToggleCase() {
     sharedPhoneIdentitySelection:await sharedPhoneIdentitySelectionCase(),
     visibleBootFailure:await bootFailureCase(),
     latestUiMapFallback:await mapFallbackCase(),
+    adminPinnedMapRegression:await adminPinnedMapRegressionCase(),
     memberApplicationModal:await memberApplicationModalCase(),
     adminNavigationSmoke:await adminNavigationSmokeCase(),
     rosterPhoneAndLeaderToggle:await rosterPhoneAndLeaderToggleCase(),
@@ -442,6 +523,7 @@ async function rosterPhoneAndLeaderToggleCase() {
     sharedPhoneIdentitySelection: message => /(?:401 \(Unauthorized\)|503 \(Service Unavailable\))$/.test(message),
     visibleBootFailure: message => /500 \(Internal Server Error\)$/.test(message) || /^Error: 地圖資料無法讀取\n/.test(message),
     latestUiMapFallback: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
+    adminPinnedMapRegression: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
     memberApplicationModal: message => /401 \(Unauthorized\)$/.test(message),
     adminNavigationSmoke: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
     rosterPhoneAndLeaderToggle: message => /net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message),
