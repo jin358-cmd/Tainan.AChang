@@ -138,6 +138,13 @@ test('a required-device admin with only a pending device cannot approve it',()=>
  assert.match(server,/account\.role==='admin'&&account\.device_approval_required===false&&!requestApproval/);
 });
 
+test('Google OAuth preserves the existing device-exempt administrator policy',()=>{
+ const oauth=read('api/oauth-session.js');
+ assert.match(oauth,/const needsDeviceApproval=!\(p\.role==='admin'&&p\.device_approval_required===false\)/);
+ assert.match(oauth,/deviceCheck\(req,p,p\.token,needsDeviceApproval\)/);
+ assert.doesNotMatch(oauth,/deviceCheck\(req,p,p\.token,true\)/);
+});
+
 test('reactivation keeps account and device authorization as separate states',()=>{
  const api=read('api/members.js'),migration=read('supabase/migrations/20261024050539_achang_auth_identity_pending_device_soft_delete.sql'),ui=read('app.js');
  assert.match(api,/action==='reactivate'/);
