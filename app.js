@@ -176,8 +176,9 @@ function renderVolunteerTaskList(root){
    const url=hasAddress?'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(a.startsWith('台')||a.startsWith('臺')?a:'臺南市永康區'+a)+'&travelmode=driving':'';
    const done=stop.status==='完成',future=taskDateCategory(stop)==='future';
    out+='<div class="volunteer-stop-item"><span class="volunteer-stop-number">'+(i+1)+'</span><div class="volunteer-stop-main"><strong>第 '+(i+1)+' 個停靠點</strong><span class="volunteer-stop-address">📍 '+esc(a||'地址尚未提供')+'</span>';
+   out+='</div>';
    if(hasAddress)out+='<a class="task-navigate" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer" aria-label="使用 Google Maps 導航到站點"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M21.3 2.8 2.7 10.2c-.9.35-.85 1.63.1 1.9l7.9 2.2 2.2 7.9c.28.95 1.55 1 1.9.1l7.4-18.6c.28-.7-.21-1.18-.9-.9Z"/></svg>導航到站點</a>';
-   out+='</div><div class="volunteer-stop-result"><button type="button" class="task-complete-btn '+(done?'is-complete':future?'is-upcoming':'is-pending')+'" data-vol-complete-group="'+esc(done?'':stop.id)+'" '+(done||future?'disabled':'')+'>'+(done?'<span class="task-done-check" aria-hidden="true">✓</span> 已完成':future?'尚未開始':'未完成')+'</button></div></div>';
+   out+='<div class="volunteer-stop-result"><button type="button" class="task-complete-btn '+(done?'is-complete':future?'is-upcoming':'is-pending')+'" data-vol-complete-group="'+esc(done?'':stop.id)+'" '+(done||future?'disabled':'')+'>'+(done?'<span class="task-done-check" aria-hidden="true">✓</span> 已完成':future?'尚未開始':'未完成')+'</button></div></div>';
   }
   out+='</div></section></div>';
  }
