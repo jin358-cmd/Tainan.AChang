@@ -158,4 +158,7 @@ test('desktop service-area counts match and village tiles show people units with
 test('desktop create and edit member forms share readable field labels and controls',()=>{
  assert.match(styles,/@media\(min-width:800px\)\{#newMemberForm>label,#personForm>label\{font-size:15px;line-height:1\.4\}#newMemberForm>label>input,#newMemberForm>label>select,#personForm>label>input,#personForm>label>select\{min-height:48px;padding:10px 12px;font-size:16px;line-height:1\.35\}\}/);
  assert.doesNotMatch(styles,/@media\(max-width:[^)]+\)[^{]*\{[^}]*(?:#newMemberForm|#personForm)/);
+ assert.match(app,/classList\.toggle\('member-create-open',title==='新增會員｜名冊與授權同步建立'\)/);
+ assert.match(styles,/@media\(min-width:800px\)\{\.modal-backdrop\.member-create-open\{align-items:center;padding:max\(12px,env\(safe-area-inset-top\)\) 12px max\(12px,env\(safe-area-inset-bottom\)\)\}\.modal-backdrop\.member-create-open \.sheet\{height:min\(720px,calc\(100dvh - 24px - env\(safe-area-inset-top\) - env\(safe-area-inset-bottom\)\)\);max-height:calc\(100dvh - 24px - env\(safe-area-inset-top\) - env\(safe-area-inset-bottom\)\);overflow:hidden\}/);
+ assert.match(styles,/\.modal-backdrop\.member-create-open \.sheet-body\{flex:1 1 auto;min-height:0;overflow-y:auto;scroll-padding-bottom:16px\}\.modal-backdrop\.member-create-open #saveNewMember\{min-height:48px;font-size:15px;line-height:1\.35\}/);
 });
