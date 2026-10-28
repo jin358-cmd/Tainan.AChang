@@ -600,7 +600,7 @@ async function submitNewMemberForm(form){
 const originalBind=bind;
 bind=function(){originalBind();
  $('#secureLogout').onclick=secureSignOut;
- $('#closeSecureLogin').onclick=()=>{$('#secureLogin').hidden=true};
+ const closeSecureLogin=$('#closeSecureLogin');if(closeSecureLogin)closeSecureLogin.onclick=()=>{$('#secureLogin').hidden=true};
  $('#loginFromRoster').onclick=openSecureLogin;
  $('#addMember').onclick=openNewMemberForm;
  $('#openRosterAuthorization').onclick=()=>openMemberAdmin();
