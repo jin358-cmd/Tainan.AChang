@@ -86,7 +86,10 @@ Deno.serve(async(req:Request)=>{
     if(error.code==='40001')throw new MemberAdminError(409,'會員角色已由其他操作更新，請重新整理','STATE_CONFLICT');
     if(error.code==='P0002')throw new MemberAdminError(404,'會員帳號不存在','ACCOUNT_NOT_FOUND');
     if(error.code==='42501')throw new MemberAdminError(403,'只有已啟用管理員可以管理會員','ADMIN_REQUIRED');
-    if(error.code==='23514')throw new MemberAdminError(409,'只有已核准且啟用中的志工可以設為管理員','INVALID_TRANSITION');
+    if(error.code==='23514'){
+     if(/own account/i.test(error.message||''))throw new MemberAdminError(409,'管理員不能變更自己的角色','SELF_ROLE_CHANGE_FORBIDDEN');
+     throw new MemberAdminError(409,'只有已核准且啟用中的志工可以設為管理員','INVALID_TRANSITION');
+    }
     throw error;
    }
    return data;

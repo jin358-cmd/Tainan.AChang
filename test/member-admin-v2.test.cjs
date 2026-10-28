@@ -83,12 +83,15 @@ test('TEST-08 active admin can create a pending admin without device approval ga
  assert.equal(calls.some(c=>c[0]==='deviceCheck'),false);
 });
 
-test('active approved volunteer can be promoted without recreating Auth or losing approval',async()=>{
+test('active volunteer including migrated rows without approved_at can be promoted without recreating Auth',async()=>{
  const {executeMemberAdminV2}=await corePromise,{deps,calls,account}=fixture({getAccountById:async()=>({...account,role:'volunteer',status:'active',approved_at:'2026-10-01T00:00:00Z'})});
  const result=await executeMemberAdminV2({token:'valid-admin',body:{action:'promote_admin',accountId:account.id}},deps);
  assert.equal(result.body.promoted,true);assert.equal(result.body.member.role,'admin');assert.equal(result.body.member.status,'active');
  assert.deepEqual(calls.find(call=>call[0]==='promote').slice(1),[account.id,'volunteer','active']);
  assert.equal(calls.some(call=>call[0]==='ensureAuth'||call[0]==='insert'),false);
+ const legacy=fixture({getAccountById:async()=>({...account,role:'volunteer',status:'active',approved_at:null})});
+ const legacyResult=await executeMemberAdminV2({token:'valid-admin',body:{action:'promote_admin',accountId:account.id}},legacy.deps);
+ assert.equal(legacyResult.body.member.role,'admin');
 });
 
 test('promotion rejects pending, suspended, existing admin, and self targets',async()=>{
@@ -102,9 +105,9 @@ test('promotion rejects pending, suspended, existing admin, and self targets',as
 });
 
 test('promotion RPC is invoker-authorized, CAS protected, and audits the role change',()=>{
- const sql=read('supabase/migrations/20261028143000_achang_member_admin_v2_promote_admin.sql');
+ const sql=read('supabase/migrations/20261028144700_achang_member_admin_v2_promote_active_semantics.sql');
  assert.match(sql,/security definer/i);assert.match(sql,/set search_path = ''/);assert.match(sql,/not app_private\.is_admin\(\)/);
- assert.match(sql,/role is distinct from p_expected_role/);assert.match(sql,/status is distinct from p_expected_status/);assert.match(sql,/approved_at is null/);
+ assert.match(sql,/role is distinct from p_expected_role/);assert.match(sql,/status is distinct from p_expected_status/);assert.doesNotMatch(sql,/approved_at is null/);
  assert.match(sql,/set role = 'admin', device_approval_required = false/);assert.match(sql,/'member_promoted_admin'/);
  assert.match(sql,/revoke all[\s\S]*from public, anon/);assert.match(sql,/grant execute[\s\S]*to authenticated/);
 });
@@ -142,6 +145,7 @@ test('archive migration revokes access, retains history, audits, and protects th
  assert.match(sql,/security definer/i);assert.match(sql,/set search_path = ''/);assert.match(sql,/not app_private\.is_admin\(\)/);
  assert.match(sql,/pg_advisory_xact_lock/);assert.match(sql,/for update/);assert.match(sql,/status is distinct from p_expected_status/);
  assert.match(sql,/protected principal cannot be archived/);assert.match(sql,/last active administrator cannot be archived/);assert.match(sql,/cannot archive own account/);
+ assert.match(sql,/select \* into v_account[\s\S]*for update[\s\S]*select \* into v_member[\s\S]*for update/);
  assert.match(sql,/update public\.member_devices[\s\S]*status = 'revoked'/);assert.match(sql,/update public\.member_accounts[\s\S]*status = 'suspended'/);
  assert.match(sql,/delete from public\.service_allocations/);assert.match(sql,/update public\.members[\s\S]*deleted_at = v_now/);
  assert.match(sql,/insert into public\.member_authorization_events[\s\S]*'member_archived'/);

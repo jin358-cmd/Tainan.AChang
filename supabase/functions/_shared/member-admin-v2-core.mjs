@@ -107,7 +107,9 @@ async function promoteAdmin(body,context,deps){
  if(!target)throw new MemberAdminError(404,'會員帳號不存在');
  if(await deps.isMemberArchived(target.member_id,context.token))throw new MemberAdminError(409,'已封存會員不能設為管理員','MEMBER_ARCHIVED');
  if(target.auth_user_id===context.actor.id)throw new MemberAdminError(409,'管理員不能變更自己的角色','SELF_ROLE_CHANGE_FORBIDDEN');
- if(target.role!=='volunteer'||target.status!=='active'||!target.approved_at)throw new MemberAdminError(409,'只有已核准且啟用中的志工可以設為管理員','INVALID_TRANSITION');
+ // `active` is the authoritative approval state. Some migrated accounts may
+ // not carry the newer approved_at metadata even though they are active.
+ if(target.role!=='volunteer'||target.status!=='active')throw new MemberAdminError(409,'只有已核准且啟用中的志工可以設為管理員','INVALID_TRANSITION');
  const updated=await deps.promoteAdminAtomic(target.id,target.role,target.status,context.token);
  if(!updated)throw new MemberAdminError(409,'會員角色已由其他操作更新，請重新整理','STATE_CONFLICT');
  return {status:200,body:{ok:true,promoted:true,member:deps.publicAccount(updated)}};
