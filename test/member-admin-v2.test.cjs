@@ -158,7 +158,10 @@ test('application email route blocks synthetic identities; direct Auth requires 
  const session=read('api/session.js');assert.match(session,/@auth\\\.achang\\\.invalid\$\/i/);assert.match(session,/名冊手機與六位數字 PIN/);
  const guardIndex=session.indexOf('@auth\\.achang\\.invalid'),passwordGrant=session.indexOf('/auth/v1/token?grant_type=password');assert.ok(guardIndex>0&&guardIndex<passwordGrant);
  const hook=read('supabase/migrations/20261028093000_achang_pin_password_verification_hook.sql');
- assert.match(hook,/v_email not like '%@auth\.achang\.invalid'/);assert.match(hook,/v_count > 5/);assert.match(hook,/'http_code',429/);
+ assert.match(hook,/v_email not like '%@auth\.achang\.invalid'/);assert.match(hook,/failed_count\+1 >= 5/);assert.match(hook,/'http_code',429/);
+ const lockCheck=hook.indexOf('v_blocked_until > v_now'),validCheck=hook.indexOf('if v_valid then');assert.ok(lockCheck>0&&lockCheck<validCheck,'active lockout must reject even a correct PIN before valid-password cleanup');
+ assert.match(hook,/where user_id=v_user_id\s+for update/);assert.match(hook,/user_id uuid primary key/);assert.doesNotMatch(hook,/ip_address|inet|remote_addr/i);
+ assert.match(hook,/v_window_started < v_now-interval '15 minutes'[\s\S]*delete from app_private\.achang_password_attempt_buckets/);
  assert.match(hook,/grant execute[\s\S]*to supabase_auth_admin/);assert.match(hook,/revoke all[\s\S]*from public, anon, authenticated/);
 });
 
