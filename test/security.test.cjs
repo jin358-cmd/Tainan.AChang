@@ -1,3 +1,4 @@
+Object.assign(process.env,{ACHANG_ENVIRONMENT:'test',ACHANG_TEST_ISOLATED:'1',EXPECTED_SUPABASE_PROJECT_REF:'fhxdpupascsikjsycpbi',SUPABASE_URL:'https://fhxdpupascsikjsycpbi.supabase.co',SUPABASE_PUBLISHABLE_KEY:'sb_publishable_test_only',VERCEL_ENV:'preview'});
 const t=require('node:test'),assert=require('node:assert/strict');const L=require('../lib/server');
 t('拒絕任意電話格式',()=>{assert.equal(L.phone('0989-098-468'),'+886989098468');assert.throws(()=>L.phone('1234567890'),/手機號碼/)});
 t('日期、時間格式有驗證',()=>{assert.equal(L.validDate('2026-10-19'),'2026-10-19');assert.throws(()=>L.validDate('tomorrow'));assert.throws(()=>L.time('25:00'))});

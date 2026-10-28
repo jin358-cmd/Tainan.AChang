@@ -641,8 +641,17 @@ async function restoreSavedSessionOnResume(){
  }finally{checkingSavedSession=false}
 }
 
+let runtimeConfig=null;
+async function loadRuntimeConfig(){
+ const response=await fetch('/api/config',{credentials:'same-origin',cache:'no-store'});
+ if(!response.ok)throw Error('測試環境尚未完成隔離設定');
+ const config=await response.json();
+ if(config?.environment!=='test'||config?.projectRef!=='fhxdpupascsikjsycpbi'||!config.googleOAuthUrl)throw Error('測試環境身分驗證失敗');
+ runtimeConfig=config;return config;
+}
 async function boot(){try{
  const pub=await fetch('./data-public.json',{cache:'no-store'});if(!pub.ok)throw Error('地圖資料無法讀取');data=await pub.json();areas=data.areas;
+ await loadRuntimeConfig();
  state=makeState([]);state.demo=false;areaPage=Math.floor(areas.indexOf(selectedArea)/CARD_PAGE_SIZE);const pa=$('#plannerAreaSelect');pa.innerHTML=areas.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('')+'<option value="all">全部</option>';
  const sel=$('#peopleAreaFilter');sel.innerHTML='<option value="all">全部里別</option>'+areas.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('');
  $('#peopleFilter').value='assigned';bind();initGpsToggle();showAuth();const googleHandled=await completeGoogleOAuth();if(!googleHandled&&!previewOnly())await authStart();if(previewOnly())previewLoginButton();lastSessionCheck=Date.now();document.addEventListener('visibilitychange',restoreSavedSessionOnResume);window.addEventListener('pageshow',e=>{if(e.persisted)restoreSavedSessionOnResume()});
@@ -650,12 +659,11 @@ async function boot(){try{
 }catch(e){console.error(e);openSecureLogin();$('#authStatus').textContent='網站暫時無法完成登入，請重新整理後再試'}
 }
 
-// Production Google OAuth: validated by Supabase and membership authorization API.
-const GOOGLE_AUTH_URL='https://ctskglmglevronvnkpmm.supabase.co/auth/v1/authorize?provider=google&redirect_to=';
 document.addEventListener('click',event=>{
  const button=event.target.closest('#googleOAuthLogin');if(!button)return;
+ if(!runtimeConfig?.googleOAuthUrl){openSecureLogin();$('#authStatus').textContent='測試環境尚未完成隔離設定，已停止登入';return}
  const redirect=location.origin+location.pathname;
- location.assign(GOOGLE_AUTH_URL+encodeURIComponent(redirect));
+ location.assign(runtimeConfig.googleOAuthUrl+encodeURIComponent(redirect));
 });
 async function completeGoogleOAuth(){
  const parsed=new URLSearchParams(location.hash.slice(1));
