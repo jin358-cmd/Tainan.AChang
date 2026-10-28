@@ -324,7 +324,7 @@ function initGpsToggle(){
 async function loadGpsVehicles(){
  if(!liveRole)return;
  if(gpsRequest)return gpsRequest;
- gpsRequest=onlineApi('gps-vehicles').then(result=>{
+ gpsRequest=onlineApi('gps-vehicles?refresh='+Math.floor(Date.now()/300000)).then(result=>{
   gpsVehicles=Array.isArray(result.vehicles)?result.vehicles.filter(v=>Number.isFinite(v.longitude)&&Number.isFinite(v.latitude)):[];
   gpsIsLive=result.live===true;
   const now=Date.now();
@@ -332,7 +332,7 @@ async function loadGpsVehicles(){
   gpsVehicles=gpsVehicles.map(v=>({...v,is_stale:!Number.isFinite(parseTime(v))||now-parseTime(v)>10*60*1000||parseTime(v)>now+60000}));
   gpsFetchedAt=now;
   const stateLabel=document.querySelector('#gpsFeedStatus');
-  if(stateLabel)stateLabel.textContent=(gpsIsLive?'官方來源':'歷史備援')+' · '+gpsVehicles.length+' 輛 · '+(gpsVehicles.filter(v=>!v.is_stale).length)+' 輛定位在10分鐘內';
+  if(stateLabel)stateLabel.textContent=(gpsIsLive?'官方來源':'歷史備援')+' · '+gpsVehicles.length+' 輛 · '+(gpsVehicles.filter(v=>!v.is_stale).length)+' 輛定位在10分鐘內 · 本頁重讀 '+new Date(now).toLocaleTimeString('zh-TW',{hour12:false});
   updateMap();
  }).catch(error=>console.warn('GPS 快照載入失敗',error.message)).finally(()=>{gpsRequest=null});
  return gpsRequest;
@@ -481,7 +481,7 @@ function updateAccessControls(){
 async function secureSignOut(){if(previewDemoMode){previewDemoMode=false;clearInterval(liveTimer);liveTimer=null;showAuth();return;}try{await onlineApi('session','DELETE')}catch{}clearInterval(liveTimer);liveTimer=null;liveTasks=[];state=makeState([]);showAuth()}
 async function authStart(){try{
  const session=await onlineApi('session');liveRole=session.role;setTimeout(loadGpsVehicles,0);
- if(!gpsTimer)gpsTimer=setInterval(()=>{if(gpsEnabled&&liveRole)loadGpsVehicles()},300000);liveMemberId=session.memberId;liveDisplayName=session.displayName||'';
+ if(!gpsTimer)gpsTimer=setInterval(()=>{if(gpsEnabled&&liveRole&&document.visibilityState==='visible')loadGpsVehicles()},300000);liveMemberId=session.memberId;liveDisplayName=session.displayName||'';
  $('#secureLogin').hidden=true;$('#app').hidden=false;$('#accountBadge')?.remove();const adminTop=$('#adminHeaderAction');if(adminTop){adminTop.hidden=liveRole!=='admin';}updateAccessControls();
  if(liveRole==='admin'){
   $('#volunteerLoginBtn').hidden=true;
