@@ -105,12 +105,27 @@ test('promotion rejects pending, suspended, existing admin, and self targets',as
 });
 
 test('promotion RPC is invoker-authorized, CAS protected, and audits the role change',()=>{
- const sql=read('supabase/migrations/20261028145500_achang_member_admin_v2_lock_member_rows.sql'),promotion=sql.slice(sql.indexOf('create or replace function public.achang_member_admin_v2_promote_admin'));
+ const promotion=read('supabase/migrations/20261028150000_achang_member_admin_v2_promote_approval_provenance.sql');
  assert.match(promotion,/security definer/i);assert.match(promotion,/set search_path = ''/);assert.match(promotion,/not app_private\.is_admin\(\)/);
  assert.match(promotion,/role is distinct from p_expected_role/);assert.match(promotion,/status is distinct from p_expected_status/);assert.doesNotMatch(promotion,/approved_at is null/);
  assert.match(promotion,/select \* into v_target[\s\S]*for update[\s\S]*select \* into v_member[\s\S]*for update/);
  assert.match(promotion,/set role = 'admin', device_approval_required = false/);assert.match(promotion,/'member_promoted_admin'/);
+ assert.match(promotion,/approved_at = coalesce\(approved_at,v_now\)/);assert.match(promotion,/approved_by = coalesce\(approved_by,v_actor\)/);
  assert.match(promotion,/revoke all[\s\S]*from public, anon/);assert.match(promotion,/grant execute[\s\S]*to authenticated/);
+});
+
+test('legacy active promotion records approval provenance so suspend then reactivate remains valid',async()=>{
+ const {executeMemberAdminV2}=await corePromise,{account}=fixture();
+ let current={...account,role:'volunteer',status:'active',approved_at:null};
+ const {deps}=fixture({
+  getAccountById:async()=>current,
+  promoteAdminAtomic:async()=>current={...current,role:'admin',approved_at:'2026-10-28T15:00:00Z'},
+  transitionAccountAtomic:async(id,action)=>current={...current,status:action==='suspend'?'suspended':'active'}
+ });
+ await executeMemberAdminV2({token:'valid-admin',body:{action:'promote_admin',accountId:account.id}},deps);
+ await executeMemberAdminV2({token:'valid-admin',body:{action:'suspend',accountId:account.id}},deps);
+ const restored=await executeMemberAdminV2({token:'valid-admin',body:{action:'reactivate',accountId:account.id}},deps);
+ assert.equal(restored.body.member.status,'active');assert.ok(current.approved_at);
 });
 
 test('TEST-02 current server session contract authenticates active admins without an approved-device gate',()=>{

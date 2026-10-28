@@ -110,12 +110,12 @@ Deno.serve(async(req:Request)=>{
    return {ok:true,members:rows,devices:(devices||[]).filter(device=>visibleAccountIds.has(String(device.account_id)))};
   }
  };
- let attemptedAction='unknown';
+ let attemptedAction='unknown',attemptedAccountId='';
  try{
-  const body=await req.json();attemptedAction=typeof body?.action==='string'?body.action.slice(0,32):'unknown';const result=await executeMemberAdminV2({token,body},deps);
+  const body=await req.json();attemptedAction=typeof body?.action==='string'?body.action.slice(0,32):'unknown';attemptedAccountId=typeof body?.accountId==='string'?body.accountId:'';const result=await executeMemberAdminV2({token,body},deps);
   return json(result.body,result.status);
  }catch(error){
-  if(error instanceof MemberAdminError){try{const {data:{user}}=await admin.auth.getUser(token);const subject=user?.id?await sha(serviceKey+'|member-admin-v2-denied|'+user.id):null;console.warn(JSON.stringify({event:'member_admin_v2_denied',action:attemptedAction,status:error.status,code:error.code,subject}))}catch{}return json({error:error.message,code:error.code},error.status)}
+  if(error instanceof MemberAdminError){try{const {data:{user}}=await admin.auth.getUser(token);const subject=user?.id?await sha(serviceKey+'|member-admin-v2-denied|'+user.id):null;let targetState=null;if(attemptedAction==='promote_admin'&&/^[0-9a-f-]{36}$/i.test(attemptedAccountId)){const {data:target}=await admin.from('member_accounts').select('member_id,auth_user_id,role,status,approved_at').eq('id',attemptedAccountId).maybeSingle();if(target){const {data:member}=await admin.from('members').select('deleted_at').eq('id',target.member_id).maybeSingle();targetState={target_hash:await sha(serviceKey+'|member-admin-v2-target|'+attemptedAccountId),role:target.role,status:target.status,approved_at_present:!!target.approved_at,archived:!member||!!member.deleted_at,self_target:target.auth_user_id===user?.id}}}console.warn(JSON.stringify({event:'member_admin_v2_denied',action:attemptedAction,status:error.status,code:error.code,subject,target_state:targetState}))}catch{}return json({error:error.message,code:error.code},error.status)}
   console.error('achang-member-admin-v2',error instanceof Error?error.message:'unknown error');
   return json({error:'會員管理服務暫時無法使用'},503);
  }

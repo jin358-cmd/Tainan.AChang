@@ -84,7 +84,8 @@ begin
   if v_target.role is distinct from p_expected_role or v_target.status is distinct from p_expected_status then raise exception using errcode = '40001', message = 'member promotion state changed'; end if;
   if v_target.role <> 'volunteer' or v_target.status <> 'active' then raise exception using errcode = '23514', message = 'only active volunteers can be promoted'; end if;
 
-  update public.member_accounts set role = 'admin', device_approval_required = false
+  update public.member_accounts set role = 'admin', device_approval_required = false,
+    approved_at = coalesce(approved_at,v_now), approved_by = coalesce(approved_by,v_actor)
   where id = v_target.id and role = p_expected_role and status = p_expected_status returning * into v_updated;
   if not found then raise exception using errcode = '40001', message = 'member promotion state changed'; end if;
   insert into public.member_authorization_events(member_id,account_id,event_type,reason,actor_user_id,created_at)
