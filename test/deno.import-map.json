@@ -1,0 +1,6 @@
+{
+  "imports": {
+    "jsr:@supabase/supabase-js@2": "./supabase-js-stub.ts"
+  }
+}
+
