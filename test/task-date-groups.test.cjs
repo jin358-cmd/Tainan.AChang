@@ -87,11 +87,12 @@ test('planner empty route hint spans the full available row without tiny or clip
  assert.doesNotMatch(styles,/#page-planner #routeButtons>\.mini-note\{[^}]*(?:text-overflow:ellipsis|overflow:hidden)/);
 });
 
-test('roster status filter uses the requested order while preserving values and assigned default',()=>{
+test('roster status filter uses the requested order and starts at pending without resetting later refreshes',()=>{
  const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
  const select=html.match(/<select id="peopleFilter"[^>]*>([\s\S]*?)<\/select>/)?.[1]||'';
- assert.match(select,/^<option value="pending">未分配<\/option><option value="assigned">已分配<\/option><option value="leader">組長<\/option><option value="all">全部人員<\/option>$/);
- assert.match(app,/\$\('#peopleFilter'\)\.value='assigned'/);
+ assert.match(select,/^<option value="pending">待分配<\/option><option value="assigned">已分配<\/option><option value="leader">組長<\/option><option value="all">全部人員<\/option>$/);
+ assert.match(app,/\$\('#peopleFilter'\)\.value='pending';bind\(\)/);
+ assert.equal((app.match(/\$\('#peopleFilter'\)\.value='pending'/g)||[]).length,1);
 });
 
 test('member authorization cards distinguish administrators without changing account status controls',()=>{
