@@ -1006,13 +1006,16 @@ body.volunteer-session #page-reports .volunteer-stop-item>.task-navigate svg{dis
 #page-reports .task-team-identity>strong{font-size:18px;font-weight:950;color:#173a5d;display:inline-flex;align-items:center;gap:5px}
 #page-reports .task-leader-crown{font-size:23px;line-height:1}
 #page-reports .task-team-phone{font-size:18px;font-weight:900;color:#075f9e;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
-#page-reports .task-team-primary .task-progress-status{margin-left:auto;flex:0 0 auto;font-size:11px;min-width:118px}
+#page-reports .task-team-primary .task-progress-status{margin-left:auto;flex:0 0 auto;font-size:13px;min-width:126px;min-height:38px;border-radius:9px}
 #page-reports .task-team-route{gap:13px;padding:10px 13px;border-top:1px solid #c8e0f3;color:#244966;font-size:17px;font-weight:850}
 #page-reports .task-team-route>strong{font-size:19px;color:#153f68}
+#page-reports .task-route-separator{color:#6e8497;font-weight:950}
+#page-reports .task-team-shift{display:inline-flex;align-items:center;gap:6px}
+#page-reports .task-team-shift .legend-pin{width:22px;height:22px;font-size:13px;flex:none}
 #page-reports .task-team-plate{font-size:19px;font-weight:950;letter-spacing:.03em;margin-left:auto}
 #page-reports .task-date-history .task-team{background:#fff7dc;border-color:#e6cf7a}
 #page-reports .task-date-history .task-team-route{border-top-color:#eadb9f}
-#page-reports .task-member-list{background:#f5faff}
+#page-reports .task-member-list{background:#fff0f5;border-top:1px solid #efc2d1}
 @media(max-width:530px){#page-reports .task-team-primary{align-items:flex-start}#page-reports .task-team-identity{gap:7px 10px}#page-reports .task-team-identity>strong,#page-reports .task-team-phone{font-size:16px}#page-reports .task-team-route{font-size:15px;gap:9px}#page-reports .task-team-route>strong,#page-reports .task-team-plate{font-size:17px}}
 
 /* Enlarged map roster identity and centered existing assignment action. */

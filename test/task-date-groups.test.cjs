@@ -24,8 +24,11 @@ test('task dates use Asia/Taipei midnight and ignore completion status',()=>{
 test('administrator task teams use one consistent two-row card with leader contact and route metadata',()=>{
  assert.match(app,/task-team-row task-team-primary/);assert.match(app,/task-team-identity/);assert.match(app,/task-leader-crown/);
  assert.match(app,/task-team-row task-team-route/);assert.match(app,/task-team-plate/);assert.match(app,/taskProgress\(done,entries\.length\)/);
+ assert.match(app,/task-route-separator[^>]*aria-hidden="true">・/);assert.match(app,/task-team-shift/);assert.match(app,/shiftIcon=shift==='日間'\?'☀':'☾'/);
  assert.match(styles,/#page-reports \.task-team\{background:#eaf5ff/);assert.match(styles,/\.task-team-phone\{font-size:18px/);
  assert.match(styles,/#page-reports \.task-team-primary\{[^}]*flex-direction:row/);
+ assert.match(styles,/#page-reports \.task-team-primary \.task-progress-status\{[^}]*font-size:13px[^}]*min-width:126px[^}]*min-height:38px/);
+ assert.match(styles,/#page-reports \.task-member-list\{background:#fff0f5/);
  assert.match(styles,/#page-reports \.task-date-history \.task-team\{background:#fff7dc;border-color:#e6cf7a\}/);
 });
 
@@ -72,4 +75,5 @@ test('fourth task page exposes three requested groups without changing task APIs
  assert.match(app,/volunteerTaskCategory==='current'/);assert.match(app,/taskDateCategory\(\{visit_date:day\}\)==='current'\?'open':''/);
  assert.match(app,/目前沒有'\+dateLabels\[category\]\+'資料/);
  assert.doesNotMatch(app,/function taskDateCategory[\s\S]{0,300}status/);
+ assert.doesNotMatch(app,/單日進度示範|示範小組：3 項排班任務|task-sample/);
 });
