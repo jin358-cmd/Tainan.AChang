@@ -946,3 +946,25 @@ body.volunteer-session #areaPopup.owner-center-popup .phone-link{min-height:42px
 #adminHeaderAction.admin-icon-action:hover,#adminHeaderAction.admin-icon-action:focus-visible{background:#ffffff22!important}
 #adminHeaderAction.admin-icon-action[hidden]{display:none!important}
 .device-detail-row .device-approved-time{display:block;margin-top:4px;font-size:12px!important;font-weight:800;color:#32604d!important;font-variant-numeric:tabular-nums}
+
+/* 2026-10-28: navigation occupies the red-box slot; status button unchanged. */
+body.volunteer-session #page-reports .volunteer-stop-item{
+ grid-template-columns:48px minmax(0,1fr) auto auto;
+}
+body.volunteer-session #page-reports .volunteer-stop-item>.volunteer-stop-inline-nav{
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ gap:6px!important;align-self:center;white-space:nowrap;
+ min-height:42px!important;padding:7px 10px!important;font-size:12px!important;
+ background:#edf5ff!important;color:#1360a8!important;border:1px solid #b2d3f7!important;
+ border-radius:12px!important;text-decoration:none!important;font-weight:900!important;
+}
+body.volunteer-session #page-reports .volunteer-stop-inline-nav svg{display:block;flex:none;width:17px;height:17px}
+@media(max-width:620px){
+ body.volunteer-session #page-reports .volunteer-stop-item{grid-template-columns:37px minmax(0,1fr) auto auto;gap:6px}
+ body.volunteer-session #page-reports .volunteer-stop-item>.volunteer-stop-inline-nav{padding:6px!important;font-size:11px!important;gap:4px!important}
+ body.volunteer-session #page-reports .volunteer-stop-inline-nav svg{width:15px;height:15px}
+}
+@media(max-width:360px){
+ body.volunteer-session #page-reports .volunteer-stop-item{grid-template-columns:32px minmax(0,1fr) auto auto;gap:4px}
+ body.volunteer-session #page-reports .volunteer-stop-item>.volunteer-stop-inline-nav{font-size:10px!important;padding:5px 3px!important}
+}
