@@ -564,11 +564,13 @@ body.volunteer-session #page-reports .task-stop-heading{display:flex;align-items
 body.volunteer-session #page-reports .task-stop-row .task-plate{display:inline-flex;align-items:center;background:#62abd7;color:#fff;border:1px solid #4292c4;border-radius:7px;min-height:40px;font-size:15px;font-weight:850;}
 
 /* 2026-10-23: Expand the settings / install sheet upward on mobile, preserve dialog safe area. */
-.modal-backdrop.settings-open{align-items:center;padding:10px 10px max(10px,env(safe-area-inset-bottom));}
-.modal-backdrop.settings-open .sheet{width:min(100%,590px);height:auto;max-height:calc(100dvh - 20px - env(safe-area-inset-bottom));border-radius:18px 18px 14px 14px;display:flex;flex-direction:column;overflow:hidden;padding-bottom:0;}
+.modal-backdrop.settings-open{align-items:center;padding:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom));}
+.modal-backdrop.settings-open .sheet{width:min(100%,590px);height:min(700px,calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom)));max-height:calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom));border-radius:18px 18px 14px 14px;display:flex;flex-direction:column;overflow:hidden;padding-bottom:0;}
 .modal-backdrop.settings-open .sheet-head{flex:0 0 auto;}
 .modal-backdrop.settings-open .sheet-body{flex:1 1 auto;min-height:0;overflow-y:auto;}
-@media(max-width:600px){.modal-backdrop.settings-open{align-items:flex-start;padding-top:max(8px,env(safe-area-inset-top));}.modal-backdrop.settings-open .sheet{margin-top:0;max-height:calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom));}.modal-backdrop.settings-open .sheet-body{font-size:14px;}}
+.modal-backdrop.settings-open .sheet-body>.pick-list{min-height:100%;display:flex;flex-direction:column;}
+.modal-backdrop.settings-open .sheet-body>.pick-list>.pick-row:last-child{margin-top:auto;}
+@media(max-width:600px){.modal-backdrop.settings-open{align-items:center;padding:max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom));}.modal-backdrop.settings-open .sheet{margin:0;height:min(700px,calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom)));max-height:calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom));}.modal-backdrop.settings-open .sheet-body{font-size:14px;}}
 
 /* Owner approved header simplification, October 23 */
 .topbar .brand strong{font-size:21px;line-height:1.3;font-weight:850;letter-spacing:.035em}

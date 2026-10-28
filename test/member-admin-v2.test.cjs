@@ -18,6 +18,7 @@ function fixture(overrides={}){
   rateLimit:async(id,action)=>calls.push(['rate',id,action]),
   getMember:async id=>({id,phone_e164:'+886900000001',display_name:'合成會員',deleted_at:null}),
   getAccountByMember:async()=>null,getAccountById:async()=>account,
+  isMemberArchived:async()=>false,
   ensureAuthUser:async payload=>{calls.push(['ensureAuth',payload]);return {id:'44444444-4444-4444-8444-444444444444'}},
   insertAccount:async values=>{calls.push(['insert',values]);return {...account,...values,id:account.id}},
   transitionAccountAtomic:async(id,action,status,reason)=>{calls.push(['transition',id,action,status,reason]);return {...account,status:action==='suspend'?'suspended':'active'}},
@@ -161,6 +162,27 @@ test('suspend and reactivate use one atomic transition RPC contract',async()=>{
  const second=fixture({getAccountById:async()=>({...account,status:'suspended',approved_at:'2026-10-01T00:00:00Z'})});
  await executeMemberAdminV2({token:'valid-admin',body:{action:'reactivate',accountId:account.id}},second.deps);
  assert.deepEqual(second.calls.filter(c=>c[0]==='transition').map(c=>c.slice(2,4)),[['reactivate','suspended']]);
+});
+
+test('archived members cannot be approved, reactivated, promoted, or authenticated',async()=>{
+ const {executeMemberAdminV2}=await corePromise,{account}=fixture();
+ for(const [action,target] of [['approve',{...account,status:'pending'}],['reactivate',{...account,status:'suspended',approved_at:'2026-10-01T00:00:00Z'}],['promote_admin',{...account,status:'active',approved_at:'2026-10-01T00:00:00Z'}]]){
+  const {deps}=fixture({getAccountById:async()=>target,isMemberArchived:async()=>true});
+  await assert.rejects(()=>executeMemberAdminV2({token:'valid-admin',body:{action,accountId:account.id}},deps),error=>error.code==='MEMBER_ARCHIVED');
+ }
+ const migration=read('supabase/migrations/20261028144500_achang_member_admin_v2_archived_guard.sql'),server=read('lib/server.js'),edge=read('supabase/functions/achang-member-admin-v2/index.ts');
+ assert.match(migration,/join public\.members m on m\.id = a\.member_id and m\.deleted_at is null/);assert.match(server,/members\?id=eq\.[\s\S]*deleted_at=is\.null/);assert.match(edge,/is\('deleted_at',null\)/);
+});
+
+test('session authorization distinguishes missing, pending, suspended, and archived membership without changing access',()=>{
+ const server=read('lib/server.js');
+ assert.match(server,/if\(!p\)problem\(403,'此 Google 帳號尚未建立會員授權'\)/);assert.match(server,/p\.status==='pending'[\s\S]*等待管理員核准/);assert.match(server,/p\.status!=='active'[\s\S]*會員帳號已停用/);assert.match(server,/deleted_at=is\.null[\s\S]*會員已封存或無法使用/);
+});
+
+test('archiving an allocation cannot cascade into retained assignments, tasks, events, or authorization history',()=>{
+ const archive=read('supabase/migrations/20261028140901_achang_member_admin_v2_archive_member.sql');
+ assert.match(archive,/delete from public\.service_allocations where member_id/);
+ assert.doesNotMatch(archive,/delete from public\.(?:assignments|visit_tasks|task_events|member_authorization_events)/);
 });
 
 test('duplicate create is idempotent and never resets PIN or role',async()=>{

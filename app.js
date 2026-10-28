@@ -311,6 +311,7 @@ const GPS_REFRESH_MS=360000,GPS_STALE_MS=900000;
 let gpsVehicles=[],gpsFetchedAt=0,gpsLatestReportedAt='',gpsRequest=null,gpsTimer=null,gpsLastError='';
 const gpsDateLabel=value=>{const date=new Date(value);return Number.isNaN(date.getTime())?'時間未知':new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(date)};
 function gpsStale(){const sourceTime=new Date(gpsLatestReportedAt).getTime();return !!gpsLastError||!sourceTime||Date.now()-sourceTime>GPS_STALE_MS}
+function gpsVehicleStale(vehicle){const sourceTime=new Date(vehicle?.reported_at).getTime();return !!gpsLastError||!sourceTime||Date.now()-sourceTime>GPS_STALE_MS}
 function updateGpsStatus(){
  const node=$('#gpsLayerStatus');if(!node)return;node.classList.toggle('error',!!gpsLastError);node.classList.toggle('stale',!gpsLastError&&gpsStale());
  if(!layerState.gps){node.textContent='垃圾車 GPS 圖層已關閉';return}
@@ -329,7 +330,7 @@ async function loadGpsVehicles(){
   gpsVehicles=Array.isArray(result.vehicles)?result.vehicles.filter(v=>Number.isFinite(v.longitude)&&Number.isFinite(v.latitude)):[];
   gpsFetchedAt=Date.parse(result.fetched_at)||Date.now();gpsLatestReportedAt=result.latest_reported_at||'';gpsLastError='';
   updateMap();
- }).catch(error=>{gpsLastError=String(error.message||'連線失敗').slice(0,120);console.warn('GPS 更新失敗',gpsLastError)}).finally(()=>{gpsRequest=null;updateGpsStatus()});
+ }).catch(error=>{gpsLastError=String(error.message||'連線失敗').slice(0,120);console.warn('GPS 更新失敗',gpsLastError);updateMap()}).finally(()=>{gpsRequest=null;updateGpsStatus()});
  return gpsRequest;
 }
 function updateMap(){if(page!=='map')return;if(mapFailed){drawFallback();return}if(!map||!map.getLayer('village-fill'))return;highlightMapSelection();markers.forEach(m=>m.remove());markers=[];
@@ -357,7 +358,7 @@ function updateMap(){if(page!=='map')return;if(mapFailed){drawFallback();return}
    const label=document.createElement('div');
    label.className='map-marker gps-truck';
    label.textContent='🚛';
-   const stale=gpsStale();label.title=v.plate+' · '+v.location+' · 資料時間 '+gpsDateLabel(v.reported_at)+(stale?'（可能已過期）':'（官方 GPS 約略位置）');
+   const stale=gpsVehicleStale(v);label.title=v.plate+' · '+v.location+' · 資料時間 '+gpsDateLabel(v.reported_at)+(stale?'（可能已過期）':'（官方 GPS 約略位置）');
    label.style.cssText='background:#8B5CF6;color:white;border:2px solid white;border-radius:50%;padding:5px;cursor:pointer;font-size:20px;box-shadow:0 2px 7px #34215b80';
    markers.push(new window.maplibregl.Marker({element:label}).setLngLat([v.longitude,v.latitude])
     .setPopup(new window.maplibregl.Popup({offset:24}).setText(v.plate+' · '+v.location+' · 資料時間 '+gpsDateLabel(v.reported_at)+(stale?' · 更新異常，保留上次位置':' · 官方 GPS 約略位置，非導航用途'))).addTo(map));

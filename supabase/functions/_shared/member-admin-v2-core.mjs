@@ -66,6 +66,7 @@ async function transitionAccount(action,body,context,deps){
  await deps.rateLimit(context.actor.id,action);
  const target=await deps.getAccountById(accountId,context.token);
  if(!target)throw new MemberAdminError(404,'會員帳號不存在');
+ if(await deps.isMemberArchived(target.member_id,context.token))throw new MemberAdminError(409,'已封存會員不能變更帳號狀態','MEMBER_ARCHIVED');
  if(target.auth_user_id===context.actor.id&&action==='suspend')throw new MemberAdminError(409,'管理員不能停用自己的帳號');
  if(action==='suspend'&&await deps.isProtectedPrincipal(target.auth_user_id))throw new MemberAdminError(403,'受保護主要管理員不能停用','PROTECTED_PRINCIPAL');
  let expectedStatus;
@@ -90,6 +91,7 @@ async function archiveAccount(body,context,deps){
  await deps.rateLimit(context.actor.id,'archive');
  const target=await deps.getAccountById(accountId,context.token);
  if(!target)throw new MemberAdminError(404,'會員帳號不存在');
+ if(await deps.isMemberArchived(target.member_id,context.token))throw new MemberAdminError(409,'會員已封存','MEMBER_ARCHIVED');
  if(target.auth_user_id===context.actor.id)throw new MemberAdminError(409,'管理員不能封存自己的帳號','SELF_ARCHIVE_FORBIDDEN');
  if(await deps.isProtectedPrincipal(target.auth_user_id))throw new MemberAdminError(403,'受保護主要管理員不能刪除','PROTECTED_PRINCIPAL');
  if(!['pending','active','suspended'].includes(target.status))throw new MemberAdminError(409,'會員狀態不允許封存','INVALID_TRANSITION');
@@ -103,6 +105,7 @@ async function promoteAdmin(body,context,deps){
  await deps.rateLimit(context.actor.id,'promote_admin');
  const target=await deps.getAccountById(accountId,context.token);
  if(!target)throw new MemberAdminError(404,'會員帳號不存在');
+ if(await deps.isMemberArchived(target.member_id,context.token))throw new MemberAdminError(409,'已封存會員不能設為管理員','MEMBER_ARCHIVED');
  if(target.auth_user_id===context.actor.id)throw new MemberAdminError(409,'管理員不能變更自己的角色','SELF_ROLE_CHANGE_FORBIDDEN');
  if(target.role!=='volunteer'||target.status!=='active'||!target.approved_at)throw new MemberAdminError(409,'只有已核准且啟用中的志工可以設為管理員','INVALID_TRANSITION');
  const updated=await deps.promoteAdminAtomic(target.id,target.role,target.status,context.token);
