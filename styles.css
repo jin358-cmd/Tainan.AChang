@@ -1034,3 +1034,6 @@ body.volunteer-session #page-reports .volunteer-stop-item>.task-navigate svg{dis
 
 /* Planner empty route hint spans the available row instead of collapsing into a narrow flex item. */
 #page-planner #routeButtons>.mini-note{display:block;grid-column:1/-1;flex:1 1 100%;width:100%;min-width:0;font-size:13px;line-height:1.55;white-space:normal;word-break:normal;overflow-wrap:normal}
+
+/* Stable white person glyph for the volunteer map-layer control. */
+.map-switches .legend-pin .legend-person-icon{width:13px;height:13px;display:block;fill:#fff}

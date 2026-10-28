@@ -33,7 +33,14 @@ test('map startup has bounded failure, cleanup and retry guards', () => {
 });
 
 test('map asset revision and service-worker cache advance together', () => {
-  assert.match(html, /styles\.css\?v=190/);
+  assert.match(html, /styles\.css\?v=191/);
   assert.match(html, /app\.js\?v=188/);
-  assert.match(sw, /achang-pwa-shell-v125-task-card-responsive/);
+  assert.match(sw, /achang-pwa-shell-v126-volunteer-legend/);
+});
+
+test('volunteer map layer uses the short label and a stable white person icon', () => {
+  assert.match(html, /id="layerVolunteer"[^>]*>[\s\S]*?legend-pin volunteer[\s\S]*?legend-person-icon[\s\S]*?<\/span>志工<\/label>/);
+  assert.doesNotMatch(html, /<\/span>志工服務<\/label>/);
+  const styles = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
+  assert.match(styles, /\.map-switches \.legend-pin \.legend-person-icon\{[^}]*fill:#fff/);
 });
