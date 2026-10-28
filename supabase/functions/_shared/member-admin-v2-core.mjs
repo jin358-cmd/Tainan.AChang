@@ -38,7 +38,9 @@ async function createAccount(body,context,deps){
   return {status:200,body:{ok:true,idempotent:true,member:deps.publicAccount(existing)}};
  }
  const loginId='ACH-'+memberId.replaceAll('-','').toUpperCase();
- const email=(requestedRole==='admin'?'admin-':'volunteer-')+memberId+'@auth.achang.invalid';
+ const alias=required(String(deps.newAuthAlias?.()||''),'登入識別碼').replaceAll('-','').toLowerCase();
+ if(!/^[0-9a-f]{32}$/.test(alias))throw new MemberAdminError(503,'登入身分安全識別碼建立失敗');
+ const email=(requestedRole==='admin'?'admin-':'volunteer-')+alias+'@auth.achang.invalid';
  let authUser;
  try{authUser=await deps.createAuthUser({email,password,memberId,role:requestedRole})}
  catch(error){
@@ -66,21 +68,18 @@ async function transitionAccount(action,body,context,deps){
  if(!target)throw new MemberAdminError(404,'會員帳號不存在');
  if(target.auth_user_id===context.actor.id&&action==='suspend')throw new MemberAdminError(409,'管理員不能停用自己的帳號');
  if(action==='suspend'&&await deps.isProtectedPrincipal(target.auth_user_id))throw new MemberAdminError(403,'受保護主要管理員不能停用','PROTECTED_PRINCIPAL');
- const now=deps.now();let expectedStatus,patch;
+ let expectedStatus;
  if(action==='approve'){
   if(target.status!=='pending')throw new MemberAdminError(409,'只有待核准帳號可以核准');
-  expectedStatus='pending';patch={status:'active',approved_at:now,approved_by:context.actor.id,rejected_at:null,rejection_reason:null};
+  expectedStatus='pending';
  }else if(action==='suspend'){
   if(target.status!=='active')throw new MemberAdminError(409,'只有已啟用帳號可以停用');
   expectedStatus='active';
-  const revoked=await deps.revokeDevices(target.id,now,context.token);
-  if(revoked===false)throw new MemberAdminError(503,'裝置撤銷失敗，帳號未停用');
-  patch={status:'suspended',suspended_at:now,suspended_by:context.actor.id,rejection_reason:reason||null};
  }else if(action==='reactivate'){
   if(target.status!=='suspended'||!target.approved_at)throw new MemberAdminError(409,'未完成首次核准的帳號不能直接恢復');
-  expectedStatus='suspended';patch={status:'active',reactivated_at:now,reactivated_by:context.actor.id,rejection_reason:null};
+  expectedStatus='suspended';
  }else throw new MemberAdminError(400,'不支援的會員操作');
- const updated=await deps.updateAccountCas(target.id,expectedStatus,patch,context.token);
+ const updated=await deps.transitionAccountAtomic(target.id,action,expectedStatus,reason,context.token);
  if(!updated)throw new MemberAdminError(409,'會員狀態已由其他操作更新，請重新整理');
  return {status:200,body:{ok:true,member:deps.publicAccount(updated)}};
 }

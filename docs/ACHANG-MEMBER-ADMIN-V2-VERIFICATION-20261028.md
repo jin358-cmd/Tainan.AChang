@@ -27,12 +27,12 @@ Base UI commit: `082d790b06b87a1927865be4466423675ce31c0e`
 - Volunteer and administrator accounts are created as `pending`; approval is a separate compare-and-set transition.
 - Six ASCII digits, including a leading zero, are passed only to Supabase Auth. No PIN or hash is stored in application tables or logs.
 - The Vercel API boundary canonicalizes formatted Taiwan mobile input (`09xx-xxx-xxx`, bare `09`, or `+8869`) to `+8869xxxxxxxx` before the strict Edge contract; invalid input is rejected before forwarding.
-- Shared phone numbers remain separated by member/Auth identity; deterministic per-member synthetic Auth email and login ID are used.
+- Shared phone numbers remain separated by member/Auth identity. The hidden Auth email uses a high-entropy random alias (never the member UUID), while the non-secret application login ID remains member-specific. This prevents targeting the public Auth password endpoint with a predictable synthetic email; normal PIN login remains on the existing phone/IP-limited path.
 - Duplicate same-member/same-role create is idempotent and does not rotate the PIN. Role mismatch is rejected.
 - If Auth creation succeeds but the account insert fails, v2 compensates by deleting that just-created Auth identity; inability to prove cleanup fails closed.
 - If the insert result and reconciliation read both fail, v2 returns `CREATE_OUTCOME_UNKNOWN` and deliberately does not delete the possibly committed Auth identity. A retry first reconciles the account row and becomes idempotent.
-- Synthetic `@auth.achang.invalid` identities cannot use the unthrottled administrator-email password route; they must use phone plus six-digit PIN through the existing phone/IP-limited login function.
-- Suspend revokes the account's devices before its status transition. Reactivation does not restore devices.
+- Synthetic `@auth.achang.invalid` identities are rejected by the administrator-email application route; the random hidden alias is not exposed to the client. Users authenticate by phone plus six-digit PIN through the existing phone/IP-limited login function.
+- Approve, suspend and reactivate use one authenticated, RLS-bound database RPC. Suspend revokes devices and changes account status in the same PostgreSQL transaction, so a trigger/RLS/CAS failure rolls both changes back. Reactivation does not restore devices.
 - Self-suspension and suspension of the configured protected principal are rejected. There is no delete or role-change action.
 - Denied v2 requests emit only action/status/code and a keyed actor hash; request bodies, phone numbers and PINs are not logged.
 - The legacy `/api/members` route retains device list/approve/revoke behavior but no longer exposes account create/suspend/delete bypasses. Previous immutable deployment and old Edge Function remain rollback points.
@@ -56,7 +56,7 @@ Base UI commit: `082d790b06b87a1927865be4466423675ce31c0e`
 
 Aggregate evidence:
 
-- `npm test`: 35/35 PASS.
+- `npm test`: 40/40 PASS.
 - `npm run test:browser`: PASS; local synthetic API only, all external requests blocked.
 - `node test/ui-readonly-preview.browser.cjs`: PASS; synthetic read-only preview, zero `/api` requests.
 - `node test/member-admin-v2.browser.cjs`: PASS; local synthetic API for create volunteer, approve volunteer, create admin, and preserved navigation controls.
@@ -64,14 +64,14 @@ Aggregate evidence:
 
 ## Remaining isolated integration gate
 
-No live TEST account, PIN, device, or database row was created by this candidate. No v2 Edge Function or Preview candidate was deployed.
+No live TEST account, PIN, device, or member row was created by this candidate. A prior v2 Edge v1 and Preview candidate exist in TEST, but they predate the random Auth alias and atomic transition changes in this record; the fixed integration alias remains on the safe read-only deployment until the updated migration/function are verified.
 
 To run browser → API → Auth/DB → login verification in TEST, the following bounded persistent TEST-only configuration is still required:
 
-1. Confirm `ACHANG_EXPECTED_PROJECT_REF=fhxdpupascsikjsycpbi` is present for the new TEST function. No new secret is required for protected-principal matching.
-2. Deploy only the new `achang-member-admin-v2` function to TEST with JWT verification enabled; do not replace `achang-admin-provision`.
-3. Configure these variables only for Preview deployments from `feature/achang-member-admin-v2-20261028`: `ACHANG_ENVIRONMENT=test`, `ACHANG_TEST_ISOLATED=1`, `EXPECTED_SUPABASE_PROJECT_REF=fhxdpupascsikjsycpbi`, the existing TEST `SUPABASE_URL`, and the existing TEST `SUPABASE_PUBLISHABLE_KEY`. The publishable key is public client configuration, not a service-role credential.
-4. Reassign the existing fixed integration alias `tainan-achang-online-ui-test-tjc1.vercel.app` to the verified candidate deployment. The candidate removes only this alias from the synthetic read-only host list; the older read-only preview hosts remain isolated.
+1. Apply the new atomic-transition migration to TEST only, then read back its definition and grants.
+2. Deploy only the updated `achang-member-admin-v2` function to TEST with JWT verification enabled; do not replace `achang-admin-provision`. The previous deployment attempt was blocked by a JSR registry timeout and is not counted as success.
+3. The branch-specific Preview TEST variables are already scoped to `feature/achang-member-admin-v2-20261028`; no Production variable was changed.
+4. Reassign the existing fixed integration alias `tainan-achang-online-ui-test-tjc1.vercel.app` only after the migration, Edge source and new Preview SHA are verified.
 5. Use bounded synthetic TEST fixtures for create/approve/login/audit, then preserve or clean them according to a stated fixture plan. Do not use Production or the protected principal as a fixture.
 
 Production switch, merge and Production data changes remain out of scope.

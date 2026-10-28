@@ -12,7 +12,7 @@ const corePromise=import(pathToFileURL(path.join(root,'supabase/functions/_share
 function fixture(overrides={}){
  const calls=[],account={id:'11111111-1111-4111-8111-111111111111',member_id:'22222222-2222-4222-8222-222222222222',auth_user_id:'33333333-3333-4333-8333-333333333333',role:'volunteer',status:'pending',approved_at:null};
  const deps={
-  calls,now:()=> '2026-10-28T07:00:00.000Z',publicAccount:a=>({...a}),
+  calls,now:()=> '2026-10-28T07:00:00.000Z',newAuthAlias:()=> '55555555-5555-4555-8555-555555555555',publicAccount:a=>({...a}),
   authenticate:async token=>token==='valid-admin'?{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',email:'admin@example.invalid'}:null,
   getActiveAdmin:async id=>id==='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'?{id:'admin-account',role:'admin',status:'active'}:null,
   rateLimit:async(id,action)=>calls.push(['rate',id,action]),
@@ -21,8 +21,7 @@ function fixture(overrides={}){
   createAuthUser:async payload=>{calls.push(['createAuth',payload]);return {id:'44444444-4444-4444-8444-444444444444'}},
   deleteAuthUser:async id=>{calls.push(['deleteAuth',id]);return true},
   insertAccount:async values=>{calls.push(['insert',values]);return {...account,...values,id:account.id}},
-  updateAccountCas:async(id,status,patch)=>{calls.push(['update',id,status,patch]);return {...account,...patch}},
-  revokeDevices:async(id,now)=>{calls.push(['revoke',id,now]);return true},
+  transitionAccountAtomic:async(id,action,status,reason)=>{calls.push(['transition',id,action,status,reason]);return {...account,status:action==='suspend'?'suspended':'active'}},
   isProtectedPrincipal:async()=>false,
   listState:async()=>({ok:true,members:[],devices:[]})
  };
@@ -66,13 +65,13 @@ test('TEST-06 account creation remains compatible with shared-phone PIN identiti
  const {executeMemberAdminV2}=await corePromise,{deps,calls}=fixture();
  await executeMemberAdminV2({token:'valid-admin',body:{action:'create',memberId:'22222222-2222-4222-8222-222222222222',phone:'+886900000001',pin:'654321',role:'volunteer'}},deps);
  const authPayload=calls.find(c=>c[0]==='createAuth')[1],dbPayload=calls.find(c=>c[0]==='insert')[1];
- assert.match(authPayload.email,/^volunteer-[0-9a-f-]+@auth\.achang\.invalid$/);assert.equal(authPayload.memberId,dbPayload.member_id);assert.equal(dbPayload.login_id,'ACH-22222222222242228222222222222222');
+ assert.match(authPayload.email,/^volunteer-[0-9a-f]{32}@auth\.achang\.invalid$/);assert.doesNotMatch(authPayload.email,/22222222/);assert.equal(authPayload.memberId,dbPayload.member_id);assert.equal(dbPayload.login_id,'ACH-22222222222242228222222222222222');
 });
 
 test('TEST-07 pending volunteer can be approved with compare-and-set',async()=>{
  const {executeMemberAdminV2}=await corePromise,{deps,calls}=fixture();
  const result=await executeMemberAdminV2({token:'valid-admin',body:{action:'approve',accountId:'11111111-1111-4111-8111-111111111111'}},deps);
- assert.equal(result.body.member.status,'active');const update=calls.find(c=>c[0]==='update');assert.equal(update[2],'pending');assert.equal(update[3].approved_by,'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
+ assert.equal(result.body.member.status,'active');const transition=calls.find(c=>c[0]==='transition');assert.deepEqual(transition.slice(2,4),['approve','pending']);
 });
 
 test('TEST-08 active admin can create a pending admin without device approval gate',async()=>{
@@ -98,13 +97,13 @@ test('TEST-10 protected principal cannot be suspended',async()=>{
  await assert.rejects(()=>executeMemberAdminV2({token:'valid-admin',body:{action:'suspend',accountId:'11111111-1111-4111-8111-111111111111'}},deps),error=>error.status===403&&error.code==='PROTECTED_PRINCIPAL');
 });
 
-test('suspend revokes devices before status CAS; reactivate never restores devices',async()=>{
+test('suspend and reactivate use one atomic transition RPC contract',async()=>{
  const {executeMemberAdminV2}=await corePromise,{deps,calls,account}=fixture({getAccountById:async()=>({...account,status:'active',approved_at:'2026-10-01T00:00:00Z'})});
  await executeMemberAdminV2({token:'valid-admin',body:{action:'suspend',accountId:account.id}},deps);
- assert.deepEqual(calls.filter(c=>['revoke','update'].includes(c[0])).map(c=>c[0]),['revoke','update']);
+ assert.deepEqual(calls.filter(c=>c[0]==='transition').map(c=>c.slice(2,4)),[['suspend','active']]);
  const second=fixture({getAccountById:async()=>({...account,status:'suspended',approved_at:'2026-10-01T00:00:00Z'})});
  await executeMemberAdminV2({token:'valid-admin',body:{action:'reactivate',accountId:account.id}},second.deps);
- assert.equal(second.calls.some(c=>c[0]==='revoke'),false);assert.equal(second.calls.find(c=>c[0]==='update')[2],'suspended');
+ assert.deepEqual(second.calls.filter(c=>c[0]==='transition').map(c=>c.slice(2,4)),[['reactivate','suspended']]);
 });
 
 test('duplicate create is idempotent and never resets PIN or role',async()=>{
@@ -164,20 +163,33 @@ test('API proxy forwards only authenticated admin commands to v2 and no device p
  const source=read('api/member-admin-v2.js'),module={exports:{}},captured=[];
  const L={run:fn=>fn,method(){},authorized:async()=>({token:'actor-token',role:'admin'}),body:req=>req.body,phone:value=>value,request:async(path,options)=>{captured.push({path,options});return {ok:true,status:201,data:{ok:true}}},json(res,status,body){res.status=status;res.body=body},problem(status,message){throw Object.assign(new Error(message),{status})}};
  vm.runInThisContext(`(function(require,module,exports){${source}\n})`) (id=>id==='../lib/server'?L:require(id),module,module.exports);
- const res={};await module.exports({method:'POST',headers:{},body:{action:'create'}},res);
+ const res={};await module.exports({method:'POST',headers:{},body:{action:'create',phone:'0912-345-678'}},res);
  assert.equal(captured[0].path,'/functions/v1/achang-member-admin-v2');assert.equal(captured[0].options.token,'actor-token');assert.equal(captured[0].options.headers,undefined);assert.equal(res.status,201);
 });
 
-test('actual API phone parser canonicalizes UI, bare 09 and +886 input before the v2 handler',async()=>{
+test('actual API phone parser accepts only 09xx-xxx-xxx, bare 09, or +886 before the v2 handler',async()=>{
  const source=read('api/member-admin-v2.js'),realL=require('../lib/server');
- for(const [input,expected] of [['0900-000-001','+886900000001'],['0900000001','+886900000001'],['+886900000001','+886900000001']]){
+ for(const [input,expected] of [['0912-345-678','+886912345678'],['0912345678','+886912345678'],['+886912345678','+886912345678']]){
   const module={exports:{}},captured=[];const L={...realL,run:fn=>fn,method(){},authorized:async()=>({token:'actor-token',role:'admin'}),body:req=>req.body,request:async(path,options)=>{captured.push({path,options});return {ok:true,status:201,data:{ok:true}}},json(res,status,body){res.status=status;res.body=body},problem(status,message){throw Object.assign(new Error(message),{status})}};
   vm.runInThisContext(`(function(require,module,exports){${source}\n})`)(id=>id==='../lib/server'?L:require(id),module,module.exports);
   await module.exports({method:'POST',headers:{},body:{action:'create',phone:input}},{});assert.equal(captured[0].options.body.phone,expected);
  }
  const module={exports:{}},L={...realL,run:fn=>fn,method(){},authorized:async()=>({token:'actor-token',role:'admin'}),body:req=>req.body,problem(status,message){throw Object.assign(new Error(message),{status})}};
  vm.runInThisContext(`(function(require,module,exports){${source}\n})`)(id=>id==='../lib/server'?L:require(id),module,module.exports);
- await assert.rejects(()=>module.exports({method:'POST',headers:{},body:{action:'create',phone:'not-a-phone'}},{}),error=>error.status===400&&/台灣手機/.test(error.message));
+ for(const invalid of ['not-a-phone','0912abc345678','0912 345 678','+886-912-345-678']){
+  await assert.rejects(()=>module.exports({method:'POST',headers:{},body:{action:'create',phone:invalid}},{}),error=>error.status===400&&/09xx-xxx-xxx/.test(error.message));
+ }
+});
+
+test('database transition RPC is atomic, invoker-authorized, CAS protected, and preserves device revocation on rollback',()=>{
+ const sql=read('supabase/migrations/20261028090000_achang_member_admin_v2_atomic_transition.sql');
+ assert.match(sql,/security invoker/i);assert.match(sql,/not app_private\.is_admin\(\)/);
+ assert.match(sql,/for update/);assert.match(sql,/status is distinct from p_expected_status/);
+ assert.match(sql,/update public\.member_devices[\s\S]*update public\.member_accounts/);
+ assert.doesNotMatch(sql,/exception[\s\S]*commit|begin[\s\S]*commit/i);
+ assert.match(sql,/protected principal cannot be suspended/);assert.match(sql,/v_account\.auth_user_id = v_actor/);
+ assert.match(sql,/revoke all on function[\s\S]*from public, anon/);assert.match(sql,/grant execute[\s\S]*to authenticated/);
+ const edge=read('supabase/functions/achang-member-admin-v2/index.ts');assert.match(edge,/\.rpc\('achang_member_admin_v2_transition'/);assert.doesNotMatch(edge,/revokeDevices|updateAccountCas/);
 });
 
 test('legacy members route keeps device management but rejects account lifecycle bypasses',async()=>{

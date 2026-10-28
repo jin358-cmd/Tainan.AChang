@@ -23,6 +23,7 @@ Deno.serve(async(req:Request)=>{
  const selectAccount='id,member_id,auth_user_id,login_id,role,status,requested_at,approved_at,approved_by,rejected_at,rejection_reason,suspended_at,suspended_by,reactivated_at,reactivated_by,created_at,device_approval_required';
  const deps={
   now:()=>new Date().toISOString(),
+  newAuthAlias:()=>crypto.randomUUID(),
   publicAccount:(account:Record<string,unknown>)=>({id:account.id,member_id:account.member_id,auth_user_id:account.auth_user_id,login_id:account.login_id,role:account.role,status:account.status,requested_at:account.requested_at,approved_at:account.approved_at,suspended_at:account.suspended_at,reactivated_at:account.reactivated_at,device_approval_required:account.device_approval_required}),
   authenticate:async(accessToken:string)=>{const {data:{user},error}=await admin.auth.getUser(accessToken);if(error||!user)return null;return {id:user.id,email:user.email||''}},
   getActiveAdmin:async(userId:string)=>{const {data,error}=await userClient.from('member_accounts').select('id,role,status').eq('auth_user_id',userId).eq('role','admin').eq('status','active').limit(1).maybeSingle();if(error)throw error;return data},
@@ -33,8 +34,7 @@ Deno.serve(async(req:Request)=>{
   createAuthUser:async({email,password,memberId,role}:{email:string,password:string,memberId:string,role:string})=>{const {data,error}=await admin.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{achang_member_id:memberId,achang_role:role}});if(error)throw error;return data.user},
   deleteAuthUser:async(userId:string)=>{const {error}=await admin.auth.admin.deleteUser(userId);return !error},
   insertAccount:async(values:Record<string,unknown>)=>{const {data,error}=await userClient.from('member_accounts').insert(values).select(selectAccount).single();if(error)throw error;return data},
-  updateAccountCas:async(id:string,status:string,patch:Record<string,unknown>)=>{const {data,error}=await userClient.from('member_accounts').update(patch).eq('id',id).eq('status',status).select(selectAccount).maybeSingle();if(error)throw error;return data},
-  revokeDevices:async(accountId:string,now:string)=>{const {error}=await userClient.from('member_devices').update({status:'revoked',revoked_at:now}).eq('account_id',accountId).neq('status','revoked');return !error},
+  transitionAccountAtomic:async(accountId:string,action:string,expectedStatus:string,reason:string)=>{const {data,error}=await userClient.rpc('achang_member_admin_v2_transition',{p_account_id:accountId,p_action:action,p_expected_status:expectedStatus,p_reason:reason||null});if(error)throw error;return data},
   isProtectedPrincipal:async(userId:string)=>await sha(userId)===protectedPrincipalHash,
   listState:async()=>{
    const [{data:accounts,error:accountError},{data:members,error:memberError},{data:devices,error:deviceError}]=await Promise.all([
