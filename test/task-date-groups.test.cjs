@@ -40,6 +40,7 @@ test('administrator task teams use one consistent two-row card with leader conta
 test('map popup enlarges member identity and centers the existing assignment button',()=>{
  assert.match(app,/class="popup-crown"/);assert.match(app,/class="popup-detail-btn" data-view-assignment/);
  assert.match(app,/esc\(p\.name\)\+\(leader\?' <span class="popup-crown"/);
+ assert.doesNotMatch(app,/popup-eyebrow">已選取里別/);
  assert.match(styles,/#page-map #areaPopup \.popup-contact strong\{font-size:20px/);
  assert.match(styles,/#page-map #areaPopup \.popup-detail-btn[\s\S]*margin:10px auto 0/);
  assert.match(app,/matchMedia\?\.\('\(max-width:620px\)'\)[\s\S]*translate\(-50%,-50%\)/);

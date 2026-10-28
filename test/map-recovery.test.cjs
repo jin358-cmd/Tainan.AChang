@@ -34,8 +34,8 @@ test('map startup has bounded failure, cleanup and retry guards', () => {
 
 test('map asset revision and service-worker cache advance together', () => {
   assert.match(html, /styles\.css\?v=195/);
-  assert.match(html, /app\.js\?v=189/);
-  assert.match(sw, /achang-pwa-shell-v130-map-roster-popup/);
+  assert.match(html, /app\.js\?v=190/);
+  assert.match(sw, /achang-pwa-shell-v131-map-roster-header/);
 });
 
 test('volunteer map layer uses the short label and a stable white person icon', () => {
