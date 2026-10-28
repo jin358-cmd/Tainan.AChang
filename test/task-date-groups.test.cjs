@@ -93,6 +93,19 @@ test('roster status filter uses the requested order while preserving values and 
  assert.match(app,/\$\('#peopleFilter'\)\.value='assigned'/);
 });
 
+test('member authorization cards distinguish administrators without changing account status controls',()=>{
+ assert.match(app,/approved-member-row \$\{m\.role==='admin'\?'admin-member-row':'volunteer-member-row'\}/);
+ assert.match(styles,/\.approved-member-row\.admin-member-row\{background:#f3edff;border-color:#c9b9ec\}/);
+ assert.match(app,/m\.status==='suspended'\?'已停用':'待核准'/);
+});
+
+test('new-member form leaves service-area assignment for the existing allocation workflow',()=>{
+ const start=app.indexOf('function openNewMemberForm()'),end=app.indexOf('async function submitNewMemberForm',start),form=app.slice(start,end);
+ assert.ok(start>=0&&end>start);
+ assert.doesNotMatch(form,/分派服務里|name="assignment"/);
+ assert.match(app,/onlineApi\('roster','POST',\{name:b\.name,phone:b\.phone,address:b\.address,residentArea:b\.residentArea,assignment:null\}\)/);
+});
+
 test('fourth task page exposes three requested groups without changing task APIs',()=>{
  assert.match(app,/history:'歷史跟巡',current:'當日跟巡',future:'下次跟巡'/);
  assert.match(app,/task-date-'\+category/);assert.match(app,/category==='current'\?'open':''/);

@@ -217,6 +217,7 @@
 .map-v04-reference .area-popup.map-attached-popup{border:1px solid #bfd5dc!important;background:#fff;max-width:320px}
 /* Online-only membership data is delivered by an administrator-checked endpoint */
 .approved-member-row{min-height:66px;background:#f7fcfa;border-color:#d0e1d9;gap:12px}
+.approved-member-row.admin-member-row{background:#f3edff;border-color:#c9b9ec}
 .approved-member-row .member-label{display:flex;flex-direction:column;align-items:flex-start;min-width:0;gap:4px;flex:1}
 .approved-member-row .approved-member-name{font-size:16px;color:#213f51;font-weight:900;overflow-wrap:anywhere}
 .approved-member-row .approved-member-phone{font-size:15px;color:#2c5b75;font-weight:750;letter-spacing:.01em}

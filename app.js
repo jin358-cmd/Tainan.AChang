@@ -556,7 +556,7 @@ async function openMemberAdmin(preselectId=''){
       buttons.push(`<button type="button" class="smallbtn member-archive-btn" data-member-action="archive" data-account-id="${esc(m.id)}">刪除會員</button>`);
       actions=buttons.join('');
     }
-    return `<div class="pick-row approved-member-row"><div class="member-label"><strong class="approved-member-name">${esc(name)}</strong><span class="approved-member-phone">${esc(prettyPhone(m.phone))}</span><small>${esc(m.role==='admin'?'管理員':'志工')}</small></div><span class="member-device-icons" aria-label="已核准設備">${deviceIcons||'<span class="device-none" title="尚無核准設備">尚無核准設備</span>'}</span>${approved?'<span class="auth-success-check" role="img" aria-label="已完成授權" title="已完成授權">✓</span>':`<span class="auth-pending-label" aria-label="尚未啟用">${esc(m.status==='suspended'?'已停用':'待核准')}</span>`}<div class="member-auth-actions">${actions}</div></div>`;
+    return `<div class="pick-row approved-member-row ${m.role==='admin'?'admin-member-row':'volunteer-member-row'}"><div class="member-label"><strong class="approved-member-name">${esc(name)}</strong><span class="approved-member-phone">${esc(prettyPhone(m.phone))}</span><small>${esc(m.role==='admin'?'管理員':'志工')}</small></div><span class="member-device-icons" aria-label="已核准設備">${deviceIcons||'<span class="device-none" title="尚無核准設備">尚無核准設備</span>'}</span>${approved?'<span class="auth-success-check" role="img" aria-label="已完成授權" title="已完成授權">✓</span>':`<span class="auth-pending-label" aria-label="尚未啟用">${esc(m.status==='suspended'?'已停用':'待核准')}</span>`}<div class="member-auth-actions">${actions}</div></div>`;
   }).join('');
   const eligible=state.people.filter(p=>p.phone&&!known.has(p.id));
   const selected=eligible.find(p=>p.id===preselectId)||eligible[0];
@@ -579,7 +579,6 @@ function openNewMemberForm(){
  if(!assertAdmin())return;
  showModal('新增會員｜名冊與授權同步建立',`<form id="newMemberForm" class="member-create-form">
  <p class="form-hint">第一步先新增志工至正式名冊。儲存後會自動開啟會員授權，選定剛新增的志工，再設定 6 碼 PIN 並核准開通。</p>
- <label>分派服務里<select name="assignment"><option value="">待分配</option>${areas.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('')}</select></label>
  <label>姓名 *<input name="name" required maxlength="80" autocomplete="off"></label>
  <label>手機號碼 *<input name="phone" required type="tel" inputmode="tel" placeholder="0989-098-468"></label>
  <label>原居住里<input name="residentArea" maxlength="40" placeholder="選填，不需重複加「里」"></label>
@@ -596,7 +595,7 @@ async function submitNewMemberForm(form){
  try{
   const n=phoneDigits(b.phone);if(!/^09\d{8}$/.test(n))throw new Error('請輸入有效的台灣手機號碼');
   info.textContent='正在建立正式名冊…';
-  const r=await onlineApi('roster','POST',{name:b.name,phone:b.phone,address:b.address,residentArea:b.residentArea,assignment:b.assignment||null});
+  const r=await onlineApi('roster','POST',{name:b.name,phone:b.phone,address:b.address,residentArea:b.residentArea,assignment:null});
   p=r.person;
   if(!p?.id)throw new Error('人員已建立，但伺服器未回傳 ID，請至名冊查核');
   // Save first. The six-digit PIN is entered only in the subsequent approval form.
