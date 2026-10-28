@@ -966,3 +966,6 @@ body.volunteer-session #page-reports .volunteer-stop-item>.task-navigate svg{dis
 /* 2026-10-28: improve member authorization roster selector legibility */
 #memberAdminForm #authorizationVolunteer{font-size:18px!important;font-weight:800!important;line-height:1.5!important;min-height:50px!important;padding:10px 12px!important;color:#183b52!important}
 #memberAdminForm #authorizationVolunteer option{font-size:18px!important;font-weight:700!important;color:#183b52!important}
+
+/* 2026-10-28: larger member authorization phone input */
+#memberAdminForm #authorizationPhone{font-size:18px!important;font-weight:800!important;min-height:50px!important;padding:10px 12px!important;letter-spacing:.02em!important;color:#183b52!important}
