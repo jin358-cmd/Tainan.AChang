@@ -5,6 +5,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 const app=fs.readFileSync(path.join(__dirname,'..','app.js'),'utf8');
+const styles=fs.readFileSync(path.join(__dirname,'..','styles.css'),'utf8');
 
 function classify(nowIso,visitDate,status='待訪'){
  const start=app.indexOf("const taipeiToday=");const end=app.indexOf('function volunteerGroups()',start);assert.ok(start>=0&&end>start);
@@ -18,6 +19,18 @@ test('task dates use Asia/Taipei midnight and ignore completion status',()=>{
  assert.equal(classify('2026-10-28T15:59:59Z','2026-10-29','待訪'),'future');
  assert.equal(classify('2026-10-28T16:00:00Z','2026-10-28','待訪'),'history');
  assert.equal(classify('2026-10-28T16:00:00Z','2026-10-29','完成'),'current');
+});
+
+test('administrator task teams use one consistent two-row card with leader contact and route metadata',()=>{
+ assert.match(app,/task-team-row task-team-primary/);assert.match(app,/task-team-identity/);assert.match(app,/task-leader-crown/);
+ assert.match(app,/task-team-row task-team-route/);assert.match(app,/task-team-plate/);assert.match(app,/taskProgress\(done,entries\.length\)/);
+ assert.match(styles,/#page-reports \.task-team\{background:#eaf5ff/);assert.match(styles,/\.task-team-phone\{font-size:18px/);
+});
+
+test('map popup enlarges member identity and centers the existing assignment button',()=>{
+ assert.match(app,/class="popup-crown"/);assert.match(app,/class="popup-detail-btn" data-view-assignment/);
+ assert.match(styles,/#page-map #areaPopup \.popup-contact strong\{font-size:20px/);
+ assert.match(styles,/#page-map #areaPopup \.popup-detail-btn[\s\S]*margin:10px auto 0/);
 });
 
 test('fourth task page exposes three requested groups without changing task APIs',()=>{
