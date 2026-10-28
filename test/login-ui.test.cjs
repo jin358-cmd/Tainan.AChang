@@ -11,6 +11,8 @@ test('login screen omits the top-right return action while preserving login cont
  assert.doesNotMatch(html,/id="closeSecureLogin"/);
  assert.doesNotMatch(html,/首次登入／重新驗證/);
  assert.match(html,/placeholder="志工手機／管理員 Email"/);
+ assert.doesNotMatch(html,/志工首次登錄須經管理員核准裝置/);
+ assert.doesNotMatch(html,/帳號和巡點進度由伺服器驗證與保存/);
  assert.match(html,/id="secureLoginForm"/);assert.match(html,/id="googleOAuthLogin"/);assert.match(html,/登入並檢視工作/);
  assert.match(app,/const closeSecureLogin=\$\('#closeSecureLogin'\);if\(closeSecureLogin\)/);
 });
