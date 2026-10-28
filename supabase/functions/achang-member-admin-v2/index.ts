@@ -21,9 +21,17 @@ Deno.serve(async(req:Request)=>{
  const admin=createClient(url,serviceKey,{auth:{autoRefreshToken:false,persistSession:false}});
  const userClient=createClient(url,anonKey,{auth:{autoRefreshToken:false,persistSession:false},global:{headers:{Authorization:bearer}}});
  const selectAccount='id,member_id,auth_user_id,login_id,role,status,requested_at,approved_at,approved_by,rejected_at,rejection_reason,suspended_at,suspended_by,reactivated_at,reactivated_by,created_at,device_approval_required';
+ const findAuthUser=async(email:string)=>{
+  for(let page=1;page<=50;page++){
+   const {data,error}=await admin.auth.admin.listUsers({page,perPage:1000});if(error)throw error;
+   const found=data.users.find((user:{email?:string})=>user.email?.toLowerCase()===email.toLowerCase());if(found)return found;
+   if(data.users.length<1000)return null;
+  }
+  throw new MemberAdminError(503,'登入身分查核範圍超出安全限制');
+ };
  const deps={
   now:()=>new Date().toISOString(),
-  newAuthAlias:()=>crypto.randomUUID(),
+  authAlias:async(memberId:string,role:string)=>(await sha(serviceKey+'|member-admin-v2-auth-alias|'+memberId+'|'+role)).slice(0,32),
   publicAccount:(account:Record<string,unknown>)=>({id:account.id,member_id:account.member_id,auth_user_id:account.auth_user_id,login_id:account.login_id,role:account.role,status:account.status,requested_at:account.requested_at,approved_at:account.approved_at,suspended_at:account.suspended_at,reactivated_at:account.reactivated_at,device_approval_required:account.device_approval_required}),
   authenticate:async(accessToken:string)=>{const {data:{user},error}=await admin.auth.getUser(accessToken);if(error||!user)return null;return {id:user.id,email:user.email||''}},
   getActiveAdmin:async(userId:string)=>{const {data,error}=await userClient.from('member_accounts').select('id,role,status').eq('auth_user_id',userId).eq('role','admin').eq('status','active').limit(1).maybeSingle();if(error)throw error;return data},
@@ -31,7 +39,14 @@ Deno.serve(async(req:Request)=>{
   getMember:async(memberId:string)=>{const {data,error}=await userClient.from('members').select('id,phone_e164,display_name,deleted_at').eq('id',memberId).limit(1).maybeSingle();if(error)throw error;return data},
   getAccountByMember:async(memberId:string)=>{const {data,error}=await userClient.from('member_accounts').select(selectAccount).eq('member_id',memberId).limit(1).maybeSingle();if(error)throw error;return data},
   getAccountById:async(accountId:string)=>{const {data,error}=await userClient.from('member_accounts').select(selectAccount).eq('id',accountId).limit(1).maybeSingle();if(error)throw error;return data},
-  createAuthUser:async({email,password,memberId,role}:{email:string,password:string,memberId:string,role:string})=>{const {data,error}=await admin.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{achang_member_id:memberId,achang_role:role}});if(error)throw error;return data.user},
+  ensureAuthUser:async({email,password,memberId,role}:{email:string,password:string,memberId:string,role:string})=>{
+   const valid=(user:{user_metadata?:Record<string,unknown>})=>user.user_metadata?.achang_member_id===memberId&&user.user_metadata?.achang_role===role;
+   let existing=await findAuthUser(email);if(existing){if(!valid(existing))throw new MemberAdminError(409,'登入身分識別衝突');return existing}
+   const {data,error}=await admin.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{achang_member_id:memberId,achang_role:role}});
+   if(!error&&data.user)return data.user;
+   existing=await findAuthUser(email);if(existing&&valid(existing))return existing;
+   throw error||new MemberAdminError(502,'登入身分建立失敗');
+  },
   deleteAuthUser:async(userId:string)=>{const {error}=await admin.auth.admin.deleteUser(userId);return !error},
   insertAccount:async(values:Record<string,unknown>)=>{const {data,error}=await userClient.from('member_accounts').insert(values).select(selectAccount).single();if(error)throw error;return data},
   transitionAccountAtomic:async(accountId:string,action:string,expectedStatus:string,reason:string)=>{const {data,error}=await userClient.rpc('achang_member_admin_v2_transition',{p_account_id:accountId,p_action:action,p_expected_status:expectedStatus,p_reason:reason||null});if(error)throw error;return data},

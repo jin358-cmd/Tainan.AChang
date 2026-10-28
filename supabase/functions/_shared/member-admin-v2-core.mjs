@@ -38,11 +38,11 @@ async function createAccount(body,context,deps){
   return {status:200,body:{ok:true,idempotent:true,member:deps.publicAccount(existing)}};
  }
  const loginId='ACH-'+memberId.replaceAll('-','').toUpperCase();
- const alias=required(String(deps.newAuthAlias?.()||''),'登入識別碼').replaceAll('-','').toLowerCase();
+ const alias=required(String(await deps.authAlias?.(memberId,requestedRole)||''),'登入識別碼').replaceAll('-','').toLowerCase();
  if(!/^[0-9a-f]{32}$/.test(alias))throw new MemberAdminError(503,'登入身分安全識別碼建立失敗');
  const email=(requestedRole==='admin'?'admin-':'volunteer-')+alias+'@auth.achang.invalid';
  let authUser;
- try{authUser=await deps.createAuthUser({email,password,memberId,role:requestedRole})}
+ try{authUser=await deps.ensureAuthUser({email,password,memberId,role:requestedRole})}
  catch(error){
   const concurrent=await reconcileCreatedAccount(memberId,context,deps);
   if(concurrent?.role===requestedRole)return {status:200,body:{ok:true,idempotent:true,member:deps.publicAccount(concurrent)}};

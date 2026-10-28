@@ -12,13 +12,13 @@ const corePromise=import(pathToFileURL(path.join(root,'supabase/functions/_share
 function fixture(overrides={}){
  const calls=[],account={id:'11111111-1111-4111-8111-111111111111',member_id:'22222222-2222-4222-8222-222222222222',auth_user_id:'33333333-3333-4333-8333-333333333333',role:'volunteer',status:'pending',approved_at:null};
  const deps={
-  calls,now:()=> '2026-10-28T07:00:00.000Z',newAuthAlias:()=> '55555555-5555-4555-8555-555555555555',publicAccount:a=>({...a}),
+  calls,now:()=> '2026-10-28T07:00:00.000Z',authAlias:async()=> '55555555555545558555555555555555',publicAccount:a=>({...a}),
   authenticate:async token=>token==='valid-admin'?{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',email:'admin@example.invalid'}:null,
   getActiveAdmin:async id=>id==='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'?{id:'admin-account',role:'admin',status:'active'}:null,
   rateLimit:async(id,action)=>calls.push(['rate',id,action]),
   getMember:async id=>({id,phone_e164:'+886900000001',display_name:'合成會員',deleted_at:null}),
   getAccountByMember:async()=>null,getAccountById:async()=>account,
-  createAuthUser:async payload=>{calls.push(['createAuth',payload]);return {id:'44444444-4444-4444-8444-444444444444'}},
+  ensureAuthUser:async payload=>{calls.push(['ensureAuth',payload]);return {id:'44444444-4444-4444-8444-444444444444'}},
   deleteAuthUser:async id=>{calls.push(['deleteAuth',id]);return true},
   insertAccount:async values=>{calls.push(['insert',values]);return {...account,...values,id:account.id}},
   transitionAccountAtomic:async(id,action,status,reason)=>{calls.push(['transition',id,action,status,reason]);return {...account,status:action==='suspend'?'suspended':'active'}},
@@ -51,20 +51,20 @@ test('TEST-05 create validates six-digit PIN and stores it only through Auth',as
  await assert.rejects(()=>executeMemberAdminV2({token:'valid-admin',body:{...base,pin:'12345'}},deps),error=>error.status===400&&/6 位/.test(error.message));
  const result=await executeMemberAdminV2({token:'valid-admin',body:{...base,pin:'123456'}},deps);
  assert.equal(result.status,201);assert.equal(result.body.member.status,'pending');
- assert.equal(calls.find(c=>c[0]==='createAuth')[1].password,'123456');
+ assert.equal(calls.find(c=>c[0]==='ensureAuth')[1].password,'123456');
  assert.equal('pin' in calls.find(c=>c[0]==='insert')[1],false,'PIN must never be written to member_accounts');
 });
 
 test('TEST-05 preserves a leading zero because PIN remains an ASCII string',async()=>{
  const {executeMemberAdminV2}=await corePromise,{deps,calls}=fixture();
  await executeMemberAdminV2({token:'valid-admin',body:{action:'create',memberId:'22222222-2222-4222-8222-222222222222',phone:'+886900000001',pin:'012345',role:'volunteer'}},deps);
- assert.equal(calls.find(c=>c[0]==='createAuth')[1].password,'012345');
+ assert.equal(calls.find(c=>c[0]==='ensureAuth')[1].password,'012345');
 });
 
 test('TEST-06 account creation remains compatible with shared-phone PIN identities',async()=>{
  const {executeMemberAdminV2}=await corePromise,{deps,calls}=fixture();
  await executeMemberAdminV2({token:'valid-admin',body:{action:'create',memberId:'22222222-2222-4222-8222-222222222222',phone:'+886900000001',pin:'654321',role:'volunteer'}},deps);
- const authPayload=calls.find(c=>c[0]==='createAuth')[1],dbPayload=calls.find(c=>c[0]==='insert')[1];
+ const authPayload=calls.find(c=>c[0]==='ensureAuth')[1],dbPayload=calls.find(c=>c[0]==='insert')[1];
  assert.match(authPayload.email,/^volunteer-[0-9a-f]{32}@auth\.achang\.invalid$/);assert.doesNotMatch(authPayload.email,/22222222/);assert.equal(authPayload.memberId,dbPayload.member_id);assert.equal(dbPayload.login_id,'ACH-22222222222242228222222222222222');
 });
 
@@ -110,7 +110,7 @@ test('duplicate create is idempotent and never resets PIN or role',async()=>{
  const existing={id:'11111111-1111-4111-8111-111111111111',member_id:'22222222-2222-4222-8222-222222222222',role:'volunteer',status:'pending'};
  const {executeMemberAdminV2}=await corePromise,{deps,calls}=fixture({getAccountByMember:async()=>existing});
  const result=await executeMemberAdminV2({token:'valid-admin',body:{action:'create',memberId:existing.member_id,phone:'+886900000001',pin:'123456',role:'volunteer'}},deps);
- assert.equal(result.body.idempotent,true);assert.equal(calls.some(c=>c[0]==='createAuth'),false);
+ assert.equal(result.body.idempotent,true);assert.equal(calls.some(c=>c[0]==='ensureAuth'),false);
  await assert.rejects(()=>executeMemberAdminV2({token:'valid-admin',body:{action:'create',memberId:existing.member_id,phone:'+886900000001',pin:'123456',role:'admin'}},deps),error=>error.status===409);
 });
 
@@ -130,20 +130,33 @@ test('unknown insert outcome never deletes Auth blindly and a retry reconciles t
  assert.equal(uncertain.calls.some(call=>call[0]==='deleteAuth'),false,'unknown commit outcome must retain the possibly committed Auth identity');
  const committed={id:'11111111-1111-4111-8111-111111111111',member_id:'22222222-2222-4222-8222-222222222222',auth_user_id:'44444444-4444-4444-8444-444444444444',role:'volunteer',status:'pending'};
  const retry=fixture({getAccountByMember:async()=>committed});const result=await executeMemberAdminV2({token:'valid-admin',body:{action:'create',memberId:committed.member_id,phone:'+886900000001',pin:'123456',role:'volunteer'}},retry.deps);
- assert.equal(result.body.idempotent,true);assert.equal(retry.calls.some(call=>call[0]==='createAuth'),false);
+ assert.equal(result.body.idempotent,true);assert.equal(retry.calls.some(call=>call[0]==='ensureAuth'),false);
 });
 
-test('synthetic Auth email cannot bypass the phone PIN rate-limited login path',()=>{
+test('unknown non-commit retry reuses one secret-derived Auth identity instead of creating another alias',async()=>{
+ const {executeMemberAdminV2}=await corePromise,emails=[];
+ const shared={authAlias:async()=> 'abcdef0123456789abcdef0123456789',ensureAuthUser:async payload=>{emails.push(payload.email);return {id:'44444444-4444-4444-8444-444444444444'}}};
+ let reads=0;const first=fixture({...shared,insertAccount:async()=>{throw new Error('timeout before commit')},getAccountByMember:async()=>{reads++;if(reads===1)return null;throw new Error('reconciliation unavailable')}});
+ await assert.rejects(()=>executeMemberAdminV2({token:'valid-admin',body:{action:'create',memberId:first.account.member_id,phone:'+886900000001',pin:'123456',role:'volunteer'}},first.deps),error=>error.code==='CREATE_OUTCOME_UNKNOWN');
+ const second=fixture({...shared,getAccountByMember:async()=>null});
+ const result=await executeMemberAdminV2({token:'valid-admin',body:{action:'create',memberId:second.account.member_id,phone:'+886900000001',pin:'123456',role:'volunteer'}},second.deps);
+ assert.equal(result.status,201);assert.equal(emails.length,2);assert.equal(emails[0],emails[1]);assert.equal(first.calls.some(call=>call[0]==='deleteAuth'),false);
+});
+
+test('application email route blocks synthetic identities; direct Auth requires the prepared account-level hook',()=>{
  const session=read('api/session.js');assert.match(session,/@auth\\\.achang\\\.invalid\$\/i/);assert.match(session,/名冊手機與六位數字 PIN/);
  const guardIndex=session.indexOf('@auth\\.achang\\.invalid'),passwordGrant=session.indexOf('/auth/v1/token?grant_type=password');assert.ok(guardIndex>0&&guardIndex<passwordGrant);
+ const hook=read('supabase/migrations/20261028093000_achang_pin_password_verification_hook.sql');
+ assert.match(hook,/v_email not like '%@auth\.achang\.invalid'/);assert.match(hook,/v_count > 5/);assert.match(hook,/'http_code',429/);
+ assert.match(hook,/grant execute[\s\S]*to supabase_auth_admin/);assert.match(hook,/revoke all[\s\S]*from public, anon, authenticated/);
 });
 
 test('concurrent retry returns the committed matching account but rejects role mismatch',async()=>{
  const {executeMemberAdminV2}=await corePromise;
  const matching={id:'11111111-1111-4111-8111-111111111111',member_id:'22222222-2222-4222-8222-222222222222',role:'volunteer',status:'pending'};
- let reads=0;const good=fixture({getAccountByMember:async()=>++reads===1?null:matching,createAuthUser:async()=>{throw Object.assign(new Error('duplicate'),{status:422})}});
+ let reads=0;const good=fixture({getAccountByMember:async()=>++reads===1?null:matching,ensureAuthUser:async()=>{throw Object.assign(new Error('duplicate'),{status:422})}});
  const result=await executeMemberAdminV2({token:'valid-admin',body:{action:'create',memberId:matching.member_id,phone:'+886900000001',pin:'123456',role:'volunteer'}},good.deps);assert.equal(result.body.idempotent,true);
- reads=0;const bad=fixture({getAccountByMember:async()=>++reads===1?null:{...matching,role:'admin'},createAuthUser:async()=>{throw Object.assign(new Error('duplicate'),{status:422})}});
+ reads=0;const bad=fixture({getAccountByMember:async()=>++reads===1?null:{...matching,role:'admin'},ensureAuthUser:async()=>{throw Object.assign(new Error('duplicate'),{status:422})}});
  await assert.rejects(()=>executeMemberAdminV2({token:'valid-admin',body:{action:'create',memberId:matching.member_id,phone:'+886900000001',pin:'123456',role:'volunteer'}},bad.deps),error=>error.status===409);
 });
 
