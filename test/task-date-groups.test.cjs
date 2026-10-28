@@ -34,7 +34,8 @@ test('administrator task teams use one consistent two-row card with leader conta
  assert.match(styles,/#page-reports \.task-member-progress\{flex-wrap:nowrap;align-items:center;gap:8px\}/);
  assert.match(styles,/#page-reports \.task-member-progress>\.task-progress-status\{[^}]*margin-left:auto[^}]*min-width:100px[^}]*text-align:center/);
  assert.match(styles,/#page-reports \.task-date-history \.task-team\{background:#fff7dc;border-color:#e6cf7a\}/);
- assert.match(styles,/#page-reports \.task-route-separator,#page-reports \.task-team-shift \.legend-pin\{display:none\}/);
+ assert.match(styles,/@media\(max-width:530px\)[\s\S]*#page-reports \.task-route-separator\{display:inline\}/);
+ assert.match(styles,/@media\(max-width:530px\)[\s\S]*#page-reports \.task-team-shift \.legend-pin\{display:grid;width:18px;height:18px;font-size:11px\}/);
 });
 
 test('map popup enlarges member identity and centers the existing assignment button',()=>{
@@ -46,6 +47,7 @@ test('map popup enlarges member identity and centers the existing assignment but
  assert.match(app,/matchMedia\?\.\('\(max-width:620px\)'\)[\s\S]*translate\(-50%,-50%\)/);
  assert.match(styles,/\.restored-map-popup\{[^}]*height:min\(380px,calc\(100% - 20px\)\)!important[^}]*overflow:hidden!important/);
  assert.match(styles,/\.popup-contacts\{flex:1 1 auto;min-height:0;max-height:242px!important;overflow-y:auto!important/);
+ assert.match(styles,/\.restored-map-popup\[hidden\]\{display:none!important\}/);
 });
 
 test('mobile settings sheet is content-sized with the device card directly after exports',()=>{

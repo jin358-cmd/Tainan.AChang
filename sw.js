@@ -1,4 +1,4 @@
-const CACHE = 'achang-pwa-shell-v132-map-attribution';
+const CACHE = 'achang-pwa-shell-v133-mobile-ui-sync';
 const SHELL=['./','./index.html','./styles.css','./app.js','./data-public.json','./manifest.webmanifest','./assets/icon.svg','./assets/icon-192.png','./assets/icon-512.png'];
 self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())});
 self.addEventListener('activate',event=>{event.waitUntil((async()=>{const names=await caches.keys();await Promise.all(names.filter(name=>name.startsWith('achang-pwa-shell-')&&name!==CACHE).map(name=>caches.delete(name)));await self.clients.claim()})())});
