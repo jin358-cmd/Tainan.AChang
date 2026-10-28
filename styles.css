@@ -969,3 +969,18 @@ body.volunteer-session #page-reports .volunteer-stop-item>.task-navigate svg{dis
 
 /* 2026-10-28: larger member authorization phone input */
 #memberAdminForm #authorizationPhone{font-size:18px!important;font-weight:800!important;min-height:50px!important;padding:10px 12px!important;letter-spacing:.02em!important;color:#183b52!important}
+
+/* 2026-10-28: readable full member authorization panel */
+#memberAdminForm{font-size:17px!important}
+#memberAdminForm label{font-size:17px!important;font-weight:800!important;line-height:1.5!important}
+#memberAdminForm input,#memberAdminForm select{font-size:18px!important;min-height:52px!important;padding:11px 12px!important}
+#memberAdminForm select option{font-size:18px!important}
+#memberAdminForm #approveAccountBtn{font-size:19px!important;font-weight:900!important;line-height:1.4!important;min-height:58px!important;padding:12px 16px!important}
+#memberAdminForm #accountRoleWarning{font-size:15px!important;line-height:1.6!important}
+.member-admin-existing{font-size:16px!important;line-height:1.5!important}
+.member-admin-existing .approved-member-name{font-size:18px!important}
+.member-admin-existing .approved-member-phone{font-size:17px!important}
+.member-admin-existing .member-auth-actions button{font-size:15px!important;min-height:42px!important}
+.device-approval-section{font-size:16px!important;line-height:1.5!important}
+.device-approval-section h3{font-size:18px!important}
+.device-approval-section .mini-note,.device-approval-section small{font-size:14px!important;line-height:1.5!important}
