@@ -55,7 +55,7 @@ test('GPS adapter keeps the timeout active until the response body is fully read
 
 test('GPS adapter emits bounded non-sensitive timing telemetry for success and failure',()=>{
  const source=read('api/gps-vehicles.js');
- assert.match(source,/GPS upstream source failed/);assert.match(source,/elapsed_ms/);assert.match(source,/timed_out/);assert.match(source,/cause_code/);
+ assert.match(source,/GPS upstream source failed/);assert.match(source,/error_stage/);assert.match(source,/upstream_status/);assert.match(source,/content_type/);assert.match(source,/elapsed_ms/);assert.match(source,/timed_out/);assert.match(source,/cause_code/);
  assert.match(source,/GPS upstream fetch completed/);assert.match(source,/upstream_status/);assert.match(source,/normalized_count/);
  assert.doesNotMatch(source,/console\.(?:info|warn)\([^\n]*(?:raw|payload|authorization|token)/i);
 });

@@ -11,22 +11,22 @@ module.exports=L.run(async(req,res)=>{
  await L.authorized(req,res,['admin','volunteer']);
  const startedAt=Date.now();let selected=null,vehicles=null,upstreamStatus=null;
  for(const source of OFFICIAL_SOURCES){
-  const attemptStarted=Date.now(),controller=new AbortController(),timer=setTimeout(()=>controller.abort(),UPSTREAM_TIMEOUT_MS);
+  const attemptStarted=Date.now(),controller=new AbortController(),timer=setTimeout(()=>controller.abort(),UPSTREAM_TIMEOUT_MS);let stage='connect',status=null,contentType='';
   try{
    const upstream=await fetch(source.url,{method:'GET',redirect:'error',cache:'no-store',headers:{Accept:source.accept},signal:controller.signal});
-   upstreamStatus=upstream.status;if(!upstream.ok)throw Object.assign(new Error('upstream status'),{status:upstream.status});
-   const contentType=String(upstream.headers.get('content-type')||'').toLowerCase(),raw=await upstream.text();
+   stage='status';status=upstream.status;upstreamStatus=upstream.status;if(!upstream.ok)throw Object.assign(new Error('upstream status'),{status:upstream.status});
+   stage='body';contentType=String(upstream.headers.get('content-type')||'').toLowerCase();const raw=await upstream.text();
    if(raw.length>5_000_000)throw Object.assign(new Error('upstream body too large'),{status:502});
-   let payload;
+   stage='parse';let payload;
    if(contentType.includes('json')){try{payload=JSON.parse(raw)}catch{throw Object.assign(new Error('invalid upstream json'),{status:502})}}
    else if(source.mode==='official_resource_page_fallback'&&contentType.includes('html'))payload=extractOfficialResourcePayload(raw);
    else throw Object.assign(new Error('unexpected upstream content type'),{status:502});
-   vehicles=normalizePayload(payload);selected=source;
+   stage='normalize';vehicles=normalizePayload(payload);selected=source;
    console.info('GPS upstream source completed',{source_mode:source.mode,elapsed_ms:Date.now()-attemptStarted,upstream_status:upstream.status,normalized_count:vehicles.length});
    break;
   }catch(error){
    const cause=error?.cause||{};
-   console.warn('GPS upstream source failed',{source_mode:source.mode,elapsed_ms:Date.now()-attemptStarted,error_name:String(error?.name||'Error').slice(0,80),cause_code:String(cause?.code||'').slice(0,80),cause_name:String(cause?.name||'').slice(0,80),cause_syscall:String(cause?.syscall||'').slice(0,80),timed_out:error?.name==='AbortError'});
+   console.warn('GPS upstream source failed',{source_mode:source.mode,error_stage:stage,elapsed_ms:Date.now()-attemptStarted,upstream_status:status,content_type:contentType.slice(0,80),error_name:String(error?.name||'Error').slice(0,80),cause_code:String(cause?.code||'').slice(0,80),cause_name:String(cause?.name||'').slice(0,80),cause_syscall:String(cause?.syscall||'').slice(0,80),timed_out:error?.name==='AbortError'});
   }finally{clearTimeout(timer)}
  }
  if(!selected||!vehicles)L.problem(503,'官方 GPS 服務目前無法連線');

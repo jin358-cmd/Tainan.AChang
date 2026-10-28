@@ -33,6 +33,13 @@ test('map popup enlarges member identity and centers the existing assignment but
  assert.match(styles,/#page-map #areaPopup \.popup-detail-btn[\s\S]*margin:10px auto 0/);
 });
 
+test('mobile settings sheet is content-sized with the device card directly after exports',()=>{
+ assert.match(styles,/\.modal-backdrop\.settings-open \.sheet\{[^}]*height:auto/);
+ assert.match(styles,/\.sheet-body>\.pick-list\{[^}]*min-height:0/);
+ assert.match(styles,/\.pick-row:last-child\{margin-top:0/);
+ assert.doesNotMatch(styles,/\.modal-backdrop\.settings-open \.sheet\{[^}]*height:min\(700px/);
+});
+
 test('fourth task page exposes three requested groups without changing task APIs',()=>{
  assert.match(app,/history:'歷史跟巡',current:'當日跟巡',future:'下次跟巡'/);
  assert.match(app,/task-date-'\+category/);assert.match(app,/category==='current'\?'open':''/);
