@@ -2,7 +2,7 @@
 const L=require('../lib/server');
 const fallback=require('../data-gps-snapshot-20261028.json');
 const OFFICIAL='https://soa.tainan.gov.tw/Api/Service/Get/2c8a70d5-06f2-4353-9e92-c40d33bcd969';
-const CACHE_MS=60000;
+const CACHE_MS=30000;
 let cache=null,cacheAt=0;
 function normalize(payload){
  const rows=Array.isArray(payload)?payload:Array.isArray(payload?.data)?payload.data:Array.isArray(payload?.result)?payload.result:null;
