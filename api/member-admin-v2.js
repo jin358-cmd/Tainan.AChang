@@ -14,7 +14,7 @@ module.exports=L.run(async(req,res)=>{
  const actor=await L.authorized(req,res,['admin']);
  const input=req.method==='GET'?{action:'list'}:L.body(req);
  const body=req.method==='POST'&&input.action==='create'?{...input,phone:createPhone(input.phone)}:input;
- const allowed=req.method==='POST'?['create']:req.method==='PATCH'?['approve','suspend','reactivate','archive']:['list'];
+ const allowed=req.method==='POST'?['create']:req.method==='PATCH'?['approve','suspend','reactivate','archive','promote_admin']:['list'];
  if(!allowed.includes(String(body.action||'')))L.problem(400,'不支援的會員操作');
  const result=await L.request('/functions/v1/achang-member-admin-v2',{method:'POST',token:actor.token,body});
  if(!result.ok){

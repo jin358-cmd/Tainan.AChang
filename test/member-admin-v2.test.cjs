@@ -22,6 +22,7 @@ function fixture(overrides={}){
   insertAccount:async values=>{calls.push(['insert',values]);return {...account,...values,id:account.id}},
   transitionAccountAtomic:async(id,action,status,reason)=>{calls.push(['transition',id,action,status,reason]);return {...account,status:action==='suspend'?'suspended':'active'}},
   archiveMemberAtomic:async(id,status,reason)=>{calls.push(['archive',id,status,reason]);return {...account,status:'suspended',deleted_at:'2026-10-28T07:01:00.000Z'}},
+  promoteAdminAtomic:async(id,expectedRole,expectedStatus)=>{calls.push(['promote',id,expectedRole,expectedStatus]);return {...account,role:'admin',status:'active',approved_at:'2026-10-01T00:00:00Z',device_approval_required:false}},
   isProtectedPrincipal:async()=>false,
   listState:async()=>({ok:true,members:[],devices:[]})
  };
@@ -79,6 +80,32 @@ test('TEST-08 active admin can create a pending admin without device approval ga
  await executeMemberAdminV2({token:'valid-admin',body:{action:'create',memberId:'22222222-2222-4222-8222-222222222222',phone:'+886900000001',pin:'123456',role:'admin'}},deps);
  const inserted=calls.find(c=>c[0]==='insert')[1];assert.equal(inserted.role,'admin');assert.equal(inserted.status,'pending');assert.equal(inserted.device_approval_required,false);
  assert.equal(calls.some(c=>c[0]==='deviceCheck'),false);
+});
+
+test('active approved volunteer can be promoted without recreating Auth or losing approval',async()=>{
+ const {executeMemberAdminV2}=await corePromise,{deps,calls,account}=fixture({getAccountById:async()=>({...account,role:'volunteer',status:'active',approved_at:'2026-10-01T00:00:00Z'})});
+ const result=await executeMemberAdminV2({token:'valid-admin',body:{action:'promote_admin',accountId:account.id}},deps);
+ assert.equal(result.body.promoted,true);assert.equal(result.body.member.role,'admin');assert.equal(result.body.member.status,'active');
+ assert.deepEqual(calls.find(call=>call[0]==='promote').slice(1),[account.id,'volunteer','active']);
+ assert.equal(calls.some(call=>call[0]==='ensureAuth'||call[0]==='insert'),false);
+});
+
+test('promotion rejects pending, suspended, existing admin, and self targets',async()=>{
+ const {executeMemberAdminV2}=await corePromise,{account}=fixture();
+ for(const target of [{...account,status:'pending'},{...account,status:'suspended',approved_at:'2026-10-01T00:00:00Z'},{...account,role:'admin',status:'active',approved_at:'2026-10-01T00:00:00Z'}]){
+  const {deps}=fixture({getAccountById:async()=>target});
+  await assert.rejects(()=>executeMemberAdminV2({token:'valid-admin',body:{action:'promote_admin',accountId:account.id}},deps),error=>error.code==='INVALID_TRANSITION');
+ }
+ const {deps}=fixture({getAccountById:async()=>({...account,auth_user_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',status:'active',approved_at:'2026-10-01T00:00:00Z'})});
+ await assert.rejects(()=>executeMemberAdminV2({token:'valid-admin',body:{action:'promote_admin',accountId:account.id}},deps),error=>error.code==='SELF_ROLE_CHANGE_FORBIDDEN');
+});
+
+test('promotion RPC is invoker-authorized, CAS protected, and audits the role change',()=>{
+ const sql=read('supabase/migrations/20261028143000_achang_member_admin_v2_promote_admin.sql');
+ assert.match(sql,/security definer/i);assert.match(sql,/set search_path = ''/);assert.match(sql,/not app_private\.is_admin\(\)/);
+ assert.match(sql,/role is distinct from p_expected_role/);assert.match(sql,/status is distinct from p_expected_status/);assert.match(sql,/approved_at is null/);
+ assert.match(sql,/set role = 'admin', device_approval_required = false/);assert.match(sql,/'member_promoted_admin'/);
+ assert.match(sql,/revoke all[\s\S]*from public, anon/);assert.match(sql,/grant execute[\s\S]*to authenticated/);
 });
 
 test('TEST-02 current server session contract authenticates active admins without an approved-device gate',()=>{
@@ -239,12 +266,14 @@ test('API proxy forwards only authenticated admin commands to v2 and no device p
  assert.equal(captured[0].path,'/functions/v1/achang-member-admin-v2');assert.equal(captured[0].options.token,'actor-token');assert.equal(captured[0].options.headers,undefined);assert.equal(res.status,201);
 });
 
-test('API proxy accepts only the explicit archive lifecycle action on PATCH',async()=>{
+test('API proxy accepts explicit archive and promotion lifecycle actions but rejects hard delete',async()=>{
  const source=read('api/member-admin-v2.js'),module={exports:{}},captured=[];
  const L={run:fn=>fn,method(){},authorized:async()=>({token:'actor-token',role:'admin'}),body:req=>req.body,request:async(path,options)=>{captured.push({path,options});return {ok:true,status:200,data:{ok:true,archived:true}}},json(res,status,body){res.status=status;res.body=body},problem(status,message){throw Object.assign(new Error(message),{status})}};
  vm.runInThisContext(`(function(require,module,exports){${source}\n})`)(id=>id==='../lib/server'?L:require(id),module,module.exports);
  await module.exports({method:'PATCH',headers:{},body:{action:'archive',accountId:'11111111-1111-4111-8111-111111111111',reason:'不再參與服務'}},{});
  assert.equal(captured[0].options.body.action,'archive');
+ await module.exports({method:'PATCH',headers:{},body:{action:'promote_admin',accountId:'11111111-1111-4111-8111-111111111111'}},{});
+ assert.equal(captured[1].options.body.action,'promote_admin');
  await assert.rejects(()=>module.exports({method:'PATCH',headers:{},body:{action:'delete',accountId:'11111111-1111-4111-8111-111111111111'}},{}),error=>error.status===400);
 });
 

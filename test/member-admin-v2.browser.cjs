@@ -36,7 +36,7 @@ async function startServer(){
       const [account]=accounts.splice(accountIndex,1),personIndex=people.findIndex(item=>item.id===account.member_id);if(personIndex>=0)people.splice(personIndex,1);
       return response.end(JSON.stringify({ok:true,archived:true}));
      }
-     const account=accounts.find(item=>item.id===body.accountId);if(!account){response.statusCode=404;return response.end(JSON.stringify({error:'missing synthetic account'}))}account.status=body.action==='approve'?'active':body.action==='suspend'?'suspended':'active';account.enabled=account.status==='active';return response.end(JSON.stringify({ok:true}));
+     const account=accounts.find(item=>item.id===body.accountId);if(!account){response.statusCode=404;return response.end(JSON.stringify({error:'missing synthetic account'}))}if(body.action==='promote_admin')account.role='admin';else account.status=body.action==='approve'?'active':body.action==='suspend'?'suspended':'active';account.enabled=account.status==='active';return response.end(JSON.stringify({ok:true}));
     }
     response.end(JSON.stringify({ok:true}));
    });return;
@@ -66,10 +66,11 @@ async function startServer(){
   ]);
   assert.equal(creates.some(call=>'deviceId' in call.body||'deviceProof' in call.body),false);assert.equal(local.observed.calls.some(call=>call.endpoint==='members'&&['POST','PATCH'].includes(call.method)),false);
   assert.equal(local.accounts[0].status,'active');assert.equal(local.accounts[1].status,'pending');assert.deepEqual(local.observed.pageErrors,[]);assert.deepEqual(local.observed.consoleErrors.filter(message=>!/net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message)),[]);
+  let promoteDialog='';page.once('dialog',dialog=>{promoteDialog=dialog.message();dialog.accept()});await page.locator('[data-member-action="promote_admin"]').click();await page.waitForFunction(()=>document.querySelector('.approved-member-row small')?.textContent==='管理員');assert.match(promoteDialog,/合成志工/);assert.match(promoteDialog,/原帳號與核准狀態會保留/);assert.equal(local.accounts[0].role,'admin');assert.equal(local.accounts[0].status,'active');assert.equal(await page.locator('[data-member-action="promote_admin"]').count(),0);
   let archiveDialog='';page.once('dialog',dialog=>{archiveDialog=dialog.message();dialog.accept()});await page.locator('[data-member-action="archive"]').first().click();
   await page.waitForFunction(()=>document.querySelectorAll('.approved-member-row').length===1);assert.match(archiveDialog,/名冊、服務里與會員授權清單/);assert.match(archiveDialog,/排班、任務、完成紀錄、稽核紀錄與 Auth 身分會保留/);
   const archive=local.observed.calls.find(call=>call.endpoint==='member-admin-v2'&&call.method==='PATCH'&&call.body.action==='archive');assert.equal(archive.body.reason,'管理員由會員授權介面封存會員');assert.equal(people.some(person=>person.id==='22222222-2222-4222-8222-222222222222'),false);
-  process.stdout.write(JSON.stringify({status:'PASS',evidence:'synthetic local browser + mock API only',cases:['create pending volunteer','approve volunteer','create pending admin','archive member confirmation and active-roster removal','map/tasks/schedule controls preserved'],requests:local.observed.calls.map(call=>`${call.method} ${call.endpoint}`),externalRequestsBlocked:local.observed.external.length},null,2)+'\n');
+  process.stdout.write(JSON.stringify({status:'PASS',evidence:'synthetic local browser + mock API only',cases:['create pending volunteer','approve volunteer','promote active volunteer while retaining approval','create pending admin','archive member confirmation and active-roster removal','map/tasks/schedule controls preserved'],requests:local.observed.calls.map(call=>`${call.method} ${call.endpoint}`),externalRequestsBlocked:local.observed.external.length},null,2)+'\n');
   await context.close();
  }finally{await browser.close();await new Promise(resolve=>local.instance.close(resolve))}
 })().catch(error=>{console.error(error.stack||error);process.exitCode=1});

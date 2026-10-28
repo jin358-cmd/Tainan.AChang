@@ -98,12 +98,25 @@ async function archiveAccount(body,context,deps){
  return {status:200,body:{ok:true,archived:true,member:deps.publicAccount(updated)}};
 }
 
+async function promoteAdmin(body,context,deps){
+ const accountId=uuid(body.accountId);
+ await deps.rateLimit(context.actor.id,'promote_admin');
+ const target=await deps.getAccountById(accountId,context.token);
+ if(!target)throw new MemberAdminError(404,'會員帳號不存在');
+ if(target.auth_user_id===context.actor.id)throw new MemberAdminError(409,'管理員不能變更自己的角色','SELF_ROLE_CHANGE_FORBIDDEN');
+ if(target.role!=='volunteer'||target.status!=='active'||!target.approved_at)throw new MemberAdminError(409,'只有已核准且啟用中的志工可以設為管理員','INVALID_TRANSITION');
+ const updated=await deps.promoteAdminAtomic(target.id,target.role,target.status,context.token);
+ if(!updated)throw new MemberAdminError(409,'會員角色已由其他操作更新，請重新整理','STATE_CONFLICT');
+ return {status:200,body:{ok:true,promoted:true,member:deps.publicAccount(updated)}};
+}
+
 export async function executeMemberAdminV2({token,body},deps){
  const context={...(await authorize(token,deps)),token};
  const action=String(body?.action||'');
  if(action==='list')return {status:200,body:await deps.listState(context.token)};
  if(action==='create')return createAccount(body,context,deps);
  if(action==='archive')return archiveAccount(body,context,deps);
+ if(action==='promote_admin')return promoteAdmin(body,context,deps);
  if(['approve','suspend','reactivate'].includes(action))return transitionAccount(action,body,context,deps);
  throw new MemberAdminError(400,'不支援的會員操作');
 }

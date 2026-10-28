@@ -79,6 +79,17 @@ Deno.serve(async(req:Request)=>{
    }
    return data;
   },
+  promoteAdminAtomic:async(accountId:string,expectedRole:string,expectedStatus:string)=>{
+   const {data,error}=await userClient.rpc('achang_member_admin_v2_promote_admin',{p_account_id:accountId,p_expected_role:expectedRole,p_expected_status:expectedStatus});
+   if(error){
+    if(error.code==='40001')throw new MemberAdminError(409,'會員角色已由其他操作更新，請重新整理','STATE_CONFLICT');
+    if(error.code==='P0002')throw new MemberAdminError(404,'會員帳號不存在','ACCOUNT_NOT_FOUND');
+    if(error.code==='42501')throw new MemberAdminError(403,'只有已啟用管理員可以管理會員','ADMIN_REQUIRED');
+    if(error.code==='23514')throw new MemberAdminError(409,'只有已核准且啟用中的志工可以設為管理員','INVALID_TRANSITION');
+    throw error;
+   }
+   return data;
+  },
   isProtectedPrincipal:async(userId:string)=>await sha(userId)===protectedPrincipalHash,
   listState:async()=>{
    const [{data:accounts,error:accountError},{data:members,error:memberError},{data:devices,error:deviceError}]=await Promise.all([
