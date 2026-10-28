@@ -466,7 +466,7 @@ async function authStart(){try{
   await refreshOnline();go('map');
  }
  clearInterval(liveTimer);liveTimer=setInterval(()=>refreshOnline(true),20000);
-}catch(e){showAuth();$('#authStatus').textContent=e.status===403?'此瀏覽環境尚未核准。請回到原先申請的 Chrome／PWA 登入，或請管理員核准此瀏覽環境。':(e.message||'無法完成登入，請稍後重試');console.warn('Session authorization failed',e.status||'network')}}
+}catch(e){stopGpsRefresh();showAuth();$('#authStatus').textContent=e.status===403?'此瀏覽環境尚未核准。請回到原先申請的 Chrome／PWA 登入，或請管理員核准此瀏覽環境。':(e.message||'無法完成登入，請稍後重試');console.warn('Session authorization failed',e.status||'network')}}
 function syncTaskProjection(){
  state.plans={};const byGroup=new Map();
  for(const t of liveTasks){

@@ -38,3 +38,8 @@ test('GPS layer polls every six minutes, avoids overlaps, pauses hidden tabs, an
  assert.doesNotMatch(app,/gpsLatestReportedAt\s*=\s*new Date|reported_at\s*=\s*new Date/);
  assert.doesNotMatch(api,/data-gps-snapshot|owner_snapshot/);assert.match(api,/redirect:'error'/);assert.match(api,/AbortController/);
 });
+
+test('failed authenticated startup stops GPS polling before returning to logged-out UI',()=>{
+ const app=read('app.js');
+ assert.match(app,/async function authStart\(\)\{try\{[\s\S]*?\}catch\(e\)\{stopGpsRefresh\(\);showAuth\(\)/);
+});
