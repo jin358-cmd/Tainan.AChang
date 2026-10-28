@@ -147,10 +147,22 @@ test('TEST-12 Edge adapter uses user-scoped RLS writes and has no device or hard
 
 test('API proxy forwards only authenticated admin commands to v2 and no device proof',async()=>{
  const source=read('api/member-admin-v2.js'),module={exports:{}},captured=[];
- const L={run:fn=>fn,method(){},authorized:async()=>({token:'actor-token',role:'admin'}),body:req=>req.body,request:async(path,options)=>{captured.push({path,options});return {ok:true,status:201,data:{ok:true}}},json(res,status,body){res.status=status;res.body=body},problem(status,message){throw Object.assign(new Error(message),{status})}};
+ const L={run:fn=>fn,method(){},authorized:async()=>({token:'actor-token',role:'admin'}),body:req=>req.body,phone:value=>value,request:async(path,options)=>{captured.push({path,options});return {ok:true,status:201,data:{ok:true}}},json(res,status,body){res.status=status;res.body=body},problem(status,message){throw Object.assign(new Error(message),{status})}};
  vm.runInThisContext(`(function(require,module,exports){${source}\n})`) (id=>id==='../lib/server'?L:require(id),module,module.exports);
  const res={};await module.exports({method:'POST',headers:{},body:{action:'create'}},res);
  assert.equal(captured[0].path,'/functions/v1/achang-member-admin-v2');assert.equal(captured[0].options.token,'actor-token');assert.equal(captured[0].options.headers,undefined);assert.equal(res.status,201);
+});
+
+test('actual API phone parser canonicalizes UI, bare 09 and +886 input before the v2 handler',async()=>{
+ const source=read('api/member-admin-v2.js'),realL=require('../lib/server');
+ for(const [input,expected] of [['0900-000-001','+886900000001'],['0900000001','+886900000001'],['+886900000001','+886900000001']]){
+  const module={exports:{}},captured=[];const L={...realL,run:fn=>fn,method(){},authorized:async()=>({token:'actor-token',role:'admin'}),body:req=>req.body,request:async(path,options)=>{captured.push({path,options});return {ok:true,status:201,data:{ok:true}}},json(res,status,body){res.status=status;res.body=body},problem(status,message){throw Object.assign(new Error(message),{status})}};
+  vm.runInThisContext(`(function(require,module,exports){${source}\n})`)(id=>id==='../lib/server'?L:require(id),module,module.exports);
+  await module.exports({method:'POST',headers:{},body:{action:'create',phone:input}},{});assert.equal(captured[0].options.body.phone,expected);
+ }
+ const module={exports:{}},L={...realL,run:fn=>fn,method(){},authorized:async()=>({token:'actor-token',role:'admin'}),body:req=>req.body,problem(status,message){throw Object.assign(new Error(message),{status})}};
+ vm.runInThisContext(`(function(require,module,exports){${source}\n})`)(id=>id==='../lib/server'?L:require(id),module,module.exports);
+ await assert.rejects(()=>module.exports({method:'POST',headers:{},body:{action:'create',phone:'not-a-phone'}},{}),error=>error.status===400&&/台灣手機/.test(error.message));
 });
 
 test('legacy members route keeps device management but rejects account lifecycle bypasses',async()=>{

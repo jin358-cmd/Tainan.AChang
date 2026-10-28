@@ -26,6 +26,7 @@ Base UI commit: `082d790b06b87a1927865be4466423675ce31c0e`
 - Account creation does not require an approved administrator device. It does not remove session or role authentication.
 - Volunteer and administrator accounts are created as `pending`; approval is a separate compare-and-set transition.
 - Six ASCII digits, including a leading zero, are passed only to Supabase Auth. No PIN or hash is stored in application tables or logs.
+- The Vercel API boundary canonicalizes formatted Taiwan mobile input (`09xx-xxx-xxx`, bare `09`, or `+8869`) to `+8869xxxxxxxx` before the strict Edge contract; invalid input is rejected before forwarding.
 - Shared phone numbers remain separated by member/Auth identity; deterministic per-member synthetic Auth email and login ID are used.
 - Duplicate same-member/same-role create is idempotent and does not rotate the PIN. Role mismatch is rejected.
 - If Auth creation succeeds but the account insert fails, v2 compensates by deleting that just-created Auth identity; inability to prove cleanup fails closed.
