@@ -2,6 +2,8 @@
   "version": "2025-04-02",
   "source": "永康區星期三、五定時定點公告",
   "display_color": "#8B5CF6",
+  "service_notice": "遇國定假日、颱風假停收",
+  "service_exceptions": [],
   "routes": [
     {
       "id": "ACHANG-W三-A-01",
@@ -22,7 +24,8 @@
       "end": "10:15",
       "name": "西勢里廣興宮",
       "color": "#8B5CF6",
-      "review_required": false,
+      "review_required": true,
+      "review_note": "圖片補列週三 A 線第二站，需再確認班次與來源順序",
       "location_verified": false
     },
     {
@@ -66,7 +69,8 @@
       "end": "14:15",
       "name": "北灣里鹽聖宮",
       "color": "#8B5CF6",
-      "review_required": false,
+      "review_required": true,
+      "review_note": "圖片為北灣里國聖宮，XLSX 為北灣里鹽聖宮，名稱待確認",
       "location_verified": false
     },
     {
@@ -110,7 +114,8 @@
       "end": "10:15",
       "name": "大橋活動中心",
       "color": "#8B5CF6",
-      "review_required": false,
+      "review_required": true,
+      "review_note": "大橋活動中心於多來源中待個別確認",
       "location_verified": false
     },
     {
@@ -121,7 +126,8 @@
       "end": "10:45",
       "name": "永明街261-12號（加慶居）",
       "color": "#8B5CF6",
-      "review_required": false,
+      "review_required": true,
+      "review_note": "圖片為如意居，XLSX 為加慶居，名稱待確認",
       "location_verified": false
     },
     {
@@ -187,7 +193,8 @@
       "end": "09:45",
       "name": "中山南路544巷48號（統領園）",
       "color": "#8B5CF6",
-      "review_required": false,
+      "review_required": true,
+      "review_note": "圖片末字疑為統領國，XLSX 為統領園，名稱待確認",
       "location_verified": false
     },
     {
@@ -253,7 +260,8 @@
       "end": "14:45",
       "name": "復華里活動中心",
       "color": "#8B5CF6",
-      "review_required": false,
+      "review_required": true,
+      "review_note": "復華里活動中心於多來源中待個別確認",
       "location_verified": false
     },
     {
@@ -265,6 +273,7 @@
       "name": "復國里活動中心",
       "color": "#8B5CF6",
       "review_required": true,
+      "review_note": "復國里活動中心於多來源中待個別確認",
       "location_verified": false
     },
     {

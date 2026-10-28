@@ -5,7 +5,7 @@ const statusMap={incomplete:'待訪',in_progress:'進行中',completed:'完成'}
 const shiftMap={'日間':'day','夜間':'night'};
 async function loadAll(token){const [a,t]=await Promise.all([L.rest('assignments?select=*&limit=2000&order=service_date.asc',token),L.rest('visit_tasks?select=*&limit=3000&order=stop_order.asc',token)]);const asign=L.need(a,'跟巡任務讀取失敗'),tasks=L.need(t,'站點狀態讀取失敗'),byId=new Map(asign.map(x=>[x.id,x]));return tasks.map(x=>{
  const p=byId.get(x.assignment_id);if(!p)return null;
- return {id:x.id,volunteer_id:x.member_id,visit_date:p.service_date,shift:p.shift==='day'?'日間':'夜間',area:p.village,truck:p.truck_number||'',stop_address:x.visit_address,eta:x.scheduled_at?new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Taipei',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(x.scheduled_at)):String(p.starts_at||'').slice(0,5),stop_order:x.stop_order,status:statusMap[x.status]||'待訪',server_version:x.server_version,updated_at:x.updated_at,completed_at:x.completed_at}
+ return {id:x.id,volunteer_id:x.member_id,visit_date:p.service_date,shift:p.shift==='day'?'日間':'夜間',area:p.village,route_id:p.route_id||p.truck_number||'',truck:p.truck_number||'',stop_address:x.visit_address,eta:x.scheduled_at?new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Taipei',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(x.scheduled_at)):String(p.starts_at||'').slice(0,5),stop_order:x.stop_order,status:statusMap[x.status]||'待訪',server_version:x.server_version,updated_at:x.updated_at,completed_at:x.completed_at}
  }).filter(Boolean)}
 module.exports=L.run(async(req,res)=>{
  L.method(req,['GET','POST','PATCH','DELETE']);const p=await L.authorized(req,res,['admin','volunteer']);
@@ -22,7 +22,9 @@ module.exports=L.run(async(req,res)=>{
  const b=L.body(req);
  if(req.method==='POST'){
   if(p.role!=='admin')L.problem(403,'志工不能指定排班');
-  const mid=L.uuid(b.volunteerId),village=L.checkText(b.area,'里別',30),d=L.validDate(b.date),sh=shiftMap[b.shift],truck=L.checkText(b.truck,'車號',30);
+  const mid=L.uuid(b.volunteerId),village=L.checkText(b.area,'里別',30),d=L.validDate(b.date),sh=shiftMap[b.shift];
+  const truck=String(b.truck||'').trim();if(truck.length>30)L.problem(400,'車號過長');
+  const routeId=L.checkText(b.routeId||truck,'路線 ID',80),routeEnd=b.routeEnd?L.time(b.routeEnd):null;
   const source=Array.isArray(b.stops)?b.stops:[{address:b.address,time:b.time,stopOrder:b.stopOrder}];
   if(source.length<1||source.length>30)L.problem(400,'每組需含 1 至 30 個巡點');
   const cleaned=source.map(x=>({visit_address:L.checkText(x.address,'巡點地址',240),time:L.time(x.time),stop_order:Math.max(1,Math.min(9999,Math.floor(Number(x.stopOrder)||1)))}));
@@ -30,7 +32,7 @@ module.exports=L.run(async(req,res)=>{
   const arrival=cleaned[0].time;
   if(!AREAS.includes(village)||!sh)L.problem(400,'里別或時段無效');
   const alloc=await L.rest('service_allocations?member_id=eq.'+mid+'&village=eq.'+encodeURIComponent(village)+'&select=member_id&limit=1',p.token);if(!L.need(alloc,'分派里別查核失敗').length)L.problem(400,'請先分派志工到對應服務里');
-  const ass=await L.rest('assignments?select=id',p.token,{method:'POST',headers:{Prefer:'return=representation'},body:{member_id:mid,service_date:d,shift:sh,village,route_id:truck,truck_number:truck,starts_at:arrival}});
+  const ass=await L.rest('assignments?select=id',p.token,{method:'POST',headers:{Prefer:'return=representation'},body:{member_id:mid,service_date:d,shift:sh,village,route_id:routeId,truck_number:truck||null,starts_at:arrival,ends_at:routeEnd}});
   if(!ass.ok){if(ass.status===409)L.problem(409,'同日同時段此志工已有跟巡排班');L.problem(502,'新建排班失敗')}
   const id=ass.data?.[0]?.id;if(!id)L.problem(502,'排班資料未取得 ID');
   const records=cleaned.map(x=>({assignment_id:id,member_id:mid,visit_address:x.visit_address,stop_order:x.stop_order,scheduled_at:`${d}T${x.time}:00+08:00`,status:'incomplete'}));
