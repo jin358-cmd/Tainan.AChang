@@ -143,6 +143,17 @@ test('unknown non-commit retry reuses one secret-derived Auth identity instead o
  assert.equal(result.status,201);assert.equal(emails.length,2);assert.equal(emails[0],emails[1]);assert.equal(first.calls.some(call=>call[0]==='deleteAuth'),false);
 });
 
+test('Auth commit with lost response retries the same identity before any account insert',async()=>{
+ const {executeMemberAdminV2}=await corePromise,emails=[];let first=true;
+ const stable={authAlias:async()=> '1234567890abcdef1234567890abcdef',ensureAuthUser:async payload=>{emails.push(payload.email);if(first){first=false;throw new Error('create committed but response and lookup were lost')}return {id:'44444444-4444-4444-8444-444444444444'}}};
+ const failed=fixture({...stable,getAccountByMember:async()=>null});
+ await assert.rejects(()=>executeMemberAdminV2({token:'valid-admin',body:{action:'create',memberId:failed.account.member_id,phone:'+886900000001',pin:'012345',role:'volunteer'}},failed.deps),error=>error.status===502);
+ assert.equal(failed.calls.some(call=>call[0]==='insert'),false,'account insert cannot run without a resolved Auth identity');
+ const retry=fixture({...stable,getAccountByMember:async()=>null});
+ const result=await executeMemberAdminV2({token:'valid-admin',body:{action:'create',memberId:retry.account.member_id,phone:'+886900000001',pin:'012345',role:'volunteer'}},retry.deps);
+ assert.equal(result.status,201);assert.equal(emails.length,2);assert.equal(emails[0],emails[1]);assert.equal(retry.calls.filter(call=>call[0]==='insert').length,1);
+});
+
 test('application email route blocks synthetic identities; direct Auth requires the prepared account-level hook',()=>{
  const session=read('api/session.js');assert.match(session,/@auth\\\.achang\\\.invalid\$\/i/);assert.match(session,/名冊手機與六位數字 PIN/);
  const guardIndex=session.indexOf('@auth\\.achang\\.invalid'),passwordGrant=session.indexOf('/auth/v1/token?grant_type=password');assert.ok(guardIndex>0&&guardIndex<passwordGrant);
@@ -203,6 +214,7 @@ test('database transition RPC is atomic, invoker-authorized, CAS protected, and 
  assert.match(sql,/protected principal cannot be suspended/);assert.match(sql,/v_account\.auth_user_id = v_actor/);
  assert.match(sql,/revoke all on function[\s\S]*from public, anon/);assert.match(sql,/grant execute[\s\S]*to authenticated/);
  const edge=read('supabase/functions/achang-member-admin-v2/index.ts');assert.match(edge,/\.rpc\('achang_member_admin_v2_transition'/);assert.doesNotMatch(edge,/revokeDevices|updateAccountCas/);
+ assert.match(edge,/error\.code==='40001'[\s\S]*MemberAdminError\(409/);assert.match(edge,/error\.code==='42501'[\s\S]*MemberAdminError\(403/);
 });
 
 test('legacy members route keeps device management but rejects account lifecycle bypasses',async()=>{

@@ -49,7 +49,20 @@ Deno.serve(async(req:Request)=>{
   },
   deleteAuthUser:async(userId:string)=>{const {error}=await admin.auth.admin.deleteUser(userId);return !error},
   insertAccount:async(values:Record<string,unknown>)=>{const {data,error}=await userClient.from('member_accounts').insert(values).select(selectAccount).single();if(error)throw error;return data},
-  transitionAccountAtomic:async(accountId:string,action:string,expectedStatus:string,reason:string)=>{const {data,error}=await userClient.rpc('achang_member_admin_v2_transition',{p_account_id:accountId,p_action:action,p_expected_status:expectedStatus,p_reason:reason||null});if(error)throw error;return data},
+  transitionAccountAtomic:async(accountId:string,action:string,expectedStatus:string,reason:string)=>{
+   const {data,error}=await userClient.rpc('achang_member_admin_v2_transition',{p_account_id:accountId,p_action:action,p_expected_status:expectedStatus,p_reason:reason||null});
+   if(error){
+    if(error.code==='40001')throw new MemberAdminError(409,'會員狀態已由其他操作更新，請重新整理','STATE_CONFLICT');
+    if(error.code==='P0002')throw new MemberAdminError(404,'會員帳號不存在','ACCOUNT_NOT_FOUND');
+    if(error.code==='42501')throw new MemberAdminError(403,'只有已啟用管理員可以管理會員','ADMIN_REQUIRED');
+    if(error.code==='23514'){
+     if(/protected principal/i.test(error.message||''))throw new MemberAdminError(403,'受保護主要管理員不能停用','PROTECTED_PRINCIPAL');
+     throw new MemberAdminError(409,'會員狀態不允許此操作','INVALID_TRANSITION');
+    }
+    throw error;
+   }
+   return data;
+  },
   isProtectedPrincipal:async(userId:string)=>await sha(userId)===protectedPrincipalHash,
   listState:async()=>{
    const [{data:accounts,error:accountError},{data:members,error:memberError},{data:devices,error:deviceError}]=await Promise.all([
