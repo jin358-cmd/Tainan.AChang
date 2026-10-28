@@ -28,6 +28,11 @@ test('I06 fixed UI preview host is isolated from runtime APIs',()=>{
  assert.match(app,/if\(previewOnly\(\)\)throw Object\.assign\(new Error\('唯讀 UI 預覽不連線 API'\)/);
  assert.match(app,/if\(!previewOnly\(\)\)await loadRuntimeConfig\(\)/);
 });
+test('I06b fixed integration alias uses fail-closed TEST runtime configuration',()=>{
+ const app=read('app.js');
+ assert.doesNotMatch(app,/location\.hostname==='tainan-achang-online-ui-test-tjc1\.vercel\.app'/);
+ assert.match(app,/if\(!previewOnly\(\)\)await loadRuntimeConfig\(\)/);
+});
 test('I07 UI preview disables real authentication and write controls',()=>{
  const app=read('app.js');
  assert.match(app,/anchor\.hidden=true;anchor\.style\.display='none'/);

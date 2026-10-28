@@ -8,6 +8,7 @@ module.exports=L.run(async(req,res)=>{
  let response;
  if(identity.includes('@')){
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identity))L.problem(400,'Email 格式不正確');
+  if(/@auth\.achang\.invalid$/i.test(identity))L.problem(400,'此帳號請使用名冊手機與六位數字 PIN 登入');
   response=await L.request('/auth/v1/token?grant_type=password',{method:'POST',body:{email:identity.toLowerCase(),password}});
  }else{
   if(!/^[0-9]{6}$/.test(password))L.problem(400,'志工請輸入六位數字 PIN');
