@@ -56,8 +56,8 @@ async function createAccount(body,context,deps){
  }catch(error){
   const concurrent=await reconcileCreatedAccount(memberId,context,deps);
   if(concurrent?.auth_user_id===authUser.id&&concurrent.role===requestedRole)return {status:200,body:{ok:true,idempotent:true,member:deps.publicAccount(concurrent)}};
-  const cleaned=await deps.deleteAuthUser(authUser.id).catch(()=>false);
-  throw new MemberAdminError(cleaned?409:503,cleaned?'會員帳號建立衝突，請重新整理':'帳號建立失敗且需要管理員檢查登入身分');
+  if(concurrent)throw new MemberAdminError(409,'會員帳號建立衝突，請重新整理','CREATE_CONFLICT');
+  throw new MemberAdminError(503,'登入身分已保留，請重新送出以完成帳號建立','CREATE_RETRY_REQUIRED');
  }
 }
 

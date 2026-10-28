@@ -29,8 +29,8 @@ Base UI commit: `082d790b06b87a1927865be4466423675ce31c0e`
 - The Vercel API boundary canonicalizes formatted Taiwan mobile input (`09xx-xxx-xxx`, bare `09`, or `+8869`) to `+8869xxxxxxxx` before the strict Edge contract; invalid input is rejected before forwarding.
 - Shared phone numbers remain separated by member/Auth identity. The hidden Auth email alias is deterministically derived from the server credential plus member/role, so a retry reuses the same Auth identity without exposing the member UUID or creating additional aliases. The non-secret application login ID remains member-specific.
 - Duplicate same-member/same-role create is idempotent and does not rotate the PIN. Role mismatch is rejected.
-- If Auth creation succeeds but the account insert fails, v2 compensates by deleting that just-created Auth identity; inability to prove cleanup fails closed.
-- If the insert result and reconciliation read both fail, v2 returns `CREATE_OUTCOME_UNKNOWN` and deliberately does not delete the possibly committed Auth identity. A retry first reconciles the account row and becomes idempotent.
+- If Auth creation succeeds but the account insert fails, v2 retains the deterministic, recoverable Auth identity and returns `CREATE_RETRY_REQUIRED`; a retry reuses that same identity. It never performs an eager Auth delete based on a stale absence read, preventing one concurrent request from deleting another request's successful identity/account binding.
+- If the insert result and reconciliation read both fail, v2 returns `CREATE_OUTCOME_UNKNOWN` and likewise retains the possibly committed Auth identity. A retry first reconciles the account row or safely resumes with the same identity.
 - Synthetic `@auth.achang.invalid` identities are rejected by the administrator-email application route. Because an Auth JWT can contain the email claim, alias secrecy alone is not treated as brute-force protection. A TEST-only Password Verification Hook migration is prepared to enforce a five-failure/15-minute account bucket on every direct Auth password attempt for synthetic identities. The hook is not enabled yet and brute-force verification remains PENDING.
 - Approve, suspend and reactivate use one authenticated, RLS-bound database RPC. Suspend revokes devices and changes account status in the same PostgreSQL transaction, so a trigger/RLS/CAS failure rolls both changes back. Reactivation does not restore devices.
 - Self-suspension and suspension of the configured protected principal are rejected. There is no delete or role-change action.
@@ -56,7 +56,7 @@ Base UI commit: `082d790b06b87a1927865be4466423675ce31c0e`
 
 Aggregate evidence:
 
-- `npm test`: 42/42 PASS at source commit `55fe6d1e80d2dba084299996cb711f005ce882b0`.
+- `npm test`: 43/43 PASS on the latest source candidate (including concurrent A-fails/B-succeeds ownership safety).
 - `npm run test:browser`: PASS; local synthetic API only, all external requests blocked.
 - `node test/ui-readonly-preview.browser.cjs`: PASS; synthetic read-only preview, zero `/api` requests.
 - `node test/member-admin-v2.browser.cjs`: PASS; local synthetic API for create volunteer, approve volunteer, create admin, and preserved navigation controls.

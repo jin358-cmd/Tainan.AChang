@@ -19,7 +19,6 @@ function fixture(overrides={}){
   getMember:async id=>({id,phone_e164:'+886900000001',display_name:'合成會員',deleted_at:null}),
   getAccountByMember:async()=>null,getAccountById:async()=>account,
   ensureAuthUser:async payload=>{calls.push(['ensureAuth',payload]);return {id:'44444444-4444-4444-8444-444444444444'}},
-  deleteAuthUser:async id=>{calls.push(['deleteAuth',id]);return true},
   insertAccount:async values=>{calls.push(['insert',values]);return {...account,...values,id:account.id}},
   transitionAccountAtomic:async(id,action,status,reason)=>{calls.push(['transition',id,action,status,reason]);return {...account,status:action==='suspend'?'suspended':'active'}},
   isProtectedPrincipal:async()=>false,
@@ -114,13 +113,11 @@ test('duplicate create is idempotent and never resets PIN or role',async()=>{
  await assert.rejects(()=>executeMemberAdminV2({token:'valid-admin',body:{action:'create',memberId:existing.member_id,phone:'+886900000001',pin:'123456',role:'admin'}},deps),error=>error.status===409);
 });
 
-test('partial create compensates Auth user and fails closed when cleanup cannot be proven',async()=>{
+test('partial create retains the deterministic Auth identity for ownership-safe retry',async()=>{
  const {executeMemberAdminV2}=await corePromise;
  const first=fixture({insertAccount:async()=>{throw new Error('synthetic database failure')}});
- await assert.rejects(()=>executeMemberAdminV2({token:'valid-admin',body:{action:'create',memberId:'22222222-2222-4222-8222-222222222222',phone:'+886900000001',pin:'123456',role:'volunteer'}},first.deps),error=>error.status===409);
- assert.equal(first.calls.some(call=>call[0]==='deleteAuth'),true);
- const second=fixture({insertAccount:async()=>{throw new Error('synthetic database failure')},deleteAuthUser:async id=>{second.calls.push(['deleteAuth',id]);return false}});
- await assert.rejects(()=>executeMemberAdminV2({token:'valid-admin',body:{action:'create',memberId:'22222222-2222-4222-8222-222222222222',phone:'+886900000001',pin:'123456',role:'volunteer'}},second.deps),error=>error.status===503);
+ await assert.rejects(()=>executeMemberAdminV2({token:'valid-admin',body:{action:'create',memberId:'22222222-2222-4222-8222-222222222222',phone:'+886900000001',pin:'123456',role:'volunteer'}},first.deps),error=>error.status===503&&error.code==='CREATE_RETRY_REQUIRED');
+ assert.equal(first.calls.some(call=>call[0]==='deleteAuth'),false);
 });
 
 test('unknown insert outcome never deletes Auth blindly and a retry reconciles the committed account',async()=>{
@@ -141,6 +138,17 @@ test('unknown non-commit retry reuses one secret-derived Auth identity instead o
  const second=fixture({...shared,getAccountByMember:async()=>null});
  const result=await executeMemberAdminV2({token:'valid-admin',body:{action:'create',memberId:second.account.member_id,phone:'+886900000001',pin:'123456',role:'volunteer'}},second.deps);
  assert.equal(result.status,201);assert.equal(emails.length,2);assert.equal(emails[0],emails[1]);assert.equal(first.calls.some(call=>call[0]==='deleteAuth'),false);
+});
+
+test('interleaved failed A never deletes the shared Auth identity successfully inserted by B',async()=>{
+ const {executeMemberAdminV2}=await corePromise,sharedId='44444444-4444-4444-8444-444444444444';
+ const shared={authAlias:async()=> 'fedcba9876543210fedcba9876543210',ensureAuthUser:async()=>({id:sharedId})};
+ const request={token:'valid-admin',body:{action:'create',memberId:'22222222-2222-4222-8222-222222222222',phone:'+886900000001',pin:'123456',role:'volunteer'}};
+ const a=fixture({...shared,insertAccount:async()=>{throw new Error('A insert failed')},getAccountByMember:async()=>null});
+ await assert.rejects(()=>executeMemberAdminV2(request,a.deps),error=>error.code==='CREATE_RETRY_REQUIRED');
+ const b=fixture({...shared,getAccountByMember:async()=>null});const done=await executeMemberAdminV2(request,b.deps);
+ assert.equal(done.status,201);assert.equal(b.calls.find(call=>call[0]==='insert')[1].auth_user_id,sharedId);
+ assert.equal(a.calls.some(call=>call[0]==='deleteAuth'),false);assert.equal(b.calls.some(call=>call[0]==='deleteAuth'),false);
 });
 
 test('Auth commit with lost response retries the same identity before any account insert',async()=>{
@@ -180,6 +188,7 @@ test('TEST-12 Edge adapter uses user-scoped RLS writes and has no device or hard
  assert.match(edge,/getActiveAdmin/);assert.match(edge,/role','admin'/);assert.match(edge,/status','active'/);
  assert.doesNotMatch(edge,/device_id_hash|Approved administrator device|requiredApprovedDevice/);
  assert.doesNotMatch(edge,/\.delete\(\).*member_accounts|deleteUser\(target/);
+ assert.doesNotMatch(edge,/deleteAuthUser|admin\.auth\.admin\.deleteUser/);
  assert.match(core,/device_approval_required:requestedRole!=='admin'/);
  assert.match(edge,/protectedPrincipalHashByProject/);assert.match(edge,/await sha\(String\(account\.auth_user_id\)\)===protectedPrincipalHash/);
  assert.doesNotMatch(edge,/299cd935-bfd4-4847-b355-996018e63a17|a43a90bf-6bc2-48af-bf68-a33c26c6a284/);

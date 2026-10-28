@@ -47,7 +47,6 @@ Deno.serve(async(req:Request)=>{
    existing=await findAuthUser(email);if(existing&&valid(existing))return existing;
    throw error||new MemberAdminError(502,'登入身分建立失敗');
   },
-  deleteAuthUser:async(userId:string)=>{const {error}=await admin.auth.admin.deleteUser(userId);return !error},
   insertAccount:async(values:Record<string,unknown>)=>{const {data,error}=await userClient.from('member_accounts').insert(values).select(selectAccount).single();if(error)throw error;return data},
   transitionAccountAtomic:async(accountId:string,action:string,expectedStatus:string,reason:string)=>{
    const {data,error}=await userClient.rpc('achang_member_admin_v2_transition',{p_account_id:accountId,p_action:action,p_expected_status:expectedStatus,p_reason:reason||null});
