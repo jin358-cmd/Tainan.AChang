@@ -141,10 +141,12 @@ test('unknown non-commit retry reuses one persisted Auth identity instead of cre
 });
 
 test('Auth operation alias is persisted before Auth creation and survives credential rotation',()=>{
- const sql=read('supabase/migrations/20261028094500_achang_member_auth_operation_identity.sql'),edge=read('supabase/functions/achang-member-admin-v2/index.ts');
+ const sql=read('supabase/migrations/20261028094500_achang_member_auth_operation_identity.sql'),hardening=read('supabase/migrations/20261028115000_achang_member_auth_operation_invoker_hardening.sql'),edge=read('supabase/functions/achang-member-admin-v2/index.ts');
  assert.match(sql,/app_private\.achang_member_auth_operations/);assert.match(sql,/member_id uuid primary key/);assert.match(sql,/auth_alias text not null unique/);
  assert.match(sql,/security definer/);assert.match(sql,/not app_private\.is_admin\(\)/);assert.match(sql,/on conflict\(member_id\) do nothing/);assert.match(sql,/requested_role<>p_role/);
  assert.match(edge,/userClient\.rpc\('achang_prepare_member_auth_identity'/);assert.doesNotMatch(edge,/member-admin-v2-auth-alias|serviceKey\+'\|member-admin-v2-auth-alias/);
+ assert.match(hardening,/enable row level security/);assert.match(hardening,/to authenticated[\s\S]*app_private\.is_admin/);assert.match(hardening,/grant select, insert/);assert.match(hardening,/security invoker/);
+ assert.doesNotMatch(hardening,/grant (?:update|delete|all) on table[\s\S]*to authenticated/i);
  const core=read('supabase/functions/_shared/member-admin-v2-core.mjs');assert.ok(core.indexOf('await deps.authAlias')<core.indexOf('await deps.ensureAuthUser'));
 });
 
