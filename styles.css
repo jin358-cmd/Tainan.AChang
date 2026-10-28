@@ -946,3 +946,9 @@ body.volunteer-session #areaPopup.owner-center-popup .phone-link{min-height:42px
 #adminHeaderAction.admin-icon-action:hover,#adminHeaderAction.admin-icon-action:focus-visible{background:#ffffff22!important}
 #adminHeaderAction.admin-icon-action[hidden]{display:none!important}
 .device-detail-row .device-approved-time{display:block;margin-top:4px;font-size:12px!important;font-weight:800;color:#32604d!important;font-variant-numeric:tabular-nums}
+
+/* 2026-10-28: keep navigation in the red-marked slot, to the left of status. */
+body.volunteer-session #page-reports .volunteer-stop-item{grid-template-columns:48px minmax(0,1fr) auto auto;min-height:116px}
+body.volunteer-session #page-reports .volunteer-stop-item>.task-navigate{display:inline-flex!important;align-items:center;justify-content:center;gap:6px;white-space:nowrap;min-height:44px;background:#edf5ff;color:#1360a8;border:1px solid #b2d3f7;border-radius:12px;text-decoration:none;padding:8px 12px;font-size:14px;font-weight:900}
+body.volunteer-session #page-reports .volunteer-stop-item>.task-navigate svg{display:block;flex:none}
+@media(max-width:620px){body.volunteer-session #page-reports .volunteer-stop-item{grid-template-columns:38px minmax(68px,1fr) auto auto;gap:6px;padding:10px 7px}body.volunteer-session #page-reports .volunteer-stop-item>.task-navigate{padding:7px 5px;font-size:11px;gap:3px;min-height:42px}body.volunteer-session #page-reports .volunteer-stop-item>.task-navigate svg{width:14px;height:14px}body.volunteer-session #page-reports .volunteer-stop-result{padding-left:6px;min-height:60px}body.volunteer-session #page-reports .volunteer-stop-result .task-complete-btn{min-width:76px!important;font-size:12px!important;padding:7px 5px!important}}
