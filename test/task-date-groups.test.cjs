@@ -25,6 +25,8 @@ test('administrator task teams use one consistent two-row card with leader conta
  assert.match(app,/task-team-row task-team-primary/);assert.match(app,/task-team-identity/);assert.match(app,/task-leader-crown/);
  assert.match(app,/task-team-row task-team-route/);assert.match(app,/task-team-plate/);assert.match(app,/taskProgress\(done,entries\.length\)/);
  assert.match(styles,/#page-reports \.task-team\{background:#eaf5ff/);assert.match(styles,/\.task-team-phone\{font-size:18px/);
+ assert.match(styles,/#page-reports \.task-team-primary\{[^}]*flex-direction:row/);
+ assert.match(styles,/#page-reports \.task-date-history \.task-team\{background:#fff7dc;border-color:#e6cf7a\}/);
 });
 
 test('map popup enlarges member identity and centers the existing assignment button',()=>{
