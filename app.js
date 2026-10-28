@@ -331,6 +331,25 @@ async function loadGpsVehicles(){
  }).catch(error=>console.warn('GPS 快照載入失敗',error.message)).finally(()=>{gpsRequest=null});
  return gpsRequest;
 }
+function showPointDetail(point){
+ const box=document.querySelector('#mapBox');if(!box)return;
+ box.querySelector('#achangPointSheet')?.remove();
+ const sheet=document.createElement('section');sheet.id='achangPointSheet';
+ sheet.setAttribute('role','dialog');sheet.setAttribute('aria-label','站點與車輛資訊');
+ sheet.style.cssText='position:absolute;z-index:120;bottom:0;left:0;right:0;max-height:68%;overflow:auto;background:#fff;border-radius:22px 22px 0 0;padding:18px 18px 24px;box-shadow:0 -5px 22px #12294435;color:#193650;font-size:15px';
+ const heading=document.createElement('div');heading.style.cssText='display:flex;align-items:start;justify-content:space-between;gap:12px';
+ const title=document.createElement('h3');title.textContent=point.address||point.location||'車輛資訊';title.style.cssText='font-size:18px;margin:0 0 10px';
+ const close=document.createElement('button');close.type='button';close.textContent='✕';close.setAttribute('aria-label','關閉資訊卡');close.style.cssText='background:#edf2f5;border:0;border-radius:9px;padding:6px 12px';close.onclick=()=>sheet.remove();heading.append(title,close);sheet.append(heading);
+ const rows=[
+ ['路線',point.route||'尚未確認'],['車牌',point.plate||'尚未對應'],
+ ['時間',point.time||point.reported_at||'尚未提供'],['清運日',point.days||'尚未確認'],
+ ['資料狀態',point.kind==='gps'?'GPS 定位資料（依最後回報時間判定新舊）':'公告定點資料']
+ ];
+ for(const [label,value] of rows){const line=document.createElement('div');line.style.cssText='padding:7px 0;border-bottom:1px solid #e5ecf2';const b=document.createElement('b');b.textContent=label+'：';const span=document.createElement('span');span.textContent=value;line.append(b,span);sheet.append(line)}
+ const actions=document.createElement('div');actions.style.cssText='display:flex;flex-wrap:wrap;gap:8px;margin-top:14px';
+ for(const [label,action] of [['車輛位置',()=>{sheet.remove();if(point.lon!=null&&point.lat!=null&&map)map.flyTo({center:[point.lon,point.lat],zoom:15});}],['班表查詢',()=>{sheet.remove();go('planner');}],['車輛動態',()=>{gpsEnabled=true;const toggle=document.querySelector('#layerGps');if(toggle)toggle.checked=true;loadGpsVehicles();sheet.remove();}]]){const btn=document.createElement('button');btn.type='button';btn.textContent=label;btn.style.cssText='background:#fff;border:1px solid #3185a9;border-radius:20px;color:#236787;padding:8px 12px';btn.onclick=action;actions.append(btn)}
+ sheet.append(actions);box.append(sheet);
+}
 function updateMap(){if(page!=='map')return;if(mapFailed){drawFallback();return}if(!map||!map.getLayer('village-fill'))return;highlightMapSelection();markers.forEach(m=>m.remove());markers=[];
  for(const a of visibleMapAreas()){
   const c=areaCentroid(a),cnt=assignedPeople(a).length,lead=leaderOf(a);
@@ -349,7 +368,7 @@ function updateMap(){if(page!=='map')return;if(mapFailed){drawFallback();return}
  if(liveRole!=='volunteer')for(const r of data.stops){
   const pos=state.pins[stopKey(r)];if(!pos||!coord(pos.lon)||!coord(pos.lat))continue;
   if((r['時段']==='日間'&&!layerState.day)||(r['時段']==='夜間'&&!layerState.night))continue;
-  marker(r['時段']==='日間'?'☀':'☾',pos.lon,pos.lat,r['時段']==='日間'?'day':'night',r['到達']+' '+r['停靠點原文'],()=>openShiftStopPopup(r['里別'],r['時段']));
+  marker(r['時段']==='日間'?'☀':'☾',pos.lon,pos.lat,r['時段']==='日間'?'day':'night',r['到達']+' '+r['停靠點原文'],()=>showPointDetail({address:r['停靠點原文'],route:r['車次'],plate:r['車牌'],time:r['到達']+'～'+r['離開'],days:r['垃圾日'],lon:pos.lon,lat:pos.lat}));
  }
  if(gpsEnabled&&(liveRole==='admin'||liveRole==='volunteer')){
   for(const v of gpsVehicles){
@@ -358,6 +377,7 @@ function updateMap(){if(page!=='map')return;if(mapFailed){drawFallback();return}
    label.textContent='🚛';
    label.title=v.plate+' · '+v.location+' · '+v.reported_at+(gpsIsLive?'（官方 GPS 定位）':'（歷史快照）');
    label.style.cssText='background:#8B5CF6;color:white;border:2px solid white;border-radius:50%;padding:5px;cursor:pointer;font-size:20px;box-shadow:0 2px 7px #34215b80';
+   label.addEventListener('click',()=>showPointDetail({kind:'gps',location:v.location,plate:v.plate,reported_at:v.reported_at,lon:v.longitude,lat:v.latitude}));
    markers.push(new window.maplibregl.Marker({element:label}).setLngLat([v.longitude,v.latitude])
     .setPopup(new window.maplibregl.Popup({offset:24}).setText(v.plate+' · '+v.location+' · '+v.reported_at+(gpsIsLive?'（臺南市官方資料）':'（歷史 GPS，非即時）'))).addTo(map));
   }
