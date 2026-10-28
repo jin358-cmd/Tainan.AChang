@@ -52,6 +52,13 @@ test('service-area leader and remove controls match phone sizing without forced 
  assert.doesNotMatch(styles,/#areaMembers \.member-actions[^}]*grid-template-columns/);
 });
 
+test('planner removes the redundant current-area summary without changing scheduling controls',()=>{
+ const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+ assert.doesNotMatch(html,/id="plannerFocus"/);assert.doesNotMatch(app,/\$\('#plannerFocus'\)|\$\('#plannerRouteInline'\)/);
+ for(const id of ['planDate','plannerAreaSelect','routeButtons','areaTeamPicker','stopList'])assert.match(html,new RegExp(`id="${id}"`));
+ assert.match(html,/data-shift="日間"/);assert.match(html,/data-shift="夜間"/);assert.match(app,/renderStops\(rows\)/);
+});
+
 test('fourth task page exposes three requested groups without changing task APIs',()=>{
  assert.match(app,/history:'歷史跟巡',current:'當日跟巡',future:'下次跟巡'/);
  assert.match(app,/task-date-'\+category/);assert.match(app,/category==='current'\?'open':''/);

@@ -45,7 +45,7 @@
 <section id="page-planner" class="page" aria-label="垃圾車跟巡排班">
  <div class="section-heading"><div><h1>垃圾車跟巡</h1><p>依里別、車次與站點安排。</p></div></div>
  <div id="plannerGate" class="gate" hidden><div class="gate-symbol">☝</div><strong>請先分配服務里</strong><p>至少指定一名志工的服務里，才可安排車次與拜訪站點。</p><button class="primary" data-go="areas">前往服務里分配</button></div>
- <div id="plannerContent"><div id="plannerFocus" class="planner-focus surface"></div><div class="surface compact-controls planner-first">
+ <div id="plannerContent"><div class="surface compact-controls planner-first">
 <label class="planner-field"><span>拜訪日期</span><input type="date" id="planDate" /></label>
 <label class="planner-field"><span>指定里別</span><select id="plannerAreaSelect" aria-label="選擇跟巡里別"><option value="all">全部</option></select></label>
 <div class="planner-shifts"><strong>清運時段</strong><div class="shift-row"><button class="shift on" data-shift="日間"><span class="legend-pin day">☀</span> 日間</button><button class="shift" data-shift="夜間"><span class="legend-pin night">☾</span> 夜間</button></div></div>
@@ -69,6 +69,6 @@
 <div class="modal-backdrop" id="modal" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="sheet-handle"></div><div class="sheet-head"><h2 id="modalTitle">選擇志工</h2><button id="closeModal" class="iconbtn light" aria-label="關閉">✕</button></div><div id="modalBody" class="sheet-body"></div></div></div>
 <div id="toast" class="toast" role="status" hidden></div>
 
-<script defer src="./app.js?v=186"></script>
+<script defer src="./app.js?v=187"></script>
 </body>
 </html>

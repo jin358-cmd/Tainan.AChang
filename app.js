@@ -70,7 +70,20 @@ const an=$('#areaName');an.textContent=selectedArea;an.style.color=data.colors[s
 
 function chooseRoute(){const matching=data.stops.filter(r=>r['時段']===shift&&(plannerArea==='all'||r['里別']===plannerArea));routes=uniq(matching.map(routeKey));if(!routes.includes(chosenRoute))chosenRoute=routes[0]||'';const holder=$('#routeButtons');holder.innerHTML=routes.length?routes.map(k=>`<button class="route-choice ${chosenRoute===k?'on':''}" type="button" data-route="${esc(k)}">${esc(k.split('|')[1])} · ${esc(k.split('|')[2])}</button>`).join(''):'<span class="mini-note">此里於所選時段暫無已選錄車次，請切換里別或時段。</span>'}
 
-function renderPlanner(){const gate=$('#plannerGate'),content=$('#plannerContent'),locked=liveRole==='admin'&&assignedCount()===0;gate.hidden=!locked;content.hidden=locked;if(locked)return;$('#planDate').value=date;$('#plannerAreaSelect').value=plannerArea;$$('[data-shift]').forEach(b=>b.classList.toggle('on',b.dataset.shift===shift));chooseRoute();const allRows=chosenRoute?routeRows():[];const rows=plannerArea==='all'?allRows:allRows.filter(r=>r['里別']===plannerArea),regions=uniq(rows.map(r=>r['里別']));if(!regions.includes(teamArea))teamArea=regions[0]||'';const focusArea=plannerArea==='all'?'全部':plannerArea;const focusColor=plannerArea==='all'?'#176581':data.colors[plannerArea]||'#176581';const times=rows.map(x=>x['到達']).filter(Boolean).sort();$('#plannerFocus').innerHTML=`<div class="planner-focus-head"><strong>目前跟巡里別</strong><span class="planner-focus-badge" style="--selected-area-color:${esc(focusColor)}">${esc(focusArea)}</span></div><div class="planner-focus-meta"><span>拜訪日期：<b>${esc(date)}</b></span><span>清運時段：<b>${esc(shift)}</b></span><span>已選車次：<b>${esc(chosenRoute?chosenRoute.split('|')[1]+' · '+chosenRoute.split('|')[2]:'未選擇')}</b></span></div><div class="planner-route-inline" id="plannerRouteInline"></div>`;$('#plannerRouteInline').textContent=chosenRoute?`${rows.length} 個停靠點 · ${regions.length} 里 · ${times[0]||'--:--'}～${times.at(-1)||'--:--'}`:'請先選擇有清運車次的時段／里別';if(regions.length)renderAreaTeams(regions);else $('#areaTeamPicker').innerHTML='';const assignBtn=$('#plannerAssignArea');if(assignBtn){assignBtn.textContent='指派跟巡'+(teamArea||'服務里');assignBtn.disabled=!teamArea;}const actions=$('#areaTeamPicker .team-areas');const target=$('#visitAreaButtons');target.replaceChildren();if(actions)target.appendChild(actions);renderStops(rows)}
+function renderPlanner(){
+ const gate=$('#plannerGate'),content=$('#plannerContent'),locked=liveRole==='admin'&&assignedCount()===0;
+ gate.hidden=!locked;content.hidden=locked;if(locked)return;
+ $('#planDate').value=date;$('#plannerAreaSelect').value=plannerArea;
+ $$('[data-shift]').forEach(b=>b.classList.toggle('on',b.dataset.shift===shift));
+ chooseRoute();
+ const allRows=chosenRoute?routeRows():[];
+ const rows=plannerArea==='all'?allRows:allRows.filter(r=>r['里別']===plannerArea),regions=uniq(rows.map(r=>r['里別']));
+ if(!regions.includes(teamArea))teamArea=regions[0]||'';
+ if(regions.length)renderAreaTeams(regions);else $('#areaTeamPicker').innerHTML='';
+ const assignBtn=$('#plannerAssignArea');if(assignBtn){assignBtn.textContent='指派跟巡'+(teamArea||'服務里');assignBtn.disabled=!teamArea;}
+ const actions=$('#areaTeamPicker .team-areas'),target=$('#visitAreaButtons');target.replaceChildren();if(actions)target.appendChild(actions);
+ renderStops(rows);
+}
 
 function renderAreaTeams(regions){
  const root=$('#areaTeamPicker'),crew=plan().teams[teamArea]||[],available=rosterAvailable(teamArea);
