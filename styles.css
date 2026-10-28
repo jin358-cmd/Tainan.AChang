@@ -958,3 +958,7 @@ body.volunteer-session #page-reports .volunteer-stop-item>.task-navigate svg{dis
 .approved-member-row .member-device-icons .device-marker{display:inline-flex;align-items:center;justify-content:center;font-size:21px;margin:0;min-width:28px;min-height:31px}
 .approved-member-row .member-device-icons .device-none{font-size:11px;color:#6a7d87;white-space:nowrap}
 @media(max-width:620px){.approved-member-row .member-device-icons{margin-left:auto;max-width:108px;gap:2px}.approved-member-row .member-device-icons .device-marker{font-size:18px;min-width:23px}}
+
+/* 2026-10-28: readable destructive action label in member authorization */
+.approved-member-row .member-auth-actions button.smallbtn.danger{background:#fff0f2!important;color:#b00020!important;border:2px solid #d84762!important;font-weight:900!important;text-shadow:none!important;opacity:1!important}
+.approved-member-row .member-auth-actions button.smallbtn.danger:hover,.approved-member-row .member-auth-actions button.smallbtn.danger:focus-visible{background:#ffe1e7!important;color:#8e0019!important}
