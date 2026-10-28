@@ -149,16 +149,19 @@ test('service-area assignment picker enlarges only desktop village and action te
 });
 
 test('desktop service-area counts match and village tiles show people units without changing mobile',()=>{
- assert.match(styles,/\.pending-desktop-label\{display:none\}@media\(min-width:800px\)\{#page-areas #areaAssignedCount,#page-areas #pendingCount\{font-size:14px;font-weight:850;line-height:1\.3\}\.pending-mobile-label\{display:none\}\.pending-desktop-label\{display:inline\}\.area-pager \.area-pill em::after\{content:'人'\}#areaMembers \.member,#pendingMembers \.member\{min-height:60px\}#page-areas #pendingMembers \.member\.pending\{background:#edf4f8;border-color:#c7d8e4\}#pendingMembers \.member\.pending \.member-info\{display:flex;align-items:center;gap:8px\}/);
+ assert.match(styles,/\.pending-desktop-label\{display:none\}@media\(min-width:800px\)\{#page-areas #areaAssignedCount,#page-areas #pendingCount\{font-size:14px;font-weight:850;line-height:1\.3\}/);
+ assert.match(styles,/@media\(min-width:800px\)\{\.area-pager \.area-pill em\{font-size:14px!important\}#areaMembers \.member,#pendingMembers \.member\{min-height:70px\}\}/);
  assert.match(styles,/#pendingMembers \.member\.pending \.service-phone,#pendingMembers \.member\.pending \[data-assign\]\{box-sizing:border-box;min-height:38px;padding:8px 9px;font-size:14px!important;line-height:1\.2;white-space:nowrap\}/);
  assert.match(html,/<span class="pending-mobile-label">待分配人員 <\/span><span id="pendingCount" class="count-tag warm"><span class="pending-desktop-label">待分配 <\/span><span id="pendingCountValue">0<\/span> 人<\/span>/);
  assert.doesNotMatch(styles,/@media\(max-width:[^)]+\)[^{]*\{[^}]*area-pill em::after/);
 });
 
 test('desktop create and edit member forms share readable field labels and controls',()=>{
- assert.match(styles,/@media\(min-width:800px\)\{#newMemberForm>label,#personForm>label\{font-size:15px;line-height:1\.4\}#newMemberForm>label>input,#newMemberForm>label>select,#personForm>label>input,#personForm>label>select\{min-height:48px;padding:10px 12px;font-size:16px;line-height:1\.35\}\}/);
+ assert.match(styles,/@media\(min-width:800px\)\{#newMemberForm \.member-create-fields>label,#personForm>label\{font-size:15px;line-height:1\.4\}#newMemberForm \.member-create-fields>label>input,#newMemberForm \.member-create-fields>label>select,#personForm>label>input,#personForm>label>select\{min-height:48px;padding:10px 12px;font-size:16px;line-height:1\.35\}\}/);
  assert.doesNotMatch(styles,/@media\(max-width:[^)]+\)[^{]*\{[^}]*(?:#newMemberForm|#personForm)/);
  assert.match(app,/classList\.toggle\('member-create-open',title==='新增會員｜名冊與授權同步建立'\)/);
  assert.match(styles,/@media\(min-width:800px\)\{\.modal-backdrop\.member-create-open\{align-items:center;padding:max\(12px,env\(safe-area-inset-top\)\) 12px max\(12px,env\(safe-area-inset-bottom\)\)\}\.modal-backdrop\.member-create-open \.sheet\{height:min\(720px,calc\(100dvh - 24px - env\(safe-area-inset-top\) - env\(safe-area-inset-bottom\)\)\);max-height:calc\(100dvh - 24px - env\(safe-area-inset-top\) - env\(safe-area-inset-bottom\)\);overflow:hidden\}/);
- assert.match(styles,/\.modal-backdrop\.member-create-open \.sheet-body\{flex:1 1 auto;min-height:0;overflow-y:auto;scroll-padding-bottom:16px\}\.modal-backdrop\.member-create-open #saveNewMember\{min-height:48px;font-size:15px;line-height:1\.35\}/);
+ assert.match(styles,/\.modal-backdrop\.member-create-open \.sheet-body\{flex:1 1 auto;min-height:0;overflow:hidden;padding-bottom:10px\}/);
+ assert.match(styles,/\.modal-backdrop\.member-create-open \.member-create-fields\{flex:1 1 auto;min-height:0;overflow-y:auto;padding-right:3px\}/);
+ assert.match(styles,/\.modal-backdrop\.member-create-open \.member-create-footer\{flex:0 0 auto;background:#fff;padding-top:8px\}/);
 });

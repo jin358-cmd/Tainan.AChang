@@ -582,13 +582,17 @@ async function openMemberAdmin(preselectId=''){
 function openNewMemberForm(){
  if(!assertAdmin())return;
  showModal('新增會員｜名冊與授權同步建立',`<form id="newMemberForm" class="member-create-form">
+ <div class="member-create-fields">
  <p class="form-hint">第一步先新增志工至正式名冊。儲存後會自動開啟會員授權，選定剛新增的志工，再設定 6 碼 PIN 並核准開通。</p>
  <label>姓名 *<input name="name" required maxlength="80" autocomplete="off"></label>
  <label>手機號碼 *<input name="phone" required type="tel" inputmode="tel" placeholder="0989-098-468"></label>
  <label>原居住里<input name="residentArea" maxlength="40" placeholder="選填，不需重複加「里」"></label>
  <label>地址<input name="address" maxlength="300"></label>
+ </div>
+ <div class="member-create-footer">
  <button type="submit" class="primary wide" id="saveNewMember">新增至名冊，下一步設定授權 PIN</button>
  <p id="memberCreateStatus" class="form-progress" role="status" aria-live="polite"></p>
+ </div>
  </form>`);
 }
 async function submitNewMemberForm(form){
