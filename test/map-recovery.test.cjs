@@ -33,9 +33,17 @@ test('map startup has bounded failure, cleanup and retry guards', () => {
 });
 
 test('map asset revision and service-worker cache advance together', () => {
-  assert.match(html, /styles\.css\?v=195/);
+  assert.match(html, /styles\.css\?v=196/);
   assert.match(html, /app\.js\?v=190/);
-  assert.match(sw, /achang-pwa-shell-v131-map-roster-header/);
+  assert.match(sw, /achang-pwa-shell-v132-map-attribution/);
+});
+
+test('map source attribution is compact but remains available', () => {
+  assert.match(html, /<details class="map-source-info">/);
+  assert.match(html, /© OpenStreetMap contributors/);
+  assert.match(html, /臺南市垃圾車位置資料/);
+  assert.match(html, /約略位置，非導航用途/);
+  assert.doesNotMatch(html, /<p class="map-foot">/);
 });
 
 test('volunteer map layer uses the short label and a stable white person icon', () => {
