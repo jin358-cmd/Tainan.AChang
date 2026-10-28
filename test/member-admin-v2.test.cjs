@@ -114,6 +114,15 @@ test('promotion RPC is invoker-authorized, CAS protected, and audits the role ch
  assert.match(promotion,/revoke all[\s\S]*from public, anon/);assert.match(promotion,/grant execute[\s\S]*to authenticated/);
 });
 
+test('promotion audit event is accepted without removing existing event types',()=>{
+ const migration=read('supabase/migrations/20261028151000_achang_member_admin_v2_promotion_audit_event.sql');
+ assert.match(migration,/'member_promoted_admin'::text/);
+ for(const eventType of ['account_requested','account_approved','account_rejected','account_suspended','account_reactivated','device_requested','device_approved','device_revoked','member_archived','invite_issued','invite_consumed','admin_created','login_succeeded','login_failed']){
+  assert.match(migration,new RegExp(`'${eventType}'::text`));
+ }
+ assert.match(migration,/add constraint member_authorization_events_event_type_check/);
+});
+
 test('legacy active promotion records approval provenance so suspend then reactivate remains valid',async()=>{
  const {executeMemberAdminV2}=await corePromise,{account}=fixture();
  let current={...account,role:'volunteer',status:'active',approved_at:null};
