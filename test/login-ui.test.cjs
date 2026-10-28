@@ -9,6 +9,8 @@ const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 test('login screen omits the top-right return action while preserving login controls',()=>{
  const html=read('index.html'),app=read('app.js');
  assert.doesNotMatch(html,/id="closeSecureLogin"/);
+ assert.doesNotMatch(html,/首次登入／重新驗證/);
+ assert.match(html,/placeholder="志工手機／管理員 Email"/);
  assert.match(html,/id="secureLoginForm"/);assert.match(html,/id="googleOAuthLogin"/);assert.match(html,/登入並檢視工作/);
  assert.match(app,/const closeSecureLogin=\$\('#closeSecureLogin'\);if\(closeSecureLogin\)/);
 });
