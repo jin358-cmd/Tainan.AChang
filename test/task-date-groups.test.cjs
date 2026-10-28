@@ -6,6 +6,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 const app=fs.readFileSync(path.join(__dirname,'..','app.js'),'utf8');
 const styles=fs.readFileSync(path.join(__dirname,'..','styles.css'),'utf8');
+const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
 
 function classify(nowIso,visitDate,status='待訪'){
  const start=app.indexOf("const taipeiToday=");const end=app.indexOf('function volunteerGroups()',start);assert.ok(start>=0&&end>start);
@@ -145,4 +146,16 @@ test('service-area assignment picker enlarges only desktop village and action te
  assert.match(app,/pick-list person-area-picker/);assert.match(app,/pick-row person-area-row/);assert.match(app,/person-area-assign/);
  assert.match(styles,/@media\(min-width:800px\)\{[^}]*\.desktop-nav button[\s\S]*\.person-area-picker \.person-area-row>strong\{font-size:18px\}[\s\S]*\.person-area-picker \.person-area-assign\{font-size:17px/);
  assert.doesNotMatch(styles,/@media\(max-width:[^)]+\)[^{]*\{[^}]*person-area-(?:row|assign)/);
+});
+
+test('desktop service-area counts match and village tiles show people units without changing mobile',()=>{
+ assert.match(styles,/\.pending-desktop-label\{display:none\}@media\(min-width:800px\)\{#page-areas #areaAssignedCount,#page-areas #pendingCount\{font-size:14px;font-weight:850;line-height:1\.3\}\.pending-mobile-label\{display:none\}\.pending-desktop-label\{display:inline\}\.area-pager \.area-pill em::after\{content:'人'\}#areaMembers \.member,#pendingMembers \.member\{min-height:60px\}#page-areas #pendingMembers \.member\.pending\{background:#edf4f8;border-color:#c7d8e4\}#pendingMembers \.member\.pending \.member-info\{display:flex;align-items:center;gap:8px\}/);
+ assert.match(styles,/#pendingMembers \.member\.pending \.service-phone,#pendingMembers \.member\.pending \[data-assign\]\{box-sizing:border-box;min-height:38px;padding:8px 9px;font-size:14px!important;line-height:1\.2;white-space:nowrap\}/);
+ assert.match(html,/<span class="pending-mobile-label">待分配人員 <\/span><span id="pendingCount" class="count-tag warm"><span class="pending-desktop-label">待分配 <\/span><span id="pendingCountValue">0<\/span> 人<\/span>/);
+ assert.doesNotMatch(styles,/@media\(max-width:[^)]+\)[^{]*\{[^}]*area-pill em::after/);
+});
+
+test('desktop create and edit member forms share readable field labels and controls',()=>{
+ assert.match(styles,/@media\(min-width:800px\)\{#newMemberForm>label,#personForm>label\{font-size:15px;line-height:1\.4\}#newMemberForm>label>input,#newMemberForm>label>select,#personForm>label>input,#personForm>label>select\{min-height:48px;padding:10px 12px;font-size:16px;line-height:1\.35\}\}/);
+ assert.doesNotMatch(styles,/@media\(max-width:[^)]+\)[^{]*\{[^}]*(?:#newMemberForm|#personForm)/);
 });

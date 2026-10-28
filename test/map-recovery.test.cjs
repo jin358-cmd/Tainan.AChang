@@ -33,9 +33,9 @@ test('map startup has bounded failure, cleanup and retry guards', () => {
 });
 
 test('map asset revision and service-worker cache advance together', () => {
-  assert.match(html, /styles\.css\?v=203/);
-  assert.match(html, /app\.js\?v=197/);
-  assert.match(sw, /achang-pwa-shell-v143-desktop-nav-picker/);
+  assert.match(html, /styles\.css\?v=204/);
+  assert.match(html, /app\.js\?v=198/);
+  assert.match(sw, /achang-pwa-shell-v144-desktop-area-roster-readability/);
 });
 
 test('map uses one compact native attribution entry with GPS source retained', () => {
