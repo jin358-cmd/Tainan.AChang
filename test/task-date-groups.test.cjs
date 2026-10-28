@@ -126,5 +126,6 @@ test('desktop task categories stack history and future at left while mobile keep
  assert.match(styles,/@media\(min-width:800px\)\{[\s\S]*#page-reports #reportsContent\.task-date-layout\{[^}]*grid-template-columns:minmax\(0,1fr\) minmax\(0,1fr\)[^}]*align-items:stretch/);
  assert.match(styles,/\.task-date-left-stack\{display:flex;flex-direction:column;gap:8px/);
  assert.match(styles,/\.task-date-left-stack>\.task-date-category:not\(\[open\]\)\{flex:1 1 0\}/);
+ assert.match(styles,/\.task-date-current\{align-self:start\}/);
  assert.doesNotMatch(styles,/\.task-date-(?:history|future)\{[^}]*(?:position:absolute|transform:translate)/);
 });

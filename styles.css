@@ -1007,7 +1007,7 @@ body.volunteer-session #page-reports .volunteer-stop-item>.task-navigate svg{dis
  #page-reports #reportsContent.task-date-layout>.task-date-left-stack{display:flex;flex-direction:column;gap:8px;min-width:0}
  #page-reports #reportsContent.task-date-layout .task-date-category{margin-bottom:0;min-height:0}
  #page-reports #reportsContent.task-date-layout>.task-date-left-stack>.task-date-category:not([open]){flex:1 1 0}
- #page-reports #reportsContent.task-date-layout>.task-date-current{align-self:stretch}
+ #page-reports #reportsContent.task-date-layout>.task-date-current{align-self:start}
 }
 
 /* 2026-10-28 Owner: consistent two-row administration task cards. */
@@ -1060,4 +1060,3 @@ body.restored-admin-map #page-map #areaPopup.restored-map-popup[hidden]{display:
 @media(max-width:620px){body.restored-admin-map #page-map #areaPopup.restored-map-popup{display:flex!important;flex-direction:column!important;height:min(380px,calc(100% - 20px))!important;max-height:calc(100% - 20px)!important;overflow:hidden!important}body.restored-admin-map #page-map #areaPopup.restored-map-popup[hidden]{display:none!important}body.restored-admin-map #page-map #areaPopup.restored-map-popup .popup-top{flex:0 0 auto}body.restored-admin-map #page-map #areaPopup.restored-map-popup .popup-contacts{flex:1 1 auto;min-height:0;max-height:242px!important;overflow-y:auto!important;gap:9px!important;margin:9px 0!important}body.restored-admin-map #page-map #areaPopup.restored-map-popup .popup-detail-btn{flex:0 0 auto!important;margin-top:7px!important}}
 
 /* Compact, recoverable map/source attribution without a persistent long caption. */
-.map-source-info{position:absolute;right:38px;bottom:8px;z-index:13}.map-source-info>summary{list-style:none;display:grid;place-items:center;width:26px;height:26px;border:1px solid #aebfc9;border-radius:7px;background:#fffffff2;color:#36566a;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 2px 8px #17334b26}.map-source-info>summary::-webkit-details-marker{display:none}.map-source-info>div{position:absolute;right:0;bottom:32px;width:min(260px,calc(100vw - 42px));display:grid;gap:6px;padding:10px;border:1px solid #bdccd5;border-radius:9px;background:#fffffff7;box-shadow:0 7px 24px #17334b35;font-size:11px;line-height:1.45}.map-source-info a{color:#245f87}.map-source-info span{color:#5f7484}
