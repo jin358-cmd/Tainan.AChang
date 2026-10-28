@@ -31,6 +31,8 @@ test('administrator task teams use one consistent two-row card with leader conta
  assert.match(styles,/#page-reports \.task-team-primary \.task-progress-label\{padding:3px 6px\}/);
  assert.match(styles,/@media\(min-width:531px\)\{#page-reports \.task-team-primary \.task-progress-status\{font-size:15px\}\}/);
  assert.match(styles,/#page-reports \.task-member-list\{background:#fff0f5/);
+ assert.match(styles,/#page-reports \.task-member-progress\{flex-wrap:nowrap;align-items:center;gap:8px\}/);
+ assert.match(styles,/#page-reports \.task-member-progress>\.task-progress-status\{[^}]*margin-left:auto[^}]*min-width:100px[^}]*text-align:center/);
  assert.match(styles,/#page-reports \.task-date-history \.task-team\{background:#fff7dc;border-color:#e6cf7a\}/);
  assert.match(styles,/#page-reports \.task-route-separator,#page-reports \.task-team-shift \.legend-pin\{display:none\}/);
 });
