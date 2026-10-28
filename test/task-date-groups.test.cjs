@@ -48,7 +48,8 @@ test('map popup enlarges member identity and centers the existing assignment but
  assert.match(styles,/\.restored-map-popup\{[^}]*height:min\(380px,calc\(100% - 20px\)\)!important[^}]*overflow:hidden!important/);
  assert.match(styles,/\.popup-contacts\{flex:1 1 auto;min-height:0;max-height:242px!important;overflow-y:auto!important/);
  assert.match(styles,/\.restored-map-popup\[hidden\]\{display:none!important\}/);
- assert.match(styles,/@media\(min-width:621px\)[\s\S]*\.restored-map-popup\{[^}]*width:min\(430px,calc\(100% - 20px\)\)!important[^}]*overflow:hidden!important/);
+ assert.match(styles,/\.restored-map-popup\[hidden\]\{display:none!important\}/);
+ assert.match(styles,/@media\(min-width:621px\)[\s\S]*\.restored-map-popup\{[^}]*width:min\(430px,calc\(100% - 20px\)\)!important[^}]*max-width:none!important[^}]*overflow:hidden!important/);
  assert.match(styles,/@media\(min-width:621px\)[\s\S]*\.popup-contact strong\{[^}]*white-space:nowrap/);
  assert.match(styles,/@media\(min-width:621px\)[\s\S]*\.popup-crown\{position:relative;top:-2px\}/);
  assert.match(app,/const pw=Math\.min\(430,Math\.max\(210,box\.clientWidth-20\)\)/);
