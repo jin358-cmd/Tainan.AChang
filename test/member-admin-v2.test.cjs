@@ -105,11 +105,12 @@ test('promotion rejects pending, suspended, existing admin, and self targets',as
 });
 
 test('promotion RPC is invoker-authorized, CAS protected, and audits the role change',()=>{
- const sql=read('supabase/migrations/20261028144700_achang_member_admin_v2_promote_active_semantics.sql');
- assert.match(sql,/security definer/i);assert.match(sql,/set search_path = ''/);assert.match(sql,/not app_private\.is_admin\(\)/);
- assert.match(sql,/role is distinct from p_expected_role/);assert.match(sql,/status is distinct from p_expected_status/);assert.doesNotMatch(sql,/approved_at is null/);
- assert.match(sql,/set role = 'admin', device_approval_required = false/);assert.match(sql,/'member_promoted_admin'/);
- assert.match(sql,/revoke all[\s\S]*from public, anon/);assert.match(sql,/grant execute[\s\S]*to authenticated/);
+ const sql=read('supabase/migrations/20261028145500_achang_member_admin_v2_lock_member_rows.sql'),promotion=sql.slice(sql.indexOf('create or replace function public.achang_member_admin_v2_promote_admin'));
+ assert.match(promotion,/security definer/i);assert.match(promotion,/set search_path = ''/);assert.match(promotion,/not app_private\.is_admin\(\)/);
+ assert.match(promotion,/role is distinct from p_expected_role/);assert.match(promotion,/status is distinct from p_expected_status/);assert.doesNotMatch(promotion,/approved_at is null/);
+ assert.match(promotion,/select \* into v_target[\s\S]*for update[\s\S]*select \* into v_member[\s\S]*for update/);
+ assert.match(promotion,/set role = 'admin', device_approval_required = false/);assert.match(promotion,/'member_promoted_admin'/);
+ assert.match(promotion,/revoke all[\s\S]*from public, anon/);assert.match(promotion,/grant execute[\s\S]*to authenticated/);
 });
 
 test('TEST-02 current server session contract authenticates active admins without an approved-device gate',()=>{
@@ -335,9 +336,9 @@ test('actual API phone parser accepts only 09xx-xxx-xxx, bare 09, or +886 before
 });
 
 test('database transition RPC is atomic, invoker-authorized, CAS protected, and preserves device revocation on rollback',()=>{
- const sql=read('supabase/migrations/20261028090000_achang_member_admin_v2_atomic_transition.sql');
+ const sql=read('supabase/migrations/20261028145500_achang_member_admin_v2_lock_member_rows.sql');
  assert.match(sql,/security invoker/i);assert.match(sql,/not app_private\.is_admin\(\)/);
- assert.match(sql,/for update/);assert.match(sql,/status is distinct from p_expected_status/);
+ assert.match(sql,/select \* into v_account[\s\S]*for update[\s\S]*select \* into v_member[\s\S]*for update/);assert.match(sql,/status is distinct from p_expected_status/);
  assert.match(sql,/update public\.member_devices[\s\S]*update public\.member_accounts/);
  assert.doesNotMatch(sql,/exception[\s\S]*commit|begin[\s\S]*commit/i);
  assert.match(sql,/protected principal cannot be suspended/);assert.match(sql,/v_account\.auth_user_id = v_actor/);
