@@ -31,7 +31,7 @@ Deno.serve(async(req:Request)=>{
  };
  const deps={
   now:()=>new Date().toISOString(),
-  authAlias:async(memberId:string,role:string)=>(await sha(serviceKey+'|member-admin-v2-auth-alias|'+memberId+'|'+role)).slice(0,32),
+  authAlias:async(memberId:string,role:string)=>{const {data,error}=await userClient.rpc('achang_prepare_member_auth_identity',{p_member_id:memberId,p_role:role});if(error)throw error;return data},
   publicAccount:(account:Record<string,unknown>)=>({id:account.id,member_id:account.member_id,auth_user_id:account.auth_user_id,login_id:account.login_id,role:account.role,status:account.status,requested_at:account.requested_at,approved_at:account.approved_at,suspended_at:account.suspended_at,reactivated_at:account.reactivated_at,device_approval_required:account.device_approval_required}),
   authenticate:async(accessToken:string)=>{const {data:{user},error}=await admin.auth.getUser(accessToken);if(error||!user)return null;return {id:user.id,email:user.email||''}},
   getActiveAdmin:async(userId:string)=>{const {data,error}=await userClient.from('member_accounts').select('id,role,status').eq('auth_user_id',userId).eq('role','admin').eq('status','active').limit(1).maybeSingle();if(error)throw error;return data},

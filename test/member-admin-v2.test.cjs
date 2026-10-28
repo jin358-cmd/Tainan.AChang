@@ -130,7 +130,7 @@ test('unknown insert outcome never deletes Auth blindly and a retry reconciles t
  assert.equal(result.body.idempotent,true);assert.equal(retry.calls.some(call=>call[0]==='ensureAuth'),false);
 });
 
-test('unknown non-commit retry reuses one secret-derived Auth identity instead of creating another alias',async()=>{
+test('unknown non-commit retry reuses one persisted Auth identity instead of creating another alias',async()=>{
  const {executeMemberAdminV2}=await corePromise,emails=[];
  const shared={authAlias:async()=> 'abcdef0123456789abcdef0123456789',ensureAuthUser:async payload=>{emails.push(payload.email);return {id:'44444444-4444-4444-8444-444444444444'}}};
  let reads=0;const first=fixture({...shared,insertAccount:async()=>{throw new Error('timeout before commit')},getAccountByMember:async()=>{reads++;if(reads===1)return null;throw new Error('reconciliation unavailable')}});
@@ -138,6 +138,14 @@ test('unknown non-commit retry reuses one secret-derived Auth identity instead o
  const second=fixture({...shared,getAccountByMember:async()=>null});
  const result=await executeMemberAdminV2({token:'valid-admin',body:{action:'create',memberId:second.account.member_id,phone:'+886900000001',pin:'123456',role:'volunteer'}},second.deps);
  assert.equal(result.status,201);assert.equal(emails.length,2);assert.equal(emails[0],emails[1]);assert.equal(first.calls.some(call=>call[0]==='deleteAuth'),false);
+});
+
+test('Auth operation alias is persisted before Auth creation and survives credential rotation',()=>{
+ const sql=read('supabase/migrations/20261028094500_achang_member_auth_operation_identity.sql'),edge=read('supabase/functions/achang-member-admin-v2/index.ts');
+ assert.match(sql,/app_private\.achang_member_auth_operations/);assert.match(sql,/member_id uuid primary key/);assert.match(sql,/auth_alias text not null unique/);
+ assert.match(sql,/security definer/);assert.match(sql,/not app_private\.is_admin\(\)/);assert.match(sql,/on conflict\(member_id\) do nothing/);assert.match(sql,/requested_role<>p_role/);
+ assert.match(edge,/userClient\.rpc\('achang_prepare_member_auth_identity'/);assert.doesNotMatch(edge,/member-admin-v2-auth-alias|serviceKey\+'\|member-admin-v2-auth-alias/);
+ const core=read('supabase/functions/_shared/member-admin-v2-core.mjs');assert.ok(core.indexOf('await deps.authAlias')<core.indexOf('await deps.ensureAuthUser'));
 });
 
 test('interleaved failed A never deletes the shared Auth identity successfully inserted by B',async()=>{

@@ -27,7 +27,7 @@ Base UI commit: `082d790b06b87a1927865be4466423675ce31c0e`
 - Volunteer and administrator accounts are created as `pending`; approval is a separate compare-and-set transition.
 - Six ASCII digits, including a leading zero, are passed only to Supabase Auth. No PIN or hash is stored in application tables or logs.
 - The Vercel API boundary canonicalizes formatted Taiwan mobile input (`09xx-xxx-xxx`, bare `09`, or `+8869`) to `+8869xxxxxxxx` before the strict Edge contract; invalid input is rejected before forwarding.
-- Shared phone numbers remain separated by member/Auth identity. The hidden Auth email alias is deterministically derived from the server credential plus member/role, so a retry reuses the same Auth identity without exposing the member UUID or creating additional aliases. The non-secret application login ID remains member-specific.
+- Shared phone numbers remain separated by member/Auth identity. Before Auth creation, a private database operation mapping persists one random hidden Auth alias for each member/role. Retries and service-key rotation reuse that mapping without exposing the member UUID or creating additional aliases. The mapping stores no PIN, phone or credential. The non-secret application login ID remains member-specific.
 - Duplicate same-member/same-role create is idempotent and does not rotate the PIN. Role mismatch is rejected.
 - If Auth creation succeeds but the account insert fails, v2 retains the deterministic, recoverable Auth identity and returns `CREATE_RETRY_REQUIRED`; a retry reuses that same identity. It never performs an eager Auth delete based on a stale absence read, preventing one concurrent request from deleting another request's successful identity/account binding.
 - If the insert result and reconciliation read both fail, v2 returns `CREATE_OUTCOME_UNKNOWN` and likewise retains the possibly committed Auth identity. A retry first reconciles the account row or safely resumes with the same identity.
@@ -56,7 +56,7 @@ Base UI commit: `082d790b06b87a1927865be4466423675ce31c0e`
 
 Aggregate evidence:
 
-- `npm test`: 43/43 PASS on the latest source candidate (including concurrent A-fails/B-succeeds ownership safety).
+- `npm test`: 44/44 PASS on the latest source candidate (including concurrent A-fails/B-succeeds ownership safety and credential-rotation-stable operation identity).
 - `npm run test:browser`: PASS; local synthetic API only, all external requests blocked.
 - `node test/ui-readonly-preview.browser.cjs`: PASS; synthetic read-only preview, zero `/api` requests.
 - `node test/member-admin-v2.browser.cjs`: PASS; local synthetic API for create volunteer, approve volunteer, create admin, and preserved navigation controls.
@@ -77,7 +77,7 @@ Isolated deployment evidence for commit `db3e3ba331843912cdd1f876f2733a99dd7dd59
 Deployment/source boundary:
 
 - The fixed TEST alias and Edge v2 evidence above remain the deployed `db3e3ba` candidate.
-- Source commit `55fe6d1` adds durable secret-derived Auth identity reuse, prepared (not activated) Password Verification Hook objects, and SQLSTATE-to-HTTP denied-event mapping. It is pushed to the Draft PR but is not the deployed TEST runtime.
+- The latest Draft PR source adds durable private operation-mapped Auth identity reuse, prepared (not activated) Password Verification Hook objects, and SQLSTATE-to-HTTP denied-event mapping. It is not the deployed TEST runtime.
 - Separate cloud-browser read-only smoke at 2026-10-28 09:49–09:50 UTC loaded the fixed TEST alias while logged out. `/api/config` showed `environment=test` and project ref `fhxdpupascsikjsycpbi`; login form open/close, five navigation tabs, logged-out task/roster privacy text, and public planner rendering worked. The map showed an offline fallback, so interactive map is not PASS. No credentials were entered and no account, device or business-data write occurred. This smoke did not independently establish runtime SHA and is not Auth E2E.
 
 To run browser → API → Auth/DB → login verification in TEST, the following bounded persistent TEST-only configuration is still required:
