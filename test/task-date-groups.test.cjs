@@ -40,6 +40,12 @@ test('mobile settings sheet is content-sized with the device card directly after
  assert.doesNotMatch(styles,/\.modal-backdrop\.settings-open \.sheet\{[^}]*height:min\(700px/);
 });
 
+test('settings install callout enlarges only its heading and keeps a compact touch-safe action',()=>{
+ assert.match(styles,/\.settings-open \.install-tip>strong\{font-size:19px/);
+ assert.match(styles,/\.settings-open \.install-tip \.install-app-large\{[^}]*width:auto[^}]*min-height:44px[^}]*font-size:14px/);
+ assert.doesNotMatch(styles,/\.settings-open \.pick-row button\{[^}]*font-size:14px/);
+});
+
 test('fourth task page exposes three requested groups without changing task APIs',()=>{
  assert.match(app,/history:'歷史跟巡',current:'當日跟巡',future:'下次跟巡'/);
  assert.match(app,/task-date-'\+category/);assert.match(app,/category==='current'\?'open':''/);
