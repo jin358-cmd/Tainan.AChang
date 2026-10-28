@@ -1026,3 +1026,6 @@ body.volunteer-session #page-reports .volunteer-stop-item>.task-navigate svg{dis
 #areaMembers .member-actions{display:flex;flex-wrap:nowrap;align-items:center;gap:6px;max-width:100%;min-width:0}
 #areaMembers .member-actions .service-phone,#areaMembers .member-actions button[data-leader],#areaMembers .member-actions button[data-remove]{box-sizing:border-box;flex:0 0 auto;width:auto;min-height:38px;padding:8px 9px;font-size:14px!important;line-height:1.2;white-space:nowrap}
 @media(max-width:390px){#areaMembers .member-actions{gap:4px}#areaMembers .member-actions .service-phone,#areaMembers .member-actions button[data-leader],#areaMembers .member-actions button[data-remove]{padding-inline:7px}}
+
+/* Planner empty route hint spans the available row instead of collapsing into a narrow flex item. */
+#page-planner #routeButtons>.mini-note{display:block;grid-column:1/-1;flex:1 1 100%;width:100%;min-width:0;font-size:13px;line-height:1.55;white-space:normal;word-break:normal;overflow-wrap:normal}

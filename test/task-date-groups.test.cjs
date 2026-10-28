@@ -59,6 +59,11 @@ test('planner removes the redundant current-area summary without changing schedu
  assert.match(html,/data-shift="日間"/);assert.match(html,/data-shift="夜間"/);assert.match(app,/renderStops\(rows\)/);
 });
 
+test('planner empty route hint spans the full available row without tiny or clipped text',()=>{
+ assert.match(styles,/#page-planner #routeButtons>\.mini-note\{[^}]*grid-column:1\/-1[^}]*flex:1 1 100%[^}]*width:100%[^}]*font-size:13px[^}]*white-space:normal/);
+ assert.doesNotMatch(styles,/#page-planner #routeButtons>\.mini-note\{[^}]*(?:text-overflow:ellipsis|overflow:hidden)/);
+});
+
 test('fourth task page exposes three requested groups without changing task APIs',()=>{
  assert.match(app,/history:'歷史跟巡',current:'當日跟巡',future:'下次跟巡'/);
  assert.match(app,/task-date-'\+category/);assert.match(app,/category==='current'\?'open':''/);
