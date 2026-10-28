@@ -17,7 +17,7 @@ Base UI commit: `082d790b06b87a1927865be4466423675ce31c0e`
 - Existing schema supports shared phones because `members.phone_e164` is indexed but not unique. `member_accounts.member_id` and `auth_user_id` remain unique.
 - Existing RLS allows writes through the authenticated, active-admin predicate. v2 database writes use the caller-scoped client so RLS and `auth.uid()` audit attribution remain effective.
 - Existing `member_accounts_authorization_audit` trigger records requested, approved, suspended and reactivated transitions. Existing last-active-admin trigger remains enabled.
-- The protected principal exists once in both TEST and Production. v2 requires an environment-specific stable Auth user ID and fails closed if it is absent or malformed; the value is not committed or logged.
+- The protected principal exists once in both TEST and Production. v2 compares an environment-specific SHA-256 digest of the stable Auth user ID selected by the already validated project ref. Raw IDs are not committed or logged; an unknown project fails closed.
 
 ## Candidate behavior
 
@@ -65,11 +65,10 @@ No live TEST account, PIN, device, or database row was created by this candidate
 
 To run browser → API → Auth/DB → login verification in TEST, the following bounded persistent TEST-only configuration is still required:
 
-1. Configure `ACHANG_PROTECTED_AUTH_USER_ID` for TEST with the already verified TEST principal ID (value handled as configuration, not committed).
-2. Confirm `ACHANG_EXPECTED_PROJECT_REF=fhxdpupascsikjsycpbi` is present for the new TEST function.
-3. Deploy only the new `achang-member-admin-v2` function to TEST with JWT verification enabled; do not replace `achang-admin-provision`.
-4. Configure these variables only for Preview deployments from `feature/achang-member-admin-v2-20261028`: `ACHANG_ENVIRONMENT=test`, `ACHANG_TEST_ISOLATED=1`, `EXPECTED_SUPABASE_PROJECT_REF=fhxdpupascsikjsycpbi`, the existing TEST `SUPABASE_URL`, and the existing TEST `SUPABASE_PUBLISHABLE_KEY`. The candidate branch currently has no branch-scoped variables; an older isolated branch has an encrypted TEST-only set that can be copied without exposing values.
-5. Reassign the existing fixed integration alias `tainan-achang-online-ui-test-tjc1.vercel.app` to the verified candidate deployment. The candidate removes only this alias from the synthetic read-only host list; the older read-only preview hosts remain isolated.
-6. Use bounded synthetic TEST fixtures for create/approve/login/audit, then preserve or clean them according to a stated fixture plan. Do not use Production or the protected principal as a fixture.
+1. Confirm `ACHANG_EXPECTED_PROJECT_REF=fhxdpupascsikjsycpbi` is present for the new TEST function. No new secret is required for protected-principal matching.
+2. Deploy only the new `achang-member-admin-v2` function to TEST with JWT verification enabled; do not replace `achang-admin-provision`.
+3. Configure these variables only for Preview deployments from `feature/achang-member-admin-v2-20261028`: `ACHANG_ENVIRONMENT=test`, `ACHANG_TEST_ISOLATED=1`, `EXPECTED_SUPABASE_PROJECT_REF=fhxdpupascsikjsycpbi`, the existing TEST `SUPABASE_URL`, and the existing TEST `SUPABASE_PUBLISHABLE_KEY`. The publishable key is public client configuration, not a service-role credential.
+4. Reassign the existing fixed integration alias `tainan-achang-online-ui-test-tjc1.vercel.app` to the verified candidate deployment. The candidate removes only this alias from the synthetic read-only host list; the older read-only preview hosts remain isolated.
+5. Use bounded synthetic TEST fixtures for create/approve/login/audit, then preserve or clean them according to a stated fixture plan. Do not use Production or the protected principal as a fixture.
 
 Production switch, merge and Production data changes remain out of scope.

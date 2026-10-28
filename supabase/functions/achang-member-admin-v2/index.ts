@@ -4,16 +4,20 @@ import { executeMemberAdminV2,MemberAdminError } from '../_shared/member-admin-v
 const json=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const encoder=new TextEncoder();
 const sha=async(value:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',encoder.encode(value)))).map(x=>x.toString(16).padStart(2,'0')).join('');
-const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const protectedPrincipalHashByProject:Record<string,string>={
+ fhxdpupascsikjsycpbi:'0c547cdd53e62896571f12b7ed9e2aaa2f0bf5361aad782f1a2e9eb362202ee6',
+ ctskglmglevronvnkpmm:'aafea9485fd742b9c78d4eea26f9368c0b4800f1823075bee0f3bd8787f9cf45'
+};
 
 Deno.serve(async(req:Request)=>{
  if(req.method!=='POST')return json({error:'Method not allowed'},405);
  if(Number(req.headers.get('content-length')||0)>4000)return json({error:'Invalid request'},400);
  const bearer=req.headers.get('authorization')||'',token=bearer.replace(/^Bearer\s+/i,'');
  if(!/^Bearer\s+\S+$/i.test(bearer))return json({error:'請重新登入',code:'UNAUTHENTICATED'},401);
- const url=Deno.env.get('SUPABASE_URL')||'',serviceKey=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||'',anonKey=Deno.env.get('SUPABASE_ANON_KEY')||'',expected=Deno.env.get('ACHANG_EXPECTED_PROJECT_REF')||'',protectedUserId=Deno.env.get('ACHANG_PROTECTED_AUTH_USER_ID')||'';
+ const url=Deno.env.get('SUPABASE_URL')||'',serviceKey=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||'',anonKey=Deno.env.get('SUPABASE_ANON_KEY')||'',expected=Deno.env.get('ACHANG_EXPECTED_PROJECT_REF')||'';
  let actual='';try{const parsed=new URL(url);if(parsed.protocol==='https:'&&/^[a-z0-9]+\.supabase\.co$/.test(parsed.hostname))actual=parsed.hostname.split('.')[0]}catch{}
- if(!expected||actual!==expected||!serviceKey||!anonKey||!uuid.test(protectedUserId))return json({error:'會員管理服務尚未完成隔離設定'},503);
+ const protectedPrincipalHash=protectedPrincipalHashByProject[expected]||'';
+ if(!expected||actual!==expected||!serviceKey||!anonKey||!protectedPrincipalHash)return json({error:'會員管理服務尚未完成隔離設定'},503);
  const admin=createClient(url,serviceKey,{auth:{autoRefreshToken:false,persistSession:false}});
  const userClient=createClient(url,anonKey,{auth:{autoRefreshToken:false,persistSession:false},global:{headers:{Authorization:bearer}}});
  const selectAccount='id,member_id,auth_user_id,login_id,role,status,requested_at,approved_at,approved_by,rejected_at,rejection_reason,suspended_at,suspended_by,reactivated_at,reactivated_by,created_at,device_approval_required';
@@ -31,7 +35,7 @@ Deno.serve(async(req:Request)=>{
   insertAccount:async(values:Record<string,unknown>)=>{const {data,error}=await userClient.from('member_accounts').insert(values).select(selectAccount).single();if(error)throw error;return data},
   updateAccountCas:async(id:string,status:string,patch:Record<string,unknown>)=>{const {data,error}=await userClient.from('member_accounts').update(patch).eq('id',id).eq('status',status).select(selectAccount).maybeSingle();if(error)throw error;return data},
   revokeDevices:async(accountId:string,now:string)=>{const {error}=await userClient.from('member_devices').update({status:'revoked',revoked_at:now}).eq('account_id',accountId).neq('status','revoked');return !error},
-  isProtectedPrincipal:async(userId:string)=>userId===protectedUserId,
+  isProtectedPrincipal:async(userId:string)=>await sha(userId)===protectedPrincipalHash,
   listState:async()=>{
    const [{data:accounts,error:accountError},{data:members,error:memberError},{data:devices,error:deviceError}]=await Promise.all([
     userClient.from('member_accounts').select(selectAccount).order('created_at'),
@@ -41,7 +45,7 @@ Deno.serve(async(req:Request)=>{
    if(accountError||memberError||deviceError)throw accountError||memberError||deviceError;
    const memberRows=(members||[]) as Record<string,unknown>[],accountRows=(accounts||[]) as Record<string,unknown>[];
    const byMember=new Map<string,Record<string,unknown>>(memberRows.map(member=>[String(member.id),member]));
-   const rows=accountRows.map(account=>{const member=byMember.get(String(account.member_id));return {...deps.publicAccount(account),name:member?.display_name||'',phone:member?.phone_e164||'',deleted_at:member?.deleted_at||null,enabled:account.status==='active',protected:account.auth_user_id===protectedUserId}});
+   const rows=await Promise.all(accountRows.map(async account=>{const member=byMember.get(String(account.member_id));return {...deps.publicAccount(account),name:member?.display_name||'',phone:member?.phone_e164||'',deleted_at:member?.deleted_at||null,enabled:account.status==='active',protected:await sha(String(account.auth_user_id))===protectedPrincipalHash}}));
    return {ok:true,members:rows,devices:devices||[]};
   }
  };

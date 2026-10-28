@@ -140,7 +140,8 @@ test('TEST-12 Edge adapter uses user-scoped RLS writes and has no device or hard
  assert.doesNotMatch(edge,/device_id_hash|Approved administrator device|requiredApprovedDevice/);
  assert.doesNotMatch(edge,/\.delete\(\).*member_accounts|deleteUser\(target/);
  assert.match(core,/device_approval_required:requestedRole!=='admin'/);
- assert.match(edge,/ACHANG_PROTECTED_AUTH_USER_ID/);assert.match(edge,/account\.auth_user_id===protectedUserId/);
+ assert.match(edge,/protectedPrincipalHashByProject/);assert.match(edge,/await sha\(String\(account\.auth_user_id\)\)===protectedPrincipalHash/);
+ assert.doesNotMatch(edge,/299cd935-bfd4-4847-b355-996018e63a17|a43a90bf-6bc2-48af-bf68-a33c26c6a284/);
  assert.match(edge,/member_admin_v2_denied/);assert.doesNotMatch(edge,/console\.(?:warn|error)\([^\n]*(?:password|pin|body)/i);
 });
 
