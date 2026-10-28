@@ -962,3 +962,7 @@ body.volunteer-session #page-reports .volunteer-stop-item>.task-navigate svg{dis
 /* 2026-10-28: readable destructive action label in member authorization */
 .approved-member-row .member-auth-actions button.smallbtn.danger{background:#fff0f2!important;color:#b00020!important;border:2px solid #d84762!important;font-weight:900!important;text-shadow:none!important;opacity:1!important}
 .approved-member-row .member-auth-actions button.smallbtn.danger:hover,.approved-member-row .member-auth-actions button.smallbtn.danger:focus-visible{background:#ffe1e7!important;color:#8e0019!important}
+
+/* 2026-10-28: improve member authorization roster selector legibility */
+#memberAdminForm #authorizationVolunteer{font-size:18px!important;font-weight:800!important;line-height:1.5!important;min-height:50px!important;padding:10px 12px!important;color:#183b52!important}
+#memberAdminForm #authorizationVolunteer option{font-size:18px!important;font-weight:700!important;color:#183b52!important}
