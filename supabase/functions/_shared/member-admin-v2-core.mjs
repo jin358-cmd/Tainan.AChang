@@ -22,6 +22,11 @@ async function authorize(token,deps){
  return {actor,account};
 }
 
+async function reconcileCreatedAccount(memberId,context,deps){
+ try{return await deps.getAccountByMember(memberId,context.token)}
+ catch{throw new MemberAdminError(503,'帳號建立結果尚待確認，請稍後重新整理','CREATE_OUTCOME_UNKNOWN')}
+}
+
 async function createAccount(body,context,deps){
  const memberId=uuid(body.memberId),contact=phone(body.phone),password=pin(body.pin),requestedRole=role(body.role);
  await deps.rateLimit(context.actor.id,'create');
@@ -37,7 +42,7 @@ async function createAccount(body,context,deps){
  let authUser;
  try{authUser=await deps.createAuthUser({email,password,memberId,role:requestedRole})}
  catch(error){
-  const concurrent=await deps.getAccountByMember(memberId,context.token);
+  const concurrent=await reconcileCreatedAccount(memberId,context,deps);
   if(concurrent?.role===requestedRole)return {status:200,body:{ok:true,idempotent:true,member:deps.publicAccount(concurrent)}};
   throw new MemberAdminError(error?.status===422?409:502,error?.status===422?'登入身分已存在，請由管理員檢查':'登入身分建立失敗');
  }
@@ -47,7 +52,7 @@ async function createAccount(body,context,deps){
   if(!account)throw new Error('account insert returned no row');
   return {status:201,body:{ok:true,idempotent:false,member:deps.publicAccount(account)}};
  }catch(error){
-  const concurrent=await deps.getAccountByMember(memberId,context.token);
+  const concurrent=await reconcileCreatedAccount(memberId,context,deps);
   if(concurrent?.auth_user_id===authUser.id&&concurrent.role===requestedRole)return {status:200,body:{ok:true,idempotent:true,member:deps.publicAccount(concurrent)}};
   const cleaned=await deps.deleteAuthUser(authUser.id).catch(()=>false);
   throw new MemberAdminError(cleaned?409:503,cleaned?'會員帳號建立衝突，請重新整理':'帳號建立失敗且需要管理員檢查登入身分');

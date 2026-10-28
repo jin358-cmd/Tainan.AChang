@@ -30,6 +30,8 @@ Base UI commit: `082d790b06b87a1927865be4466423675ce31c0e`
 - Shared phone numbers remain separated by member/Auth identity; deterministic per-member synthetic Auth email and login ID are used.
 - Duplicate same-member/same-role create is idempotent and does not rotate the PIN. Role mismatch is rejected.
 - If Auth creation succeeds but the account insert fails, v2 compensates by deleting that just-created Auth identity; inability to prove cleanup fails closed.
+- If the insert result and reconciliation read both fail, v2 returns `CREATE_OUTCOME_UNKNOWN` and deliberately does not delete the possibly committed Auth identity. A retry first reconciles the account row and becomes idempotent.
+- Synthetic `@auth.achang.invalid` identities cannot use the unthrottled administrator-email password route; they must use phone plus six-digit PIN through the existing phone/IP-limited login function.
 - Suspend revokes the account's devices before its status transition. Reactivation does not restore devices.
 - Self-suspension and suspension of the configured protected principal are rejected. There is no delete or role-change action.
 - Denied v2 requests emit only action/status/code and a keyed actor hash; request bodies, phone numbers and PINs are not logged.

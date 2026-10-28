@@ -124,6 +124,21 @@ test('partial create compensates Auth user and fails closed when cleanup cannot 
  await assert.rejects(()=>executeMemberAdminV2({token:'valid-admin',body:{action:'create',memberId:'22222222-2222-4222-8222-222222222222',phone:'+886900000001',pin:'123456',role:'volunteer'}},second.deps),error=>error.status===503);
 });
 
+test('unknown insert outcome never deletes Auth blindly and a retry reconciles the committed account',async()=>{
+ const {executeMemberAdminV2}=await corePromise;let reads=0;
+ const uncertain=fixture({insertAccount:async()=>{throw new Error('synthetic timeout after write')},getAccountByMember:async()=>{reads++;if(reads===1)return null;throw new Error('synthetic reconciliation outage')}});
+ await assert.rejects(()=>executeMemberAdminV2({token:'valid-admin',body:{action:'create',memberId:'22222222-2222-4222-8222-222222222222',phone:'+886900000001',pin:'123456',role:'volunteer'}},uncertain.deps),error=>error.status===503&&error.code==='CREATE_OUTCOME_UNKNOWN');
+ assert.equal(uncertain.calls.some(call=>call[0]==='deleteAuth'),false,'unknown commit outcome must retain the possibly committed Auth identity');
+ const committed={id:'11111111-1111-4111-8111-111111111111',member_id:'22222222-2222-4222-8222-222222222222',auth_user_id:'44444444-4444-4444-8444-444444444444',role:'volunteer',status:'pending'};
+ const retry=fixture({getAccountByMember:async()=>committed});const result=await executeMemberAdminV2({token:'valid-admin',body:{action:'create',memberId:committed.member_id,phone:'+886900000001',pin:'123456',role:'volunteer'}},retry.deps);
+ assert.equal(result.body.idempotent,true);assert.equal(retry.calls.some(call=>call[0]==='createAuth'),false);
+});
+
+test('synthetic Auth email cannot bypass the phone PIN rate-limited login path',()=>{
+ const session=read('api/session.js');assert.match(session,/@auth\\\.achang\\\.invalid\$\/i/);assert.match(session,/名冊手機與六位數字 PIN/);
+ const guardIndex=session.indexOf('@auth\\.achang\\.invalid'),passwordGrant=session.indexOf('/auth/v1/token?grant_type=password');assert.ok(guardIndex>0&&guardIndex<passwordGrant);
+});
+
 test('concurrent retry returns the committed matching account but rejects role mismatch',async()=>{
  const {executeMemberAdminV2}=await corePromise;
  const matching={id:'11111111-1111-4111-8111-111111111111',member_id:'22222222-2222-4222-8222-222222222222',role:'volunteer',status:'pending'};
