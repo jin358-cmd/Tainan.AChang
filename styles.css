@@ -1006,7 +1006,8 @@ body.volunteer-session #page-reports .volunteer-stop-item>.task-navigate svg{dis
 #page-reports .task-team-identity>strong{font-size:18px;font-weight:950;color:#173a5d;display:inline-flex;align-items:center;gap:5px}
 #page-reports .task-leader-crown{font-size:23px;line-height:1}
 #page-reports .task-team-phone{font-size:18px;font-weight:900;color:#075f9e;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
-#page-reports .task-team-primary .task-progress-status{margin-left:auto;flex:0 0 auto;font-size:13px;min-width:126px;min-height:38px;border-radius:9px}
+#page-reports .task-team-primary .task-progress-status{margin-left:auto;flex:0 0 auto;font-size:13px;min-width:112px;min-height:34px;border-radius:8px}
+#page-reports .task-team-primary .task-progress-label{padding:3px 6px}
 @media(min-width:531px){#page-reports .task-team-primary .task-progress-status{font-size:15px}}
 #page-reports .task-team-route{gap:13px;padding:10px 13px;border-top:1px solid #c8e0f3;color:#244966;font-size:17px;font-weight:850}
 #page-reports .task-team-route>strong{font-size:19px;color:#153f68}

@@ -27,7 +27,8 @@ test('administrator task teams use one consistent two-row card with leader conta
  assert.match(app,/task-route-separator[^>]*aria-hidden="true">・/);assert.match(app,/task-team-shift/);assert.match(app,/shiftIcon=shift==='日間'\?'☀':'☾'/);
  assert.match(styles,/#page-reports \.task-team\{background:#eaf5ff/);assert.match(styles,/\.task-team-phone\{font-size:18px/);
  assert.match(styles,/#page-reports \.task-team-primary\{[^}]*flex-direction:row/);
- assert.match(styles,/#page-reports \.task-team-primary \.task-progress-status\{[^}]*font-size:13px[^}]*min-width:126px[^}]*min-height:38px/);
+ assert.match(styles,/#page-reports \.task-team-primary \.task-progress-status\{[^}]*font-size:13px[^}]*min-width:112px[^}]*min-height:34px/);
+ assert.match(styles,/#page-reports \.task-team-primary \.task-progress-label\{padding:3px 6px\}/);
  assert.match(styles,/@media\(min-width:531px\)\{#page-reports \.task-team-primary \.task-progress-status\{font-size:15px\}\}/);
  assert.match(styles,/#page-reports \.task-member-list\{background:#fff0f5/);
  assert.match(styles,/#page-reports \.task-date-history \.task-team\{background:#fff7dc;border-color:#e6cf7a\}/);
