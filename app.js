@@ -206,6 +206,7 @@ async function completeVolunteerGroup(ids){
 }
 let taskSelectedDay='';
 function renderReports(){const root=document.getElementById('reportsContent');if(!root)return;
+ root.classList.remove('task-date-layout');
  if(liveRole==='volunteer'){renderVolunteerTaskList(root);return;}
  if(liveRole!=='admin'){root.innerHTML='<div class="access-notice"><strong>登入後查看任務</strong><p>管理員與志工請先登入帳號。</p><button class="primary" id="loginFromTasks" type="button">🔐 登入查看任務</button></div>';return;}
  const daily=new Map();for(const t of liveTasks){if(!daily.has(t.visit_date))daily.set(t.visit_date,[]);daily.get(t.visit_date).push(t)}
@@ -219,7 +220,9 @@ function renderReports(){const root=document.getElementById('reportsContent');if
  return '<details class="task-team"><summary class="task-team-head"><span class="task-team-row task-team-primary"><span class="task-team-identity"><strong><span class="task-leader-crown" aria-hidden="true">👑</span> '+esc(lead?.name||'未指派組長')+'</strong>'+(lead?.phone?'<a class="task-team-phone" href="tel:'+esc(canDial(lead))+'" onclick="event.stopPropagation()">☎ '+esc(prettyPhone(lead.phone))+'</a>':'')+'</span>'+taskProgress(done,entries.length)+'</span><span class="task-team-row task-team-route"><strong>'+esc(area)+'</strong><span class="task-route-separator" aria-hidden="true">・</span><span class="task-team-shift"><span class="legend-pin '+shiftClass+'" aria-hidden="true">'+shiftIcon+'</span>'+esc(shift)+'</span><span class="task-team-plate">'+esc(truck)+'</span></span></summary><div class="task-member-list">'+[...members.entries()].map(([id,jobs])=>{const p=state.people.find(x=>x.id===id),completed=jobs.filter(x=>x.status==='完成').length;return '<div class="task-member-progress"><div><strong>'+esc(p?.name||'志工')+'</strong><small>'+esc(area)+' · '+esc(shift)+' · '+esc(truck)+'</small></div>'+taskProgress(completed,jobs.length)+'</div>'}).join('')+'</div></details>';
  }).join('')+'</details>';
  };
- root.innerHTML=days.length?['history','current','future'].map(category=>'<details class="surface task-date-category task-date-'+category+'" '+(category==='current'?'open':'')+'><summary>'+dateLabels[category]+' · '+dateGroups[category].length+' 天</summary><div class="task-date-category-body">'+(dateGroups[category].length?dateGroups[category].map(dayHtml).join(''):'<div class="empty">目前沒有'+dateLabels[category]+'資料</div>')+'</div></details>').join(''):'<div class="empty">目前沒有正式排班資料</div>';
+ root.classList.toggle('task-date-layout',days.length>0);
+ const categoryHtml=category=>'<details class="surface task-date-category task-date-'+category+'" '+(category==='current'?'open':'')+'><summary>'+dateLabels[category]+' · '+dateGroups[category].length+' 天</summary><div class="task-date-category-body">'+(dateGroups[category].length?dateGroups[category].map(dayHtml).join(''):'<div class="empty">目前沒有'+dateLabels[category]+'資料</div>')+'</div></details>';
+ root.innerHTML=days.length?'<div class="task-date-left-stack">'+categoryHtml('history')+categoryHtml('future')+'</div>'+categoryHtml('current'):'<div class="empty">目前沒有正式排班資料</div>';
 }
 function phoneDigits(s){return String(s||'').replace(/\D/g,'')}
 function openVolunteerLogin(){

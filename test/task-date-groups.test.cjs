@@ -115,3 +115,15 @@ test('fourth task page exposes three requested groups without changing task APIs
  assert.doesNotMatch(app,/function taskDateCategory[\s\S]{0,300}status/);
  assert.doesNotMatch(app,/單日進度示範|示範小組：3 項排班任務|task-sample/);
 });
+
+test('desktop task categories stack history and future at left while mobile keeps DOM order',()=>{
+ assert.match(app,/root\.classList\.remove\('task-date-layout'\)/);
+ assert.match(app,/root\.classList\.toggle\('task-date-layout',days\.length>0\)/);
+ assert.match(app,/task-date-left-stack[^\n]*categoryHtml\('history'\)\+categoryHtml\('future'\)[^\n]*categoryHtml\('current'\)/);
+ assert.match(styles,/\.task-date-left-stack\{display:contents\}/);
+ assert.match(styles,/\.task-date-history\{order:1\}\.task-date-current\{order:2\}\.task-date-future\{order:3\}/);
+ assert.match(styles,/@media\(min-width:800px\)\{[\s\S]*#page-reports #reportsContent\.task-date-layout\{[^}]*grid-template-columns:minmax\(0,1fr\) minmax\(0,1fr\)[^}]*align-items:stretch/);
+ assert.match(styles,/\.task-date-left-stack\{display:flex;flex-direction:column;gap:8px/);
+ assert.match(styles,/\.task-date-left-stack>\.task-date-category:not\(\[open\]\)\{flex:1 1 0\}/);
+ assert.doesNotMatch(styles,/\.task-date-(?:history|future)\{[^}]*(?:position:absolute|transform:translate)/);
+});

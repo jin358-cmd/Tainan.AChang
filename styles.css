@@ -997,6 +997,18 @@ body.volunteer-session #page-reports .volunteer-stop-item>.task-navigate svg{dis
 .gps-layer-status.stale{color:#a15a13}
 .gps-layer-status.error{color:#b12b40}
 .task-date-category>summary{cursor:pointer;font-weight:900;color:#173b5e}.task-date-category-body{display:grid;gap:8px;margin-top:10px}.task-date-category-body>.task-day{margin:0;box-shadow:none}.task-date-history:not([open])>summary{color:#718398}
+/* Desktop task groups: history and future share the left column while today
+   remains unchanged on the right. Opening history grows naturally and pushes
+   future down; display:contents preserves the original mobile visual order. */
+.task-date-left-stack{display:contents}
+.task-date-history{order:1}.task-date-current{order:2}.task-date-future{order:3}
+@media(min-width:800px){
+ #page-reports #reportsContent.task-date-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:stretch;gap:8px}
+ #page-reports #reportsContent.task-date-layout>.task-date-left-stack{display:flex;flex-direction:column;gap:8px;min-width:0}
+ #page-reports #reportsContent.task-date-layout .task-date-category{margin-bottom:0;min-height:0}
+ #page-reports #reportsContent.task-date-layout>.task-date-left-stack>.task-date-category:not([open]){flex:1 1 0}
+ #page-reports #reportsContent.task-date-layout>.task-date-current{align-self:stretch}
+}
 
 /* 2026-10-28 Owner: consistent two-row administration task cards. */
 #page-reports .task-team{background:#eaf5ff;border:1px solid #b9d8f1;border-radius:13px}
