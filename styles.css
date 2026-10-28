@@ -952,3 +952,9 @@ body.volunteer-session #page-reports .volunteer-stop-item{grid-template-columns:
 body.volunteer-session #page-reports .volunteer-stop-item>.task-navigate{display:inline-flex!important;align-items:center;justify-content:center;gap:6px;white-space:nowrap;min-height:44px;background:#edf5ff;color:#1360a8;border:1px solid #b2d3f7;border-radius:12px;text-decoration:none;padding:8px 12px;font-size:14px;font-weight:900}
 body.volunteer-session #page-reports .volunteer-stop-item>.task-navigate svg{display:block;flex:none}
 @media(max-width:620px){body.volunteer-session #page-reports .volunteer-stop-item{grid-template-columns:38px minmax(68px,1fr) auto auto;gap:6px;padding:10px 7px}body.volunteer-session #page-reports .volunteer-stop-item>.task-navigate{padding:7px 5px;font-size:11px;gap:3px;min-height:42px}body.volunteer-session #page-reports .volunteer-stop-item>.task-navigate svg{width:14px;height:14px}body.volunteer-session #page-reports .volunteer-stop-result{padding-left:6px;min-height:60px}body.volunteer-session #page-reports .volunteer-stop-result .task-complete-btn{min-width:76px!important;font-size:12px!important;padding:7px 5px!important}}
+
+/* 2026-10-28: list each approved device at right of member card */
+.approved-member-row .member-device-icons{display:inline-flex;align-items:center;justify-content:flex-end;gap:5px;flex-wrap:wrap;flex:0 1 auto;max-width:180px;margin-left:auto}
+.approved-member-row .member-device-icons .device-marker{display:inline-flex;align-items:center;justify-content:center;font-size:21px;margin:0;min-width:28px;min-height:31px}
+.approved-member-row .member-device-icons .device-none{font-size:11px;color:#6a7d87;white-space:nowrap}
+@media(max-width:620px){.approved-member-row .member-device-icons{margin-left:auto;max-width:108px;gap:2px}.approved-member-row .member-device-icons .device-marker{font-size:18px;min-width:23px}}
