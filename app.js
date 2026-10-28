@@ -311,7 +311,7 @@ function initGpsToggle(){
  const legend=document.querySelector('#layerDay')?.parentElement?.parentElement;
  if(!legend||document.querySelector('#layerGps'))return;
  const label=document.createElement('label');
- label.innerHTML='<input id="layerGps" type="checkbox" /> <span style="display:inline-block;background:#8B5CF6;color:white;border-radius:6px;padding:2px 5px">🚛</span> GPS 車輛';
+ label.innerHTML='<input id="layerGps" type="checkbox" /> <span style="display:inline-block;background:#8B5CF6;color:white;border-radius:6px;padding:2px 5px">🚛</span> GPS 車輛｜每 5 分鐘更新';
  legend.appendChild(label);
  const status=document.createElement('small');status.id='gpsFeedStatus';status.style.cssText='display:block;font-size:11px;color:#596a7b';status.textContent='GPS 尚未開啟';legend.appendChild(status);
  label.querySelector('input').addEventListener('change',e=>{
