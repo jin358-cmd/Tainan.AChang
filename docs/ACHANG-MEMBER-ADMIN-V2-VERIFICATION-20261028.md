@@ -56,7 +56,7 @@ Base UI commit: `082d790b06b87a1927865be4466423675ce31c0e`
 
 Aggregate evidence:
 
-- `npm test`: 41/41 PASS.
+- `npm test`: 42/42 PASS at source commit `55fe6d1e80d2dba084299996cb711f005ce882b0`.
 - `npm run test:browser`: PASS; local synthetic API only, all external requests blocked.
 - `node test/ui-readonly-preview.browser.cjs`: PASS; synthetic read-only preview, zero `/api` requests.
 - `node test/member-admin-v2.browser.cjs`: PASS; local synthetic API for create volunteer, approve volunteer, create admin, and preserved navigation controls.
@@ -73,6 +73,12 @@ Isolated deployment evidence for commit `db3e3ba331843912cdd1f876f2733a99dd7dd59
 - TEST migration `achang_member_admin_v2_atomic_transition` applied successfully. Readback confirms invoker security, empty search path, authenticated-only application grant, row lock/CAS, protected-principal check, and transactional device/account updates.
 - Supabase security advisor reported no new v2/RPC finding. Existing unrelated findings remain: the internal PIN bucket table has RLS with no public policy (expected server-only access), and leaked-password protection is disabled.
 - Direct HTTP from this executor is BLOCKED before reaching Vercel or Supabase (`Envoy CONNECT 403`). No browser-control tool is available in this executor. Therefore live browser → API → Auth/DB → login remains PENDING, not PASS.
+
+Deployment/source boundary:
+
+- The fixed TEST alias and Edge v2 evidence above remain the deployed `db3e3ba` candidate.
+- Source commit `55fe6d1` adds durable secret-derived Auth identity reuse, prepared (not activated) Password Verification Hook objects, and SQLSTATE-to-HTTP denied-event mapping. It is pushed to the Draft PR but is not the deployed TEST runtime.
+- Separate cloud-browser read-only smoke at 2026-10-28 09:49–09:50 UTC loaded the fixed TEST alias while logged out. `/api/config` showed `environment=test` and project ref `fhxdpupascsikjsycpbi`; login form open/close, five navigation tabs, logged-out task/roster privacy text, and public planner rendering worked. The map showed an offline fallback, so interactive map is not PASS. No credentials were entered and no account, device or business-data write occurred. This smoke did not independently establish runtime SHA and is not Auth E2E.
 
 To run browser → API → Auth/DB → login verification in TEST, the following bounded persistent TEST-only configuration is still required:
 
