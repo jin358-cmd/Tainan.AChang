@@ -56,7 +56,7 @@ Base UI commit: `082d790b06b87a1927865be4466423675ce31c0e`
 
 Aggregate evidence:
 
-- `npm test`: 44/44 PASS on the latest source candidate (including concurrent A-fails/B-succeeds ownership safety and credential-rotation-stable operation identity).
+- `npm test`: 45/45 PASS on the latest source candidate (including absent-bucket hook concurrency, A-fails/B-succeeds ownership safety, and credential-rotation-stable operation identity).
 - `npm run test:browser`: PASS; local synthetic API only, all external requests blocked.
 - `node test/ui-readonly-preview.browser.cjs`: PASS; synthetic read-only preview, zero `/api` requests.
 - `node test/member-admin-v2.browser.cjs`: PASS; local synthetic API for create volunteer, approve volunteer, create admin, and preserved navigation controls.

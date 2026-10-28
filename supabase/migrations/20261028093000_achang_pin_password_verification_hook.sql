@@ -30,6 +30,7 @@ begin
     return jsonb_build_object('decision','continue');
   end if;
 
+  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(v_user_id::text,731358));
   select failed_count,window_started_at,blocked_until
     into v_count,v_window_started,v_blocked_until
   from app_private.achang_password_attempt_buckets
