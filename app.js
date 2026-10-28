@@ -306,6 +306,17 @@ function openShiftStopPopup(area,shiftName){
  root.innerHTML='<div class="popup-top"><strong class="popup-area-name">'+esc(area)+' · '+esc(shiftName)+' '+rows.length+'站</strong><button type="button" data-close-area aria-label="關閉站點">✕</button></div><div class="assigned-stop-list">'+items+'</div>';
  root.hidden=false;requestAnimationFrame(positionAreaPopup);
 }
+let gpsVehicles=[],gpsFetchedAt=0,gpsRequest=null;
+async function loadGpsVehicles(){
+ if(!liveRole)return;
+ if(gpsRequest)return gpsRequest;
+ gpsRequest=onlineApi('gps-vehicles').then(result=>{
+  gpsVehicles=Array.isArray(result.vehicles)?result.vehicles.filter(v=>Number.isFinite(v.longitude)&&Number.isFinite(v.latitude)):[];
+  gpsFetchedAt=Date.now();
+  updateMap();
+ }).catch(error=>console.warn('GPS 快照載入失敗',error.message)).finally(()=>{gpsRequest=null});
+ return gpsRequest;
+}
 function updateMap(){if(page!=='map')return;if(mapFailed){drawFallback();return}if(!map||!map.getLayer('village-fill'))return;highlightMapSelection();markers.forEach(m=>m.remove());markers=[];
  for(const a of visibleMapAreas()){
   const c=areaCentroid(a),cnt=assignedPeople(a).length,lead=leaderOf(a);
@@ -326,6 +337,18 @@ function updateMap(){if(page!=='map')return;if(mapFailed){drawFallback();return}
   if((r['時段']==='日間'&&!layerState.day)||(r['時段']==='夜間'&&!layerState.night))continue;
   marker(r['時段']==='日間'?'☀':'☾',pos.lon,pos.lat,r['時段']==='日間'?'day':'night',r['到達']+' '+r['停靠點原文'],()=>openShiftStopPopup(r['里別'],r['時段']));
  }
+ if(liveRole==='admin'||liveRole==='volunteer'){
+  for(const v of gpsVehicles){
+   const label=document.createElement('div');
+   label.className='map-marker gps-truck';
+   label.textContent='🚛';
+   label.title=v.plate+' · '+v.location+' · '+v.reported_at+'（歷史快照）';
+   label.style.cssText='background:#8B5CF6;color:white;border:2px solid white;border-radius:50%;padding:5px;cursor:pointer;font-size:20px;box-shadow:0 2px 7px #34215b80';
+   markers.push(new window.maplibregl.Marker({element:label}).setLngLat([v.longitude,v.latitude])
+    .setPopup(new window.maplibregl.Popup({offset:24}).setText(v.plate+' · '+v.location+' · '+v.reported_at+'（歷史 GPS，非即時）')).addTo(map));
+  }
+ }
+
 }
 function positionAreaPopup(){const pop=$('#areaPopup');if(pop.hidden)return;if(liveRole==='admin'&&page==='map'){pop.classList.remove('owner-center-popup');const box=$('#mapBox');if(!box||!data)return;let x=box.clientWidth/2,y=box.clientHeight/2;const c=areaCentroid(selectedArea);if(map&&!mapFailed){const p=map.project(c);x=p.x;y=p.y}else{const w=box.clientWidth,h=box.clientHeight;x=(c[0]-120.224)/(120.256-120.224)*w;y=(23.022-c[1])/(23.022-22.990)*h}const pw=Math.min(340,Math.max(210,box.clientWidth-20)),ph=Math.min(pop.scrollHeight||250,box.clientHeight-12);let left=x+32;if(left+pw>box.clientWidth-6)left=x-pw-32;left=Math.max(6,Math.min(left,box.clientWidth-pw-6));let top=Math.max(7,Math.min(y-45,box.clientHeight-ph-7));pop.style.setProperty('left',left+'px','important');pop.style.setProperty('top',top+'px','important');return;}pop.classList.add('owner-center-popup');}
 function openAreaPreview(a,taskGroup=null){if(liveRole==='admin'&&page==='map'){if(!areas.includes(a))return;selectedArea=a;highlightMapSelection();const list=sortedMembers(a),visible=list.slice(0,6);const people=visible.map(p=>{const leader=p.id===leaderId(a);return '<div class="popup-contact '+(leader?'leader-row':'')+'"><strong>'+(leader?'👑 ':'')+esc(p.name)+'</strong>'+telLink(p)+'</div>'}).join('');const root=$('#areaPopup'),box=$('#mapBox');if(root.parentElement!==box)box.append(root);root.classList.remove('owner-center-popup');root.classList.add('map-attached-popup','restored-map-popup');root.style.removeProperty('left');root.style.removeProperty('top');root.innerHTML='<div class="popup-top"><div><span class="popup-eyebrow">已選取里別</span><strong class="popup-area-name">'+esc(a)+'</strong><span class="popup-count">已分配 '+list.length+' 人</span></div><button type="button" data-close-area aria-label="關閉里別名單">✕</button></div><div class="popup-contacts">'+(people||'<span class="mini-note">目前尚無服務志工</span>')+(list.length>6?'<small class="popup-more">另有 '+(list.length-6)+' 位，請至服務分區查看</small>':'')+'</div><button type="button" class="popup-detail-btn" data-view-assignment="'+esc(a)+'">前往此里分配 →</button>';root.hidden=false;requestAnimationFrame(positionAreaPopup);return;}if(taskGroup){const match=liveTasks.some(t=>t.volunteer_id===liveMemberId&&t.area===a&&[t.visit_date,t.shift,t.truck,t.area].join('|')===taskGroup);if(!match)return;}else if(!visibleMapAreas().includes(a))return;selectedArea=a;if(page==='map')highlightMapSelection();const list=liveRole==='volunteer'?(previewDemoMode?[{id:liveMemberId,name:liveDisplayName,phone:''}]:groupContacts.filter(p=>p.area===a&&p.id!==liveMemberId)):sortedMembers(a);const people=list.map(p=>'<div class="popup-contact '+(p.isLeader?'leader-row':'')+'"><strong>'+(p.isLeader?'👑 ':'')+esc(p.name)+'</strong>'+telLink(p)+'</div>').join('');const root=$('#areaPopup');if(page!=='map'&&root.parentElement!==document.body)document.body.append(root);else if(page==='map'&&root.parentElement!==$('#mapBox'))$('#mapBox').append(root);root.innerHTML='<div class="popup-top"><div><span class="popup-eyebrow">當日小組任務</span><strong class="popup-area-name">'+esc(a)+'</strong><span class="popup-count">同組 '+list.length+' 位夥伴</span></div><button type="button" data-close-area aria-label="關閉里別名單">✕</button></div><div class="popup-contacts">'+(people||'<span class="mini-note">目前沒有其他小組成員</span>')+'</div>';root.hidden=false;root.classList.add('owner-center-popup');requestAnimationFrame(positionAreaPopup);}
@@ -416,7 +439,7 @@ function updateAccessControls(){
 
 async function secureSignOut(){if(previewDemoMode){previewDemoMode=false;clearInterval(liveTimer);liveTimer=null;showAuth();return;}try{await onlineApi('session','DELETE')}catch{}clearInterval(liveTimer);liveTimer=null;liveTasks=[];state=makeState([]);showAuth()}
 async function authStart(){try{
- const session=await onlineApi('session');liveRole=session.role;liveMemberId=session.memberId;liveDisplayName=session.displayName||'';
+ const session=await onlineApi('session');liveRole=session.role;setTimeout(loadGpsVehicles,0);liveMemberId=session.memberId;liveDisplayName=session.displayName||'';
  $('#secureLogin').hidden=true;$('#app').hidden=false;$('#accountBadge')?.remove();const adminTop=$('#adminHeaderAction');if(adminTop){adminTop.hidden=liveRole!=='admin';}updateAccessControls();
  if(liveRole==='admin'){
   $('#volunteerLoginBtn').hidden=true;
