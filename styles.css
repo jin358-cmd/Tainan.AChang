@@ -968,3 +968,9 @@ body.volunteer-session #page-reports .volunteer-stop-inline-nav svg{display:bloc
  body.volunteer-session #page-reports .volunteer-stop-item{grid-template-columns:32px minmax(0,1fr) auto auto;gap:4px}
  body.volunteer-session #page-reports .volunteer-stop-item>.volunteer-stop-inline-nav{font-size:10px!important;padding:5px 3px!important}
 }
+
+/* 2026-10-28 member authorization legibility */
+.approved-member-row .member-device-action{display:inline-flex;align-items:center;justify-content:center;flex:none;min-width:26px}
+.approved-member-row .auth-success-text{color:#126b49;font-weight:850;font-size:13px;white-space:nowrap}
+.approved-member-row .member-auth-actions .smallbtn.danger{background:#fff0f2!important;color:#94152e!important;border:1px solid #d35a73!important;font-weight:900!important}
+.approved-member-row .member-auth-actions .smallbtn.danger:hover{background:#ffe1e7!important;color:#761126!important}
