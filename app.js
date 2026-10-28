@@ -115,7 +115,7 @@ const volunteerExpandedGroups=new Set();
 // Isolated preview UI testing: synthetic-only, no API mutation or production credentials.
 let previewDemoMode=false;
 const READONLY_PREVIEW_HOST='tainan-achang-online-git-fix-achang-day-routes-memb-4e2e73-tjc1.vercel.app';
-function previewOnly(){return location.hostname===READONLY_PREVIEW_HOST||location.hostname.startsWith('tainan-achang-pin-eipp-test-')||location.hostname==='tainan-achang-pin-eipp-test.vercel.app';}
+function previewOnly(){return location.hostname==='tainan-achang-online-ui-test-tjc1.vercel.app'||location.hostname===READONLY_PREVIEW_HOST||location.hostname.startsWith('tainan-achang-pin-eipp-test-')||location.hostname==='tainan-achang-pin-eipp-test.vercel.app';}
 function previewLoginButton(){
  if(!previewOnly())return;
  const anchor=document.getElementById('secureLoginForm');
