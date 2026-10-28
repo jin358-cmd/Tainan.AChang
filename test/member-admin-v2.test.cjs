@@ -155,6 +155,14 @@ test('archived members are removed from current roster and authorization list',(
  assert.match(edge,/visibleAccountIds/);assert.match(edge,/\.filter\(device=>visibleAccountIds\.has/);
 });
 
+test('legacy roster removal is labeled as recoverable archive and routes authorized accounts to protected member archive',()=>{
+ const app=read('app.js'),roster=read('api/roster.js');
+ assert.match(app,/確認封存人員/);assert.match(app,/這是可恢復的封存，不會永久清除歷史資料/);
+ assert.match(app,/請改由「會員授權」執行受保護的會員封存/);assert.match(app,/確認封存/);
+ assert.match(roster,/member_accounts\?member_id=eq\./);assert.match(roster,/此人員已有會員授權/);
+ assert.match(roster,/source_member_id:'ARCHIVED-'/);assert.doesNotMatch(roster,/delete from|deleteUser/);
+});
+
 test('suspend and reactivate use one atomic transition RPC contract',async()=>{
  const {executeMemberAdminV2}=await corePromise,{deps,calls,account}=fixture({getAccountById:async()=>({...account,status:'active',approved_at:'2026-10-01T00:00:00Z'})});
  await executeMemberAdminV2({token:'valid-admin',body:{action:'suspend',accountId:account.id}},deps);

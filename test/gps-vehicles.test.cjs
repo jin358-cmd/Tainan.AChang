@@ -33,10 +33,18 @@ test('GPS same-origin adapter fetches the fixed official HTTPS JSON endpoint wit
 
 test('GPS adapter keeps the timeout active until the response body is fully read',async()=>{
  const source=read('api/gps-vehicles.js');
+ assert.match(source,/UPSTREAM_TIMEOUT_MS=20000/);assert.match(read('vercel.json'),/"api\/gps-vehicles\.js"[\s\S]*"maxDuration": 30/);
  assert.ok(source.indexOf('raw=await upstream.text()')<source.indexOf('finally{clearTimeout(timer)}'));
  const module={exports:{}},L={run:fn=>fn,method(){},authorized:async()=>({role:'admin'}),json(){},problem(status,message){throw Object.assign(new Error(message),{status})}};
  const original=global.fetch;global.fetch=async()=>({ok:true,headers:new Headers({'Content-Type':'application/json'}),text:async()=>{throw Object.assign(new Error('aborted'),{name:'AbortError'})}});
  try{vm.runInThisContext(`(function(require,module,exports){${source}\n})`)(id=>id==='../lib/server'?L:id==='../lib/gps-vehicles'?require('../lib/gps-vehicles'):require(id),module,module.exports);await assert.rejects(()=>module.exports({method:'GET',headers:{}},{}),error=>error.status===503&&/逾時/.test(error.message))}finally{global.fetch=original}
+});
+
+test('GPS adapter emits bounded non-sensitive timing telemetry for success and failure',()=>{
+ const source=read('api/gps-vehicles.js');
+ assert.match(source,/GPS upstream fetch failed/);assert.match(source,/elapsed_ms/);assert.match(source,/timed_out/);
+ assert.match(source,/GPS upstream fetch completed/);assert.match(source,/upstream_status/);assert.match(source,/normalized_count/);
+ assert.doesNotMatch(source,/console\.(?:info|warn)\([^\n]*(?:raw|payload|authorization|token)/i);
 });
 
 test('GPS layer polls every six minutes, avoids overlaps, pauses hidden tabs, and never fabricates movement',()=>{
