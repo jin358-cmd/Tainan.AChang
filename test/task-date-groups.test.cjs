@@ -46,6 +46,12 @@ test('settings install callout enlarges only its heading and keeps a compact tou
  assert.doesNotMatch(styles,/\.settings-open \.pick-row button\{[^}]*font-size:14px/);
 });
 
+test('service-area leader and remove controls match phone sizing without forced equal widths',()=>{
+ assert.match(styles,/#areaMembers \.member-actions\{[^}]*flex-wrap:nowrap/);
+ assert.match(styles,/#areaMembers \.member-actions \.service-phone,#areaMembers \.member-actions button\[data-leader\],#areaMembers \.member-actions button\[data-remove\]\{[^}]*width:auto[^}]*min-height:38px[^}]*font-size:14px!important/);
+ assert.doesNotMatch(styles,/#areaMembers \.member-actions[^}]*grid-template-columns/);
+});
+
 test('fourth task page exposes three requested groups without changing task APIs',()=>{
  assert.match(app,/history:'歷史跟巡',current:'當日跟巡',future:'下次跟巡'/);
  assert.match(app,/task-date-'\+category/);assert.match(app,/category==='current'\?'open':''/);
