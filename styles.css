@@ -1040,3 +1040,6 @@ body.volunteer-session #page-reports .volunteer-stop-item>.task-navigate svg{dis
 
 /* Stable white person glyph for the volunteer map-layer control. */
 .map-switches .legend-pin .legend-person-icon{width:13px;height:13px;display:block;fill:#fff}
+
+/* Mobile map roster: keep four people visible and the assignment action fixed below the scrollable list. */
+@media(max-width:620px){body.restored-admin-map #page-map #areaPopup.restored-map-popup{display:flex!important;flex-direction:column!important;height:min(380px,calc(100% - 20px))!important;max-height:calc(100% - 20px)!important;overflow:hidden!important}body.restored-admin-map #page-map #areaPopup.restored-map-popup .popup-top{flex:0 0 auto}body.restored-admin-map #page-map #areaPopup.restored-map-popup .popup-contacts{flex:1 1 auto;min-height:0;max-height:242px!important;overflow-y:auto!important;gap:9px!important;margin:9px 0!important}body.restored-admin-map #page-map #areaPopup.restored-map-popup .popup-detail-btn{flex:0 0 auto!important;margin-top:7px!important}}

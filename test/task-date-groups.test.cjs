@@ -39,8 +39,12 @@ test('administrator task teams use one consistent two-row card with leader conta
 
 test('map popup enlarges member identity and centers the existing assignment button',()=>{
  assert.match(app,/class="popup-crown"/);assert.match(app,/class="popup-detail-btn" data-view-assignment/);
+ assert.match(app,/esc\(p\.name\)\+\(leader\?' <span class="popup-crown"/);
  assert.match(styles,/#page-map #areaPopup \.popup-contact strong\{font-size:20px/);
  assert.match(styles,/#page-map #areaPopup \.popup-detail-btn[\s\S]*margin:10px auto 0/);
+ assert.match(app,/matchMedia\?\.\('\(max-width:620px\)'\)[\s\S]*translate\(-50%,-50%\)/);
+ assert.match(styles,/\.restored-map-popup\{[^}]*height:min\(380px,calc\(100% - 20px\)\)!important[^}]*overflow:hidden!important/);
+ assert.match(styles,/\.popup-contacts\{flex:1 1 auto;min-height:0;max-height:242px!important;overflow-y:auto!important/);
 });
 
 test('mobile settings sheet is content-sized with the device card directly after exports',()=>{
