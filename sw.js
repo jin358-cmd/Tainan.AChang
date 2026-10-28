@@ -1,4 +1,4 @@
-const CACHE = 'achang-pwa-shell-v148-day-route-preview';
+const CACHE = 'achang-pwa-shell-v149-day-route-count';
 const SHELL=['./','./index.html','./styles.css','./day-routes.js','./app.js','./data-public.json','./data-day-routes-20250402.json','./manifest.webmanifest','./assets/icon.svg','./assets/icon-192.png','./assets/icon-512.png'];
 self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())});
 self.addEventListener('activate',event=>{event.waitUntil((async()=>{const names=await caches.keys();await Promise.all(names.filter(name=>name.startsWith('achang-pwa-shell-')&&name!==CACHE).map(name=>caches.delete(name)));await self.clients.claim()})())});

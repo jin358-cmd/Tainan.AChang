@@ -51,11 +51,12 @@ test('frontend and backend keep route identity separate from an optional truck n
  assert.match(app,/fetch\('\.\/data-day-routes-20250402\.json'/);
  assert.match(app,/r\['固定日間'\]\?true:plannerArea==='all'/);
  assert.match(app,/本日另有.*來源待確認，未列入排班/);
- assert.match(app,/本日可排.*matching\.length.*站次/);
- assert.match(app,/共.*count.*站/);
+ assert.doesNotMatch(app,/本日可排.*matching\.length.*站次/);
  assert.match(app,/全部里別僅供預覽；指派前請選擇服務里/);
  assert.match(app,/人員會跟巡整條官方路線/);
- assert.match(app,/areaLabel=area\|\|'未指定服務里'/);
+ assert.match(app,/visitTitle\.textContent=rows\.length\?`依車次順序拜訪・共 \$\{rows\.length\} 站點`/);
+ assert.match(app,/classList\.toggle\('planner-picker-open',kind==='team'\|\|kind==='stop'\)/);
+ assert.match(app,/areaLabel=r\['固定日間'\]\?'站點里別待核':area\|\|'未指定服務里'/);
  assert.match(app,/available=area\?rosterAvailable\(area\):\[\]/);
  assert.match(app,/assignBtn\.disabled=!teamArea/);
  assert.match(app,/routeId:first\['路線ID'\]\|\|first\['車牌'\]\|\|first\['車次'\]/);
