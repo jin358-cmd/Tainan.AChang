@@ -85,6 +85,13 @@ test('planner empty route hint spans the full available row without tiny or clip
  assert.doesNotMatch(styles,/#page-planner #routeButtons>\.mini-note\{[^}]*(?:text-overflow:ellipsis|overflow:hidden)/);
 });
 
+test('roster status filter uses the requested order while preserving values and assigned default',()=>{
+ const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+ const select=html.match(/<select id="peopleFilter"[^>]*>([\s\S]*?)<\/select>/)?.[1]||'';
+ assert.match(select,/^<option value="pending">未分配<\/option><option value="assigned">已分配<\/option><option value="leader">組長<\/option><option value="all">全部人員<\/option>$/);
+ assert.match(app,/\$\('#peopleFilter'\)\.value='assigned'/);
+});
+
 test('fourth task page exposes three requested groups without changing task APIs',()=>{
  assert.match(app,/history:'歷史跟巡',current:'當日跟巡',future:'下次跟巡'/);
  assert.match(app,/task-date-'\+category/);assert.match(app,/category==='current'\?'open':''/);

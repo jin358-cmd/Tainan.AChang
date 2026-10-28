@@ -54,6 +54,7 @@ async function startServer(){
   const context=await browser.newContext({serviceWorkers:'block'});await context.route('**/*',route=>{const url=new URL(route.request().url());if(url.origin===local.origin)return route.continue();local.observed.external.push(url.href.replace(/[?#].*$/,''));return route.abort('blockedbyclient')});
   const page=await context.newPage();page.on('console',message=>{if(message.type()==='error')local.observed.consoleErrors.push(message.text())});page.on('pageerror',error=>local.observed.pageErrors.push(error.message));
   await page.goto(local.origin,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelector('#signedInName')?.textContent==='合成管理員');
+  assert.deepEqual(await page.locator('#peopleFilter option').evaluateAll(options=>options.map(option=>[option.value,option.textContent])),[['pending','未分配'],['assigned','已分配'],['leader','組長'],['all','全部人員']]);assert.equal(await page.locator('#peopleFilter').inputValue(),'assigned');
   assert.equal(await page.locator('#mapLibre').count(),1);assert.equal(await page.locator('.desktop-nav [data-page="planner"]').count(),1);assert.equal(await page.locator('.desktop-nav [data-page="reports"]').count(),1);
   await page.locator('#adminHeaderAction').click();await page.waitForSelector('#memberAdminForm');
   await page.locator('#memberAdminForm input[name="password"]').fill('123456');await page.locator('#memberAdminForm').evaluate(form=>form.requestSubmit());
