@@ -24,12 +24,18 @@ async function startServer(){
     if(endpoint==='config')return response.end(JSON.stringify({environment:'test',projectRef:'fhxdpupascsikjsycpbi',supabaseUrl:'https://fhxdpupascsikjsycpbi.supabase.co',googleOAuthUrl:'https://fhxdpupascsikjsycpbi.supabase.co/auth/v1/authorize?provider=google'}));
     if(endpoint==='session'&&request.method==='GET')return response.end(JSON.stringify({role:'admin',memberId:null,accountId:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',displayName:'合成管理員'}));
     if(endpoint==='tasks')return response.end(JSON.stringify({tasks:[]}));
+    if(endpoint==='gps-vehicles')return response.end(JSON.stringify({live:true,fetched_at:'2026-10-28T14:00:00Z',latest_reported_at:'2026-10-28T13:59:00Z',vehicles:[]}));
     if(endpoint==='roster')return response.end(JSON.stringify({people}));
     if(endpoint==='member-admin-v2'&&request.method==='GET')return response.end(JSON.stringify({ok:true,members:accounts,devices:[]}));
     if(endpoint==='member-admin-v2'&&request.method==='POST'){
      const person=people.find(item=>item.id===body.memberId);accounts.push({id:crypto.randomUUID(),member_id:body.memberId,name:person.name,phone:person.phone,role:body.role,status:'pending',enabled:false,protected:false});response.statusCode=201;return response.end(JSON.stringify({ok:true}));
     }
     if(endpoint==='member-admin-v2'&&request.method==='PATCH'){
+     if(body.action==='archive'){
+      const accountIndex=accounts.findIndex(item=>item.id===body.accountId);if(accountIndex<0){response.statusCode=404;return response.end(JSON.stringify({error:'missing synthetic account'}))}
+      const [account]=accounts.splice(accountIndex,1),personIndex=people.findIndex(item=>item.id===account.member_id);if(personIndex>=0)people.splice(personIndex,1);
+      return response.end(JSON.stringify({ok:true,archived:true}));
+     }
      const account=accounts.find(item=>item.id===body.accountId);if(!account){response.statusCode=404;return response.end(JSON.stringify({error:'missing synthetic account'}))}account.status=body.action==='approve'?'active':body.action==='suspend'?'suspended':'active';account.enabled=account.status==='active';return response.end(JSON.stringify({ok:true}));
     }
     response.end(JSON.stringify({ok:true}));
@@ -60,7 +66,10 @@ async function startServer(){
   ]);
   assert.equal(creates.some(call=>'deviceId' in call.body||'deviceProof' in call.body),false);assert.equal(local.observed.calls.some(call=>call.endpoint==='members'&&['POST','PATCH'].includes(call.method)),false);
   assert.equal(local.accounts[0].status,'active');assert.equal(local.accounts[1].status,'pending');assert.deepEqual(local.observed.pageErrors,[]);assert.deepEqual(local.observed.consoleErrors.filter(message=>!/net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message)),[]);
-  process.stdout.write(JSON.stringify({status:'PASS',cases:['create pending volunteer','approve volunteer','create pending admin','map/tasks/schedule controls preserved'],requests:local.observed.calls.map(call=>`${call.method} ${call.endpoint}`),externalRequestsBlocked:local.observed.external.length},null,2)+'\n');
+  let archiveDialog='';page.once('dialog',dialog=>{archiveDialog=dialog.message();dialog.accept()});await page.locator('[data-member-action="archive"]').first().click();
+  await page.waitForFunction(()=>document.querySelectorAll('.approved-member-row').length===1);assert.match(archiveDialog,/名冊、服務里與會員授權清單/);assert.match(archiveDialog,/排班、任務、完成紀錄、稽核紀錄與 Auth 身分會保留/);
+  const archive=local.observed.calls.find(call=>call.endpoint==='member-admin-v2'&&call.method==='PATCH'&&call.body.action==='archive');assert.equal(archive.body.reason,'管理員由會員授權介面封存會員');assert.equal(people.some(person=>person.id==='22222222-2222-4222-8222-222222222222'),false);
+  process.stdout.write(JSON.stringify({status:'PASS',evidence:'synthetic local browser + mock API only',cases:['create pending volunteer','approve volunteer','create pending admin','archive member confirmation and active-roster removal','map/tasks/schedule controls preserved'],requests:local.observed.calls.map(call=>`${call.method} ${call.endpoint}`),externalRequestsBlocked:local.observed.external.length},null,2)+'\n');
   await context.close();
  }finally{await browser.close();await new Promise(resolve=>local.instance.close(resolve))}
 })().catch(error=>{console.error(error.stack||error);process.exitCode=1});

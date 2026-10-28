@@ -84,11 +84,26 @@ async function transitionAccount(action,body,context,deps){
  return {status:200,body:{ok:true,member:deps.publicAccount(updated)}};
 }
 
+async function archiveAccount(body,context,deps){
+ const accountId=uuid(body.accountId),reason=required(String(body.reason||''),'封存原因').slice(0,500);
+ if(reason.length<2)throw new MemberAdminError(400,'請填寫至少 2 個字的封存原因');
+ await deps.rateLimit(context.actor.id,'archive');
+ const target=await deps.getAccountById(accountId,context.token);
+ if(!target)throw new MemberAdminError(404,'會員帳號不存在');
+ if(target.auth_user_id===context.actor.id)throw new MemberAdminError(409,'管理員不能封存自己的帳號','SELF_ARCHIVE_FORBIDDEN');
+ if(await deps.isProtectedPrincipal(target.auth_user_id))throw new MemberAdminError(403,'受保護主要管理員不能刪除','PROTECTED_PRINCIPAL');
+ if(!['pending','active','suspended'].includes(target.status))throw new MemberAdminError(409,'會員狀態不允許封存','INVALID_TRANSITION');
+ const updated=await deps.archiveMemberAtomic(target.id,target.status,reason,context.token);
+ if(!updated)throw new MemberAdminError(409,'會員狀態已由其他操作更新，請重新整理','STATE_CONFLICT');
+ return {status:200,body:{ok:true,archived:true,member:deps.publicAccount(updated)}};
+}
+
 export async function executeMemberAdminV2({token,body},deps){
  const context={...(await authorize(token,deps)),token};
  const action=String(body?.action||'');
  if(action==='list')return {status:200,body:await deps.listState(context.token)};
  if(action==='create')return createAccount(body,context,deps);
+ if(action==='archive')return archiveAccount(body,context,deps);
  if(['approve','suspend','reactivate'].includes(action))return transitionAccount(action,body,context,deps);
  throw new MemberAdminError(400,'不支援的會員操作');
 }

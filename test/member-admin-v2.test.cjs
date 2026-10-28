@@ -21,6 +21,7 @@ function fixture(overrides={}){
   ensureAuthUser:async payload=>{calls.push(['ensureAuth',payload]);return {id:'44444444-4444-4444-8444-444444444444'}},
   insertAccount:async values=>{calls.push(['insert',values]);return {...account,...values,id:account.id}},
   transitionAccountAtomic:async(id,action,status,reason)=>{calls.push(['transition',id,action,status,reason]);return {...account,status:action==='suspend'?'suspended':'active'}},
+  archiveMemberAtomic:async(id,status,reason)=>{calls.push(['archive',id,status,reason]);return {...account,status:'suspended',deleted_at:'2026-10-28T07:01:00.000Z'}},
   isProtectedPrincipal:async()=>false,
   listState:async()=>({ok:true,members:[],devices:[]})
  };
@@ -94,6 +95,36 @@ test('TEST-09 no self escalation or self suspension',async()=>{
 test('TEST-10 protected principal cannot be suspended',async()=>{
  const {executeMemberAdminV2}=await corePromise,{deps}=fixture({getAccountById:async()=>({id:'11111111-1111-4111-8111-111111111111',auth_user_id:'99999999-9999-4999-8999-999999999999',role:'admin',status:'active',approved_at:'2026-10-01T00:00:00Z'}),isProtectedPrincipal:async()=>true});
  await assert.rejects(()=>executeMemberAdminV2({token:'valid-admin',body:{action:'suspend',accountId:'11111111-1111-4111-8111-111111111111'}},deps),error=>error.status===403&&error.code==='PROTECTED_PRINCIPAL');
+});
+
+test('member archive is recoverable, atomic, and refuses self or protected principals',async()=>{
+ const {executeMemberAdminV2}=await corePromise,{deps,calls,account}=fixture({getAccountById:async()=>({...account,status:'active',approved_at:'2026-10-01T00:00:00Z'})});
+ const result=await executeMemberAdminV2({token:'valid-admin',body:{action:'archive',accountId:account.id,reason:'不再參與服務'}},deps);
+ assert.equal(result.body.archived,true);assert.equal(result.body.member.deleted_at,'2026-10-28T07:01:00.000Z');
+ assert.deepEqual(calls.find(call=>call[0]==='archive').slice(1),[account.id,'active','不再參與服務']);
+ const self=fixture({getAccountById:async()=>({...account,auth_user_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',status:'active'})});
+ await assert.rejects(()=>executeMemberAdminV2({token:'valid-admin',body:{action:'archive',accountId:account.id,reason:'不再參與服務'}},self.deps),error=>error.code==='SELF_ARCHIVE_FORBIDDEN');
+ const protectedTarget=fixture({getAccountById:async()=>({...account,status:'active'}),isProtectedPrincipal:async()=>true});
+ await assert.rejects(()=>executeMemberAdminV2({token:'valid-admin',body:{action:'archive',accountId:account.id,reason:'不再參與服務'}},protectedTarget.deps),error=>error.code==='PROTECTED_PRINCIPAL');
+ await assert.rejects(()=>executeMemberAdminV2({token:'valid-admin',body:{action:'archive',accountId:account.id,reason:'x'}},deps),error=>error.status===400);
+});
+
+test('archive migration revokes access, retains history, audits, and protects the final administrator',()=>{
+ const sql=read('supabase/migrations/20261028140901_achang_member_admin_v2_archive_member.sql');
+ assert.match(sql,/security definer/i);assert.match(sql,/set search_path = ''/);assert.match(sql,/not app_private\.is_admin\(\)/);
+ assert.match(sql,/pg_advisory_xact_lock/);assert.match(sql,/for update/);assert.match(sql,/status is distinct from p_expected_status/);
+ assert.match(sql,/protected principal cannot be archived/);assert.match(sql,/last active administrator cannot be archived/);assert.match(sql,/cannot archive own account/);
+ assert.match(sql,/update public\.member_devices[\s\S]*status = 'revoked'/);assert.match(sql,/update public\.member_accounts[\s\S]*status = 'suspended'/);
+ assert.match(sql,/delete from public\.service_allocations/);assert.match(sql,/update public\.members[\s\S]*deleted_at = v_now/);
+ assert.match(sql,/insert into public\.member_authorization_events[\s\S]*'member_archived'/);
+ assert.doesNotMatch(sql,/delete from public\.(?:members|member_accounts|member_devices|member_authorization_events)/);
+ assert.doesNotMatch(sql,/auth\.users|deleteUser/);assert.match(sql,/revoke all on function[\s\S]*from public, anon/);assert.match(sql,/grant execute[\s\S]*to authenticated/);
+});
+
+test('archived members are removed from current roster and authorization list',()=>{
+ const roster=read('api/roster.js'),edge=read('supabase/functions/achang-member-admin-v2/index.ts');
+ assert.match(roster,/members\?deleted_at=is\.null/);assert.match(edge,/filter\(member=>!member\.deleted_at\)/);
+ assert.match(edge,/visibleAccountIds/);assert.match(edge,/\.filter\(device=>visibleAccountIds\.has/);
 });
 
 test('suspend and reactivate use one atomic transition RPC contract',async()=>{
@@ -206,6 +237,15 @@ test('API proxy forwards only authenticated admin commands to v2 and no device p
  vm.runInThisContext(`(function(require,module,exports){${source}\n})`) (id=>id==='../lib/server'?L:require(id),module,module.exports);
  const res={};await module.exports({method:'POST',headers:{},body:{action:'create',phone:'0912-345-678'}},res);
  assert.equal(captured[0].path,'/functions/v1/achang-member-admin-v2');assert.equal(captured[0].options.token,'actor-token');assert.equal(captured[0].options.headers,undefined);assert.equal(res.status,201);
+});
+
+test('API proxy accepts only the explicit archive lifecycle action on PATCH',async()=>{
+ const source=read('api/member-admin-v2.js'),module={exports:{}},captured=[];
+ const L={run:fn=>fn,method(){},authorized:async()=>({token:'actor-token',role:'admin'}),body:req=>req.body,request:async(path,options)=>{captured.push({path,options});return {ok:true,status:200,data:{ok:true,archived:true}}},json(res,status,body){res.status=status;res.body=body},problem(status,message){throw Object.assign(new Error(message),{status})}};
+ vm.runInThisContext(`(function(require,module,exports){${source}\n})`)(id=>id==='../lib/server'?L:require(id),module,module.exports);
+ await module.exports({method:'PATCH',headers:{},body:{action:'archive',accountId:'11111111-1111-4111-8111-111111111111',reason:'不再參與服務'}},{});
+ assert.equal(captured[0].options.body.action,'archive');
+ await assert.rejects(()=>module.exports({method:'PATCH',headers:{},body:{action:'delete',accountId:'11111111-1111-4111-8111-111111111111'}},{}),error=>error.status===400);
 });
 
 test('actual server wrapper preserves stable v2 application error codes',async()=>{

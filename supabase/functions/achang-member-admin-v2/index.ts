@@ -32,7 +32,7 @@ Deno.serve(async(req:Request)=>{
  const deps={
   now:()=>new Date().toISOString(),
   authAlias:async(memberId:string,role:string)=>{const {data,error}=await userClient.rpc('achang_prepare_member_auth_identity',{p_member_id:memberId,p_role:role});if(error)throw error;return data},
-  publicAccount:(account:Record<string,unknown>)=>({id:account.id,member_id:account.member_id,auth_user_id:account.auth_user_id,login_id:account.login_id,role:account.role,status:account.status,requested_at:account.requested_at,approved_at:account.approved_at,suspended_at:account.suspended_at,reactivated_at:account.reactivated_at,device_approval_required:account.device_approval_required}),
+  publicAccount:(account:Record<string,unknown>)=>({id:account.id,member_id:account.member_id,auth_user_id:account.auth_user_id,login_id:account.login_id,role:account.role,status:account.status,requested_at:account.requested_at,approved_at:account.approved_at,suspended_at:account.suspended_at,reactivated_at:account.reactivated_at,device_approval_required:account.device_approval_required,deleted_at:account.deleted_at||null}),
   authenticate:async(accessToken:string)=>{const {data:{user},error}=await admin.auth.getUser(accessToken);if(error||!user)return null;return {id:user.id,email:user.email||''}},
   getActiveAdmin:async(userId:string)=>{const {data,error}=await userClient.from('member_accounts').select('id,role,status').eq('auth_user_id',userId).eq('role','admin').eq('status','active').limit(1).maybeSingle();if(error)throw error;return data},
   rateLimit:async(userId:string,action:string)=>{const subject=await sha(serviceKey+'|member-admin-v2|'+userId+'|'+action);const {data,error}=await admin.rpc('achang_try_pin_attempt',{p_subject:subject,p_max_attempts:30,p_window_seconds:900});if(error)throw new MemberAdminError(503,'會員管理安全檢查暫時無法使用');if(!data)throw new MemberAdminError(429,'操作過於頻繁，請稍後再試')},
@@ -62,6 +62,23 @@ Deno.serve(async(req:Request)=>{
    }
    return data;
   },
+  archiveMemberAtomic:async(accountId:string,expectedStatus:string,reason:string)=>{
+   const {data,error}=await userClient.rpc('achang_member_admin_v2_archive',{p_account_id:accountId,p_expected_status:expectedStatus,p_reason:reason});
+   if(error){
+    if(error.code==='40001')throw new MemberAdminError(409,'會員狀態已由其他操作更新，請重新整理','STATE_CONFLICT');
+    if(error.code==='P0002')throw new MemberAdminError(404,'會員帳號不存在','ACCOUNT_NOT_FOUND');
+    if(error.code==='42501')throw new MemberAdminError(403,'只有已啟用管理員可以管理會員','ADMIN_REQUIRED');
+    if(error.code==='23514'){
+     if(/protected principal/i.test(error.message||''))throw new MemberAdminError(403,'受保護主要管理員不能刪除','PROTECTED_PRINCIPAL');
+     if(/last active administrator/i.test(error.message||''))throw new MemberAdminError(409,'不能刪除最後一位啟用中的管理員','LAST_ACTIVE_ADMIN');
+     if(/own account/i.test(error.message||''))throw new MemberAdminError(409,'管理員不能封存自己的帳號','SELF_ARCHIVE_FORBIDDEN');
+     throw new MemberAdminError(409,'會員狀態不允許封存','INVALID_TRANSITION');
+    }
+    if(error.code==='22023')throw new MemberAdminError(400,'封存資料格式不正確','INVALID_ARCHIVE_REQUEST');
+    throw error;
+   }
+   return data;
+  },
   isProtectedPrincipal:async(userId:string)=>await sha(userId)===protectedPrincipalHash,
   listState:async()=>{
    const [{data:accounts,error:accountError},{data:members,error:memberError},{data:devices,error:deviceError}]=await Promise.all([
@@ -70,10 +87,12 @@ Deno.serve(async(req:Request)=>{
     userClient.from('member_devices').select('id,account_id,status,requested_at,created_at,device_type,operating_system,browser_name,approved_at,revoked_at,last_seen_at').order('created_at')
    ]);
    if(accountError||memberError||deviceError)throw accountError||memberError||deviceError;
-   const memberRows=(members||[]) as Record<string,unknown>[],accountRows=(accounts||[]) as Record<string,unknown>[];
+   const memberRows=((members||[]) as Record<string,unknown>[]).filter(member=>!member.deleted_at),accountRows=(accounts||[]) as Record<string,unknown>[];
    const byMember=new Map<string,Record<string,unknown>>(memberRows.map(member=>[String(member.id),member]));
-   const rows=await Promise.all(accountRows.map(async account=>{const member=byMember.get(String(account.member_id));return {...deps.publicAccount(account),name:member?.display_name||'',phone:member?.phone_e164||'',deleted_at:member?.deleted_at||null,enabled:account.status==='active',protected:await sha(String(account.auth_user_id))===protectedPrincipalHash}}));
-   return {ok:true,members:rows,devices:devices||[]};
+   const visibleAccounts=accountRows.filter(account=>byMember.has(String(account.member_id)));
+   const visibleAccountIds=new Set(visibleAccounts.map(account=>String(account.id)));
+   const rows=await Promise.all(visibleAccounts.map(async account=>{const member=byMember.get(String(account.member_id));return {...deps.publicAccount(account),name:member?.display_name||'',phone:member?.phone_e164||'',enabled:account.status==='active',protected:await sha(String(account.auth_user_id))===protectedPrincipalHash}}));
+   return {ok:true,members:rows,devices:(devices||[]).filter(device=>visibleAccountIds.has(String(device.account_id)))};
   }
  };
  let attemptedAction='unknown';

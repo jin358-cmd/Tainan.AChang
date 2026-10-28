@@ -24,7 +24,7 @@ function loadState(){for(const k of [KEY,PRIOR_KEY,LEGACY_KEY]){try{const raw=lo
 const MAP_LOAD_TIMEOUT_MS=8000;
 const MAPLIBRE_JS='https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.js';
 const MAPLIBRE_CSS='https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.css';
-let state=loadState(),data=null,areas=[],routes=[],page='areas',selectedArea='復興里',shift='夜間',date=today(),chosenRoute='',plannerArea='復興里',areaPage=0,teamArea='',toastTimer=null,installPrompt=null,map=null,markers=[],mapFailed=false,mapLoaded=false,mapLoadTimer=null,mapAttempt=0,mapInitPromise=null,mapFailureMessage='',pinTarget=null,layerState={volunteer:true,day:false,night:false},pickerKind='',volunteerId='',volunteerPhone='';
+let state=loadState(),data=null,areas=[],routes=[],page='areas',selectedArea='復興里',shift='夜間',date=today(),chosenRoute='',plannerArea='復興里',areaPage=0,teamArea='',toastTimer=null,installPrompt=null,map=null,markers=[],mapFailed=false,mapLoaded=false,mapLoadTimer=null,mapAttempt=0,mapInitPromise=null,mapFailureMessage='',pinTarget=null,layerState={volunteer:true,day:false,night:false,gps:true},pickerKind='',volunteerId='',volunteerPhone='';
 const personNorm=p=>({id:String(p.id||`P${Date.now()}`),name:String(p.name||'').trim().slice(0,80),phone:String(p.phone||'').slice(0,80),address:String(p.address||'').slice(0,300),residentArea:String(p.residentArea||'待確認'),assignment:areas.includes(p.assignment)?p.assignment:'',serviceLat:coord(p.serviceLat)?p.serviceLat:null,serviceLon:coord(p.serviceLon)?p.serviceLon:null});
 const residentLabel=p=>{const s=String(p?.residentArea||'').trim().replace(/里里$/,'里');return /十里以外|十里外|待確認/.test(s)?'十里外':s&&s!=='未填寫'?s:''};
 const residentHtml=p=>residentLabel(p)?`原里：${esc(residentLabel(p))} · `:'';
@@ -109,7 +109,7 @@ let reportAreaSelected='';
 function taskProgress(done,total){const pct=total?Math.round(done/total*100):0,all=total>0&&done===total;return '<span class="task-progress-status '+(all?'is-complete':'')+'"><span class="task-progress-fill" style="width:'+pct+'%"></span><span class="task-progress-label">'+(all?'✅ ':'')+done+'/'+total+' 已完成</span></span>';}
 function navToStop(t){return 'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent('臺南市永康區'+t.stop_address)+'&travelmode=driving';}
 let volunteerTaskCategory='current';
-const volunteerExpandedGroups=new Set();
+const volunteerGroupOpen=new Map();
 
 // Isolated preview UI testing: synthetic-only, no API mutation or production credentials.
 let previewDemoMode=false;
@@ -137,21 +137,19 @@ function startPreviewDemo(){
  $('#secureLogin').hidden=true;$('#app').hidden=false;updateAccessControls();volunteerTaskCategory='current';go('reports');toast('隔離測試已啟動：所有資料均為範例');
 }
 function myTasks(){return liveTasks.filter(t=>t.volunteer_id===liveMemberId);}
+const taipeiToday=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 function taskDateCategory(t){
- const date=String(t.visit_date||'');const day=today();
- if(date<day)return 'history';if(date>day)return 'future';
- const time=String(t.eta||'').match(/(\d{1,2}:\d{2})(?:\s*[-~～至]\s*(\d{1,2}:\d{2}))?/);
- if(time&&time[2]){const now=new Date(),n=now.getHours()*60+now.getMinutes();const start=time[1].split(':').map(Number),end=time[2].split(':').map(Number);if(n>end[0]*60+end[1])return 'history';if(n<start[0]*60+start[1])return 'future';}
- return 'current';
+ const date=String(t.visit_date||''),day=taipeiToday();
+ if(date<day)return 'history';if(date>day)return 'future';return 'current';
 }
 function volunteerGroups(){const groups=new Map();for(const t of myTasks()){const key=[t.visit_date,t.shift,t.truck,t.area].join('|');if(!groups.has(key))groups.set(key,[]);groups.get(key).push(t)}return [...groups.values()].sort((a,b)=>a[0].visit_date.localeCompare(b[0].visit_date));}
 function renderVolunteerTaskList(root){
  const groups=volunteerGroups(),cats={history:[],current:[],future:[]};
  for(const g of groups)cats[taskDateCategory(g[0])].push(g);
  const pending=cats.history.filter(g=>g.some(t=>t.status!=='完成')).length;
- const catLabels={history:'歷史',current:'現有',future:'待執行'};
+ const catLabels={history:'歷史跟巡',current:'當日跟巡',future:'下次跟巡'};
  const selected=cats[volunteerTaskCategory]||[];
- let out='<section class="volunteer-task-unified"><div class="volunteer-task-heading"><h2 class="personal-task-title">今日跟巡任務</h2></div><div class="volunteer-categories" role="tablist" aria-label="任務時段分類">';
+ let out='<section class="volunteer-task-unified"><div class="volunteer-task-heading"><h2 class="personal-task-title">跟巡任務</h2></div><div class="volunteer-categories" role="tablist" aria-label="跟巡日期分類">';
  for(const k of ['history','current','future'])
   out+='<button type="button" role="tab" aria-selected="'+(k===volunteerTaskCategory)+'" class="volunteer-category '+(k===volunteerTaskCategory?'on':'')+'" data-vol-category="'+k+'">'+catLabels[k]+(k==='history'&&pending?'<small class="history-pending-count" role="status">● 尚未確認 '+pending+' 筆</small>':'<small>'+cats[k].length+' 筆</small>')+'</button>';
  out+='</div><div class="volunteer-task-unified-body">';
@@ -159,7 +157,7 @@ function renderVolunteerTaskList(root){
  for(const [groupIndex,g] of selected.entries()){
   const t=g[0],stops=[...new Map(g.map(x=>[x.id,x])).values()].sort((a,b)=>Number(a.stop_order)-Number(b.stop_order));
   const completed=g.every(x=>x.status==='完成'),groupKey=[t.visit_date,t.shift,t.truck,t.area].join('|');
-  const expanded=volunteerExpandedGroups.has(groupKey),panelId='volunteer-stops-'+volunteerTaskCategory+'-'+groupIndex;
+  const expanded=volunteerGroupOpen.has(groupKey)?volunteerGroupOpen.get(groupKey):volunteerTaskCategory==='current',panelId='volunteer-stops-'+volunteerTaskCategory+'-'+groupIndex;
   const shiftIsNight=/夜/.test(t.shift),isHistory=volunteerTaskCategory==='history';
   const times=stops.map(s=>String(s.eta||'').match(/\d{1,2}:\d{2}/)?.[0]).filter(Boolean);
   const period=times.length>1?times[0]+'～'+times[times.length-1]:(times[0]||'時間待排定');
@@ -198,15 +196,17 @@ function renderReports(){const root=document.getElementById('reportsContent');if
  if(liveRole==='volunteer'){renderVolunteerTaskList(root);return;}
  if(liveRole!=='admin'){root.innerHTML='<div class="access-notice"><strong>登入後查看任務</strong><p>管理員與志工請先登入帳號。</p><button class="primary" id="loginFromTasks" type="button">🔐 登入查看任務</button></div>';return;}
  const daily=new Map();for(const t of liveTasks){if(!daily.has(t.visit_date))daily.set(t.visit_date,[]);daily.get(t.visit_date).push(t)}
- const days=[...daily.keys()].sort();root.innerHTML=(days.length?days.map(day=>{
+ const days=[...daily.keys()].sort(),dateLabels={history:'歷史跟巡',current:'當日跟巡',future:'下次跟巡'},dateGroups={history:[],current:[],future:[]};for(const day of days)dateGroups[taskDateCategory({visit_date:day})].push(day);
+ const dayHtml=day=>{
  const tasks=daily.get(day),groups=new Map();for(const t of tasks){const key=[t.area,t.shift,t.truck].join('|');if(!groups.has(key))groups.set(key,[]);groups.get(key).push(t)}
- return '<details class="surface task-day" '+(day===taskSelectedDay?'open':'')+'><summary data-task-day="'+esc(day)+'">'+esc(day)+' · '+groups.size+' 組跟巡 · '+tasks.filter(t=>t.status==='完成').length+'/'+tasks.length+' 已完成</summary>'+
+ return '<details class="surface task-day" '+(day===taskSelectedDay||taskDateCategory({visit_date:day})==='current'?'open':'')+'><summary data-task-day="'+esc(day)+'">'+esc(day)+' · '+groups.size+' 組跟巡 · '+tasks.filter(t=>t.status==='完成').length+'/'+tasks.length+' 已完成</summary>'+
  [...groups.entries()].map(([key,entries])=>{const [area,shift,truck]=key.split('|'),lead=state.people.find(p=>p.id===leaderId(area)),members=new Map();
  for(const t of entries){if(!members.has(t.volunteer_id))members.set(t.volunteer_id,[]);members.get(t.volunteer_id).push(t)}
  const done=entries.filter(t=>t.status==='完成').length;
  return '<details class="task-team"><summary class="task-team-head"><span><strong>👑 '+esc(lead?.name||'未指派組長')+'</strong><small>'+esc(area)+' · '+esc(shift)+' · '+esc(truck)+'</small>'+(lead?.phone?'<a class="task-team-phone" href="tel:'+esc(canDial(lead))+'" onclick="event.stopPropagation()">☎ '+esc(prettyPhone(lead.phone))+'</a>':'')+'</span>'+taskProgress(done,entries.length)+'</summary><div class="task-member-list">'+[...members.entries()].map(([id,jobs])=>{const p=state.people.find(x=>x.id===id),completed=jobs.filter(x=>x.status==='完成').length;return '<div class="task-member-progress"><div><strong>'+esc(p?.name||'志工')+'</strong><small>'+esc(area)+' · '+esc(shift)+' · '+esc(truck)+'</small></div>'+taskProgress(completed,jobs.length)+'</div>'}).join('')+'</div></details>';
  }).join('')+'</details>';
- }).join(''):'<div class="empty">目前沒有正式排班資料</div>')+'<details class="surface task-sample"><summary>單日進度示範（非正式資料）</summary><div class="task-member-progress"><strong>示範小組：3 項排班任務</strong>'+taskProgress(2,3)+'</div></details>';
+ };
+ root.innerHTML=(days.length?['history','current','future'].map(category=>'<details class="surface task-date-category task-date-'+category+'" '+(category==='current'?'open':'')+'><summary>'+dateLabels[category]+' · '+dateGroups[category].length+' 天</summary><div class="task-date-category-body">'+(dateGroups[category].length?dateGroups[category].map(dayHtml).join(''):'<div class="empty">目前沒有'+dateLabels[category]+'資料</div>')+'</div></details>').join(''):'<div class="empty">目前沒有正式排班資料</div>')+'<details class="surface task-sample"><summary>單日進度示範（非正式資料）</summary><div class="task-member-progress"><strong>示範小組：3 項排班任務</strong>'+taskProgress(2,3)+'</div></details>';
 }
 function phoneDigits(s){return String(s||'').replace(/\D/g,'')}
 function openVolunteerLogin(){
@@ -307,15 +307,29 @@ function openShiftStopPopup(area,shiftName){
  root.innerHTML='<div class="popup-top"><strong class="popup-area-name">'+esc(area)+' · '+esc(shiftName)+' '+rows.length+'站</strong><button type="button" data-close-area aria-label="關閉站點">✕</button></div><div class="assigned-stop-list">'+items+'</div>';
  root.hidden=false;requestAnimationFrame(positionAreaPopup);
 }
-let gpsVehicles=[],gpsFetchedAt=0,gpsRequest=null;
+const GPS_REFRESH_MS=360000,GPS_STALE_MS=900000;
+let gpsVehicles=[],gpsFetchedAt=0,gpsLatestReportedAt='',gpsRequest=null,gpsTimer=null,gpsLastError='';
+const gpsDateLabel=value=>{const date=new Date(value);return Number.isNaN(date.getTime())?'時間未知':new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(date)};
+function gpsStale(){const sourceTime=new Date(gpsLatestReportedAt).getTime();return !!gpsLastError||!sourceTime||Date.now()-sourceTime>GPS_STALE_MS}
+function updateGpsStatus(){
+ const node=$('#gpsLayerStatus');if(!node)return;node.classList.toggle('error',!!gpsLastError);node.classList.toggle('stale',!gpsLastError&&gpsStale());
+ if(!layerState.gps){node.textContent='垃圾車 GPS 圖層已關閉';return}
+ if(gpsLastError){node.textContent='垃圾車 GPS 更新失敗；保留上次約略位置（'+gpsLastError+'）';return}
+ if(!gpsFetchedAt){node.textContent='垃圾車 GPS：正在取得永康區資料…';return}
+ node.textContent='垃圾車 GPS：'+gpsVehicles.length+' 輛 · 資料時間 '+gpsDateLabel(gpsLatestReportedAt)+' · 最近讀取 '+gpsDateLabel(gpsFetchedAt)+(gpsStale()?' · 資料可能已過期':' · 每 6 分鐘更新');
+}
+function stopGpsRefresh(){clearTimeout(gpsTimer);gpsTimer=null}
+function scheduleGpsRefresh(){stopGpsRefresh();if(!liveRole||!layerState.gps)return;gpsTimer=setTimeout(async()=>{if(document.visibilityState!=='hidden')await loadGpsVehicles();scheduleGpsRefresh()},GPS_REFRESH_MS)}
+function startGpsRefresh(){stopGpsRefresh();if(!liveRole||!layerState.gps){updateGpsStatus();return}loadGpsVehicles();scheduleGpsRefresh()}
 async function loadGpsVehicles(){
- if(!liveRole)return;
+ if(!liveRole||!layerState.gps||document.visibilityState==='hidden')return;
  if(gpsRequest)return gpsRequest;
  gpsRequest=onlineApi('gps-vehicles').then(result=>{
+  if(result.live!==true)throw new Error('來源未標示為即時官方資料');
   gpsVehicles=Array.isArray(result.vehicles)?result.vehicles.filter(v=>Number.isFinite(v.longitude)&&Number.isFinite(v.latitude)):[];
-  gpsFetchedAt=Date.now();
+  gpsFetchedAt=Date.parse(result.fetched_at)||Date.now();gpsLatestReportedAt=result.latest_reported_at||'';gpsLastError='';
   updateMap();
- }).catch(error=>console.warn('GPS 快照載入失敗',error.message)).finally(()=>{gpsRequest=null});
+ }).catch(error=>{gpsLastError=String(error.message||'連線失敗').slice(0,120);console.warn('GPS 更新失敗',gpsLastError)}).finally(()=>{gpsRequest=null;updateGpsStatus()});
  return gpsRequest;
 }
 function updateMap(){if(page!=='map')return;if(mapFailed){drawFallback();return}if(!map||!map.getLayer('village-fill'))return;highlightMapSelection();markers.forEach(m=>m.remove());markers=[];
@@ -338,15 +352,15 @@ function updateMap(){if(page!=='map')return;if(mapFailed){drawFallback();return}
   if((r['時段']==='日間'&&!layerState.day)||(r['時段']==='夜間'&&!layerState.night))continue;
   marker(r['時段']==='日間'?'☀':'☾',pos.lon,pos.lat,r['時段']==='日間'?'day':'night',r['到達']+' '+r['停靠點原文'],()=>openShiftStopPopup(r['里別'],r['時段']));
  }
- if(liveRole==='admin'||liveRole==='volunteer'){
+ if(layerState.gps&&(liveRole==='admin'||liveRole==='volunteer')){
   for(const v of gpsVehicles){
    const label=document.createElement('div');
    label.className='map-marker gps-truck';
    label.textContent='🚛';
-   label.title=v.plate+' · '+v.location+' · '+v.reported_at+'（歷史快照）';
+   const stale=gpsStale();label.title=v.plate+' · '+v.location+' · 資料時間 '+gpsDateLabel(v.reported_at)+(stale?'（可能已過期）':'（官方 GPS 約略位置）');
    label.style.cssText='background:#8B5CF6;color:white;border:2px solid white;border-radius:50%;padding:5px;cursor:pointer;font-size:20px;box-shadow:0 2px 7px #34215b80';
    markers.push(new window.maplibregl.Marker({element:label}).setLngLat([v.longitude,v.latitude])
-    .setPopup(new window.maplibregl.Popup({offset:24}).setText(v.plate+' · '+v.location+' · '+v.reported_at+'（歷史 GPS，非即時）')).addTo(map));
+    .setPopup(new window.maplibregl.Popup({offset:24}).setText(v.plate+' · '+v.location+' · 資料時間 '+gpsDateLabel(v.reported_at)+(stale?' · 更新異常，保留上次位置':' · 官方 GPS 約略位置，非導航用途'))).addTo(map));
   }
  }
 
@@ -361,11 +375,11 @@ document.addEventListener('click',e=>{
  const summary=e.target.closest('[data-vol-summary]');
  if(summary&&!e.target.closest('[data-vol-group],[data-vol-complete-group],a')){
   const key=summary.dataset.volSummary;
-  if(volunteerExpandedGroups.has(key))volunteerExpandedGroups.delete(key);else volunteerExpandedGroups.add(key);
+  const open=!(volunteerGroupOpen.has(key)?volunteerGroupOpen.get(key):taskDateCategory(liveTasks.find(t=>[t.visit_date,t.shift,t.truck,t.area].join('|')===key)||{})==='current');volunteerGroupOpen.set(key,open);
   const panel=summary.parentElement.querySelector('.volunteer-stop-panel');
-  if(panel)panel.hidden=!volunteerExpandedGroups.has(key);
+  if(panel)panel.hidden=!open;
   const btn=summary.querySelector('[data-vol-expand]');
-  if(btn){const yes=volunteerExpandedGroups.has(key);btn.setAttribute('aria-expanded',String(yes));btn.setAttribute('aria-label',(yes?'收合':'展開')+'停靠點列表');const arrow=btn.querySelector('.task-summary-chevron');if(arrow)arrow.textContent=yes?'⌃':'⌄';}
+  if(btn){btn.setAttribute('aria-expanded',String(open));btn.setAttribute('aria-label',(open?'收合':'展開')+'停靠點列表');const arrow=btn.querySelector('.task-summary-chevron');if(arrow)arrow.textContent=open?'⌃':'⌄';}
   return;
  }
  const cat=e.target.closest('[data-vol-category]');if(cat&&liveRole==='volunteer'){volunteerTaskCategory=cat.dataset.volCategory;renderReports();return;}const group=e.target.closest('[data-vol-group]');if(group&&liveRole==='volunteer'){const ids=group.dataset.volGroup,related=liveTasks.filter(t=>[t.visit_date,t.shift,t.truck,t.area].join('|')===ids);if(related.some(t=>t.volunteer_id===liveMemberId)){const area=related[0].area;openAreaPreview(area,ids);if(!previewDemoMode)onlineApi('tasks?groupArea='+encodeURIComponent(area)).then(r=>{groupContacts=groupContacts.filter(p=>p.area!==area);groupContacts.push(...(r.people||[]).map(p=>({id:p.member_id,name:p.display_name,phone:p.phone_e164,isLeader:p.is_leader,area})));if(!$('#areaPopup').hidden)openAreaPreview(area,ids)}).catch(e=>console.warn('小組人員名單讀取失敗',e.message));}return;}const done=e.target.closest('[data-vol-complete-group]');if(done&&liveRole==='volunteer')completeVolunteerGroup(done.dataset.volCompleteGroup);});
@@ -438,9 +452,9 @@ function updateAccessControls(){
  $('#volunteerLoginBtn').textContent='🔐 登入';const adminTop=$('#adminHeaderAction');if(adminTop)adminTop.hidden=!admin;$('#secureLogout').hidden=!liveRole;const nameNode=$('#signedInName');if(nameNode){nameNode.hidden=!liveRole;nameNode.textContent=liveDisplayName||'登入者';}
 }
 
-async function secureSignOut(){if(previewDemoMode){previewDemoMode=false;clearInterval(liveTimer);liveTimer=null;showAuth();return;}try{await onlineApi('session','DELETE')}catch{}clearInterval(liveTimer);liveTimer=null;liveTasks=[];state=makeState([]);showAuth()}
+async function secureSignOut(){stopGpsRefresh();if(previewDemoMode){previewDemoMode=false;clearInterval(liveTimer);liveTimer=null;showAuth();return;}try{await onlineApi('session','DELETE')}catch{}clearInterval(liveTimer);liveTimer=null;liveTasks=[];state=makeState([]);showAuth()}
 async function authStart(){try{
- const session=await onlineApi('session');liveRole=session.role;setTimeout(loadGpsVehicles,0);liveMemberId=session.memberId;liveDisplayName=session.displayName||'';
+ const session=await onlineApi('session');liveRole=session.role;liveMemberId=session.memberId;liveDisplayName=session.displayName||'';startGpsRefresh();
  $('#secureLogin').hidden=true;$('#app').hidden=false;$('#accountBadge')?.remove();const adminTop=$('#adminHeaderAction');if(adminTop){adminTop.hidden=liveRole!=='admin';}updateAccessControls();
  if(liveRole==='admin'){
   $('#volunteerLoginBtn').hidden=true;
@@ -520,9 +534,14 @@ async function openMemberAdmin(preselectId=''){
     const approved=m.status==='active'||m.enabled===true;
     let actions='';
     if(m.protected)actions='<span class="auth-pending-label">主要管理員</span>';
-    else if(m.status==='pending')actions=`<button type="button" class="smallbtn" data-member-action="approve" data-account-id="${esc(m.id)}">核准開通</button>`;
-    else if(approved)actions=`<button type="button" class="smallbtn" data-member-action="suspend" data-account-id="${esc(m.id)}">停用帳號</button>`;
-    else if(m.status==='suspended'&&m.approved_at)actions=`<button type="button" class="smallbtn member-restore-btn" data-member-action="reactivate" data-account-id="${esc(m.id)}">恢復帳號</button>`;
+    else{
+      const buttons=[];
+      if(m.status==='pending')buttons.push(`<button type="button" class="smallbtn" data-member-action="approve" data-account-id="${esc(m.id)}">核准開通</button>`);
+      else if(approved)buttons.push(`<button type="button" class="smallbtn" data-member-action="suspend" data-account-id="${esc(m.id)}">停用帳號</button>`);
+      else if(m.status==='suspended'&&m.approved_at)buttons.push(`<button type="button" class="smallbtn member-restore-btn" data-member-action="reactivate" data-account-id="${esc(m.id)}">恢復帳號</button>`);
+      buttons.push(`<button type="button" class="smallbtn member-archive-btn" data-member-action="archive" data-account-id="${esc(m.id)}">刪除會員</button>`);
+      actions=buttons.join('');
+    }
     return `<div class="pick-row approved-member-row"><div class="member-label"><strong class="approved-member-name">${esc(name)}</strong><span class="approved-member-phone">${esc(prettyPhone(m.phone))}</span><small>${esc(m.role==='admin'?'管理員':'志工')}</small></div><span class="member-device-icons" aria-label="已核准設備">${deviceIcons||'<span class="device-none" title="尚無核准設備">尚無核准設備</span>'}</span>${approved?'<span class="auth-success-check" role="img" aria-label="已完成授權" title="已完成授權">✓</span>':`<span class="auth-pending-label" aria-label="尚未啟用">${esc(m.status==='suspended'?'已停用':'待核准')}</span>`}<div class="member-auth-actions">${actions}</div></div>`;
   }).join('');
   const eligible=state.people.filter(p=>p.phone&&!known.has(p.id));
@@ -587,7 +606,7 @@ bind=function(){originalBind();
  document.addEventListener('click',async e=>{const del=e.target.closest('[data-delete-person]');if(del){if(!assertAdmin())return;const id=del.dataset.deletePerson;const person=state.people.find(p=>p.id===id);if(!person)return;showModal('確認刪除人員',`<div class="delete-warning"><p>確定將「<strong>${esc(person.name)}</strong>」從志工名冊移除？</p><small>這項操作須管理員權限；若帳號仍有會員授權，將先停止刪除以保障資料安全。</small></div><div class="delete-confirm-actions"><button type="button" class="smallbtn" data-cancel-person-delete>取消</button><button type="button" class="delete-person-confirm" data-confirm-delete-person="${esc(id)}">確認刪除</button></div>`);return;}if(e.target.closest('[data-cancel-person-delete]')){closeModal();return;}const confirm=e.target.closest('[data-confirm-delete-person]');if(!confirm)return;if(!assertAdmin())return;const id=confirm.dataset.confirmDeletePerson;confirm.disabled=true;confirm.textContent='刪除處理中…';try{await onlineApi('roster','DELETE',{id});await refreshOnline(true);closeModal();toast('人員已從名冊移除');}catch(err){confirm.disabled=false;confirm.textContent='確認刪除';toast('刪除未完成：'+err.message)}});
  $('#secureLoginForm').onsubmit=async e=>{e.preventDefault();$('#authStatus').textContent='登入驗證中…';const d=Object.fromEntries(new FormData(e.target));try{await onlineApi('session','POST',d);await authStart()}catch(err){$('#authStatus').textContent=err.message}};
  document.addEventListener('click',e=>{const b=e.target.closest('button[data-live-complete]');if(b)completeOnlineTask(b.dataset.liveComplete)});
- document.addEventListener('click',async e=>{const btn=e.target.closest('button[data-member-action]');if(!btn)return;if(!assertAdmin())return;const action=btn.dataset.memberAction,labels={approve:'核准此會員帳號？',suspend:'停用此會員帳號？既有裝置會一併撤銷。',reactivate:'恢復此會員帳號？既有裝置不會自動恢復。'};if(!labels[action]||!confirm(labels[action]))return;btn.disabled=true;try{await onlineApi('member-admin-v2','PATCH',{action,accountId:btn.dataset.accountId});toast(action==='approve'?'✓ 會員帳號已核准':action==='suspend'?'會員帳號已停用':'會員帳號已恢復');await openMemberAdmin()}catch(err){toast('操作失敗：'+err.message);btn.disabled=false}});
+ document.addEventListener('click',async e=>{const btn=e.target.closest('button[data-member-action]');if(!btn)return;if(!assertAdmin())return;const action=btn.dataset.memberAction,labels={approve:'核准此會員帳號？',suspend:'停用此會員帳號？既有裝置會一併撤銷。',reactivate:'恢復此會員帳號？既有裝置不會自動恢復。',archive:'刪除這位會員？\n\n會從目前名冊、服務里與會員授權清單移除，並停用登入、撤銷所有裝置。既有排班、任務、完成紀錄、稽核紀錄與 Auth 身分會保留，不會永久清除。'};if(!labels[action]||!confirm(labels[action]))return;btn.disabled=true;try{const payload={action,accountId:btn.dataset.accountId};if(action==='archive')payload.reason='管理員由會員授權介面封存會員';await onlineApi('member-admin-v2','PATCH',payload);if(action==='archive'){await refreshOnline(true);toast('會員已封存並從目前名冊移除')}else toast(action==='approve'?'✓ 會員帳號已核准':action==='suspend'?'會員帳號已停用':'會員帳號已恢復');await openMemberAdmin()}catch(err){toast('操作失敗：'+err.message);btn.disabled=false}});
  document.addEventListener('click',async e=>{const btn=e.target.closest('button[data-revoke-device]');if(!btn)return;if(!assertAdmin())return;if(!confirm('確定撤銷這台設備？'))return;btn.disabled=true;try{await onlineApi('members','PATCH',{deviceId:btn.dataset.revokeDevice,approved:false});toast('已撤銷指定設備');await openMemberAdmin()}catch(err){toast('撤銷設備失敗：'+err.message);btn.disabled=false}});
  document.addEventListener('click',async e=>{const btn=e.target.closest('button[data-approve-device]');if(!btn)return;if(!assertAdmin())return;btn.disabled=true;try{await onlineApi('members','PATCH',{deviceId:btn.dataset.approveDevice,approved:true});toast('✓ 手機已核准，志工可重新開啟 PWA');await openMemberAdmin()}catch(err){toast('核准手機失敗：'+err.message);btn.disabled=false}});
  $('#modalBody').addEventListener('submit',async e=>{if(e.target.id==='newMemberForm'){e.preventDefault();await submitNewMemberForm(e.target);return}if(e.target.id!=='memberAdminForm')return;e.preventDefault();if(!assertAdmin())return;const d=Object.fromEntries(new FormData(e.target));const x=state.people.find(p=>p.id===d.volunteerId);const normalizePhone=p=>{let n=phoneDigits(p);if(n.startsWith('8869'))n='0'+n.slice(3);return n};if(!x||normalizePhone(x.phone)!==normalizePhone(d.phone)){toast('手機號碼和人員名冊不符');return}if(d.role==='admin'&&!confirm('確認建立「'+x.name+'」的待核准管理員帳號？此帳號核准後可管理名冊與會員授權。'))return;try{await onlineApi('member-admin-v2','POST',{action:'create',memberId:d.volunteerId,phone:d.phone,pin:d.password,role:d.role});toast('✓ 帳號已建立並列入待核准清單');await openMemberAdmin()}catch(err){toast('建立會員失敗：'+err.message)}});
@@ -616,7 +635,7 @@ async function boot(){try{
  const pub=await fetch('./data-public.json',{cache:'no-store'});if(!pub.ok)throw Error('地圖資料無法讀取');data=await pub.json();areas=data.areas;
  state=makeState([]);state.demo=false;areaPage=Math.floor(areas.indexOf(selectedArea)/CARD_PAGE_SIZE);const pa=$('#plannerAreaSelect');pa.innerHTML=areas.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('')+'<option value="all">全部</option>';
  const sel=$('#peopleAreaFilter');sel.innerHTML='<option value="all">全部里別</option>'+areas.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('');
- $('#peopleFilter').value='assigned';bind();showAuth();const googleHandled=await completeGoogleOAuth();if(!googleHandled&&!previewOnly())await authStart();if(previewOnly())previewLoginButton();lastSessionCheck=Date.now();document.addEventListener('visibilitychange',restoreSavedSessionOnResume);window.addEventListener('pageshow',e=>{if(e.persisted)restoreSavedSessionOnResume()});
+ $('#peopleFilter').value='assigned';bind();const gpsToggle=$('#layerGps');if(gpsToggle)gpsToggle.onchange=e=>{layerState.gps=e.target.checked;if(layerState.gps)startGpsRefresh();else stopGpsRefresh();updateGpsStatus();updateMap()};showAuth();const googleHandled=await completeGoogleOAuth();if(!googleHandled&&!previewOnly())await authStart();if(previewOnly())previewLoginButton();lastSessionCheck=Date.now();document.addEventListener('visibilitychange',()=>{restoreSavedSessionOnResume();if(document.visibilityState==='visible'&&liveRole&&layerState.gps){if(!gpsFetchedAt||Date.now()-gpsFetchedAt>=GPS_REFRESH_MS)loadGpsVehicles();scheduleGpsRefresh()}else if(document.visibilityState==='hidden')stopGpsRefresh()});window.addEventListener('pageshow',e=>{if(e.persisted){restoreSavedSessionOnResume();startGpsRefresh()}});
  if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }catch(e){console.error(e);openSecureLogin();$('#authStatus').textContent='網站暫時無法完成登入，請重新整理後再試'}
 }

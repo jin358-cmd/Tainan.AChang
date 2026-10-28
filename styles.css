@@ -987,3 +987,10 @@ body.volunteer-session #page-reports .volunteer-stop-item>.task-navigate svg{dis
 
 /* 2026-10-28: gently enlarge the actual volunteer approval submit button. */
 #memberAdminForm button[type="submit"]{font-size:21px!important;font-weight:900!important;line-height:1.4!important;min-height:58px!important}
+
+/* Official Yongkang garbage-truck layer status. */
+.legend-pin.gps{background:#8b5cf6}
+.gps-layer-status{margin:8px 2px 3px;color:#566f83;font-size:11px}
+.gps-layer-status.stale{color:#a15a13}
+.gps-layer-status.error{color:#b12b40}
+.task-date-category>summary{cursor:pointer;font-weight:900;color:#173b5e}.task-date-category-body{display:grid;gap:8px;margin-top:10px}.task-date-category-body>.task-day{margin:0;box-shadow:none}.task-date-history:not([open])>summary{color:#718398}

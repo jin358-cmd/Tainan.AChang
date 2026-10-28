@@ -8,7 +8,7 @@ async function changeArea(id,village,token,leader=false){if(village){const r=awa
 module.exports=L.run(async(req,res)=>{
  L.method(req,['GET','POST','PATCH','DELETE']);const p=await L.authorized(req,res,['admin']);
  if(req.method==='GET'){
-  const [m,a]=await Promise.all([L.rest('members?select='+mFields+'&order=display_name.asc&limit=2000',p.token),L.rest('service_allocations?select=member_id,village,is_leader&limit=2000',p.token)]);
+  const [m,a]=await Promise.all([L.rest('members?deleted_at=is.null&select='+mFields+'&order=display_name.asc&limit=2000',p.token),L.rest('service_allocations?select=member_id,village,is_leader&limit=2000',p.token)]);
   const all=L.need(m,'名冊讀取失敗').filter(x=>!['ADMIN-','ARCHIVED-'].some(prefix=>String(x.source_member_id||'').startsWith(prefix))),alloc=L.need(a,'服務里讀取失敗'),index=new Map(alloc.map(x=>[x.member_id,x]));
   return L.json(res,200,{people:all.map(x=>map(x,index.get(x.id)))});
  }
