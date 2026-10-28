@@ -313,6 +313,7 @@ function initGpsToggle(){
  const label=document.createElement('label');
  label.innerHTML='<input id="layerGps" type="checkbox" /> <span style="display:inline-block;background:#8B5CF6;color:white;border-radius:6px;padding:2px 5px">🚛</span> GPS 車輛';
  legend.appendChild(label);
+ const status=document.createElement('small');status.id='gpsFeedStatus';status.style.cssText='display:block;font-size:11px;color:#596a7b';status.textContent='GPS 尚未開啟';legend.appendChild(status);
  label.querySelector('input').addEventListener('change',e=>{
   gpsEnabled=e.target.checked;
   if(gpsEnabled)loadGpsVehicles();
@@ -326,7 +327,12 @@ async function loadGpsVehicles(){
  gpsRequest=onlineApi('gps-vehicles').then(result=>{
   gpsVehicles=Array.isArray(result.vehicles)?result.vehicles.filter(v=>Number.isFinite(v.longitude)&&Number.isFinite(v.latitude)):[];
   gpsIsLive=result.live===true;
-  gpsFetchedAt=Date.now();
+  const now=Date.now();
+  const parseTime=v=>Date.parse(String(v.reported_at||'').replace(' ','T')+'+08:00');
+  gpsVehicles=gpsVehicles.map(v=>({...v,is_stale:!Number.isFinite(parseTime(v))||now-parseTime(v)>10*60*1000||parseTime(v)>now+60000}));
+  gpsFetchedAt=now;
+  const stateLabel=document.querySelector('#gpsFeedStatus');
+  if(stateLabel)stateLabel.textContent=(gpsIsLive?'官方來源':'歷史備援')+' · '+gpsVehicles.length+' 輛 · '+(gpsVehicles.filter(v=>!v.is_stale).length)+' 輛定位在10分鐘內';
   updateMap();
  }).catch(error=>console.warn('GPS 快照載入失敗',error.message)).finally(()=>{gpsRequest=null});
  return gpsRequest;
@@ -374,8 +380,9 @@ function updateMap(){if(page!=='map')return;if(mapFailed){drawFallback();return}
   for(const v of gpsVehicles){
    const label=document.createElement('div');
    label.className='map-marker gps-truck';
-   label.textContent='🚛';
-   label.title=v.plate+' · '+v.location+' · '+v.reported_at+(gpsIsLive?'（官方 GPS 定位）':'（歷史快照）');
+   label.textContent=v.is_stale?'🚛':'🚛';
+   label.style.opacity=v.is_stale?'0.48':'1';
+   label.title=v.plate+' · '+v.location+' · '+v.reported_at+(v.is_stale?'（定位逾時）':gpsIsLive?'（官方定位）':'（歷史快照）');
    label.style.cssText='background:#8B5CF6;color:white;border:2px solid white;border-radius:50%;padding:5px;cursor:pointer;font-size:20px;box-shadow:0 2px 7px #34215b80';
    label.addEventListener('click',()=>showPointDetail({kind:'gps',location:v.location,plate:v.plate,reported_at:v.reported_at,lon:v.longitude,lat:v.latitude}));
    markers.push(new window.maplibregl.Marker({element:label}).setLngLat([v.longitude,v.latitude])
