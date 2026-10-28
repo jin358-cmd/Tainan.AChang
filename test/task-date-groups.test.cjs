@@ -53,6 +53,7 @@ test('map popup enlarges member identity and centers the existing assignment but
  assert.match(styles,/@media\(min-width:621px\)[\s\S]*\.popup-contact strong\{[^}]*white-space:nowrap/);
  assert.match(styles,/@media\(min-width:621px\)[\s\S]*\.popup-crown\{position:relative;top:-2px\}/);
  assert.match(app,/const pw=Math\.min\(430,Math\.max\(210,box\.clientWidth-20\)\)/);
+ assert.match(app,/document\.addEventListener\('click',e=>\{const close=e\.target\.closest\?\.\('\[data-close-area\]'\)[\s\S]*e\.stopPropagation\(\);p\.hidden=true;\},true\)/);
 });
 
 test('mobile settings sheet is content-sized with the device card directly after exports',()=>{
