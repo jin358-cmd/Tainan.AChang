@@ -56,7 +56,7 @@ Base UI commit: `082d790b06b87a1927865be4466423675ce31c0e`
 
 Aggregate evidence:
 
-- The post-decline candidate removes the unactivated Hook; exact SHA is recorded after this change is committed.
+- Exact post-decline deployed source: `d2ebbb532be5946b6af4c5a345186fb49a5f064f`.
 - `npm test`: 44/44 LOCAL PASS. Tests cover Node mocks and static source/SQL contracts, including A-fails/B-succeeds ownership safety and credential-rotation-stable operation identity. They are not live PostgreSQL concurrency tests.
 - `npm run test:browser`: PASS; local synthetic API only, all external requests blocked.
 - `node test/ui-readonly-preview.browser.cjs`: PASS; synthetic read-only preview, zero `/api` requests.
@@ -67,33 +67,33 @@ Aggregate evidence:
 
 No live TEST account, PIN, device, or member row was created by this candidate.
 
-Isolated deployment evidence for commit `db3e3ba331843912cdd1f876f2733a99dd7dd59d`:
+Current isolated deployment evidence:
 
-- Vercel Preview `dpl_9BfULZpP3vTSup692GyPGQXikpgs` is `READY`; the existing fixed TEST alias `tainan-achang-online-ui-test-tjc1.vercel.app` resolves to this deployment. Production aliases were not changed.
-- TEST Edge `achang-member-admin-v2` is ACTIVE v2, `verify_jwt=true`, deployment digest `95b6121ac996ba9981501e2206c241b23045469c8d170dcc035ce40dcd345349`. Its retrieved files include the random Auth alias and atomic RPC integration.
+- Vercel Preview `dpl_Fhg2ULWG71uQdqxpZa5TPZTVkBh7` is `READY` at Git SHA `d2ebbb532be5946b6af4c5a345186fb49a5f064f`; the existing fixed TEST alias `tainan-achang-online-ui-test-tjc1.vercel.app` resolves to this deployment. Production aliases were not changed.
+- TEST Edge `achang-member-admin-v2` is ACTIVE v3, `verify_jwt=true`, deployment digest `6f8520d3ca7b0eb7d01f84b659effd551ccd9ca9695b74ff64a93ddb5b4716b5`. Retrieved files match the ownership-safe operation-mapped Auth integration; the declined Hook is absent.
 - TEST migration `achang_member_admin_v2_atomic_transition` applied successfully. Readback confirms invoker security, empty search path, authenticated-only application grant, row lock/CAS, protected-principal check, and transactional device/account updates.
+- TEST migrations `achang_member_auth_operation_identity` and `achang_member_auth_operation_invoker_hardening` applied successfully. Readback confirms `SECURITY INVOKER`, empty search path, active-admin RLS policy, authenticated EXECUTE, and table privileges limited to SELECT/INSERT for authenticated callers. The security-definer advisor warning was cleared.
 - Supabase security advisor reported no new v2/RPC finding. Existing unrelated findings remain: the internal PIN bucket table has RLS with no public policy (expected server-only access), and leaked-password protection is disabled.
 - Direct HTTP from this executor is BLOCKED before reaching Vercel or Supabase (`Envoy CONNECT 403`). No browser-control tool is available in this executor. Therefore live browser → API → Auth/DB → login remains PENDING, not PASS.
 
 Deployment/source boundary:
 
-- The fixed TEST alias and Edge v2 evidence above remain the deployed `db3e3ba` candidate.
-- The latest Draft PR source adds durable private operation-mapped Auth identity reuse, SQLSTATE-to-HTTP denied-event mapping, and ownership-safe recovery. It excludes the declined Password Verification Hook and is not yet the deployed TEST runtime.
-- Migration `20261028094500_achang_member_auth_operation_identity.sql` is committed but not applied to TEST.
+- The fixed TEST alias, Vercel deployment and Edge v3 now serve the post-decline candidate above.
+- The Draft PR source adds durable private operation-mapped Auth identity reuse, SQLSTATE-to-HTTP denied-event mapping, and ownership-safe recovery. It excludes the declined Password Verification Hook.
 - Separate cloud-browser read-only smoke at 2026-10-28 09:49–09:50 UTC loaded the fixed TEST alias while logged out. `/api/config` showed `environment=test` and project ref `fhxdpupascsikjsycpbi`; login form open/close, five navigation tabs, logged-out task/roster privacy text, and public planner rendering worked. The map showed an offline fallback, so interactive map is not PASS. No credentials were entered and no account, device or business-data write occurred. This smoke did not independently establish runtime SHA and is not Auth E2E.
 
 TEST actor/session prerequisite:
 
 - The available cloud browser is currently logged out. No TEST administrator credential, PIN or token has been transferred in chat, and none should be.
+- A pre-existing synthetic TEST administrator fixture is active and has approved devices, but its credential/session is not available in this executor. It was not recreated or reset.
 - Live E2E requires an already authorized TEST administrator session on an authorized browser, or secure credential injection through an approved execution secret channel. Do not create a new administrator/bootstrap credential merely to unblock the run without separate authority.
 
 Exact remaining checklist for browser → API → Auth/DB → login verification in TEST:
 
-1. Apply only the pending identity-operation migration to TEST and read back its definition and grants; do not apply it to Production.
-2. Deploy the post-decline reviewed source to the existing TEST Edge/function and fixed Preview alias; verify Git SHA, Edge version/hash, `verify_jwt=true`, TEST project ref and rollback points before login.
-3. Establish an authorized TEST admin session through the secure prerequisite above. Run bounded synthetic create volunteer/admin → pending → approve → PIN login/device path → list/status → suspend/reactivate tests, including shared-phone separation, leading-zero PIN, denied roles and protected principal. The declined custom account-level brute-force test is excluded and remains NOT ENABLED / NOT PASS.
-4. Read back only the scoped TEST Auth/account/device/audit rows and verify transaction rollback. Cleanup must use suspend/revoke and preserve audit history; no hard delete.
-5. Complete independent review of the exact deployed SHA and classify TEST-01–12 from live evidence. Until then none of TEST-01–12 is an overall live PASS.
-6. Production switch to `https://achang.pmos.space`, merge, and Production schema/function/data changes require the separate post-verification release authorization and remain out of scope.
+1. Reconnect the already authorized TEST browser/profile or inject the existing synthetic TEST administrator credential through an approved secret channel; do not send it in chat and do not create/reset an administrator.
+2. Run bounded synthetic create volunteer/admin → pending → approve → PIN login/device path → list/status → suspend/reactivate tests, including shared-phone separation, leading-zero PIN, denied roles and protected principal. The declined custom account-level brute-force test is excluded and remains NOT ENABLED / NOT PASS.
+3. Read back only the scoped TEST Auth/account/device/audit rows and verify transaction rollback. Cleanup must use suspend/revoke and preserve audit history; no hard delete.
+4. Complete independent review of exact deployed SHA `d2ebbb5` and classify TEST-01–12 from live evidence. Until then none of TEST-01–12 is an overall live PASS.
+5. Production switch to `https://achang.pmos.space`, merge, and Production schema/function/data changes require the separate post-verification release authorization and remain out of scope.
 
 Production switch, merge and Production data changes remain out of scope.
