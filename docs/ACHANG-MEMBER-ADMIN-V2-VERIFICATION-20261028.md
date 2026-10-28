@@ -64,14 +64,21 @@ Aggregate evidence:
 
 ## Remaining isolated integration gate
 
-No live TEST account, PIN, device, or member row was created by this candidate. A prior v2 Edge v1 and Preview candidate exist in TEST, but they predate the random Auth alias and atomic transition changes in this record; the fixed integration alias remains on the safe read-only deployment until the updated migration/function are verified.
+No live TEST account, PIN, device, or member row was created by this candidate.
+
+Isolated deployment evidence for commit `db3e3ba331843912cdd1f876f2733a99dd7dd59d`:
+
+- Vercel Preview `dpl_9BfULZpP3vTSup692GyPGQXikpgs` is `READY`; the existing fixed TEST alias `tainan-achang-online-ui-test-tjc1.vercel.app` resolves to this deployment. Production aliases were not changed.
+- TEST Edge `achang-member-admin-v2` is ACTIVE v2, `verify_jwt=true`, deployment digest `95b6121ac996ba9981501e2206c241b23045469c8d170dcc035ce40dcd345349`. Its retrieved files include the random Auth alias and atomic RPC integration.
+- TEST migration `achang_member_admin_v2_atomic_transition` applied successfully. Readback confirms invoker security, empty search path, authenticated-only application grant, row lock/CAS, protected-principal check, and transactional device/account updates.
+- Supabase security advisor reported no new v2/RPC finding. Existing unrelated findings remain: the internal PIN bucket table has RLS with no public policy (expected server-only access), and leaked-password protection is disabled.
+- Direct HTTP from this executor is BLOCKED before reaching Vercel or Supabase (`Envoy CONNECT 403`). No browser-control tool is available in this executor. Therefore live browser → API → Auth/DB → login remains PENDING, not PASS.
 
 To run browser → API → Auth/DB → login verification in TEST, the following bounded persistent TEST-only configuration is still required:
 
-1. Apply the new atomic-transition migration to TEST only, then read back its definition and grants.
-2. Deploy only the updated `achang-member-admin-v2` function to TEST with JWT verification enabled; do not replace `achang-admin-provision`. The previous deployment attempt was blocked by a JSR registry timeout and is not counted as success.
-3. The branch-specific Preview TEST variables are already scoped to `feature/achang-member-admin-v2-20261028`; no Production variable was changed.
-4. Reassign the existing fixed integration alias `tainan-achang-online-ui-test-tjc1.vercel.app` only after the migration, Edge source and new Preview SHA are verified.
-5. Use bounded synthetic TEST fixtures for create/approve/login/audit, then preserve or clean them according to a stated fixture plan. Do not use Production or the protected principal as a fixture.
+1. Use an authorized browser/network path to run bounded synthetic TEST fixtures through create/approve/login/audit. Do not use Production or the protected principal as a fixture.
+2. Verify the resulting Auth/account/audit rows and rollback/cleanup behavior in TEST, including shared-phone separation and leading-zero PIN login.
+3. Complete independent Code Review of the exact Draft PR head and record the remaining PARTIAL/PENDING gates.
+4. Production switch to `https://achang.pmos.space`, merge, and Production data/schema/function changes require the post-verification release gate and remain out of scope for this record.
 
 Production switch, merge and Production data changes remain out of scope.
