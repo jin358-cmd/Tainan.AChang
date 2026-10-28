@@ -33,9 +33,9 @@ test('map startup has bounded failure, cleanup and retry guards', () => {
 });
 
 test('map asset revision and service-worker cache advance together', () => {
-  assert.match(html, /styles\.css\?v=197/);
-  assert.match(html, /app\.js\?v=190/);
-  assert.match(sw, /achang-pwa-shell-v133-mobile-ui-sync/);
+  assert.match(html, /styles\.css\?v=198/);
+  assert.match(html, /app\.js\?v=191/);
+  assert.match(sw, /achang-pwa-shell-v135-desktop-map-roster/);
 });
 
 test('map source attribution is compact but remains available', () => {

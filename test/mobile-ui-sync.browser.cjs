@@ -10,7 +10,7 @@ const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');
 
 function markup(){
  return `<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style>
- <body class="restored-admin-map">
+ <body class="restored-admin-map"><style>#mapBox{height:640px;position:relative}</style>
   <main id="page-reports">
    <details class="task-date-category task-date-history" open><summary>歷史跟巡</summary><div class="task-date-category-body"><details class="task-team"><summary class="task-team-head"><span class="task-team-row task-team-primary"><span class="task-team-identity"><strong><span class="task-leader-crown">👑</span> 王大明</strong><a class="task-team-phone">☎ 0912-345-678</a></span><span class="task-progress-status"><span class="task-progress-label">0/2 已完成</span></span></span><span class="task-team-row task-team-route"><strong>建國里</strong><span class="task-route-separator">・</span><span class="task-team-shift"><span class="legend-pin day">☀</span>日間</span><span class="task-team-plate">KEB-5939</span></span></summary><div class="task-member-list"><div class="task-member-progress"><div><strong>王大明</strong><small>建國里 · 日間 · KEB-5939</small></div><span class="task-progress-status"><span class="task-progress-label">0/1 已完成</span></span></div></div></details></div></details>
   </main>
@@ -30,6 +30,8 @@ function markup(){
    await page.locator('[data-close-area]').click();assert.equal(await page.locator('#areaPopup').isHidden(),true);assert.equal(await page.locator('#areaPopup').evaluate(el=>getComputedStyle(el).display),'none');
    results.push(layout);await context.close();
   }
-  process.stdout.write(JSON.stringify({status:'PASS',evidence:'synthetic local Chromium render only',viewports:['390x844','360x800'],results},null,2)+'\n');
+  const desktop=await browser.newContext({viewport:{width:1024,height:768},serviceWorkers:'block'}),desktopPage=await desktop.newPage();await desktopPage.setContent(markup());
+  const desktopLayout=await desktopPage.evaluate(()=>{const popup=document.querySelector('#areaPopup'),contacts=popup.querySelector('.popup-contacts'),names=[...contacts.querySelectorAll('strong')],crown=popup.querySelector('.popup-crown'),p=popup.getBoundingClientRect();return {width:p.width,outerScroll:popup.scrollHeight-popup.clientHeight,contactsOverflow:getComputedStyle(contacts).overflowY,namesSingleLine:names.every(node=>getComputedStyle(node).whiteSpace==='nowrap'&&node.scrollWidth<=node.clientWidth+1),crownTop:parseFloat(getComputedStyle(crown).top)}});assert.ok(desktopLayout.width>=420,JSON.stringify(desktopLayout));assert.ok(desktopLayout.outerScroll<=1,JSON.stringify(desktopLayout));assert.equal(desktopLayout.contactsOverflow,'auto');assert.equal(desktopLayout.namesSingleLine,true);assert.equal(desktopLayout.crownTop,-2);results.push({desktop:desktopLayout});await desktop.close();
+  process.stdout.write(JSON.stringify({status:'PASS',evidence:'synthetic local Chromium render only',viewports:['390x844','360x800','1024x768'],results},null,2)+'\n');
  }finally{await browser.close()}
 })().catch(error=>{console.error(error.stack||error);process.exitCode=1});
