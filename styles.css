@@ -984,3 +984,6 @@ body.volunteer-session #page-reports .volunteer-stop-item>.task-navigate svg{dis
 .device-approval-section{font-size:16px!important;line-height:1.5!important}
 .device-approval-section h3{font-size:18px!important}
 .device-approval-section .mini-note,.device-approval-section small{font-size:14px!important;line-height:1.5!important}
+
+/* 2026-10-28: gently enlarge the actual volunteer approval submit button. */
+#memberAdminForm button[type="submit"]{font-size:21px!important;font-weight:900!important;line-height:1.4!important;min-height:58px!important}
