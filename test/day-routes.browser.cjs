@@ -1,0 +1,52 @@
+'use strict';
+
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const http=require('node:http');
+const path=require('node:path');
+const {chromium}=require('playwright');
+
+const root=path.join(__dirname,'..');
+
+function contentType(file){return ({'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.webmanifest':'application/manifest+json','.svg':'image/svg+xml','.png':'image/png'})[path.extname(file)]||'application/octet-stream'}
+
+async function startServer(){
+ const observed={calls:[],writes:[],external:[],consoleErrors:[],pageErrors:[]};
+ const instance=http.createServer((request,response)=>{
+  const url=new URL(request.url,'http://127.0.0.1');response.setHeader('Cache-Control','no-store');
+  if(url.pathname.startsWith('/api/')){
+   let raw='';request.on('data',chunk=>raw+=chunk);request.on('end',()=>{
+    observed.calls.push(`${request.method} ${url.pathname}`);if(!['GET','HEAD'].includes(request.method))observed.writes.push({method:request.method,path:url.pathname,body:raw});response.setHeader('Content-Type','application/json');
+    if(url.pathname==='/api/config')return response.end(JSON.stringify({environment:'test',projectRef:'fhxdpupascsikjsycpbi',supabaseUrl:'https://fhxdpupascsikjsycpbi.supabase.co'}));
+    if(url.pathname==='/api/session')return response.end(JSON.stringify({role:'admin',memberId:null,accountId:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',displayName:'合成管理員'}));
+    if(url.pathname==='/api/roster')return response.end(JSON.stringify({people:[{id:'22222222-2222-4222-8222-222222222222',name:'合成志工',phone:'+886900000001',address:'合成地址',resident_area:'成功里',assignment:'成功里',is_leader:false}]}));
+    if(url.pathname==='/api/tasks')return response.end(JSON.stringify({tasks:[]}));
+    if(url.pathname==='/api/gps-vehicles')return response.end(JSON.stringify({live:true,fetched_at:'2026-10-28T14:00:00Z',latest_reported_at:'2026-10-28T13:59:00Z',vehicles:[]}));
+    if(url.pathname==='/api/member-admin-v2')return response.end(JSON.stringify({ok:true,members:[],devices:[]}));
+    response.statusCode=404;response.end(JSON.stringify({error:'not found'}));
+   });return;
+  }
+  const relative=url.pathname==='/'?'index.html':decodeURIComponent(url.pathname.slice(1));if(relative.includes('..')){response.statusCode=400;return response.end('bad path')}
+  try{response.setHeader('Content-Type',contentType(relative));response.end(fs.readFileSync(path.join(root,relative)))}catch{response.statusCode=404;response.end('not found')}
+ });
+ await new Promise((resolve,reject)=>{instance.once('error',reject);instance.listen(0,'127.0.0.1',resolve)});
+ return {instance,origin:`http://127.0.0.1:${instance.address().port}`,observed};
+}
+
+(async()=>{
+ const local=await startServer(),browser=await chromium.launch({headless:true,executablePath:'/usr/bin/chromium'});
+ try{
+  const context=await browser.newContext({viewport:{width:1293,height:700},serviceWorkers:'block'});await context.route('**/*',route=>{const url=new URL(route.request().url());if(url.origin===local.origin)return route.continue();local.observed.external.push(url.href.replace(/[?#].*$/,''));return route.abort('blockedbyclient')});
+  const page=await context.newPage();page.on('console',message=>{if(message.type()==='error')local.observed.consoleErrors.push(message.text())});page.on('pageerror',error=>local.observed.pageErrors.push(error.message));
+  await page.goto(local.origin,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelector('#signedInName')?.textContent==='合成管理員');await page.locator('.desktop-nav [data-page="planner"]').click();
+  await page.locator('#planDate').fill('2026-11-04');await page.locator('#planDate').dispatchEvent('change');await page.locator('#plannerAreaSelect').selectOption('all');await page.locator('[data-shift="日間"]').click();
+  await page.waitForFunction(()=>document.querySelectorAll('#stopList .stop-card').length===6);
+  assert.deepEqual(await page.locator('#routeButtons .route-choice').allTextContents(),['日間 A線 · 共 6 站','日間 B線 · 共 6 站']);assert.match(await page.locator('.day-route-notice').textContent(),/本日可排 12 站次/);assert.match(await page.locator('.day-route-notice').textContent(),/另有 4 筆來源待確認/);assert.match(await page.locator('.day-route-notice').textContent(),/全部里別僅供預覽/);assert.match(await page.locator('.day-route-notice').textContent(),/來源未提供站點里別/);
+  assert.equal(await page.locator('#stopList .stop-card').count(),6);await page.locator('#routeButtons .route-choice').filter({hasText:'B線'}).click();await page.waitForFunction(()=>document.querySelectorAll('#stopList .stop-card').length===6);assert.deepEqual([...new Set(await page.locator('#stopList .stop-area').allTextContents())],['未指定服務里']);assert.equal(await page.locator('#stopList .assign-person:not([disabled])').count(),0);assert.equal(await page.locator('#plannerAssignArea').isDisabled(),true);
+  await page.locator('#plannerAreaSelect').selectOption('成功里');await page.waitForFunction(()=>document.querySelectorAll('#stopList .stop-card').length===6);assert.match(await page.locator('.day-route-notice').textContent(),/成功里 人員會跟巡整條官方路線/);assert.match(await page.locator('.day-route-notice').textContent(),/不代表這些站點屬於 成功里/);assert.deepEqual([...new Set(await page.locator('#stopList .stop-area').allTextContents())],['成功里']);
+  await page.locator('#planDate').fill('2026-11-06');await page.locator('#planDate').dispatchEvent('change');await page.locator('#plannerAreaSelect').selectOption('all');await page.waitForFunction(()=>document.querySelectorAll('#stopList .stop-card').length===8);assert.deepEqual(await page.locator('#routeButtons .route-choice').allTextContents(),['日間 B線 · 共 8 站','日間 A線 · 共 5 站']);assert.match(await page.locator('.day-route-notice').textContent(),/本日可排 13 站次/);assert.match(await page.locator('.day-route-notice').textContent(),/另有 3 筆來源待確認/);await page.locator('#routeButtons .route-choice').filter({hasText:'A線'}).click();await page.waitForFunction(()=>document.querySelectorAll('#stopList .stop-card').length===5);assert.equal(await page.locator('#stopList .assign-person:not([disabled])').count(),0);
+  await page.locator('#planDate').fill('2026-10-29');await page.locator('#planDate').dispatchEvent('change');await page.waitForFunction(()=>document.querySelector('#routeButtons')?.textContent.includes('沒有週三／週五固定日間路線'));assert.equal(await page.locator('#stopList .stop-card').count(),0);
+  assert.deepEqual(local.observed.writes,[]);assert.deepEqual(local.observed.pageErrors,[]);assert.deepEqual(local.observed.consoleErrors.filter(message=>!/net::ERR_(?:FAILED|BLOCKED_BY_CLIENT\.Inspector)$/.test(message)),[]);
+  process.stdout.write(JSON.stringify({status:'PASS',evidence:'local real Chromium + mock authenticated API; no external or business writes',cases:['all-villages Wednesday preview 12 active / 4 review-required','all-villages Friday preview 13 active / 3 review-required','all-villages controls remain assignment-locked','selected-village note states full-route semantics without inferring stop villages','non-service weekday remains empty'],writes:local.observed.writes.length},null,2)+'\n');await context.close();
+ }finally{await browser.close();await new Promise(resolve=>local.instance.close(resolve))}
+})().catch(error=>{console.error(error.stack||error);process.exitCode=1});

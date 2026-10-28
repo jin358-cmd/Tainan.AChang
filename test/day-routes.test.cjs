@@ -49,8 +49,15 @@ test('single times stay single, intervals stay intervals, and uncertain rows rem
 test('frontend and backend keep route identity separate from an optional truck number',()=>{
  assert.match(html,/day-routes\.js/);assert.match(sw,/data-day-routes-20250402\.json/);
  assert.match(app,/fetch\('\.\/data-day-routes-20250402\.json'/);
- assert.match(app,/r\['固定日間'\]\?plannerArea!=='all'/);
+ assert.match(app,/r\['固定日間'\]\?true:plannerArea==='all'/);
  assert.match(app,/本日另有.*來源待確認，未列入排班/);
+ assert.match(app,/本日可排.*matching\.length.*站次/);
+ assert.match(app,/共.*count.*站/);
+ assert.match(app,/全部里別僅供預覽；指派前請選擇服務里/);
+ assert.match(app,/人員會跟巡整條官方路線/);
+ assert.match(app,/areaLabel=area\|\|'未指定服務里'/);
+ assert.match(app,/available=area\?rosterAvailable\(area\):\[\]/);
+ assert.match(app,/assignBtn\.disabled=!teamArea/);
  assert.match(app,/routeId:first\['路線ID'\]\|\|first\['車牌'\]\|\|first\['車次'\]/);
  assert.match(tasks,/const truck=String\(b\.truck\|\|''\)\.trim\(\)/);
  assert.match(tasks,/route_id:routeId,truck_number:truck\|\|null,starts_at:arrival,ends_at:routeEnd/);
