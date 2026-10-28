@@ -56,7 +56,7 @@ function normalizeSchedules(){state.leaders||={};state.plans||={};state.pins||={
 function visibleMapAreas(){return liveRole==='volunteer'?[...new Set(liveTasks.filter(t=>t.volunteer_id===liveMemberId&&t.visit_date===today()).map(t=>t.area))]:areas;}
 function highlightMapSelection(){if(!map||!map.getLayer('village-fill'))return;const allowed=visibleMapAreas();map.setPaintProperty('village-fill','fill-opacity',['case',['in',['get','name'],['literal',allowed]],0.22,0]);map.setPaintProperty('village-lines','line-opacity',['case',['in',['get','name'],['literal',allowed]],1,0]);map.setPaintProperty('village-fill','fill-opacity',['case',['in',['get','name'],['literal',allowed]],['case',['==',['get','name'],selectedArea],0.46,0.22],0]);map.setPaintProperty('village-lines','line-width',['case',['==',['get','name'],selectedArea],7,2.6]);map.setPaintProperty('village-lines','line-color',['case',['==',['get','name'],selectedArea],'#d62436',['get','color']]);}
 
-function renderSummary(){const planCurrent=state.plans[planId()];$('#statTotal').textContent=state.people.length;$('#statAssigned').textContent=assignedCount();$('#statPending').textContent=state.people.length-assignedCount();$('#statStops').textContent=Object.values(planCurrent?.stops||{}).filter(v=>v.chosen).length;const banner=$('#modeBanner');banner.hidden=true;banner.textContent=''}
+function renderSummary(){const planCurrent=state.plans[planId()];$('#statTotal').textContent=state.people.length;$('#statAssigned').textContent=assignedCount();$('#statPending').textContent=state.people.length-assignedCount();$('#statStops').textContent=Object.values(planCurrent?.stops||{}).filter(v=>v.chosen).length;const banner=$('#modeBanner');banner.hidden=!previewDemoMode;banner.textContent=previewDemoMode?'隔離唯讀 UI 預覽｜全部為合成資料，不連線正式系統、不提交修改':''}
 function go(next){page=next;const mapPopup=$('#areaPopup');if(mapPopup)mapPopup.hidden=true;$$('.page').forEach(el=>el.classList.toggle('active',el.id==='page-'+next));$$('[data-page]').forEach(el=>{el.classList.toggle('on',el.dataset.page===next);el.setAttribute('aria-current',el.dataset.page===next?'page':'false')});render();window.scrollTo({top:0,behavior:'auto'});if(next==='map')requestAnimationFrame(()=>{initMap().then(()=>{map?.resize();try{updateMap();centerTodayVillage()}catch(e){console.warn('地圖顯示錯誤',e);drawFallback('地圖顯示發生問題，請重試')}}).catch(e=>drawFallback(e?.message||'地圖載入失敗'))})}
 function render(){document.body.classList.toggle('read-only-visitor',!liveRole);document.body.classList.toggle('restored-admin-map',liveRole==='admin');renderSummary();if(page==='areas'){if(liveRole==='volunteer'){$('#areaMembers').innerHTML='';$('#pendingMembers').innerHTML='';$('#areaMembers').hidden=true;$('#pendingMembers').hidden=true;$('#areaAssignedCount').textContent='僅管理員可分派';}else renderAreas();}if(page==='planner'){if(liveRole==='volunteer'){$('#plannerContent').hidden=true;$('#plannerGate').hidden=false;$('#plannerGate').innerHTML='<strong>跟巡排班由管理員安排</strong><p>請至「任務」查看你的排班與完成回報。</p>';}else renderPlanner();}if(page==='people'){const ttl=$('#rosterTitle'),sub=$('#rosterSubtitle');if(ttl)ttl.textContent=liveRole==='volunteer'?'小組任務':'志工名冊';if(sub)sub.textContent=liveRole==='volunteer'?'僅顯示本人已參與的排班小組':'會員授權及志工資料由管理員管理';renderPeople();}if(page==='reports')renderReports();if(page==='map')updateMap();if(page==='volunteer')renderVolunteer()}
 function assignPerson(id,a){const p=state.people.find(x=>x.id===id);if(!p||!areas.includes(a))return false;if(p.assignment===a){toast(`${p.name} 已在 ${a}`);return true}const from=p.assignment;if(from&&!confirm(`將 ${p.name} 從 ${from} 改派到 ${a}？`))return false;if(from)cleanLeader(p.id,from);p.assignment=a;p.serviceLat=null;p.serviceLon=null;for(const v of Object.values(state.plans)){for(const key of Object.keys(v.teams||{}))v.teams[key]=v.teams[key].filter(x=>x!==p.id);for(const r of Object.values(v.stops||{}))r.people=(r.people||[]).filter(x=>x!==p.id)}save();render();toast(`已將 ${p.name} 分配至 ${a}`);return true}
@@ -114,15 +114,18 @@ const volunteerExpandedGroups=new Set();
 
 // Isolated preview UI testing: synthetic-only, no API mutation or production credentials.
 let previewDemoMode=false;
-function previewOnly(){return location.hostname.startsWith('tainan-achang-pin-eipp-test-')||location.hostname==='tainan-achang-pin-eipp-test.vercel.app';}
+const READONLY_PREVIEW_HOST='tainan-achang-online-git-fix-achang-day-routes-memb-4e2e73-tjc1.vercel.app';
+function previewOnly(){return location.hostname===READONLY_PREVIEW_HOST||location.hostname.startsWith('tainan-achang-pin-eipp-test-')||location.hostname==='tainan-achang-pin-eipp-test.vercel.app';}
 function previewLoginButton(){
  if(!previewOnly())return;
  const anchor=document.getElementById('secureLoginForm');
+ if(anchor){anchor.hidden=true;anchor.style.display='none'}
+ const google=document.getElementById('googleOAuthLogin');if(google){google.hidden=true;google.style.display='none'}
  if(anchor&&!document.getElementById('previewDemoLogin')){
-  const b=document.createElement('button');b.id='previewDemoLogin';b.type='button';b.className='primary wide';b.style.margin='12px 0';b.textContent='進入志工測試介面（免帳密）';b.onclick=startPreviewDemo;anchor.before(b);
-  const note=document.createElement('p');note.className='mini-note';note.textContent='此預覽僅使用範例排班資料，不連線寫入正式資料庫。正式帳號登入尚未驗證。';b.after(note);
+  const b=document.createElement('button');b.id='previewDemoLogin';b.type='button';b.className='primary wide';b.style.margin='12px 0';b.textContent='進入志工 UI 唯讀預覽';b.onclick=startPreviewDemo;anchor.before(b);
+  const note=document.createElement('p');note.id='readonlyPreviewNotice';note.className='mini-note';note.textContent='隔離唯讀預覽：僅使用合成排班資料，不連線帳號、資料庫或正式 API，也不會提交修改。';b.after(note);
  }
-
+ const status=document.getElementById('authStatus');if(status)status.textContent='此網址僅供 UI 預覽，真實登入已停用';
 }
 function startPreviewDemo(){
  if(!previewOnly())return;
@@ -135,7 +138,7 @@ function startPreviewDemo(){
  sample('PREVIEW-FUTURE-1',1,'16:22','復國二路142號','復國里'),
  sample('PREVIEW-FUTURE-2',2,'16:02','復國一路345號','復國里'),
  sample('PREVIEW-FUTURE-3',4,'19:30','復華一街24號','復華里')];
- $('#secureLogin').hidden=true;$('#app').hidden=false;updateAccessControls();volunteerTaskCategory='current';go('reports');toast('隔離測試已啟動：所有資料均為範例');
+ $('#secureLogin').hidden=true;$('#app').hidden=false;updateAccessControls();const menu=$('#menuBtn');if(menu)menu.disabled=true;volunteerTaskCategory='current';go('reports');const banner=$('#modeBanner');if(banner){banner.hidden=false;banner.textContent='隔離唯讀 UI 預覽｜全部為合成資料，不連線正式系統、不提交修改'}toast('隔離唯讀預覽已啟動：所有資料均為合成範例');
 }
 function myTasks(){return liveTasks.filter(t=>t.volunteer_id===liveMemberId);}
 function taskDateCategory(t){
@@ -175,11 +178,11 @@ function renderVolunteerTaskList(root){
   for(const [i,stop] of stops.entries()){
    const a=String(stop.stop_address||'').trim(),hasAddress=!!a;
    const url=hasAddress?'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(a.startsWith('台')||a.startsWith('臺')?a:'臺南市永康區'+a)+'&travelmode=driving':'';
-   const done=stop.status==='完成',future=taskDateCategory(stop)==='future';
+   const done=stop.status==='完成',future=taskDateCategory(stop)==='future',readOnly=previewOnly();
    out+='<div class="volunteer-stop-item"><span class="volunteer-stop-number">'+(i+1)+'</span><div class="volunteer-stop-main"><strong>第 '+(i+1)+' 個停靠點</strong><span class="volunteer-stop-address">📍 '+esc(a||'地址尚未提供')+'</span>';
    out+='</div>';
    if(hasAddress)out+='<a class="task-navigate volunteer-stop-inline-nav" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer" aria-label="使用 Google Maps 導航到站點"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M21.3 2.8 2.7 10.2c-.9.35-.85 1.63.1 1.9l7.9 2.2 2.2 7.9c.28.95 1.55 1 1.9.1l7.4-18.6c.28-.7-.21-1.18-.9-.9Z"/></svg>導航到站點</a>';
-   out+='<div class="volunteer-stop-result"><button type="button" class="task-complete-btn '+(done?'is-complete':future?'is-upcoming':'is-pending')+'" data-vol-complete-group="'+esc(done?'':stop.id)+'" '+(done||future?'disabled':'')+'>'+(done?'<span class="task-done-check" aria-hidden="true">✓</span> 已完成':future?'尚未開始':'未完成')+'</button></div></div>';
+   out+='<div class="volunteer-stop-result"><button type="button" class="task-complete-btn '+(done?'is-complete':future?'is-upcoming':'is-pending')+'" data-vol-complete-group="'+esc(done?'':stop.id)+'" '+(done||future||readOnly?'disabled':'')+'>'+(done?'<span class="task-done-check" aria-hidden="true">✓</span> 已完成':future?'尚未開始':readOnly?'唯讀預覽':'未完成')+'</button></div></div>';
   }
   out+='</div></section></div>';
  }
@@ -316,6 +319,7 @@ function initGpsToggle(){
  label.innerHTML='<input id="layerGps" type="checkbox" /> <span style="display:inline-block;background:#8B5CF6;color:white;border-radius:6px;padding:2px 5px">🚛</span> GPS 車輛｜每 5 分鐘更新';
  legend.appendChild(label);
  const status=document.createElement('small');status.id='gpsFeedStatus';status.style.cssText='display:block;font-size:11px;color:#596a7b';status.textContent='GPS 尚未開啟';legend.appendChild(status);
+ if(previewOnly()){label.querySelector('input').disabled=true;status.textContent='唯讀預覽不連線 GPS API';}
  label.querySelector('input').addEventListener('change',e=>{
   gpsEnabled=e.target.checked;
   if(gpsEnabled)loadGpsVehicles();
@@ -448,6 +452,7 @@ const deviceReady=(async()=>{
  return deviceId;
 })();
 async function onlineApi(endpoint,method='GET',body){
+ if(previewOnly())throw Object.assign(new Error('唯讀 UI 預覽不連線 API'),{status:503});
  await deviceReady;
  const r=await fetch('/api/'+endpoint,{method,credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json','X-AChang-Device':deviceId},body:body===undefined?undefined:JSON.stringify(body)});
  let doc;try{doc=await r.json()}catch{doc={error:'資料伺服器回傳格式錯誤'}};
@@ -653,10 +658,10 @@ async function loadRuntimeConfig(){
 }
 async function boot(){try{
  const pub=await fetch('./data-public.json',{cache:'no-store'});if(!pub.ok)throw Error('地圖資料無法讀取');data=await pub.json();areas=data.areas;
- await loadRuntimeConfig();
+ if(!previewOnly())await loadRuntimeConfig();
  state=makeState([]);state.demo=false;areaPage=Math.floor(areas.indexOf(selectedArea)/CARD_PAGE_SIZE);const pa=$('#plannerAreaSelect');pa.innerHTML=areas.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('')+'<option value="all">全部</option>';
  const sel=$('#peopleAreaFilter');sel.innerHTML='<option value="all">全部里別</option>'+areas.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('');
- $('#peopleFilter').value='assigned';bind();initGpsToggle();showAuth();const googleHandled=await completeGoogleOAuth();if(!googleHandled&&!previewOnly())await authStart();if(previewOnly())previewLoginButton();lastSessionCheck=Date.now();document.addEventListener('visibilitychange',restoreSavedSessionOnResume);window.addEventListener('pageshow',e=>{if(e.persisted)restoreSavedSessionOnResume()});
+ $('#peopleFilter').value='assigned';bind();initGpsToggle();showAuth();if(previewOnly()){openSecureLogin();previewLoginButton()}else{const googleHandled=await completeGoogleOAuth();if(!googleHandled)await authStart()}lastSessionCheck=Date.now();document.addEventListener('visibilitychange',restoreSavedSessionOnResume);window.addEventListener('pageshow',e=>{if(e.persisted)restoreSavedSessionOnResume()});
  if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }catch(e){console.error(e);openSecureLogin();$('#authStatus').textContent='網站暫時無法完成登入，請重新整理後再試'}
 }
