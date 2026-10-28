@@ -208,6 +208,15 @@ test('API proxy forwards only authenticated admin commands to v2 and no device p
  assert.equal(captured[0].path,'/functions/v1/achang-member-admin-v2');assert.equal(captured[0].options.token,'actor-token');assert.equal(captured[0].options.headers,undefined);assert.equal(res.status,201);
 });
 
+test('actual server wrapper preserves stable v2 application error codes',async()=>{
+ const source=read('api/member-admin-v2.js'),module={exports:{}},realL=require('../lib/server');
+ const L={...realL,authorized:async()=>({token:'actor-token',role:'admin'}),body:req=>req.body,request:async()=>({ok:false,status:503,data:{error:'帳號建立結果尚待確認',code:'CREATE_OUTCOME_UNKNOWN'}})};
+ vm.runInThisContext(`(function(require,module,exports){${source}\n})`)(id=>id==='../lib/server'?L:require(id),module,module.exports);
+ const req={method:'POST',headers:{},body:{action:'create',phone:'0912-345-678'}},res={headers:{},setHeader(k,v){this.headers[k]=v},end(value){this.body=JSON.parse(value);this.writableEnded=true}};
+ await module.exports(req,res);
+ assert.equal(res.statusCode,503);assert.equal(res.body.code,'CREATE_OUTCOME_UNKNOWN');assert.equal(res.body.error,'帳號建立結果尚待確認');
+});
+
 test('actual API phone parser accepts only 09xx-xxx-xxx, bare 09, or +886 before the v2 handler',async()=>{
  const source=read('api/member-admin-v2.js'),realL=require('../lib/server');
  for(const [input,expected] of [['0912-345-678','+886912345678'],['0912345678','+886912345678'],['+886912345678','+886912345678']]){
