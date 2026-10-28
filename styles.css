@@ -1016,7 +1016,7 @@ body.volunteer-session #page-reports .volunteer-stop-item>.task-navigate svg{dis
 #page-reports .task-date-history .task-team{background:#fff7dc;border-color:#e6cf7a}
 #page-reports .task-date-history .task-team-route{border-top-color:#eadb9f}
 #page-reports .task-member-list{background:#fff0f5;border-top:1px solid #efc2d1}
-@media(max-width:530px){#page-reports .task-team-primary{align-items:flex-start}#page-reports .task-team-identity{gap:7px 10px}#page-reports .task-team-identity>strong,#page-reports .task-team-phone{font-size:16px}#page-reports .task-team-route{font-size:15px;gap:9px}#page-reports .task-team-route>strong,#page-reports .task-team-plate{font-size:17px}}
+@media(max-width:530px){#page-reports .task-team-primary{align-items:flex-start}#page-reports .task-team-identity{gap:7px 10px}#page-reports .task-team-identity>strong,#page-reports .task-team-phone{font-size:16px}#page-reports .task-team-route{font-size:15px;gap:9px}#page-reports .task-team-route>strong,#page-reports .task-team-plate{font-size:17px}#page-reports .task-route-separator,#page-reports .task-team-shift .legend-pin{display:none}#page-reports .task-team-shift{display:inline}}
 
 /* Enlarged map roster identity and centered existing assignment action. */
 #page-map #areaPopup .popup-contact strong{font-size:20px!important;display:inline-flex;align-items:center;gap:6px}

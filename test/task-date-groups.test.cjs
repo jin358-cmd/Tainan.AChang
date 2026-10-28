@@ -30,6 +30,7 @@ test('administrator task teams use one consistent two-row card with leader conta
  assert.match(styles,/#page-reports \.task-team-primary \.task-progress-status\{[^}]*font-size:13px[^}]*min-width:126px[^}]*min-height:38px/);
  assert.match(styles,/#page-reports \.task-member-list\{background:#fff0f5/);
  assert.match(styles,/#page-reports \.task-date-history \.task-team\{background:#fff7dc;border-color:#e6cf7a\}/);
+ assert.match(styles,/#page-reports \.task-route-separator,#page-reports \.task-team-shift \.legend-pin\{display:none\}/);
 });
 
 test('map popup enlarges member identity and centers the existing assignment button',()=>{
