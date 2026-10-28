@@ -41,22 +41,23 @@ Base UI commit: `082d790b06b87a1927865be4466423675ce31c0e`
 
 | ID | Result | Evidence boundary |
 |---|---|---|
-| TEST-01 active admin | PASS | Node dependency-isolated core test |
-| TEST-02 admin without approved device can create | PASS | actual server/proxy source contract + Node test; no live TEST call yet |
-| TEST-03 volunteer forbidden | PASS | Node dependency-isolated core test |
-| TEST-04 unauthenticated forbidden | PASS | Node dependency-isolated core test |
-| TEST-05 six-digit PIN | PASS | Node tests, including leading zero and no DB PIN field |
-| TEST-06 PIN login compatibility | PARTIAL | actual old pin-login source inspected; new live Auth login not yet run |
-| TEST-07 approve member | PASS locally | Node CAS test + synthetic Chromium UI/API |
-| TEST-08 create admin | PASS locally | Node core + synthetic Chromium UI/API |
-| TEST-09 no self escalation | PASS | Node test; API has no role-change operation |
-| TEST-10 protected principal | PASS locally | stable-ID source/test; live TEST attempt not run |
-| TEST-11 map/tasks/schedule regression | PASS locally | existing Chromium login suite + v2 Chromium control-presence test |
-| TEST-12 audit trace | PASS schema/source; live pending | actual TEST trigger/function inspected read-only; no v2 live write yet |
+| TEST-01 active admin | LOCAL PASS / LIVE PENDING | Node dependency-isolated core test; no live TEST actor request |
+| TEST-02 admin without approved device can create | LOCAL PASS / LIVE PENDING | actual server/proxy source contract + Node test; no live TEST create |
+| TEST-03 volunteer forbidden | LOCAL PASS / LIVE PENDING | Node dependency-isolated core test |
+| TEST-04 unauthenticated forbidden | LOCAL PASS / LIVE PENDING | Node dependency-isolated core test |
+| TEST-05 six-digit PIN | LOCAL PASS / LIVE PENDING | Node tests, including leading zero and no DB PIN field |
+| TEST-06 PIN login compatibility | PARTIAL / LIVE PENDING | actual old pin-login source inspected; new Auth identity login not run |
+| TEST-07 approve member | LOCAL PASS / LIVE PENDING | Node transaction contract + synthetic Chromium UI/API |
+| TEST-08 create admin | LOCAL PASS / LIVE PENDING | Node core + synthetic Chromium UI/API |
+| TEST-09 no self escalation | LOCAL PASS / LIVE PENDING | Node/source tests; no live denial event |
+| TEST-10 protected principal | LOCAL PASS / LIVE PENDING | stable-ID source/test; live TEST denial not run |
+| TEST-11 map/tasks/schedule regression | LOCAL PASS / LIVE PARTIAL | synthetic Chromium suite; logged-out cloud smoke only, interactive map fallback |
+| TEST-12 audit trace | SOURCE VERIFIED / LIVE PENDING | actual TEST trigger/function inspected read-only; no v2 live write/audit row |
 
 Aggregate evidence:
 
-- `npm test`: 45/45 PASS on the latest source candidate (including absent-bucket hook concurrency, A-fails/B-succeeds ownership safety, and credential-rotation-stable operation identity).
+- Exact latest reviewed source: `9abac16ebd033db51c4a62d0793b153eaedb7f3c`.
+- `npm test`: 45/45 LOCAL PASS on that source (Node mocks and static source/SQL assertions, including absent-bucket hook concurrency, A-fails/B-succeeds ownership safety, and credential-rotation-stable operation identity). This is not a live PostgreSQL concurrency test.
 - `npm run test:browser`: PASS; local synthetic API only, all external requests blocked.
 - `node test/ui-readonly-preview.browser.cjs`: PASS; synthetic read-only preview, zero `/api` requests.
 - `node test/member-admin-v2.browser.cjs`: PASS; local synthetic API for create volunteer, approve volunteer, create admin, and preserved navigation controls.
@@ -77,15 +78,24 @@ Isolated deployment evidence for commit `db3e3ba331843912cdd1f876f2733a99dd7dd59
 Deployment/source boundary:
 
 - The fixed TEST alias and Edge v2 evidence above remain the deployed `db3e3ba` candidate.
-- The latest Draft PR source adds durable private operation-mapped Auth identity reuse, prepared (not activated) Password Verification Hook objects, and SQLSTATE-to-HTTP denied-event mapping. It is not the deployed TEST runtime.
+- The latest Draft PR source is `9abac16ebd033db51c4a62d0793b153eaedb7f3c`. It adds durable private operation-mapped Auth identity reuse, prepared Password Verification Hook objects, SQLSTATE-to-HTTP denied-event mapping, and ownership-safe recovery. It is not the deployed TEST runtime.
+- Migration `20261028094500_achang_member_auth_operation_identity.sql` is committed but not applied to TEST.
+- Migration `20261028093000_achang_pin_password_verification_hook.sql` is committed but not applied; its Auth Hook is not enabled. Owner action-time approval remains pending.
 - Separate cloud-browser read-only smoke at 2026-10-28 09:49–09:50 UTC loaded the fixed TEST alias while logged out. `/api/config` showed `environment=test` and project ref `fhxdpupascsikjsycpbi`; login form open/close, five navigation tabs, logged-out task/roster privacy text, and public planner rendering worked. The map showed an offline fallback, so interactive map is not PASS. No credentials were entered and no account, device or business-data write occurred. This smoke did not independently establish runtime SHA and is not Auth E2E.
 
-To run browser → API → Auth/DB → login verification in TEST, the following bounded persistent TEST-only configuration is still required:
+TEST actor/session prerequisite:
 
-1. Use an authorized browser/network path to run bounded synthetic TEST fixtures through create/approve/login/audit. Do not use Production or the protected principal as a fixture.
-2. Explicitly authorize enabling the TEST Auth Password Verification Hook `public.achang_password_verification_hook(jsonb)`. This changes TEST Auth security configuration; its migration/function may be reviewed before activation. No Production hook change is authorized.
-3. Verify the resulting Auth/account/audit rows and rollback/cleanup behavior in TEST, including shared-phone separation, direct Auth rate limiting and leading-zero PIN login.
-4. Complete independent Code Review of the exact Draft PR head and record the remaining PARTIAL/PENDING gates.
-5. Production switch to `https://achang.pmos.space`, merge, and Production data/schema/function changes require the post-verification release gate and remain out of scope for this record.
+- The available cloud browser is currently logged out. No TEST administrator credential, PIN or token has been transferred in chat, and none should be.
+- Live E2E requires an already authorized TEST administrator session on an authorized browser, or secure credential injection through an approved execution secret channel. Do not create a new administrator/bootstrap credential merely to unblock the run without separate authority.
+
+Exact remaining checklist for browser → API → Auth/DB → login verification in TEST:
+
+1. Obtain Owner approval to enable only the TEST Auth Password Verification Hook `public.achang_password_verification_hook(jsonb)` with five failed PINs / 15-minute account lockout. No Production hook change is included.
+2. After approval, apply the two pending migrations to TEST and read back definitions, grants and hook configuration; do not apply them to Production.
+3. Deploy exact source `9abac16` (or its reviewed successor) to the existing TEST Edge/function and fixed Preview alias; verify Git SHA, Edge version/hash, `verify_jwt=true`, TEST project ref and rollback points before login.
+4. Establish an authorized TEST admin session through the secure prerequisite above. Run bounded synthetic create volunteer/admin → pending → approve → PIN login/device path → list/status → suspend/reactivate tests, including shared-phone separation, leading-zero PIN, five-failure lockout, changed-IP non-bypass, expiry, concurrency, denied roles and protected principal.
+5. Read back only the scoped TEST Auth/account/device/audit rows and verify transaction rollback. Cleanup must use suspend/revoke and preserve audit history; no hard delete.
+6. Complete independent review of the exact deployed SHA and classify TEST-01–12 from live evidence. Until then none of TEST-01–12 is an overall live PASS.
+7. Production switch to `https://achang.pmos.space`, merge, and Production schema/function/data changes require the separate post-verification release authorization and remain out of scope.
 
 Production switch, merge and Production data changes remain out of scope.
