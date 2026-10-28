@@ -31,7 +31,7 @@ Base UI commit: `082d790b06b87a1927865be4466423675ce31c0e`
 - Duplicate same-member/same-role create is idempotent and does not rotate the PIN. Role mismatch is rejected.
 - If Auth creation succeeds but the account insert fails, v2 retains the deterministic, recoverable Auth identity and returns `CREATE_RETRY_REQUIRED`; a retry reuses that same identity. It never performs an eager Auth delete based on a stale absence read, preventing one concurrent request from deleting another request's successful identity/account binding.
 - If the insert result and reconciliation read both fail, v2 returns `CREATE_OUTCOME_UNKNOWN` and likewise retains the possibly committed Auth identity. A retry first reconciles the account row or safely resumes with the same identity.
-- Synthetic `@auth.achang.invalid` identities are rejected by the administrator-email application route. Because an Auth JWT can contain the email claim, alias secrecy alone is not treated as brute-force protection. A TEST-only Password Verification Hook migration is prepared to enforce a five-failure/15-minute account bucket on every direct Auth password attempt for synthetic identities. The hook is not enabled yet and brute-force verification remains PENDING.
+- Synthetic `@auth.achang.invalid` identities are rejected by the administrator-email application route. Owner explicitly declined the proposed additional Password Verification Hook on 2026-10-28; it is removed from the candidate and is NOT ENABLED / NOT PASS. Existing Supabase Auth and phone/IP limits remain unchanged and are not disabled.
 - Approve, suspend and reactivate use one authenticated, RLS-bound database RPC. Suspend revokes devices and changes account status in the same PostgreSQL transaction, so a trigger/RLS/CAS failure rolls both changes back. Reactivation does not restore devices.
 - Self-suspension and suspension of the configured protected principal are rejected. There is no delete or role-change action.
 - Denied v2 requests emit only action/status/code and a keyed actor hash; request bodies, phone numbers and PINs are not logged.
@@ -56,8 +56,8 @@ Base UI commit: `082d790b06b87a1927865be4466423675ce31c0e`
 
 Aggregate evidence:
 
-- Exact latest reviewed source: `9abac16ebd033db51c4a62d0793b153eaedb7f3c`.
-- `npm test`: 45/45 LOCAL PASS on that source (Node mocks and static source/SQL assertions, including absent-bucket hook concurrency, A-fails/B-succeeds ownership safety, and credential-rotation-stable operation identity). This is not a live PostgreSQL concurrency test.
+- The post-decline candidate removes the unactivated Hook; exact SHA is recorded after this change is committed.
+- `npm test`: 44/44 LOCAL PASS. Tests cover Node mocks and static source/SQL contracts, including A-fails/B-succeeds ownership safety and credential-rotation-stable operation identity. They are not live PostgreSQL concurrency tests.
 - `npm run test:browser`: PASS; local synthetic API only, all external requests blocked.
 - `node test/ui-readonly-preview.browser.cjs`: PASS; synthetic read-only preview, zero `/api` requests.
 - `node test/member-admin-v2.browser.cjs`: PASS; local synthetic API for create volunteer, approve volunteer, create admin, and preserved navigation controls.
@@ -78,9 +78,8 @@ Isolated deployment evidence for commit `db3e3ba331843912cdd1f876f2733a99dd7dd59
 Deployment/source boundary:
 
 - The fixed TEST alias and Edge v2 evidence above remain the deployed `db3e3ba` candidate.
-- The latest Draft PR source is `9abac16ebd033db51c4a62d0793b153eaedb7f3c`. It adds durable private operation-mapped Auth identity reuse, prepared Password Verification Hook objects, SQLSTATE-to-HTTP denied-event mapping, and ownership-safe recovery. It is not the deployed TEST runtime.
+- The latest Draft PR source adds durable private operation-mapped Auth identity reuse, SQLSTATE-to-HTTP denied-event mapping, and ownership-safe recovery. It excludes the declined Password Verification Hook and is not yet the deployed TEST runtime.
 - Migration `20261028094500_achang_member_auth_operation_identity.sql` is committed but not applied to TEST.
-- Migration `20261028093000_achang_pin_password_verification_hook.sql` is committed but not applied; its Auth Hook is not enabled. Owner action-time approval remains pending.
 - Separate cloud-browser read-only smoke at 2026-10-28 09:49–09:50 UTC loaded the fixed TEST alias while logged out. `/api/config` showed `environment=test` and project ref `fhxdpupascsikjsycpbi`; login form open/close, five navigation tabs, logged-out task/roster privacy text, and public planner rendering worked. The map showed an offline fallback, so interactive map is not PASS. No credentials were entered and no account, device or business-data write occurred. This smoke did not independently establish runtime SHA and is not Auth E2E.
 
 TEST actor/session prerequisite:
@@ -90,12 +89,11 @@ TEST actor/session prerequisite:
 
 Exact remaining checklist for browser → API → Auth/DB → login verification in TEST:
 
-1. Obtain Owner approval to enable only the TEST Auth Password Verification Hook `public.achang_password_verification_hook(jsonb)` with five failed PINs / 15-minute account lockout. No Production hook change is included.
-2. After approval, apply the two pending migrations to TEST and read back definitions, grants and hook configuration; do not apply them to Production.
-3. Deploy exact source `9abac16` (or its reviewed successor) to the existing TEST Edge/function and fixed Preview alias; verify Git SHA, Edge version/hash, `verify_jwt=true`, TEST project ref and rollback points before login.
-4. Establish an authorized TEST admin session through the secure prerequisite above. Run bounded synthetic create volunteer/admin → pending → approve → PIN login/device path → list/status → suspend/reactivate tests, including shared-phone separation, leading-zero PIN, five-failure lockout, changed-IP non-bypass, expiry, concurrency, denied roles and protected principal.
-5. Read back only the scoped TEST Auth/account/device/audit rows and verify transaction rollback. Cleanup must use suspend/revoke and preserve audit history; no hard delete.
-6. Complete independent review of the exact deployed SHA and classify TEST-01–12 from live evidence. Until then none of TEST-01–12 is an overall live PASS.
-7. Production switch to `https://achang.pmos.space`, merge, and Production schema/function/data changes require the separate post-verification release authorization and remain out of scope.
+1. Apply only the pending identity-operation migration to TEST and read back its definition and grants; do not apply it to Production.
+2. Deploy the post-decline reviewed source to the existing TEST Edge/function and fixed Preview alias; verify Git SHA, Edge version/hash, `verify_jwt=true`, TEST project ref and rollback points before login.
+3. Establish an authorized TEST admin session through the secure prerequisite above. Run bounded synthetic create volunteer/admin → pending → approve → PIN login/device path → list/status → suspend/reactivate tests, including shared-phone separation, leading-zero PIN, denied roles and protected principal. The declined custom account-level brute-force test is excluded and remains NOT ENABLED / NOT PASS.
+4. Read back only the scoped TEST Auth/account/device/audit rows and verify transaction rollback. Cleanup must use suspend/revoke and preserve audit history; no hard delete.
+5. Complete independent review of the exact deployed SHA and classify TEST-01–12 from live evidence. Until then none of TEST-01–12 is an overall live PASS.
+6. Production switch to `https://achang.pmos.space`, merge, and Production schema/function/data changes require the separate post-verification release authorization and remain out of scope.
 
 Production switch, merge and Production data changes remain out of scope.

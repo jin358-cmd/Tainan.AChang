@@ -170,23 +170,10 @@ test('Auth commit with lost response retries the same identity before any accoun
  assert.equal(result.status,201);assert.equal(emails.length,2);assert.equal(emails[0],emails[1]);assert.equal(retry.calls.filter(call=>call[0]==='insert').length,1);
 });
 
-test('application email route blocks synthetic identities; direct Auth requires the prepared account-level hook',()=>{
+test('application email route blocks synthetic identities without changing existing Auth protections',()=>{
  const session=read('api/session.js');assert.match(session,/@auth\\\.achang\\\.invalid\$\/i/);assert.match(session,/名冊手機與六位數字 PIN/);
  const guardIndex=session.indexOf('@auth\\.achang\\.invalid'),passwordGrant=session.indexOf('/auth/v1/token?grant_type=password');assert.ok(guardIndex>0&&guardIndex<passwordGrant);
- const hook=read('supabase/migrations/20261028093000_achang_pin_password_verification_hook.sql');
- assert.match(hook,/v_email not like '%@auth\.achang\.invalid'/);assert.match(hook,/failed_count\+1 >= 5/);assert.match(hook,/'http_code',429/);
- const advisory=hook.indexOf('pg_advisory_xact_lock'),rowRead=hook.indexOf('select failed_count,window_started_at,blocked_until'),lockCheck=hook.indexOf('v_blocked_until > v_now'),validCheck=hook.indexOf('if v_valid then');
- assert.ok(advisory>0&&advisory<rowRead&&rowRead<lockCheck&&lockCheck<validCheck,'per-user transaction lock must serialize even an absent bucket before valid-password cleanup');
- assert.match(hook,/where user_id=v_user_id\s+for update/);assert.match(hook,/user_id uuid primary key/);assert.doesNotMatch(hook,/ip_address|inet|remote_addr/i);
- assert.match(hook,/v_window_started < v_now-interval '15 minutes'[\s\S]*delete from app_private\.achang_password_attempt_buckets/);
- assert.match(hook,/grant execute[\s\S]*to supabase_auth_admin/);assert.match(hook,/revoke all[\s\S]*from public, anon, authenticated/);
-});
-
-test('absent-bucket valid request cannot resume after five bad commits and clear their lockout',()=>{
- const hook=read('supabase/migrations/20261028093000_achang_pin_password_verification_hook.sql');
- assert.match(hook,/pg_advisory_xact_lock\(pg_catalog\.hashtextextended\(v_user_id::text,731358\)\)/);
- const serialization=hook.indexOf('pg_advisory_xact_lock'),validCleanup=hook.indexOf('if v_valid then'),badUpsert=hook.indexOf('insert into app_private.achang_password_attempt_buckets');
- assert.ok(serialization<validCleanup&&serialization<badUpsert,'both valid cleanup and bad-attempt upsert must share the same per-user transaction lock');
+ assert.doesNotMatch(session,/disable.*rate.?limit|bypass.*rate.?limit/i);
 });
 
 test('concurrent retry returns the committed matching account but rejects role mismatch',async()=>{
