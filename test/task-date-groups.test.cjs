@@ -129,3 +129,20 @@ test('desktop task categories stack history and future at left while mobile keep
  assert.match(styles,/\.task-date-current\{align-self:start\}/);
  assert.doesNotMatch(styles,/\.task-date-(?:history|future)\{[^}]*(?:position:absolute|transform:translate)/);
 });
+
+test('desktop navigation reuses the five mobile icons without changing labels',()=>{
+ const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+ const desktop=html.match(/<nav class="desktop-nav"[\s\S]*?<\/nav>/)?.[0]||'';
+ assert.match(desktop,/data-page="map"><i[^>]*>◉<\/i><span>地圖<\/span>/);
+ assert.match(desktop,/data-page="areas"><i[^>]*>⌖<\/i><span>服務分區<\/span>/);
+ assert.match(desktop,/data-page="planner"><i[^>]*>🚛<\/i><span>跟巡排班<\/span>/);
+ assert.match(desktop,/data-page="reports"><i[^>]*>✓<\/i><span>任務<\/span>/);
+ assert.match(desktop,/data-page="people"><i[^>]*>☷<\/i><span>名冊<\/span>/);
+ assert.doesNotMatch(desktop,/[①②③④⑤]/);
+});
+
+test('service-area assignment picker enlarges only desktop village and action text',()=>{
+ assert.match(app,/pick-list person-area-picker/);assert.match(app,/pick-row person-area-row/);assert.match(app,/person-area-assign/);
+ assert.match(styles,/@media\(min-width:800px\)\{[^}]*\.desktop-nav button[\s\S]*\.person-area-picker \.person-area-row>strong\{font-size:18px\}[\s\S]*\.person-area-picker \.person-area-assign\{font-size:17px/);
+ assert.doesNotMatch(styles,/@media\(max-width:[^)]+\)[^{]*\{[^}]*person-area-(?:row|assign)/);
+});
