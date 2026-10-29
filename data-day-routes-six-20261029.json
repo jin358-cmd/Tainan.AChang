@@ -17,9 +17,12 @@
       "plate": "KEP-5860",
       "plate_source_page": 5,
       "garbage_collection": true,
-      "recycling_status": "待核",
-      "recycling_weekdays": [],
-      "recycling_note": "回收服務尚未核對"
+      "recycling_status": "有",
+      "recycling_weekdays": [
+        "星期二",
+        "星期六"
+      ],
+      "recycling_note": "依 PDF 路線表頭之資源回收日"
     },
     {
       "number": 2,
@@ -36,9 +39,9 @@
       "plate": "008-UT",
       "plate_source_page": 7,
       "garbage_collection": true,
-      "recycling_status": "無",
+      "recycling_status": "未列",
       "recycling_weekdays": [],
-      "recycling_note": "Owner 確認此車次不提供資源回收"
+      "recycling_note": "PDF 該車表頭未列資源回收日"
     },
     {
       "number": 3,
@@ -56,8 +59,12 @@
       "plate_source_page": 8,
       "garbage_collection": true,
       "recycling_status": "有",
-      "recycling_weekdays": [],
-      "recycling_note": "Owner 確認有資源回收，日期待核"
+      "recycling_weekdays": [
+        "星期一",
+        "星期四",
+        "星期五"
+      ],
+      "recycling_note": "依 PDF 路線表頭之資源回收日"
     },
     {
       "number": 4,
@@ -74,9 +81,9 @@
       "plate": "KER-3760",
       "plate_source_page": 11,
       "garbage_collection": true,
-      "recycling_status": "待核",
+      "recycling_status": "未列",
       "recycling_weekdays": [],
-      "recycling_note": "回收服務尚未核對"
+      "recycling_note": "PDF 該車表頭未列資源回收日"
     },
     {
       "number": 5,
@@ -93,9 +100,9 @@
       "plate": "KER-2025",
       "plate_source_page": 12,
       "garbage_collection": true,
-      "recycling_status": "無",
+      "recycling_status": "未列",
       "recycling_weekdays": [],
-      "recycling_note": "Owner 確認此車次不提供資源回收"
+      "recycling_note": "PDF 該車表頭未列資源回收日"
     },
     {
       "number": 6,
@@ -112,9 +119,9 @@
       "plate": "AAQ-059",
       "plate_source_page": 13,
       "garbage_collection": true,
-      "recycling_status": "無",
+      "recycling_status": "未列",
       "recycling_weekdays": [],
-      "recycling_note": "Owner 確認此車次不提供資源回收"
+      "recycling_note": "PDF 該車表頭未列資源回收日"
     }
   ]
 }
