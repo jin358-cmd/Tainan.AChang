@@ -33,7 +33,7 @@
   const exception=Array.isArray(document?.service_exceptions)?document.service_exceptions.find(row=>row?.date===date&&row?.closed===true):null;
   const pending=catalog.filter(row=>!row.enabled&&(!ALLOWED.has(weekday)||row.weekday===weekday));
   if(!ALLOWED.has(weekday)||exception)return {weekday,stops:[],pending,serviceNotice,closedReason:exception?String(exception.reason||'當日停收').trim():''};
-  const active=catalog.filter(row=>row.enabled&&row.weekday===weekday).sort((a,b)=>a.start.localeCompare(b.start)||a.sourceOrder-b.sourceOrder);
+  const active=catalog.filter(row=>row.enabled&&row.weekday===weekday);
   const routeOrder=new Map();
   const stops=active.map(row=>{
    const order=(routeOrder.get(row.route)||0)+1;routeOrder.set(row.route,order);

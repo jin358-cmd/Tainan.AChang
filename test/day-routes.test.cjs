@@ -20,7 +20,7 @@ test('32-row source enables 25 reviewed rows and keeps all seven cross-source it
  for(const [date,weekday,count,pending] of [['2026-10-28','星期三',12,4],['2026-10-30','星期五',13,3]]){
   const result=adapter.stopsForDate(source,date);assert.equal(result.weekday,weekday);assert.equal(result.stops.length,count);
   assert.equal(result.pending.length,pending);assert.equal(result.serviceNotice,'遇國定假日、颱風假停收');
-  assert.deepEqual([...result.stops].sort((a,b)=>a['到達'].localeCompare(b['到達'])||a['來源順序']-b['來源順序']),result.stops);
+  assert.deepEqual(result.stops.map(row=>row['來源順序']),normalized.filter(row=>row.enabled&&row.weekday===weekday).map(row=>row.sourceOrder));
   assert.deepEqual([...new Set(result.stops.map(row=>row['路線ID']))].sort(),[`DAY:${weekday}:A`,`DAY:${weekday}:B`]);
   assert.ok(result.stops.every(row=>row['時段']==='日間'&&row['車牌']===''&&row['固定日間']===true));
  }
@@ -46,8 +46,18 @@ test('single times stay single, intervals stay intervals, and uncertain rows rem
  assert.equal(adapter.normalize(fixture).find(row=>row.id==='unknown-day').enabled,false);
 });
 
+test('day adapter preserves document order instead of numerically or chronologically re-sorting stops',()=>{
+ const fixture={routes:[
+  {id:'late-first',weekday:'星期三',route:'A',start:'14:40',end:'',name:'原表第一筆'},
+  {id:'early-second',weekday:'星期三',route:'A',start:'04:59',end:'',name:'原表第二筆'}
+ ]};
+ const result=adapter.stopsForDate(fixture,'2026-10-28');
+ assert.deepEqual(result.stops.map(row=>row['站點ID']),['late-first','early-second']);
+ assert.deepEqual(result.stops.map(row=>row['清運次序']),[1,2]);
+});
+
 test('frontend and backend keep route identity separate from an optional truck number',()=>{
- assert.match(html,/day-routes\.js/);assert.match(sw,/data-day-routes-20250402\.json/);
+ assert.match(html,/day-routes\.js/);assert.match(html,/route-time-filter\.js/);assert.match(sw,/data-day-routes-20250402\.json/);assert.match(sw,/route-time-filter\.js/);
  assert.match(app,/fetch\('\.\/data-day-routes-20250402\.json'/);
  assert.match(app,/r\['固定日間'\]\?true:plannerArea==='all'/);
  assert.match(app,/本日另有.*來源待確認，未列入排班/);
@@ -57,9 +67,12 @@ test('frontend and backend keep route identity separate from an optional truck n
  assert.match(app,/visitTitle\.textContent=rows\.length\?`依車次順序拜訪・共 \$\{rows\.length\} 站點`/);
  assert.match(app,/classList\.toggle\('planner-picker-open',kind==='team'\|\|kind==='stop'\)/);
  assert.match(app,/areaLabel=r\['固定日間'\]\?'站點里別待核':area\|\|'未指定服務里'/);
- assert.match(app,/available=area\?rosterAvailable\(area\):\[\]/);
+ assert.match(app,/available=!excluded&&area\?rosterAvailable\(area\):\[\]/);
  assert.match(app,/assignBtn\.disabled=!teamArea/);
  assert.match(app,/routeId:first\['路線ID'\]\|\|first\['車牌'\]\|\|first\['車次'\]/);
+ assert.match(app,/stopOrder:sourceOrderForTask\(r\)/);
+ assert.match(app,/原表刪除線・僅供來源追溯，不可指派/);
+ assert.match(app,/schedulableRouteRows\(\)\.filter/);
  assert.match(tasks,/const truck=String\(b\.truck\|\|''\)\.trim\(\)/);
  assert.match(tasks,/route_id:routeId,truck_number:truck\|\|null,starts_at:arrival,ends_at:routeEnd/);
  assert.match(tasks,/route_id:p\.route_id\|\|p\.truck_number\|\|''/);
