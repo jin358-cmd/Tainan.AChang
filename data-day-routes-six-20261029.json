@@ -13,7 +13,9 @@
         "星期四",
         "星期六"
       ],
-      "verified_scope": "first_stop_only"
+      "verified_scope": "first_stop_only",
+      "plate": "KEP-5860",
+      "plate_source_page": 5
     },
     {
       "number": 2,
@@ -26,7 +28,9 @@
         "星期五",
         "星期六"
       ],
-      "verified_scope": "first_stop_only"
+      "verified_scope": "first_stop_only",
+      "plate": "008-UT",
+      "plate_source_page": 7
     },
     {
       "number": 3,
@@ -39,7 +43,9 @@
         "星期五",
         "星期六"
       ],
-      "verified_scope": "first_stop_only"
+      "verified_scope": "first_stop_only",
+      "plate": "009-UT",
+      "plate_source_page": 8
     },
     {
       "number": 4,
@@ -52,7 +58,9 @@
         "星期五",
         "星期六"
       ],
-      "verified_scope": "first_stop_only"
+      "verified_scope": "first_stop_only",
+      "plate": "KER-3760",
+      "plate_source_page": 11
     },
     {
       "number": 5,
@@ -65,7 +73,9 @@
         "星期五",
         "星期六"
       ],
-      "verified_scope": "first_stop_only"
+      "verified_scope": "first_stop_only",
+      "plate": "KER-2025",
+      "plate_source_page": 12
     },
     {
       "number": 6,
@@ -78,7 +88,9 @@
         "星期五",
         "星期六"
       ],
-      "verified_scope": "first_stop_only"
+      "verified_scope": "first_stop_only",
+      "plate": "AAQ-059",
+      "plate_source_page": 13
     }
   ]
 }
