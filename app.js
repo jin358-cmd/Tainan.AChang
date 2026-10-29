@@ -100,7 +100,7 @@ function chooseRoute(){
 }
 
 function renderPlanner(){
- const gate=$('#plannerGate'),content=$('#plannerContent'),locked=liveRole==='admin'&&assignedCount()===0;
+ const gate=$('#plannerGate'),content=$('#plannerContent'),locked=liveRole==='admin'&&assignedCount()===0&&!previewDemoMode;
  gate.hidden=!locked;content.hidden=locked;if(locked)return;
  $('#planDate').value=date;$('#plannerAreaSelect').value=plannerArea;
  $('[data-shift]').forEach(b=>b.classList.toggle('on',b.dataset.shift===shift));const dayPicker=$('#dayRouteCategoryPicker');if(dayPicker){dayPicker.hidden=shift!=='日間';dayPicker.querySelectorAll('[data-day-category]').forEach(b=>b.classList.toggle('on',b.dataset.dayCategory===dayRouteCategory));}
@@ -158,18 +158,19 @@ const volunteerGroupOpen=new Map();
 
 // Isolated preview UI testing: synthetic-only, no API mutation or production credentials.
 let previewDemoMode=false;
-function previewOnly(){return location.hostname.startsWith('tainan-achang-pin-eipp-test-')||location.hostname==='tainan-achang-pin-eipp-test.vercel.app';}
+function previewOnly(){return location.hostname.startsWith('tainan-achang-daytime-test-')||location.hostname==='tainan-achang-daytime-test.vercel.app'||location.hostname.startsWith('tainan-achang-pin-eipp-test-')||location.hostname==='tainan-achang-pin-eipp-test.vercel.app';}
 function previewLoginButton(){
  if(!previewOnly())return;
  const anchor=document.getElementById('secureLoginForm');
  if(anchor&&!document.getElementById('previewDemoLogin')){
-  const b=document.createElement('button');b.id='previewDemoLogin';b.type='button';b.className='primary wide';b.style.margin='12px 0';b.textContent='進入志工測試介面（免帳密）';b.onclick=startPreviewDemo;anchor.before(b);
+  const b=document.createElement('button');b.id='previewDemoLogin';b.type='button';b.className='primary wide';b.style.margin='12px 0';b.textContent=location.hostname.startsWith('tainan-achang-daytime-test')?'查看日間清運測試班表（免登入）':'進入志工測試介面（免帳密）';b.onclick=startPreviewDemo;anchor.before(b);
   const note=document.createElement('p');note.className='mini-note';note.textContent='此預覽僅使用範例排班資料，不連線寫入正式資料庫。正式帳號登入尚未驗證。';b.after(note);
  }
 
 }
 function startPreviewDemo(){
  if(!previewOnly())return;
+ if(location.hostname.startsWith('tainan-achang-daytime-test')){previewDemoMode=true;liveRole='admin';liveMemberId='PREVIEW-READONLY';liveDisplayName='清運測試檢視';state=makeState([]);$('#secureLogin').hidden=true;$('#app').hidden=false;updateAccessControls();shift='日間';dayRouteCategory='six';date='2026-10-27';plannerArea='all';go('planner');toast('測試檢視模式：只核對清運班表，請勿指派或寫入資料');return;}
  previewDemoMode=true;liveRole='volunteer';liveMemberId='PREVIEW-VOL-001';liveDisplayName='測試志工';state=makeState([]);
  const d=today(),y=new Date();y.setDate(y.getDate()-1);const past=[y.getFullYear(),String(y.getMonth()+1).padStart(2,'0'),String(y.getDate()).padStart(2,'0')].join('-');
  const item=(id,date,addr,order)=>({id,volunteer_id:liveMemberId,visit_date:date,shift:'夜間8',truck:'KEN-3201',area:'復華里',eta:'00:00～23:59',stop_order:order,stop_address:addr,status:'待訪'});
