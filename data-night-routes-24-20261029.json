@@ -15581,387 +15581,435 @@
       "stops": [
         {
           "sequence": 1,
-          "time": null,
-          "name": null,
+          "time": "16:10",
+          "name": "大都市A棟",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 2,
-          "time": null,
-          "name": null,
+          "time": "16:14",
+          "name": "自強路415號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 3,
-          "time": null,
-          "name": null,
+          "time": "16:19",
+          "name": "自強路381號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 4,
-          "time": null,
-          "name": null,
+          "time": "16:21",
+          "name": "中山路101巷1號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 5,
-          "time": null,
-          "name": null,
+          "time": "16:22",
+          "name": "聖龍街6號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 6,
-          "time": null,
-          "name": null,
+          "time": "16:23",
+          "name": "聖龍街53號對面",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 7,
-          "time": null,
-          "name": null,
+          "time": "16:25",
+          "name": "永埔街71號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 8,
-          "time": null,
-          "name": null,
+          "time": "16:26",
+          "name": "中山路94巷1號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 9,
-          "time": null,
-          "name": null,
+          "time": "16:30",
+          "name": "埔聖街152號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 10,
-          "time": null,
-          "name": null,
+          "time": "16:32",
+          "name": "中山北路123巷5號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 11,
-          "time": null,
-          "name": null,
+          "time": "16:35",
+          "name": "永埔街33巷2號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 12,
-          "time": null,
-          "name": null,
+          "time": "16:36",
+          "name": "聖龍街98號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 13,
-          "time": null,
-          "name": null,
+          "time": "16:39",
+          "name": "自強路468巷20號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 14,
-          "time": null,
-          "name": null,
+          "time": "16:41",
+          "name": "自強路526號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 15,
-          "time": null,
-          "name": null,
+          "time": "16:42",
+          "name": "埔園街96號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 16,
-          "time": null,
-          "name": null,
+          "time": "16:43",
+          "name": "自強路550號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 17,
-          "time": null,
-          "name": null,
+          "time": "16:46",
+          "name": "龍國街15號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 18,
-          "time": null,
-          "name": null,
+          "time": "16:47",
+          "name": "埔園街222號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 19,
-          "time": null,
-          "name": null,
+          "time": "16:49",
+          "name": "埔園街145號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 20,
-          "time": null,
-          "name": null,
+          "time": "16:50",
+          "name": "自強路479號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 21,
-          "time": null,
-          "name": null,
+          "time": "16:52",
+          "name": "大都市B棟",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 22,
-          "time": null,
-          "name": null,
+          "time": "16:54",
+          "name": "埔東街26號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 23,
-          "time": null,
-          "name": null,
+          "time": "16:57",
+          "name": "龍埔街488巷",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 24,
-          "time": null,
-          "name": null,
+          "time": "17:00",
+          "name": "龍埔街283巷1號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 25,
-          "time": null,
-          "name": null,
+          "time": "17:46",
+          "name": "聖龍街108巷8號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 26,
-          "time": null,
-          "name": null,
+          "time": "17:48",
+          "name": "埔聖街75巷10號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 27,
-          "time": null,
-          "name": null,
+          "time": "17:49",
+          "name": "永埔街116巷9弄2號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 28,
-          "time": null,
-          "name": null,
+          "time": "17:59",
+          "name": "龍埔街430巷5號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 29,
-          "time": null,
-          "name": null,
+          "time": "18:00",
+          "name": "龍埔街430巷35弄2號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 30,
-          "time": null,
-          "name": null,
+          "time": "18:05",
+          "name": "中山路207巷13號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 31,
-          "time": null,
-          "name": null,
+          "time": "18:09",
+          "name": "埔園街308號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 32,
-          "time": null,
-          "name": null,
+          "time": "18:12",
+          "name": "四維街58巷30號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 33,
-          "time": null,
-          "name": null,
+          "time": "18:16",
+          "name": "中山路185巷3號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 34,
-          "time": null,
-          "name": null,
+          "time": "18:19",
+          "name": "中山路171巷2-1號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 35,
-          "time": null,
-          "name": null,
+          "time": "18:24",
+          "name": "四維街140巷19號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 36,
-          "time": null,
-          "name": null,
+          "time": "18:28",
+          "name": "龍埔街469號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 37,
-          "time": null,
-          "name": null,
+          "time": "18:30",
+          "name": "八德街370號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 38,
-          "time": null,
-          "name": null,
+          "time": "18:33",
+          "name": "中山路383巷1弄38號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 39,
-          "time": null,
-          "name": null,
+          "time": "18:35",
+          "name": "中山路383巷28號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 40,
-          "time": null,
-          "name": null,
+          "time": "19:20",
+          "name": "中山北路262號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 45
         },
         {
           "sequence": 41,
-          "time": null,
-          "name": null,
+          "time": "19:23",
+          "name": "永明街231巷86號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 46
         },
         {
           "sequence": 42,
-          "time": null,
-          "name": null,
+          "time": "19:25",
+          "name": "中山北路164巷158弄1號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 46
         },
         {
           "sequence": 43,
-          "time": null,
-          "name": null,
+          "time": "19:34",
+          "name": "永平街168號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 46
         },
         {
           "sequence": 44,
-          "time": null,
-          "name": null,
+          "time": "19:45",
+          "name": "國民路231號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 46
         },
         {
           "sequence": 45,
-          "time": null,
-          "name": null,
+          "time": "19:48",
+          "name": "永明街300號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 46
         },
         {
           "sequence": 46,
-          "time": null,
-          "name": null,
+          "time": "19:53",
+          "name": "永明街160號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 46
         },
         {
           "sequence": 47,
-          "time": null,
-          "name": null,
+          "time": "20:00",
+          "name": "中山北路164巷118號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 46
         },
         {
           "sequence": 48,
-          "time": null,
-          "name": null,
+          "time": "20:02",
+          "name": "陽光綠地",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 46
         }
       ]
     },
@@ -21411,8 +21459,8 @@
       ]
     }
   ],
-  "merged_source_records": 914,
-  "missing_stop_details": 672,
+  "merged_source_records": 962,
+  "missing_stop_details": 624,
   "batch_source_alignment": {
     "source": "https://github.com/funtuan/taiwan-garbage-opendata/blob/open-data/data/tainan.json",
     "source_route_blocks": 24,
