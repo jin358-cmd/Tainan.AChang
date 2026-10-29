@@ -29,7 +29,8 @@ jobs:
               d=json.load(f)
           sources={1:6091097622,8:5111503410,11:6351489598,15:6231489605,22:6971338935,23:6351338892,28:6971489631,40:6091144728}
           log=[]
-          requests.packages.urllib3.disable_warnings()\n          session=requests.Session()
+          requests.packages.urllib3.disable_warnings()
+          session=requests.Session()
           session.headers.update({"User-Agent":"Mozilla/5.0 (compatible; archival import of open government route tables)"})
           for car,dbid in sources.items():
               route=next(r for r in d["routes"] if r["car"]==car)
