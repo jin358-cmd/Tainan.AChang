@@ -16709,7 +16709,7 @@
           "name": "復華六街95號",
           "village": "復國里",
           "recycling_weekdays": null,
-          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
           "address": "臺南市永康區復華六街95號",
           "departure_time": "16:01",
           "garbage_days_raw": "一、二、四、六",
@@ -16722,7 +16722,7 @@
           "name": "復國一路345號",
           "village": "復國里",
           "recycling_weekdays": null,
-          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
           "address": "臺南市永康區復國一路345號",
           "departure_time": null,
           "garbage_days_raw": "一、二、四、六",
@@ -16731,59 +16731,66 @@
         },
         {
           "sequence": 3,
-          "time": null,
-          "name": null,
+          "time": "16:04",
+          "name": "復國一路339-1號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 4,
-          "time": null,
-          "name": null,
+          "time": "16:07",
+          "name": "復華三街56號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 5,
-          "time": null,
-          "name": null,
+          "time": "16:09",
+          "name": "復國一路315巷40號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 6,
-          "time": null,
-          "name": null,
+          "time": "16:11",
+          "name": "復國一路326號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 7,
-          "time": null,
-          "name": null,
+          "time": "16:13",
+          "name": "復華六街15號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 8,
-          "time": null,
-          "name": null,
+          "time": "16:16",
+          "name": "復華三街23號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 9,
-          "time": null,
-          "name": null,
+          "time": "16:20",
+          "name": "復華三街43號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 10,
@@ -16791,7 +16798,7 @@
           "name": "復國二路142號",
           "village": "復國里",
           "recycling_weekdays": null,
-          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
           "address": "臺南市永康區復國二路142號",
           "departure_time": null,
           "garbage_days_raw": "一、二、四、六",
@@ -16800,179 +16807,201 @@
         },
         {
           "sequence": 11,
-          "time": null,
-          "name": null,
+          "time": "16:28",
+          "name": "復國二路198號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 12,
-          "time": null,
-          "name": null,
+          "time": "16:32",
+          "name": "復國一路280巷23號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 13,
-          "time": null,
-          "name": null,
+          "time": "16:34",
+          "name": "復國一路276巷73號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 14,
-          "time": null,
-          "name": null,
+          "time": "16:36",
+          "name": "復國一路276巷2號(陳笙教育中心)",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 15,
-          "time": null,
-          "name": null,
+          "time": "16:40",
+          "name": "復華二街1巷2號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 16,
-          "time": null,
-          "name": null,
+          "time": "16:45",
+          "name": "復國二路79巷2號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 17,
-          "time": null,
-          "name": null,
+          "time": "17:46",
+          "name": "復國二路86號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 18,
-          "time": null,
-          "name": null,
+          "time": "17:50",
+          "name": "復國二路40巷口",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 19,
-          "time": null,
-          "name": null,
+          "time": "17:52",
+          "name": "復國二路38巷口",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 20,
-          "time": null,
-          "name": null,
+          "time": "17:54",
+          "name": "復國二路16巷口",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 21,
-          "time": null,
-          "name": null,
+          "time": "17:58",
+          "name": "復國一路6巷17號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 22,
-          "time": null,
-          "name": null,
+          "time": "18:00",
+          "name": "復國一路30號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 23,
-          "time": null,
-          "name": null,
+          "time": "18:06",
+          "name": "復國一路122號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 24,
-          "time": null,
-          "name": null,
+          "time": "18:11",
+          "name": "復國一路206號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 25,
-          "time": null,
-          "name": null,
+          "time": "18:14",
+          "name": "復國一路175號(深社溪)",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 26,
-          "time": null,
-          "name": null,
+          "time": "18:23",
+          "name": "興國街10巷1號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 27,
-          "time": null,
-          "name": null,
+          "time": "18:25",
+          "name": "復興路356巷80弄125號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 28,
-          "time": null,
-          "name": null,
+          "time": "19:22",
+          "name": "復國一路67巷15號(紫龍宮)",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 29,
-          "time": null,
-          "name": null,
+          "time": "19:26",
+          "name": "復華一街19巷13號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 30,
-          "time": null,
-          "name": null,
+          "time": "19:27",
+          "name": "復華一街28巷1號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 31,
-          "time": null,
-          "name": null,
+          "time": "19:28",
+          "name": "復國一路173巷弄1號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 32,
-          "time": null,
-          "name": null,
+          "time": "19:29",
+          "name": "復華二街3巷12弄口",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 33,
@@ -16980,7 +17009,7 @@
           "name": "復華一街24號",
           "village": "復國里",
           "recycling_weekdays": null,
-          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
           "address": "臺南市永康區復華一街24號",
           "departure_time": null,
           "garbage_days_raw": "一、二、四、六",
@@ -16989,27 +17018,30 @@
         },
         {
           "sequence": 34,
-          "time": null,
-          "name": null,
+          "time": "19:34",
+          "name": "復華一街66巷63號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 35,
-          "time": null,
-          "name": null,
+          "time": "19:42",
+          "name": "興國街239號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         },
         {
           "sequence": 36,
-          "time": null,
-          "name": null,
+          "time": "19:45",
+          "name": "復華一街63號椰風名廈",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "PDF_TRANSCRIBED_PENDING_FINAL_BATCH_VERIFICATION",
+          "source_pdf_page": 50
         }
       ]
     },
@@ -21379,8 +21411,8 @@
       ]
     }
   ],
-  "merged_source_records": 882,
-  "missing_stop_details": 704,
+  "merged_source_records": 914,
+  "missing_stop_details": 672,
   "batch_source_alignment": {
     "source": "https://github.com/funtuan/taiwan-garbage-opendata/blob/open-data/data/tainan.json",
     "source_route_blocks": 24,
