@@ -30,7 +30,7 @@
     42,
     27
   ],
-  "notes": "Known source records copied from existing data-public.json; remaining stops are placeholders. No PDF visual verification or production deployment.",
+  "notes": "40 prior JSON records plus 5 new manual PDF page 8 transcriptions; new records require second review. Remaining entries are placeholders.",
   "routes": [
     {
       "car": 1,
@@ -608,43 +608,48 @@
       "stops": [
         {
           "sequence": 1,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "14:28",
+          "name": "大灣路三段467號",
+          "village": "埔園里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "MANUAL_PDF_TRANSCRIPTION_PENDING_SECOND_REVIEW",
+          "source_pdf_page": 8
         },
         {
           "sequence": 2,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "14:30",
+          "name": "大灣路三段405號",
+          "village": "埔園里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "MANUAL_PDF_TRANSCRIPTION_PENDING_SECOND_REVIEW",
+          "source_pdf_page": 8
         },
         {
           "sequence": 3,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "14:33",
+          "name": "大灣路三段299號",
+          "village": "埔園里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "MANUAL_PDF_TRANSCRIPTION_PENDING_SECOND_REVIEW",
+          "source_pdf_page": 8
         },
         {
           "sequence": 4,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "14:34",
+          "name": "大灣路三段241號",
+          "village": "埔園里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "MANUAL_PDF_TRANSCRIPTION_PENDING_SECOND_REVIEW",
+          "source_pdf_page": 8
         },
         {
           "sequence": 5,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "14:36",
+          "name": "大灣路三段189號",
+          "village": "埔園里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "MANUAL_PDF_TRANSCRIPTION_PENDING_SECOND_REVIEW",
+          "source_pdf_page": 8
         },
         {
           "sequence": 6,
@@ -13161,6 +13166,6 @@
       ]
     }
   ],
-  "merged_source_records": 40,
-  "missing_stop_details": 1546
+  "merged_source_records": 45,
+  "missing_stop_details": 1541
 }
