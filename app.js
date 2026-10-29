@@ -370,11 +370,17 @@ function stopGpsRefresh(){}
 function updateMapLayerNotice(){
  const node=$('#mapLayerNotice');if(!node||!data)return;
  const messages=[];
- for(const [label,enabled] of [['日間',layerState.day],['夜間',layerState.night]]){
-  if(!enabled)continue;
-  const rows=data.stops.filter(row=>row['時段']===label&&!sourceExcluded(row));
-  const routes=new Set(rows.map(routeKey)).size,located=rows.filter(row=>areas.includes(row['里別'])).length;
-  messages.push(located?`${label}圖層：${routes} 車次・${rows.length} 站；目前十里可依來源里別顯示 ${located} 站。`:`${label}圖層：${routes} 車次・${rows.length} 站；來源未提供可核對的十里里別或座標，未放置假標記。`);
+ if(layerState.day){
+  const pdf=data.stops.filter(row=>row['時段']==='日間'&&row['日間分類']==='six'),active=pdf.filter(row=>!sourceExcluded(row));
+  const ab=data.stops.filter(row=>row['時段']==='日間'&&row['日間分類']==='ab'&&!sourceExcluded(row));
+  const located=active.filter(row=>areas.includes(row['里別'])).length;
+  messages.push(`PDF 日間：${new Set(pdf.map(routeKey)).size} 車次・原始 ${pdf.length} 筆・可用 ${active.length} 筆；十里圖層可依來源里別彙總 ${located} 筆（無站點座標，不放置假站點）。`);
+  messages.push(ab.length?`週三／五 A／B：${new Set(ab.map(routeKey)).size} 路線・${ab.length} 筆，獨立顯示，不併入 PDF 日間統計。`:'週三／五 A／B：所選日期無固定路線，獨立入口保留。');
+ }
+ if(layerState.night){
+  const pdf=data.stops.filter(row=>row['時段']==='夜間'),active=pdf.filter(row=>!sourceExcluded(row)),struck=pdf.length-active.length;
+  const located=active.filter(row=>areas.includes(row['里別'])).length;
+  messages.push(`PDF 夜間：${new Set(pdf.map(routeKey)).size} 車次・原始 ${pdf.length} 筆・可用 ${active.length} 筆${struck?`（另 ${struck} 筆原表刪除線，僅供追溯、不指派）`:''}；十里圖層可依來源里別彙總 ${located} 筆（無站點座標，不放置假站點）。`);
  }
  node.hidden=messages.length===0;node.textContent=messages.join(' ');
 }
