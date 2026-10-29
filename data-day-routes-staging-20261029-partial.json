@@ -1,0 +1,192 @@
+{
+  "status": "PARTIAL_DATA_STAGING_NOT_PRODUCTION",
+  "expected_total": 160,
+  "verified_staged_count": 16,
+  "missing_routes": [
+    {
+      "car": 1,
+      "route": 47,
+      "expected": 50
+    },
+    {
+      "car": 3,
+      "route": 49,
+      "expected": 94
+    }
+  ],
+  "notes": "第三方彙整頁面（標示資料源為臺南環保局 2026-10-09）；車牌取自既有 PDF 核對檔，實際車牌可能更新。逐站頁面之資源回收日均顯示不收。不可直接替代正式站 data-public.json。",
+  "routes": [
+    {
+      "car": 2,
+      "route": 48,
+      "plate": "008-UT",
+      "source": "https://trash.joelin.cc/areas/tainan/yongkang/route-48/",
+      "collection_weekdays": [
+        1,
+        2,
+        4,
+        5,
+        6
+      ],
+      "stops": [
+        {
+          "sequence": 1,
+          "time": "06:30",
+          "name": "三村國小(鹽行路2號)",
+          "village": "鹽洲里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 2,
+          "time": "06:53",
+          "name": "台南應用科大(和美家傳1期)",
+          "village": "鹽行里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 3,
+          "time": "07:17",
+          "name": "尚頂活動中心後面",
+          "village": "尚頂里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 4,
+          "time": "07:33",
+          "name": "甲頂里籃球場",
+          "village": "甲頂里",
+          "recycling_weekdays": []
+        }
+      ]
+    },
+    {
+      "car": 4,
+      "route": 50,
+      "plate": "KER-3760",
+      "source": "https://trash.joelin.cc/areas/tainan/yongkang/route-50/",
+      "collection_weekdays": [
+        1,
+        2,
+        4,
+        5,
+        6
+      ],
+      "stops": [
+        {
+          "sequence": 1,
+          "time": "06:30",
+          "name": "勝利國小前",
+          "village": "勝利里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 2,
+          "time": "07:00",
+          "name": "復興國小（華興街）",
+          "village": "中華里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 3,
+          "time": "07:25",
+          "name": "五王市場（中華二路206巷72號）",
+          "village": "五王里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 4,
+          "time": "07:50",
+          "name": "五王國小（中華二路150號）",
+          "village": "五王里",
+          "recycling_weekdays": []
+        }
+      ]
+    },
+    {
+      "car": 5,
+      "route": 51,
+      "plate": "KER-2025",
+      "source": "https://trash.joelin.cc/areas/tainan/yongkang/route-51/",
+      "collection_weekdays": [
+        1,
+        2,
+        4,
+        5,
+        6
+      ],
+      "stops": [
+        {
+          "sequence": 1,
+          "time": "06:28",
+          "name": "崑山國小大門",
+          "village": "崑山里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 2,
+          "time": "06:45",
+          "name": "國光七街和大勇路口",
+          "village": "西灣里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 3,
+          "time": "07:00",
+          "name": "大灣農會旁",
+          "village": "大灣里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 4,
+          "time": "07:17",
+          "name": "廣興宮",
+          "village": "西勢里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 5,
+          "time": "07:35",
+          "name": "永明街和國民路口",
+          "village": "永明里",
+          "recycling_weekdays": []
+        }
+      ]
+    },
+    {
+      "car": 6,
+      "route": 52,
+      "plate": "AAQ-059",
+      "source": "https://trash.joelin.cc/areas/tainan/yongkang/route-52/",
+      "collection_weekdays": [
+        1,
+        2,
+        4,
+        5,
+        6
+      ],
+      "stops": [
+        {
+          "sequence": 1,
+          "time": "06:38",
+          "name": "中華西路196巷口",
+          "village": "安康里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 2,
+          "time": "07:00",
+          "name": "大橋國小後側門",
+          "village": "大橋里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 3,
+          "time": "07:15",
+          "name": "大橋二街188號旁",
+          "village": "大橋里",
+          "recycling_weekdays": []
+        }
+      ]
+    }
+  ]
+}
