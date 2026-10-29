@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0",
+  "created_at": "2026-10-29",
+  "purpose": "Source manifest for importing 160 complete daytime stops; manifest is not the actual stops dataset.",
+  "expected_total": 160,
+  "route_count": 6,
+  "routes": [
+    {
+      "vehicle": "日間1",
+      "route_number": 47,
+      "expected_count": 50,
+      "source_url": "https://trash.joelin.cc/areas/tainan/yongkang/route-47/",
+      "record_import_status": "PENDING",
+      "verified_import_count": 0
+    },
+    {
+      "vehicle": "日間2",
+      "route_number": 48,
+      "expected_count": 4,
+      "source_url": "https://trash.joelin.cc/areas/tainan/yongkang/route-48/",
+      "record_import_status": "PENDING",
+      "verified_import_count": 0
+    },
+    {
+      "vehicle": "日間3",
+      "route_number": 49,
+      "expected_count": 94,
+      "source_url": "https://trash.joelin.cc/areas/tainan/yongkang/route-49/",
+      "record_import_status": "PENDING",
+      "verified_import_count": 0
+    },
+    {
+      "vehicle": "日間4",
+      "route_number": 50,
+      "expected_count": 4,
+      "source_url": "https://trash.joelin.cc/areas/tainan/yongkang/route-50/",
+      "record_import_status": "PENDING",
+      "verified_import_count": 0
+    },
+    {
+      "vehicle": "日間5",
+      "route_number": 51,
+      "expected_count": 5,
+      "source_url": "https://trash.joelin.cc/areas/tainan/yongkang/route-51/",
+      "record_import_status": "PENDING",
+      "verified_import_count": 0
+    },
+    {
+      "vehicle": "日間6",
+      "route_number": 52,
+      "expected_count": 3,
+      "source_url": "https://trash.joelin.cc/areas/tainan/yongkang/route-52/",
+      "record_import_status": "PENDING",
+      "verified_import_count": 0
+    }
+  ],
+  "validation_requirements": [
+    "160 distinct route+sequence pairs",
+    "Each route counts 50/4/94/4/5/3",
+    "Each stop has ordered sequence, display address, collection time, collection days, recycling days if specified",
+    "Preserve existing nighttime stops and production deployment",
+    "Do not label PASS until GitHub readback verifies all 160 actual stop records"
+  ],
+  "status": "PENDING"
+}
