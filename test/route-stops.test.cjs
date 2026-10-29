@@ -34,6 +34,25 @@ test('migration keeps overlays soft-deletable, audited, RLS protected and seeds 
  assert.match(sql,/'日間4','KER-3760','勝利里','二王廟前','06:30','06:45',1/);assert.match(sql,/'日間6','AAQ-059','大橋里','大橋一街103巷口','06:52','06:54',1/);
 });
 
+test('day 6 reorder keeps the original PDF first stop and records a reversible audit snapshot',()=>{
+ const sql=fs.readFileSync(path.join(root,'supabase/migrations/20261029200500_reorder_day6_owner_overlay.sql'),'utf8');
+ assert.match(sql,/display_order = 2/);
+ assert.match(sql,/position_before_source_id = 'PDF:DAY:0159'/);
+ assert.match(sql,/'reordered'/);
+ assert.match(sql,/'before',to_jsonb\(v_before\)/);
+ assert.match(sql,/'after',to_jsonb\(v_after\)/);
+ assert.doesNotMatch(sql,/delete\s+from\s+public\.route_stop_overlays/i);
+});
+
+test('planner initializes the selected shift as daytime without overriding later click state',()=>{
+ const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
+ const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+ assert.match(app,/shift='日間'/);
+ assert.match(html,/class="shift on" data-shift="日間"/);
+ assert.match(app,/\$\$\('\[data-shift\]'\)\.forEach\(b=>b\.onclick=\(\)=>\{shift=b\.dataset\.shift/);
+ assert.doesNotMatch(app,/renderPlanner\(\)[\s\S]{0,80}shift='日間'/);
+});
+
 test('frontend distinguishes immutable PDF rows from active overlay total and defaults all-village preview safely',()=>{
  const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
  assert.match(app,/plannerArea='all'/);assert.match(app,/dayShiftWindow\(\)\{return shift==='日間'&&dayRouteCategory==='six'\?\{start:'',end:'08:05'\}/);assert.match(app,/原始 PDF 160 筆保持不變/);assert.match(app,/plannerArea!=='all'\?rosterAvailable\(area\):\[\]/);
