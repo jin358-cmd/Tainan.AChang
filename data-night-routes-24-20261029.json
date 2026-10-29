@@ -698,19 +698,21 @@
         },
         {
           "sequence": 11,
-          "time": null,
-          "name": null,
+          "time": "14:49",
+          "name": "大灣路三段641號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "MANUAL_PDF_TRANSCRIPTION_PENDING_SECOND_REVIEW",
+          "source_pdf_page": 8
         },
         {
           "sequence": 12,
-          "time": null,
-          "name": null,
+          "time": "14:50",
+          "name": "大灣路三段579號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "MANUAL_PDF_TRANSCRIPTION_PENDING_SECOND_REVIEW",
+          "source_pdf_page": 8
         },
         {
           "sequence": 13,
@@ -13171,6 +13173,6 @@
       ]
     }
   ],
-  "merged_source_records": 50,
-  "missing_stop_details": 1536
+  "merged_source_records": 52,
+  "missing_stop_details": 1534
 }
