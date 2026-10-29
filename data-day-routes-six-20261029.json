@@ -1,0 +1,127 @@
+{
+  "version": "2026-10-29",
+  "source": "Owner 提供之臺南環保通班表截圖＋永康區清運路線930（日間）PDF",
+  "scope": "六車首站已核對；沿線逐站資料尚未完整轉錄",
+  "routes": [
+    {
+      "number": 1,
+      "name": "二王廟前",
+      "start": "06:30",
+      "weekdays": [
+        "星期一",
+        "星期二",
+        "星期四",
+        "星期六"
+      ],
+      "verified_scope": "first_stop_only",
+      "plate": "KEP-5860",
+      "plate_source_page": 5,
+      "garbage_collection": true,
+      "recycling_status": "有",
+      "recycling_weekdays": [
+        "星期二",
+        "星期六"
+      ],
+      "recycling_note": "PDF 與 Owner 確認之資源回收日"
+    },
+    {
+      "number": 2,
+      "name": "三村國小（鹽行路2號）",
+      "start": "06:30",
+      "weekdays": [
+        "星期一",
+        "星期二",
+        "星期四",
+        "星期五",
+        "星期六"
+      ],
+      "verified_scope": "first_stop_only",
+      "plate": "008-UT",
+      "plate_source_page": 7,
+      "garbage_collection": true,
+      "recycling_status": "無",
+      "recycling_weekdays": [],
+      "recycling_note": "僅一般垃圾"
+    },
+    {
+      "number": 3,
+      "name": "三老爺廟",
+      "start": "06:15",
+      "weekdays": [
+        "星期一",
+        "星期二",
+        "星期四",
+        "星期五",
+        "星期六"
+      ],
+      "verified_scope": "first_stop_only",
+      "plate": "009-UT",
+      "plate_source_page": 8,
+      "garbage_collection": true,
+      "recycling_status": "有",
+      "recycling_weekdays": [
+        "星期一",
+        "星期四",
+        "星期五"
+      ],
+      "recycling_note": "PDF 與 Owner 確認之資源回收日"
+    },
+    {
+      "number": 4,
+      "name": "勝利國小前",
+      "start": "06:30",
+      "weekdays": [
+        "星期一",
+        "星期二",
+        "星期四",
+        "星期五",
+        "星期六"
+      ],
+      "verified_scope": "first_stop_only",
+      "plate": "KER-3760",
+      "plate_source_page": 11,
+      "garbage_collection": true,
+      "recycling_status": "無",
+      "recycling_weekdays": [],
+      "recycling_note": "僅一般垃圾"
+    },
+    {
+      "number": 5,
+      "name": "崑山國小大門",
+      "start": "06:28",
+      "weekdays": [
+        "星期一",
+        "星期二",
+        "星期四",
+        "星期五",
+        "星期六"
+      ],
+      "verified_scope": "first_stop_only",
+      "plate": "KER-2025",
+      "plate_source_page": 12,
+      "garbage_collection": true,
+      "recycling_status": "無",
+      "recycling_weekdays": [],
+      "recycling_note": "僅一般垃圾"
+    },
+    {
+      "number": 6,
+      "name": "中華西路196巷口",
+      "start": "06:38",
+      "weekdays": [
+        "星期一",
+        "星期二",
+        "星期四",
+        "星期五",
+        "星期六"
+      ],
+      "verified_scope": "first_stop_only",
+      "plate": "AAQ-059",
+      "plate_source_page": 13,
+      "garbage_collection": true,
+      "recycling_status": "無",
+      "recycling_weekdays": [],
+      "recycling_note": "僅一般垃圾"
+    }
+  ]
+}
