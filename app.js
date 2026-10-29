@@ -53,7 +53,7 @@ function applyDayRoutes(){
  const weekday=result.weekday;
  const sixRows=selectedSix.filter(x=>Array.isArray(x.weekdays)&&x.weekdays.includes(weekday)).map((r,i)=>({
   '時段':'日間','車次':'日間'+r.number,'車牌':r.plate||'','路線ID':'DAY:SIX:'+r.number,
-  '站點ID':'DAY:SIX:'+r.number+':START','里別':'','固定日間':true,'日間分類':'six','回收狀態':r.recycling_status||'待核',
+  '站點ID':'DAY:SIX:'+r.number+':START','里別':'','固定日間':true,'日間分類':'six','回收狀態':r.recycling_status||'未列','回收星期':(r.recycling_weekdays||[]).map(d=>d.replace('星期','')).join('、'),
   '清運次序':1,'停靠點原文':r.name+'（首站；沿線資料待核）',
   '到達':r.start,'離開':'','適用星期':weekday,'來源順序':i+1,
   '定位狀態':'來源未提供座標，不顯示地圖站點','備註':'僅首站已核對；不得視為完整沿線班表'
@@ -94,7 +94,7 @@ function chooseRoute(){
  routes=uniq(matching.map(routeKey));if(!routes.includes(chosenRoute))chosenRoute=routes[0]||'';
  const holder=$('#routeButtons');
  if(routes.length){const fixedDay=matching.some(row=>row['固定日間']),scopeNote=fixedDay?(plannerArea==='all'?'全部里別僅供預覽；指派前請選擇服務里。來源未提供站點里別。':`${plannerArea} 人員會跟巡整條官方路線；來源未提供站點里別，不代表這些站點屬於 ${plannerArea}。`):'';
-  const note=[dayCatalogStatus.notice,dayCatalogStatus.pending?`本日另有 ${dayCatalogStatus.pending} 筆來源待確認，未列入排班。`:'',scopeNote].filter(Boolean).join('；');holder.innerHTML=routes.map(key=>{const row=matching.find(item=>routeKey(item)===key);return `<button class="route-choice ${chosenRoute===key?'on':''}" type="button" data-route="${esc(key)}">${esc(routeLabel(row||{}))}${shift==='日間'&&dayRouteCategory==='six'?` · 🗑️ 一般垃圾 · ${row?.['回收狀態']==='有'?'♻️ 資源回收（日期待核）':row?.['回收狀態']==='無'?'無資源回收':'♻️ 回收待核'}`:''}</button>`}).join('')+(note?`<p class="mini-note day-route-notice">${esc(note)}</p>`:'');return}
+  const note=[dayCatalogStatus.notice,dayCatalogStatus.pending?`本日另有 ${dayCatalogStatus.pending} 筆來源待確認，未列入排班。`:'',scopeNote].filter(Boolean).join('；');holder.innerHTML=routes.map(key=>{const row=matching.find(item=>routeKey(item)===key);return `<button class="route-choice ${chosenRoute===key?'on':''}" type="button" data-route="${esc(key)}">${esc(routeLabel(row||{}))}${shift==='日間'&&dayRouteCategory==='six'?` · 🗑️ 一般垃圾 · ${row?.['回收狀態']==='有'?`♻️ 回收：週${row['回收星期']}`:'回收日未列'}`:''}</button>`}).join('')+(note?`<p class="mini-note day-route-notice">${esc(note)}</p>`:'');return}
  const noFixedDay=shift==='日間'&&dayRouteCategory==='ab'&&dayCatalogStatus.weekday&&!['星期三','星期五'].includes(dayCatalogStatus.weekday);
  holder.innerHTML=`<span class="mini-note">${dayCatalogStatus.closedReason?esc(dayCatalogStatus.closedReason):noFixedDay?'所選日期沒有週三／週五固定日間路線。':shift==='日間'&&plannerArea==='all'?'請先選擇服務里，再選擇週三／週五 A、B 路線。':'此里於所選時段暫無已核對站點，請切換里別或時段。'}</span>`;
 }
