@@ -21443,5 +21443,63 @@
       }
     ],
     "warning": "Older normalized source may differ from PDF; not yet passed verification"
-  }
+  },
+  "government_route_import_log": [
+    {
+      "car": 1,
+      "status": "PENDING",
+      "collected": 0,
+      "expected": 67,
+      "error": "SSLError(MaxRetryError(\"HTTPSConnectionPool(host='hwms.moenv.gov.tw', port=443): Max retries exceeded with url: /dispPageBox/route/routeCP.aspx?dbid=6091097622&ddsPageID=LINEINFO&p=1 (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Missing Subject Key Identifier (_ssl.c:1081)')))\"))"
+    },
+    {
+      "car": 8,
+      "status": "PENDING",
+      "collected": 0,
+      "expected": 72,
+      "error": "SSLError(MaxRetryError(\"HTTPSConnectionPool(host='hwms.moenv.gov.tw', port=443): Max retries exceeded with url: /dispPageBox/route/routeCP.aspx?dbid=5111503410&ddsPageID=LINEINFO&p=1 (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Missing Subject Key Identifier (_ssl.c:1081)')))\"))"
+    },
+    {
+      "car": 11,
+      "status": "PENDING",
+      "collected": 0,
+      "expected": 74,
+      "error": "SSLError(MaxRetryError(\"HTTPSConnectionPool(host='hwms.moenv.gov.tw', port=443): Max retries exceeded with url: /dispPageBox/route/routeCP.aspx?dbid=6351489598&ddsPageID=LINEINFO&p=1 (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Missing Subject Key Identifier (_ssl.c:1081)')))\"))"
+    },
+    {
+      "car": 15,
+      "status": "PENDING",
+      "collected": 0,
+      "expected": 81,
+      "error": "SSLError(MaxRetryError(\"HTTPSConnectionPool(host='hwms.moenv.gov.tw', port=443): Max retries exceeded with url: /dispPageBox/route/routeCP.aspx?dbid=6231489605&ddsPageID=LINEINFO&p=1 (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Missing Subject Key Identifier (_ssl.c:1081)')))\"))"
+    },
+    {
+      "car": 22,
+      "status": "PENDING",
+      "collected": 0,
+      "expected": 96,
+      "error": "SSLError(MaxRetryError(\"HTTPSConnectionPool(host='hwms.moenv.gov.tw', port=443): Max retries exceeded with url: /dispPageBox/route/routeCP.aspx?dbid=6971338935&ddsPageID=LINEINFO&p=1 (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Missing Subject Key Identifier (_ssl.c:1081)')))\"))"
+    },
+    {
+      "car": 23,
+      "status": "PENDING",
+      "collected": 0,
+      "expected": 104,
+      "error": "SSLError(MaxRetryError(\"HTTPSConnectionPool(host='hwms.moenv.gov.tw', port=443): Max retries exceeded with url: /dispPageBox/route/routeCP.aspx?dbid=6351338892&ddsPageID=LINEINFO&p=1 (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Missing Subject Key Identifier (_ssl.c:1081)')))\"))"
+    },
+    {
+      "car": 28,
+      "status": "PENDING",
+      "collected": 0,
+      "expected": 116,
+      "error": "SSLError(MaxRetryError(\"HTTPSConnectionPool(host='hwms.moenv.gov.tw', port=443): Max retries exceeded with url: /dispPageBox/route/routeCP.aspx?dbid=6971489631&ddsPageID=LINEINFO&p=1 (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Missing Subject Key Identifier (_ssl.c:1081)')))\"))"
+    },
+    {
+      "car": 40,
+      "status": "PENDING",
+      "collected": 0,
+      "expected": 42,
+      "error": "SSLError(MaxRetryError(\"HTTPSConnectionPool(host='hwms.moenv.gov.tw', port=443): Max retries exceeded with url: /dispPageBox/route/routeCP.aspx?dbid=6091144728&ddsPageID=LINEINFO&p=1 (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Missing Subject Key Identifier (_ssl.c:1081)')))\"))"
+    }
+  ]
 }
