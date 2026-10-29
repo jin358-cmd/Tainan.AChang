@@ -1,0 +1,1728 @@
+{
+  "version": "2026-10-29",
+  "scope": "Yongkang daytime routes 1-6; 160 stop schedule data; staging only, not production",
+  "source_pages": [
+    "https://trash.joelin.cc/areas/tainan/yongkang/route-47/",
+    "https://trash.joelin.cc/areas/tainan/yongkang/route-48/",
+    "https://trash.joelin.cc/areas/tainan/yongkang/route-49/",
+    "https://trash.joelin.cc/areas/tainan/yongkang/route-50/",
+    "https://trash.joelin.cc/areas/tainan/yongkang/route-51/",
+    "https://trash.joelin.cc/areas/tainan/yongkang/route-52/"
+  ],
+  "source_note": "Route 47 and 49 transcribed from public third-party rendering of Tainan EPB open data accessed 2026-10-29; 2/4/5/6 carried forward from previously verified 16-stop staging. Vehicle plates from owner-provided PDF and may differ from live fleet. Source route 47 stop 49 is 10:15 after stop 48 at 12:12, retained as published and flagged for review. Stop 1-5 of route 47 and 1-4 of route 49 have no recycling; the remaining points follow day-specific recycling schedules.",
+  "total_stops": 160,
+  "route_counts": [
+    50,
+    4,
+    94,
+    4,
+    5,
+    3
+  ],
+  "routes": [
+    {
+      "car": 1,
+      "route": 47,
+      "plate": "KEP-5860",
+      "source": "https://trash.joelin.cc/areas/tainan/yongkang/route-47/",
+      "collection_weekdays": [
+        1,
+        2,
+        4,
+        6
+      ],
+      "stops": [
+        {
+          "sequence": 1,
+          "time": "06:30",
+          "name": "二王廟前",
+          "village": "二王里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 2,
+          "time": "06:50",
+          "name": "文化路96之1號",
+          "village": "網寮里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 3,
+          "time": "07:10",
+          "name": "國華街110號(活動中心)",
+          "village": "復華里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 4,
+          "time": "07:30",
+          "name": "復華三街夜市",
+          "village": "復國里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 5,
+          "time": "07:50",
+          "name": "中山東路412號",
+          "village": "中興里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 6,
+          "time": "09:00",
+          "name": "中正南路739巷口",
+          "village": "鹽洲里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 7,
+          "time": "09:04",
+          "name": "中正南路669號",
+          "village": "鹽洲里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 8,
+          "time": "09:08",
+          "name": "中正南路589號",
+          "village": "鹽洲里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 9,
+          "time": "09:12",
+          "name": "中正南路451號",
+          "village": "鹽洲里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 10,
+          "time": "09:16",
+          "name": "中正南路343號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 11,
+          "time": "09:20",
+          "name": "中正南路307號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 12,
+          "time": "09:24",
+          "name": "中正南路229號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 13,
+          "time": "09:28",
+          "name": "中華路1046號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 14,
+          "time": "09:32",
+          "name": "中華路1013號",
+          "village": "甲頂里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 15,
+          "time": "09:36",
+          "name": "中央路41號",
+          "village": "甲頂里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 16,
+          "time": "09:40",
+          "name": "小北路1號",
+          "village": "甲頂里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 17,
+          "time": "09:44",
+          "name": "小北路50號",
+          "village": "甲頂里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 18,
+          "time": "09:48",
+          "name": "中正南路30號",
+          "village": "甲頂里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 19,
+          "time": "09:52",
+          "name": "中正南路100號",
+          "village": "甲頂里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 20,
+          "time": "09:56",
+          "name": "中正南路170號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 21,
+          "time": "10:00",
+          "name": "中華路1010號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 22,
+          "time": "10:04",
+          "name": "中正南路236號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 23,
+          "time": "10:08",
+          "name": "中正南路378號",
+          "village": "鹽行里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 24,
+          "time": "10:12",
+          "name": "中正南路426號",
+          "village": "鹽行里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 25,
+          "time": "10:16",
+          "name": "中正南路528號",
+          "village": "鹽行里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 26,
+          "time": "10:20",
+          "name": "中正南路662號",
+          "village": "鹽行里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 27,
+          "time": "10:24",
+          "name": "中正南路736號",
+          "village": "鹽行里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 28,
+          "time": "10:28",
+          "name": "中正北路56號",
+          "village": "鹽行里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 29,
+          "time": "10:32",
+          "name": "中正北路104號",
+          "village": "鹽行里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 30,
+          "time": "10:36",
+          "name": "中正北路136號",
+          "village": "鹽行里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 31,
+          "time": "10:40",
+          "name": "中正北路600號",
+          "village": "烏竹里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 32,
+          "time": "10:48",
+          "name": "中正北路922號",
+          "village": "王行里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 33,
+          "time": "11:20",
+          "name": "中正北路952號",
+          "village": "王行里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 34,
+          "time": "11:23",
+          "name": "王行路866巷29弄18號",
+          "village": "王行里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 35,
+          "time": "11:27",
+          "name": "王行路866巷5號",
+          "village": "王行里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 36,
+          "time": "11:29",
+          "name": "王行路1158號",
+          "village": "王行里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 37,
+          "time": "11:35",
+          "name": "中正北路977號",
+          "village": "蔦松里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 38,
+          "time": "11:37",
+          "name": "中正北路713號",
+          "village": "蔦松里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 39,
+          "time": "11:39",
+          "name": "中正北路543號",
+          "village": "蔦松里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 40,
+          "time": "11:39",
+          "name": "中正北路427號",
+          "village": "蔦松里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 41,
+          "time": "11:45",
+          "name": "中正北路149號",
+          "village": "鹽興里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 42,
+          "time": "11:49",
+          "name": "中正北路11號",
+          "village": "鹽興里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 43,
+          "time": "11:51",
+          "name": "中正路601號",
+          "village": "鹽行里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 44,
+          "time": "12:00",
+          "name": "中正路515號",
+          "village": "鹽行里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 45,
+          "time": "12:03",
+          "name": "中正路339號",
+          "village": "鹽行里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 46,
+          "time": "12:03",
+          "name": "中正路798號",
+          "village": "鹽行里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 47,
+          "time": "12:10",
+          "name": "中正路854號",
+          "village": "鹽行里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 48,
+          "time": "12:12",
+          "name": "中正路888號",
+          "village": "鹽行里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 49,
+          "time": "10:15",
+          "name": "中正路996號",
+          "village": "鹽行里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        },
+        {
+          "sequence": 50,
+          "time": "12:19",
+          "name": "中正路1006號",
+          "village": "鹽行里",
+          "recycling_weekdays": [
+            2,
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "car": 2,
+      "route": 48,
+      "plate": "008-UT",
+      "source": "https://trash.joelin.cc/areas/tainan/yongkang/route-48/",
+      "collection_weekdays": [
+        1,
+        2,
+        4,
+        5,
+        6
+      ],
+      "stops": [
+        {
+          "sequence": 1,
+          "time": "06:30",
+          "name": "三村國小(鹽行路2號)",
+          "village": "鹽洲里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 2,
+          "time": "06:53",
+          "name": "台南應用科大(和美家傳1期)",
+          "village": "鹽行里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 3,
+          "time": "07:17",
+          "name": "尚頂活動中心後面",
+          "village": "尚頂里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 4,
+          "time": "07:33",
+          "name": "甲頂里籃球場",
+          "village": "甲頂里",
+          "recycling_weekdays": []
+        }
+      ]
+    },
+    {
+      "car": 3,
+      "route": 49,
+      "plate": "009-UT",
+      "source": "https://trash.joelin.cc/areas/tainan/yongkang/route-49/",
+      "collection_weekdays": [
+        1,
+        2,
+        4,
+        5,
+        6
+      ],
+      "stops": [
+        {
+          "sequence": 1,
+          "time": "06:15",
+          "name": "三老爺廟",
+          "village": "蔦松里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 2,
+          "time": "06:30",
+          "name": "龍潭國小前(龍潭街214號)",
+          "village": "王行里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 3,
+          "time": "06:50",
+          "name": "永康國中邊(中山路43號)",
+          "village": "正強里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 4,
+          "time": "07:05",
+          "name": "永康農會前(中山南路635號)",
+          "village": "永康里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 5,
+          "time": "08:14",
+          "name": "中正南路242巷4弄口",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 6,
+          "time": "08:15",
+          "name": "中正南路242巷南台後門",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 7,
+          "time": "08:17",
+          "name": "中正南路242巷20號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 8,
+          "time": "08:19",
+          "name": "正南一街190巷29號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 9,
+          "time": "08:20",
+          "name": "正南一街190巷口",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 10,
+          "time": "08:21",
+          "name": "正南一街183號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 11,
+          "time": "08:24",
+          "name": "正南一街157號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 12,
+          "time": "08:25",
+          "name": "正南一街129巷口",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 13,
+          "time": "08:27",
+          "name": "正南一街107巷51號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 14,
+          "time": "08:30",
+          "name": "正南一街105巷3號(全家)",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 15,
+          "time": "08:32",
+          "name": "正南一街118巷口",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 16,
+          "time": "08:35",
+          "name": "正南一街92巷38號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 17,
+          "time": "08:38",
+          "name": "正南一街92巷7號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 18,
+          "time": "08:42",
+          "name": "正南一街53號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 19,
+          "time": "08:43",
+          "name": "正南一街33號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 20,
+          "time": "08:44",
+          "name": "正南一街57巷42號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 21,
+          "time": "08:45",
+          "name": "尚頂路59巷14號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 22,
+          "time": "08:47",
+          "name": "尚頂路56號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 23,
+          "time": "08:50",
+          "name": "中正二街105巷8號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 24,
+          "time": "08:52",
+          "name": "中正二街105巷38號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 25,
+          "time": "08:55",
+          "name": "塩信街76號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 26,
+          "time": "08:56",
+          "name": "塩信街50號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 27,
+          "time": "08:57",
+          "name": "塩信街18號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 28,
+          "time": "09:02",
+          "name": "中正二街32號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 29,
+          "time": "09:05",
+          "name": "中正二街132號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 30,
+          "time": "09:06",
+          "name": "中正二街162巷口",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 31,
+          "time": "09:08",
+          "name": "中正二街182巷39號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 32,
+          "time": "09:12",
+          "name": "正南三路23號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 33,
+          "time": "09:15",
+          "name": "正南三路108號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 34,
+          "time": "09:17",
+          "name": "正南三路162號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 35,
+          "time": "09:20",
+          "name": "中正二街418號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 36,
+          "time": "09:22",
+          "name": "正南五街75號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 37,
+          "time": "09:23",
+          "name": "正南五街35號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 38,
+          "time": "09:24",
+          "name": "正南五街32巷口",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 39,
+          "time": "09:26",
+          "name": "塩和街174號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 40,
+          "time": "09:28",
+          "name": "塩和街210號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 41,
+          "time": "09:30",
+          "name": "塩和街226號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 42,
+          "time": "09:32",
+          "name": "塩平街158巷25號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 43,
+          "time": "09:33",
+          "name": "塩平街212號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 44,
+          "time": "09:37",
+          "name": "中正三街336號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 45,
+          "time": "09:39",
+          "name": "中正五街506號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 46,
+          "time": "09:41",
+          "name": "中正五街146號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 47,
+          "time": "09:43",
+          "name": "中正五街65號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 48,
+          "time": "09:45",
+          "name": "中正五街53巷36號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 49,
+          "time": "09:46",
+          "name": "中正一街50號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 50,
+          "time": "09:47",
+          "name": "中正一街27號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 51,
+          "time": "10:35",
+          "name": "中正二街617號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 52,
+          "time": "10:36",
+          "name": "中正二街567號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 53,
+          "time": "10:40",
+          "name": "中正二街283號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 54,
+          "time": "10:42",
+          "name": "中正二街227號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 55,
+          "time": "10:43",
+          "name": "中正二街207號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 56,
+          "time": "10:44",
+          "name": "中正二街157號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 57,
+          "time": "10:49",
+          "name": "中正南路344巷9號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 58,
+          "time": "10:51",
+          "name": "塩信街146巷23號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 59,
+          "time": "10:52",
+          "name": "中正二街169巷72-4號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 60,
+          "time": "10:56",
+          "name": "尚頂路96號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 61,
+          "time": "10:57",
+          "name": "尚頂路118號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 62,
+          "time": "11:00",
+          "name": "尚頂路117巷3號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 63,
+          "time": "11:02",
+          "name": "中正南路306巷",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 64,
+          "time": "11:08",
+          "name": "中正南路404巷6號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 65,
+          "time": "11:10",
+          "name": "正南三路297號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 66,
+          "time": "11:12",
+          "name": "正南三路232號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 67,
+          "time": "11:16",
+          "name": "中正南路490巷64號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 68,
+          "time": "11:18",
+          "name": "塩和街240號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 69,
+          "time": "11:19",
+          "name": "塩和街258號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 70,
+          "time": "11:20",
+          "name": "塩和街276號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 71,
+          "time": "11:22",
+          "name": "塩和街263巷23-1號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 72,
+          "time": "11:25",
+          "name": "塩和街288號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 73,
+          "time": "11:36",
+          "name": "中正南路349巷14號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 74,
+          "time": "11:37",
+          "name": "中正南路349巷57號",
+          "village": "塩行里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 75,
+          "time": "11:40",
+          "name": "國聖街86巷口",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 76,
+          "time": "11:45",
+          "name": "中正南路381巷6號",
+          "village": "尚頂里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 77,
+          "time": "11:49",
+          "name": "國聖街178號",
+          "village": "塩洲里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 78,
+          "time": "11:51",
+          "name": "洲工街9巷口",
+          "village": "塩洲里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 79,
+          "time": "11:55",
+          "name": "國聖街167巷30號",
+          "village": "塩洲里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 80,
+          "time": "11:56",
+          "name": "洲工街96號",
+          "village": "塩洲里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 81,
+          "time": "11:57",
+          "name": "洲工街&正南二街口",
+          "village": "塩洲里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 82,
+          "time": "11:58",
+          "name": "洲工街151號",
+          "village": "塩洲里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 83,
+          "time": "11:59",
+          "name": "洲工街166-1號",
+          "village": "塩洲里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 84,
+          "time": "12:00",
+          "name": "正南六街97號",
+          "village": "塩洲里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 85,
+          "time": "12:02",
+          "name": "正南六街73號",
+          "village": "塩洲里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 86,
+          "time": "12:03",
+          "name": "國聖街253號",
+          "village": "塩洲里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 87,
+          "time": "12:06",
+          "name": "正南二街86巷口",
+          "village": "塩洲里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 88,
+          "time": "12:10",
+          "name": "國聖街293巷口",
+          "village": "塩洲里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 89,
+          "time": "12:11",
+          "name": "洲尾街72-3號",
+          "village": "塩洲里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 90,
+          "time": "12:25",
+          "name": "蔦松三街",
+          "village": "蔦菘里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 91,
+          "time": "12:28",
+          "name": "正北三路91巷7號",
+          "village": "三民里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 92,
+          "time": "12:29",
+          "name": "正北三路132號",
+          "village": "三民里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 93,
+          "time": "12:31",
+          "name": "正北三路146號",
+          "village": "三民里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        },
+        {
+          "sequence": 94,
+          "time": "12:32",
+          "name": "正北一路136巷",
+          "village": "三民里",
+          "recycling_weekdays": [
+            1,
+            4,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "car": 4,
+      "route": 50,
+      "plate": "KER-3760",
+      "source": "https://trash.joelin.cc/areas/tainan/yongkang/route-50/",
+      "collection_weekdays": [
+        1,
+        2,
+        4,
+        5,
+        6
+      ],
+      "stops": [
+        {
+          "sequence": 1,
+          "time": "06:30",
+          "name": "勝利國小前",
+          "village": "勝利里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 2,
+          "time": "07:00",
+          "name": "復興國小（華興街）",
+          "village": "中華里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 3,
+          "time": "07:25",
+          "name": "五王市場（中華二路206巷72號）",
+          "village": "五王里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 4,
+          "time": "07:50",
+          "name": "五王國小（中華二路150號）",
+          "village": "五王里",
+          "recycling_weekdays": []
+        }
+      ]
+    },
+    {
+      "car": 5,
+      "route": 51,
+      "plate": "KER-2025",
+      "source": "https://trash.joelin.cc/areas/tainan/yongkang/route-51/",
+      "collection_weekdays": [
+        1,
+        2,
+        4,
+        5,
+        6
+      ],
+      "stops": [
+        {
+          "sequence": 1,
+          "time": "06:28",
+          "name": "崑山國小大門",
+          "village": "崑山里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 2,
+          "time": "06:45",
+          "name": "國光七街和大勇路口",
+          "village": "西灣里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 3,
+          "time": "07:00",
+          "name": "大灣農會旁",
+          "village": "大灣里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 4,
+          "time": "07:17",
+          "name": "廣興宮",
+          "village": "西勢里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 5,
+          "time": "07:35",
+          "name": "永明街和國民路口",
+          "village": "永明里",
+          "recycling_weekdays": []
+        }
+      ]
+    },
+    {
+      "car": 6,
+      "route": 52,
+      "plate": "AAQ-059",
+      "source": "https://trash.joelin.cc/areas/tainan/yongkang/route-52/",
+      "collection_weekdays": [
+        1,
+        2,
+        4,
+        5,
+        6
+      ],
+      "stops": [
+        {
+          "sequence": 1,
+          "time": "06:38",
+          "name": "中華西路196巷口",
+          "village": "安康里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 2,
+          "time": "07:00",
+          "name": "大橋國小後側門",
+          "village": "大橋里",
+          "recycling_weekdays": []
+        },
+        {
+          "sequence": 3,
+          "time": "07:15",
+          "name": "大橋二街188號旁",
+          "village": "大橋里",
+          "recycling_weekdays": []
+        }
+      ]
+    }
+  ]
+}
