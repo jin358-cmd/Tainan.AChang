@@ -52,7 +52,7 @@ function applyDayRoutes(){
  const selectedSix=Array.isArray(sixRouteDocument?.routes)?sixRouteDocument.routes:[];
  const weekday=result.weekday;
  const sixRows=selectedSix.filter(x=>Array.isArray(x.weekdays)&&x.weekdays.includes(weekday)).map((r,i)=>({
-  '時段':'日間','車次':'日間'+r.number,'車牌':'','路線ID':'DAY:SIX:'+r.number,
+  '時段':'日間','車次':'日間'+r.number,'車牌':r.plate||'','路線ID':'DAY:SIX:'+r.number,
   '站點ID':'DAY:SIX:'+r.number+':START','里別':'','固定日間':true,'日間分類':'six',
   '清運次序':1,'停靠點原文':r.name+'（首站；沿線資料待核）',
   '到達':r.start,'離開':'','適用星期':weekday,'來源順序':i+1,
