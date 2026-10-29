@@ -22,7 +22,7 @@
         "星期二",
         "星期六"
       ],
-      "recycling_note": "依 PDF 路線表頭之資源回收日"
+      "recycling_note": "PDF 與 Owner 確認之資源回收日"
     },
     {
       "number": 2,
@@ -39,9 +39,9 @@
       "plate": "008-UT",
       "plate_source_page": 7,
       "garbage_collection": true,
-      "recycling_status": "未列",
+      "recycling_status": "無",
       "recycling_weekdays": [],
-      "recycling_note": "PDF 該車表頭未列資源回收日"
+      "recycling_note": "僅一般垃圾"
     },
     {
       "number": 3,
@@ -64,7 +64,7 @@
         "星期四",
         "星期五"
       ],
-      "recycling_note": "依 PDF 路線表頭之資源回收日"
+      "recycling_note": "PDF 與 Owner 確認之資源回收日"
     },
     {
       "number": 4,
@@ -81,9 +81,9 @@
       "plate": "KER-3760",
       "plate_source_page": 11,
       "garbage_collection": true,
-      "recycling_status": "未列",
+      "recycling_status": "無",
       "recycling_weekdays": [],
-      "recycling_note": "PDF 該車表頭未列資源回收日"
+      "recycling_note": "僅一般垃圾"
     },
     {
       "number": 5,
@@ -100,9 +100,9 @@
       "plate": "KER-2025",
       "plate_source_page": 12,
       "garbage_collection": true,
-      "recycling_status": "未列",
+      "recycling_status": "無",
       "recycling_weekdays": [],
-      "recycling_note": "PDF 該車表頭未列資源回收日"
+      "recycling_note": "僅一般垃圾"
     },
     {
       "number": 6,
@@ -119,9 +119,9 @@
       "plate": "AAQ-059",
       "plate_source_page": 13,
       "garbage_collection": true,
-      "recycling_status": "未列",
+      "recycling_status": "無",
       "recycling_weekdays": [],
-      "recycling_note": "PDF 該車表頭未列資源回收日"
+      "recycling_note": "僅一般垃圾"
     }
   ]
 }
