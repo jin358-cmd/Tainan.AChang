@@ -1,0 +1,84 @@
+{
+  "version": "2026-10-29",
+  "source": "Owner 提供之臺南環保通班表截圖＋永康區清運路線930（日間）PDF",
+  "scope": "六車首站已核對；沿線逐站資料尚未完整轉錄",
+  "routes": [
+    {
+      "number": 1,
+      "name": "二王廟前",
+      "start": "06:30",
+      "weekdays": [
+        "星期一",
+        "星期二",
+        "星期四",
+        "星期六"
+      ],
+      "verified_scope": "first_stop_only"
+    },
+    {
+      "number": 2,
+      "name": "三村國小（鹽行路2號）",
+      "start": "06:30",
+      "weekdays": [
+        "星期一",
+        "星期二",
+        "星期四",
+        "星期五",
+        "星期六"
+      ],
+      "verified_scope": "first_stop_only"
+    },
+    {
+      "number": 3,
+      "name": "三老爺廟",
+      "start": "06:15",
+      "weekdays": [
+        "星期一",
+        "星期二",
+        "星期四",
+        "星期五",
+        "星期六"
+      ],
+      "verified_scope": "first_stop_only"
+    },
+    {
+      "number": 4,
+      "name": "勝利國小前",
+      "start": "06:30",
+      "weekdays": [
+        "星期一",
+        "星期二",
+        "星期四",
+        "星期五",
+        "星期六"
+      ],
+      "verified_scope": "first_stop_only"
+    },
+    {
+      "number": 5,
+      "name": "崑山國小大門",
+      "start": "06:28",
+      "weekdays": [
+        "星期一",
+        "星期二",
+        "星期四",
+        "星期五",
+        "星期六"
+      ],
+      "verified_scope": "first_stop_only"
+    },
+    {
+      "number": 6,
+      "name": "中華西路196巷口",
+      "start": "06:38",
+      "weekdays": [
+        "星期一",
+        "星期二",
+        "星期四",
+        "星期五",
+        "星期六"
+      ],
+      "verified_scope": "first_stop_only"
+    }
+  ]
+}
