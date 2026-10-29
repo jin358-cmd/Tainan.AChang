@@ -59,7 +59,7 @@ function renderVisitTimeFilter(rows){
  const optionHtml='<option value="">全部時段</option>'+options.map(value=>`<option value="${esc(value)}">${esc(value)}</option>`).join('');
  start.innerHTML=optionHtml;end.innerHTML=optionHtml;start.value=visitTimeStart;end.value=visitTimeEnd;
  const disabled=!chosenRoute||options.length===0;start.disabled=disabled;end.disabled=disabled;
- hint.textContent=disabled?(chosenRoute?'此車次沒有可供篩選的合法原表時間。':'請先選擇車次。'):'僅以原表合法時間過濾，不變更站點內容與順序。';
+ hint.textContent=disabled?(chosenRoute?'此車次沒有可供篩選的合法原表時間。':'請先選擇車次。'):'';
 }
 function applyDayRoutes(){
  const adapter=window.AChangDayRoutes;
@@ -103,8 +103,8 @@ function chooseRoute(){
  const matching=data.stops.filter(r=>r['時段']===shift&&(shift!=='日間'||r['日間分類']===dayRouteCategory)&&(r['固定日間']?true:plannerArea==='all'||r['里別']===plannerArea));
  routes=uniq(matching.map(routeKey));if(!routes.includes(chosenRoute))chosenRoute=routes[0]||'';
  const holder=$('#routeButtons');
- if(routes.length){const fixedDay=matching.some(row=>row['固定日間']),scopeNote=fixedDay?(plannerArea==='all'?'全部里別僅供預覽；指派前請選擇服務里。來源未提供站點里別。':`${plannerArea} 人員會跟巡整條官方路線；來源未提供站點里別，不代表這些站點屬於 ${plannerArea}。`):'';
-  const note=[dayCatalogStatus.notice,dayCatalogStatus.pending?`本日另有 ${dayCatalogStatus.pending} 筆來源待確認，未列入排班。`:'',scopeNote].filter(Boolean).join('；');holder.innerHTML=routes.map(key=>{const row=matching.find(item=>routeKey(item)===key),sourceRows=matching.filter(item=>routeKey(item)===key),collection=shift==='日間'&&dayRouteCategory==='six'?` 🗑️${sourceRows.some(item=>String(item['回收日']||'').trim())?' ♻️':''}`:'';return `<button class="route-choice ${chosenRoute===key?'on':''}" type="button" data-route="${esc(key)}">${esc(routeLabel(row||{}))}${collection}</button>`}).join('')+(note?`<p class="mini-note day-route-notice">${esc(note)}</p>`:'');return}
+ if(routes.length){const fixedDay=shift==='日間'&&dayRouteCategory==='ab'&&matching.some(row=>row['固定日間']),scopeNote=fixedDay?(plannerArea==='all'?'全部里別僅供預覽；指派前請選擇服務里。來源未提供站點里別。':`${plannerArea} 人員會跟巡整條官方路線；來源未提供站點里別，不代表這些站點屬於 ${plannerArea}。`):'';
+  const note=[fixedDay?dayCatalogStatus.notice:'',fixedDay&&dayCatalogStatus.pending?`本日另有 ${dayCatalogStatus.pending} 筆來源待確認，未列入排班。`:'',scopeNote].filter(Boolean).join('；');holder.innerHTML=routes.map(key=>{const row=matching.find(item=>routeKey(item)===key),sourceRows=matching.filter(item=>routeKey(item)===key),collection=shift==='日間'&&dayRouteCategory==='six'?` 🗑️${sourceRows.some(item=>String(item['回收日']||'').trim())?' ♻️':''}`:'';return `<button class="route-choice ${chosenRoute===key?'on':''}" type="button" data-route="${esc(key)}">${esc(routeLabel(row||{}))}${collection}</button>`}).join('')+(note?`<p class="mini-note day-route-notice">${esc(note)}</p>`:'');return}
  const noFixedDay=shift==='日間'&&dayRouteCategory==='ab'&&dayCatalogStatus.weekday&&!['星期三','星期五'].includes(dayCatalogStatus.weekday);
  holder.innerHTML=`<span class="mini-note">${dayCatalogStatus.closedReason?esc(dayCatalogStatus.closedReason):noFixedDay?'所選日期沒有週三／週五固定日間路線。':shift==='日間'&&plannerArea==='all'?'請先選擇服務里，再選擇週三／週五 A、B 路線。':'此里於所選時段暫無已核對站點，請切換里別或時段。'}</span>`;
 }

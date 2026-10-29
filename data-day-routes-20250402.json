@@ -24,8 +24,8 @@
       "end": "10:15",
       "name": "西勢里廣興宮",
       "color": "#8B5CF6",
-      "review_required": true,
-      "review_note": "圖片補列週三 A 線第二站，需再確認班次與來源順序",
+      "review_required": false,
+      "review_note": "114.4.2 公告正確版已確認班次與來源順序；保留原候審紀錄供稽核",
       "location_verified": false
     },
     {
@@ -67,10 +67,10 @@
       "route": "A",
       "start": "14:00",
       "end": "14:15",
-      "name": "北灣里鹽聖宮",
+      "name": "北灣里國聖宮",
       "color": "#8B5CF6",
-      "review_required": true,
-      "review_note": "圖片為北灣里國聖宮，XLSX 為北灣里鹽聖宮，名稱待確認",
+      "review_required": false,
+      "review_note": "114.4.2 公告正確版確認為北灣里國聖宮；保留 XLSX 異文供稽核",
       "location_verified": false
     },
     {
@@ -114,8 +114,8 @@
       "end": "10:15",
       "name": "大橋活動中心",
       "color": "#8B5CF6",
-      "review_required": true,
-      "review_note": "大橋活動中心於多來源中待個別確認",
+      "review_required": false,
+      "review_note": "114.4.2 公告正確版已確認大橋活動中心；保留原候審紀錄供稽核",
       "location_verified": false
     },
     {
@@ -124,10 +124,10 @@
       "route": "B",
       "start": "10:30",
       "end": "10:45",
-      "name": "永明街261-12號（加慶居）",
+      "name": "永明街261-12號(如意居)",
       "color": "#8B5CF6",
-      "review_required": true,
-      "review_note": "圖片為如意居，XLSX 為加慶居，名稱待確認",
+      "review_required": false,
+      "review_note": "114.4.2 公告正確版確認為如意居；保留 XLSX 異文供稽核",
       "location_verified": false
     },
     {
@@ -158,7 +158,7 @@
       "route": "B",
       "start": "14:00",
       "end": "14:15",
-      "name": "國光八街與大勇路（9-1公園）",
+      "name": "國光八街&大勇路(9-1公園)",
       "color": "#8B5CF6",
       "review_required": false,
       "location_verified": false
@@ -191,10 +191,10 @@
       "route": "A",
       "start": "09:30",
       "end": "09:45",
-      "name": "中山南路544巷48號（統領園）",
+      "name": "中山南路544巷48號(統領國)",
       "color": "#8B5CF6",
-      "review_required": true,
-      "review_note": "圖片末字疑為統領國，XLSX 為統領園，名稱待確認",
+      "review_required": false,
+      "review_note": "114.4.2 公告正確版確認為統領國；保留 XLSX 異文供稽核",
       "location_verified": false
     },
     {
@@ -260,8 +260,8 @@
       "end": "14:45",
       "name": "復華里活動中心",
       "color": "#8B5CF6",
-      "review_required": true,
-      "review_note": "復華里活動中心於多來源中待個別確認",
+      "review_required": false,
+      "review_note": "114.4.2 公告正確版已確認復華里活動中心；保留原候審紀錄供稽核",
       "location_verified": false
     },
     {
@@ -272,8 +272,8 @@
       "end": "15:15",
       "name": "復國里活動中心",
       "color": "#8B5CF6",
-      "review_required": true,
-      "review_note": "復國里活動中心於多來源中待個別確認",
+      "review_required": false,
+      "review_note": "114.4.2 公告正確版已確認復國里活動中心；保留原候審紀錄供稽核",
       "location_verified": false
     },
     {
@@ -304,7 +304,7 @@
       "route": "B",
       "start": "10:30",
       "end": "10:45",
-      "name": "鹽興里（桂田停車場）",
+      "name": "塩興里(桂田停車場)",
       "color": "#8B5CF6",
       "review_required": false,
       "location_verified": false
@@ -326,7 +326,7 @@
       "route": "B",
       "start": "13:30",
       "end": "13:45",
-      "name": "大灣三街與大安街口",
+      "name": "大灣三街&大安街口",
       "color": "#8B5CF6",
       "review_required": false,
       "location_verified": false

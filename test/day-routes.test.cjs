@@ -11,26 +11,34 @@ test('Taipei calendar dates select only Wednesday and Friday fixed daytime catal
  assert.equal(adapter.stopsForDate(source,'2026-10-29').stops.length,0);
 });
 
-test('32-row source enables 25 reviewed rows and keeps all seven cross-source items pending',()=>{
- const normalized=adapter.normalize(source);assert.equal(normalized.length,32);assert.equal(normalized.filter(row=>row.enabled).length,25);
- assert.deepEqual(normalized.filter(row=>!row.enabled).map(row=>row.id),[
-  'ACHANG-W三-A-02','ACHANG-W三-A-06','ACHANG-W三-B-10','ACHANG-W三-B-11','ACHANG-W五-A-17','ACHANG-W五-A-23','ACHANG-W五-A-24'
- ]);
- assert.ok(normalized.filter(row=>!row.enabled).every(row=>row.pendingReasons.includes('來源衝突待核')&&row.reviewNote));
- for(const [date,weekday,count,pending] of [['2026-10-28','星期三',12,4],['2026-10-30','星期五',13,3]]){
-  const result=adapter.stopsForDate(source,date);assert.equal(result.weekday,weekday);assert.equal(result.stops.length,count);
-  assert.equal(result.pending.length,pending);assert.equal(result.serviceNotice,'遇國定假日、颱風假停收');
+test('114.4.2 notice enables all 32 rows while retaining prior review notes for audit',()=>{
+ const normalized=adapter.normalize(source);assert.equal(normalized.length,32);assert.equal(normalized.filter(row=>row.enabled).length,32);
+ assert.deepEqual(normalized.filter(row=>!row.enabled),[]);
+ assert.equal(source.routes.filter(row=>row.review_note).length,7);
+ assert.ok(source.routes.filter(row=>row.review_note).every(row=>row.review_required===false&&row.review_note.includes('保留')));
+ for(const [date,weekday] of [['2026-10-28','星期三'],['2026-10-30','星期五']]){
+  const result=adapter.stopsForDate(source,date);assert.equal(result.weekday,weekday);
+  assert.equal(result.stops.length,16);assert.equal(result.pending.length,0);assert.equal(result.serviceNotice,'遇國定假日、颱風假停收');
   assert.deepEqual(result.stops.map(row=>row['來源順序']),normalized.filter(row=>row.enabled&&row.weekday===weekday).map(row=>row.sourceOrder));
   assert.deepEqual([...new Set(result.stops.map(row=>row['路線ID']))].sort(),[`DAY:${weekday}:A`,`DAY:${weekday}:B`]);
+  assert.deepEqual([...new Set(result.stops.map(row=>row['車次']))].sort(),['日間 A線','日間 B線']);
+  assert.deepEqual(result.stops.filter(row=>row['車次']==='日間 A線').map(row=>row['清運次序']),[1,2,3,4,5,6,7,8]);
+  assert.deepEqual(result.stops.filter(row=>row['車次']==='日間 B線').map(row=>row['清運次序']),[1,2,3,4,5,6,7,8]);
   assert.ok(result.stops.every(row=>row['時段']==='日間'&&row['車牌']===''&&row['固定日間']===true));
  }
+ assert.equal(source.routes.find(row=>row.id==='ACHANG-W三-A-06').name,'北灣里國聖宮');
+ assert.equal(source.routes.find(row=>row.id==='ACHANG-W三-B-11').name,'永明街261-12號(如意居)');
+ assert.equal(source.routes.find(row=>row.id==='ACHANG-W三-B-14').name,'國光八街&大勇路(9-1公園)');
+ assert.equal(source.routes.find(row=>row.id==='ACHANG-W五-A-17').name,'中山南路544巷48號(統領國)');
+ assert.equal(source.routes.find(row=>row.id==='ACHANG-W五-B-27').name,'塩興里(桂田停車場)');
+ assert.equal(source.routes.find(row=>row.id==='ACHANG-W五-B-29').name,'大灣三街&大安街口');
 });
 
 test('an explicit service exception closes only the selected date without inventing a holiday calendar',()=>{
  const fixture={...source,service_exceptions:[{date:'2026-10-28',closed:true,reason:'國定假日停收'}]};
  const closed=adapter.stopsForDate(fixture,'2026-10-28'),next=adapter.stopsForDate(fixture,'2026-10-30');
- assert.equal(closed.stops.length,0);assert.equal(closed.closedReason,'國定假日停收');assert.equal(closed.pending.length,4);
- assert.equal(next.stops.length,13);assert.equal(next.closedReason,'');
+ assert.equal(closed.stops.length,0);assert.equal(closed.closedReason,'國定假日停收');assert.equal(closed.pending.length,0);
+ assert.equal(next.stops.length,16);assert.equal(next.closedReason,'');
 });
 
 test('single times stay single, intervals stay intervals, and uncertain rows remain pending',()=>{
@@ -61,6 +69,9 @@ test('frontend and backend keep route identity separate from an optional truck n
  assert.match(app,/fetch\('\.\/data-day-routes-20250402\.json'/);
  assert.match(app,/r\['固定日間'\]\?true:plannerArea==='all'/);
  assert.match(app,/本日另有.*來源待確認，未列入排班/);
+ assert.match(app,/fixedDay\?dayCatalogStatus\.notice:''/);
+ assert.match(html,/<p id="visitTimeHint" class="mini-note"><\/p>/);
+ assert.doesNotMatch(app,/僅以原表合法時間過濾，不變更站點內容與順序/);
  assert.doesNotMatch(app,/本日可排.*matching\.length.*站次/);
  assert.match(app,/全部里別僅供預覽；指派前請選擇服務里/);
  assert.match(app,/人員會跟巡整條官方路線/);
