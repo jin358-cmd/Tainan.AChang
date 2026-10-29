@@ -2,7 +2,7 @@
   "version": "2026-10-29",
   "scope": "Yongkang nighttime routes; staging only, separate from daytime 160 stops",
   "source": "永康夜間24車逐站轉錄稽核_20261029.csv",
-  "status": "INCOMPLETE_UNVERIFIED_PLACEHOLDERS",
+  "status": "PARTIALLY_POPULATED_UNVERIFIED",
   "total_stops": 1586,
   "route_counts": [
     67,
@@ -30,7 +30,7 @@
     42,
     27
   ],
-  "notes": "1586 sequence placeholders, NOT verified address/time records. Audit CSV reports 5 populated addresses/times but does not contain those values. Do not publish as complete route schedule. Audit total differs from previous 1588 by 2.",
+  "notes": "Known source records copied from existing data-public.json; remaining stops are placeholders. No PDF visual verification or production deployment.",
   "routes": [
     {
       "car": 1,
@@ -42,11 +42,16 @@
       "stops": [
         {
           "sequence": 1,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "15:45",
+          "name": "中華路23巷3號",
+          "village": "勝利里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區中華路23巷3號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "一、四",
+          "source_pdf_page": 5
         },
         {
           "sequence": 2,
@@ -66,11 +71,16 @@
         },
         {
           "sequence": 4,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "15:51",
+          "name": "勝利街24號",
+          "village": "勝利里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區勝利街24號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "一、四",
+          "source_pdf_page": 5
         },
         {
           "sequence": 5,
@@ -202,11 +212,16 @@
         },
         {
           "sequence": 21,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "16:17",
+          "name": "勝學路156號",
+          "village": "勝利里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區勝學路156號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "一、四",
+          "source_pdf_page": 5
         },
         {
           "sequence": 22,
@@ -362,11 +377,16 @@
         },
         {
           "sequence": 41,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "18:44",
+          "name": "勝華街37巷37弄1號",
+          "village": "勝利里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區勝華街37巷37弄1號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "一、四",
+          "source_pdf_page": 6
         },
         {
           "sequence": 42,
@@ -1816,11 +1836,16 @@
         },
         {
           "sequence": 18,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "14:49",
+          "name": "中華路249號",
+          "village": "勝利里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區中華路249號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "一、四",
+          "source_pdf_page": 12
         },
         {
           "sequence": 19,
@@ -1856,11 +1881,16 @@
         },
         {
           "sequence": 23,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "15:30",
+          "name": "華興街127號",
+          "village": "中華里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區華興街127號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "一、四",
+          "source_pdf_page": 12
         },
         {
           "sequence": 24,
@@ -1872,11 +1902,16 @@
         },
         {
           "sequence": 25,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "15:42",
+          "name": "小東路591巷",
+          "village": "復興里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區小東路591巷",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "一、四",
+          "source_pdf_page": 12
         },
         {
           "sequence": 26,
@@ -1896,19 +1931,29 @@
         },
         {
           "sequence": 28,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "15:45",
+          "name": "華興街186號",
+          "village": "光復里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區華興街186號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "一、四",
+          "source_pdf_page": 12
         },
         {
           "sequence": 29,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "15:50",
+          "name": "復興路415號",
+          "village": "光復里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區復興路415號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "一、四",
+          "source_pdf_page": 12
         },
         {
           "sequence": 30,
@@ -2000,11 +2045,16 @@
         },
         {
           "sequence": 41,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "18:04",
+          "name": "小東路477巷30號",
+          "village": "復興里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區小東路477巷30號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "一、四",
+          "source_pdf_page": 13
         },
         {
           "sequence": 42,
@@ -2040,11 +2090,16 @@
         },
         {
           "sequence": 46,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "18:13",
+          "name": "中華路10巷12-1號",
+          "village": "光復里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區中華路10巷12-1號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "一、四",
+          "source_pdf_page": 13
         },
         {
           "sequence": 47,
@@ -2056,11 +2111,16 @@
         },
         {
           "sequence": 48,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "18:17",
+          "name": "忠義街54號",
+          "village": "中華里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區忠義街54號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "一、四",
+          "source_pdf_page": 13
         },
         {
           "sequence": 49,
@@ -2248,11 +2308,16 @@
         },
         {
           "sequence": 72,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "18:57",
+          "name": "中華路58巷56號",
+          "village": "中華里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區中華路58巷56號",
+          "departure_time": "19:20",
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "一、四",
+          "source_pdf_page": 13
         }
       ]
     },
@@ -3190,11 +3255,16 @@
         },
         {
           "sequence": 16,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "15:30",
+          "name": "復華十街45巷35號",
+          "village": "復華里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區復華十街45巷35號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "二、六",
+          "source_pdf_page": 17
         },
         {
           "sequence": 17,
@@ -3230,11 +3300,16 @@
         },
         {
           "sequence": 21,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "15:40",
+          "name": "復國一路501號",
+          "village": "復華里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區復國一路501號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "二、六",
+          "source_pdf_page": 17
         },
         {
           "sequence": 22,
@@ -3326,11 +3401,16 @@
         },
         {
           "sequence": 33,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "17:02",
+          "name": "國華街151號",
+          "village": "復華里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區國華街151號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "二、六",
+          "source_pdf_page": 17
         },
         {
           "sequence": 34,
@@ -3390,11 +3470,16 @@
         },
         {
           "sequence": 41,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "17:19",
+          "name": "復華街七街73號",
+          "village": "復華里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區復華街七街73號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "二、六",
+          "source_pdf_page": 18
         },
         {
           "sequence": 42,
@@ -3654,11 +3739,16 @@
         },
         {
           "sequence": 74,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "19:50",
+          "name": "國華街102巷97號",
+          "village": "復華里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區國華街102巷97號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "二、六",
+          "source_pdf_page": 18
         }
       ]
     },
@@ -5270,19 +5360,29 @@
       "stops": [
         {
           "sequence": 1,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "14:30",
+          "name": "忠孝一路268巷1號",
+          "village": "光復里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區忠孝一路268巷1號",
+          "departure_time": "14:31",
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "一、四",
+          "source_pdf_page": 27
         },
         {
           "sequence": 2,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "14:50",
+          "name": "中華路6號",
+          "village": "中華里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區中華路6號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "一、四",
+          "source_pdf_page": 27
         },
         {
           "sequence": 3,
@@ -5438,11 +5538,16 @@
         },
         {
           "sequence": 22,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "15:25",
+          "name": "中華二路285號",
+          "village": "中興里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區中華二路285號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "一、四",
+          "source_pdf_page": 27
         },
         {
           "sequence": 23,
@@ -5510,11 +5615,16 @@
         },
         {
           "sequence": 31,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "15:39",
+          "name": "中山東路337號",
+          "village": "中興里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區中山東路337號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "一、四",
+          "source_pdf_page": 27
         },
         {
           "sequence": 32,
@@ -5582,11 +5692,16 @@
         },
         {
           "sequence": 40,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "15:54",
+          "name": "忠孝路152巷16號",
+          "village": "神洲里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區忠孝路152巷16號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "一、四",
+          "source_pdf_page": 27
         },
         {
           "sequence": 41,
@@ -5606,11 +5721,16 @@
         },
         {
           "sequence": 43,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "17:06",
+          "name": "忠孝路76巷63弄2號",
+          "village": "神洲里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區忠孝路76巷63弄2號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "一、四",
+          "source_pdf_page": 28
         },
         {
           "sequence": 44,
@@ -5702,11 +5822,16 @@
         },
         {
           "sequence": 55,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "17:20",
+          "name": "忠孝路108號",
+          "village": "神洲里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區忠孝路108號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "一、四",
+          "source_pdf_page": 28
         },
         {
           "sequence": 56,
@@ -5718,11 +5843,16 @@
         },
         {
           "sequence": 57,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "17:24",
+          "name": "中興街118號",
+          "village": "中興里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區中興街118號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "一、四",
+          "source_pdf_page": 28
         },
         {
           "sequence": 58,
@@ -5782,11 +5912,16 @@
         },
         {
           "sequence": 65,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "17:43",
+          "name": "中華一路136號",
+          "village": "中興里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區中華一路136號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "一、四",
+          "source_pdf_page": 28
         },
         {
           "sequence": 66,
@@ -5974,11 +6109,16 @@
         },
         {
           "sequence": 89,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "19:22",
+          "name": "中華一路70號",
+          "village": "中興里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區中華一路70號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "一、四",
+          "source_pdf_page": 29
         },
         {
           "sequence": 90,
@@ -10752,19 +10892,29 @@
       "stops": [
         {
           "sequence": 1,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "16:00",
+          "name": "復華六街95號",
+          "village": "復國里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區復華六街95號",
+          "departure_time": "16:01",
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "二、六",
+          "source_pdf_page": 50
         },
         {
           "sequence": 2,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "16:02",
+          "name": "復國一路345號",
+          "village": "復國里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區復國一路345號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "二、六",
+          "source_pdf_page": 50
         },
         {
           "sequence": 3,
@@ -10824,11 +10974,16 @@
         },
         {
           "sequence": 10,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "16:22",
+          "name": "復國二路142號",
+          "village": "復國里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區復國二路142號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "二、六",
+          "source_pdf_page": 50
         },
         {
           "sequence": 11,
@@ -11008,11 +11163,16 @@
         },
         {
           "sequence": 33,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "19:30",
+          "name": "復華一街24號",
+          "village": "復國里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區復華一街24號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "二、六",
+          "source_pdf_page": 50
         },
         {
           "sequence": 34,
@@ -11050,11 +11210,16 @@
       "stops": [
         {
           "sequence": 1,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "14:30",
+          "name": "高速二街860巷",
+          "village": "建國里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區高速二街860巷",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "二、六",
+          "source_pdf_page": 51
         },
         {
           "sequence": 2,
@@ -11074,19 +11239,29 @@
         },
         {
           "sequence": 4,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "16:20",
+          "name": "中華路154巷18弄1號",
+          "village": "成功里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區中華路154巷18弄1號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "二、六",
+          "source_pdf_page": 51
         },
         {
           "sequence": 5,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "16:24",
+          "name": "中華路134巷65號",
+          "village": "成功里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區中華路134巷65號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "二、六",
+          "source_pdf_page": 51
         },
         {
           "sequence": 6,
@@ -11098,11 +11273,16 @@
         },
         {
           "sequence": 7,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "16:43",
+          "name": "復興路429巷56號",
+          "village": "復興里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區復興路429巷56號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "二、六",
+          "source_pdf_page": 51
         },
         {
           "sequence": 8,
@@ -11146,27 +11326,42 @@
         },
         {
           "sequence": 13,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "17:10",
+          "name": "復國路53巷9號",
+          "village": "復興里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區復國路53巷9號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "二、六",
+          "source_pdf_page": 51
         },
         {
           "sequence": 14,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "17:15",
+          "name": "復興路128巷54號",
+          "village": "光復里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區復興路128巷54號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "二、六",
+          "source_pdf_page": 51
         },
         {
           "sequence": 15,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "17:22",
+          "name": "復興路71巷88弄1號",
+          "village": "建國里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區復興路71巷88弄1號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "二、六",
+          "source_pdf_page": 51
         },
         {
           "sequence": 16,
@@ -11218,11 +11413,16 @@
         },
         {
           "sequence": 22,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "19:02",
+          "name": "復興路33巷42號",
+          "village": "建國里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "SOURCE_RECORDED_NOT_PDF_VERIFIED",
+          "address": "臺南市永康區復興路33巷42號",
+          "departure_time": null,
+          "garbage_days_raw": "一、二、四、六",
+          "recycling_days_raw": "二、六",
+          "source_pdf_page": 51
         },
         {
           "sequence": 23,
@@ -12960,5 +13160,7 @@
         }
       ]
     }
-  ]
+  ],
+  "merged_source_records": 40,
+  "missing_stop_details": 1546
 }
