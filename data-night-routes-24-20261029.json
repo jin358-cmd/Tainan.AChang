@@ -30,7 +30,7 @@
     42,
     27
   ],
-  "notes": "40 prior JSON records plus 5 new manual PDF page 8 transcriptions; new records require second review. Remaining entries are placeholders.",
+  "notes": "Route 2 batch imported from official MOENV route 02 online list; previously misread road names replaced by authoritative route names. All records await post-transcription batch verification. Other routes remain incomplete.",
   "routes": [
     {
       "car": 1,
@@ -609,649 +609,792 @@
         {
           "sequence": 1,
           "time": "14:28",
-          "name": "大灣路三段467號",
+          "name": "永大路三段467號",
           "village": "埔園里",
           "recycling_weekdays": null,
-          "verification_status": "MANUAL_PDF_TRANSCRIPTION_PENDING_SECOND_REVIEW",
-          "source_pdf_page": 8
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_pdf_page": 8,
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC"
         },
         {
           "sequence": 2,
           "time": "14:30",
-          "name": "大灣路三段405號",
+          "name": "永大路三段405號",
           "village": "埔園里",
           "recycling_weekdays": null,
-          "verification_status": "MANUAL_PDF_TRANSCRIPTION_PENDING_SECOND_REVIEW",
-          "source_pdf_page": 8
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_pdf_page": 8,
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC"
         },
         {
           "sequence": 3,
           "time": "14:33",
-          "name": "大灣路三段299號",
+          "name": "永大路三段299號",
           "village": "埔園里",
           "recycling_weekdays": null,
-          "verification_status": "MANUAL_PDF_TRANSCRIPTION_PENDING_SECOND_REVIEW",
-          "source_pdf_page": 8
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_pdf_page": 8,
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC"
         },
         {
           "sequence": 4,
           "time": "14:34",
-          "name": "大灣路三段241號",
+          "name": "永大路三段241號",
           "village": "埔園里",
           "recycling_weekdays": null,
-          "verification_status": "MANUAL_PDF_TRANSCRIPTION_PENDING_SECOND_REVIEW",
-          "source_pdf_page": 8
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_pdf_page": 8,
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC"
         },
         {
           "sequence": 5,
           "time": "14:36",
-          "name": "大灣路三段189號",
+          "name": "永大路三段189號",
           "village": "埔園里",
           "recycling_weekdays": null,
-          "verification_status": "MANUAL_PDF_TRANSCRIPTION_PENDING_SECOND_REVIEW",
-          "source_pdf_page": 8
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_pdf_page": 8,
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC"
         },
         {
           "sequence": 6,
           "time": "14:37",
-          "name": "大灣路三段107號",
+          "name": "永大路三段107號",
           "village": "埔園里",
           "recycling_weekdays": null,
-          "verification_status": "MANUAL_PDF_TRANSCRIPTION_PENDING_SECOND_REVIEW",
-          "source_pdf_page": 8
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_pdf_page": 8,
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC"
         },
         {
           "sequence": 7,
           "time": "14:39",
-          "name": "大灣路三段79號",
+          "name": "永大路三段7號",
           "village": "埔園里",
           "recycling_weekdays": null,
-          "verification_status": "MANUAL_PDF_TRANSCRIPTION_PENDING_SECOND_REVIEW",
-          "source_pdf_page": 8
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_pdf_page": 8,
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC"
         },
         {
           "sequence": 8,
           "time": "14:41",
-          "name": "大灣路三段703號",
+          "name": "永大路二段1073號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "MANUAL_PDF_TRANSCRIPTION_PENDING_SECOND_REVIEW",
-          "source_pdf_page": 8
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_pdf_page": 8,
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC"
         },
         {
           "sequence": 9,
           "time": "14:44",
-          "name": "大灣路三段913號",
+          "name": "永大路二段913號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "MANUAL_PDF_TRANSCRIPTION_PENDING_SECOND_REVIEW",
-          "source_pdf_page": 8
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_pdf_page": 8,
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC"
         },
         {
           "sequence": 10,
           "time": "14:47",
-          "name": "大灣路三段681號",
+          "name": "永大路二段811號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "MANUAL_PDF_TRANSCRIPTION_PENDING_SECOND_REVIEW",
-          "source_pdf_page": 8
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_pdf_page": 8,
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC"
         },
         {
           "sequence": 11,
           "time": "14:49",
-          "name": "大灣路三段641號",
+          "name": "永大路二段641號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "MANUAL_PDF_TRANSCRIPTION_PENDING_SECOND_REVIEW",
-          "source_pdf_page": 8
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_pdf_page": 8,
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC"
         },
         {
           "sequence": 12,
           "time": "14:50",
-          "name": "大灣路三段579號",
+          "name": "永大路二段579號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "MANUAL_PDF_TRANSCRIPTION_PENDING_SECOND_REVIEW",
-          "source_pdf_page": 8
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_pdf_page": 8,
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC"
         },
         {
           "sequence": 13,
           "time": "14:51",
-          "name": "大灣路三段433號",
+          "name": "永大路二段443號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "MANUAL_PDF_TRANSCRIPTION_PENDING_BATCH_REVIEW",
-          "source_pdf_page": 8
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_pdf_page": 8,
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC"
         },
         {
           "sequence": 14,
           "time": "14:53",
-          "name": "大灣路三段313號",
+          "name": "永大路二段313號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "MANUAL_PDF_TRANSCRIPTION_PENDING_BATCH_REVIEW",
-          "source_pdf_page": 8
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_pdf_page": 8,
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC"
         },
         {
           "sequence": 15,
           "time": "14:54",
-          "name": "大灣路三段285號",
+          "name": "永大路二段285號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "MANUAL_PDF_TRANSCRIPTION_PENDING_BATCH_REVIEW",
-          "source_pdf_page": 8
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_pdf_page": 8,
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC"
         },
         {
           "sequence": 16,
-          "time": null,
-          "name": null,
+          "time": "14:56",
+          "name": "永大路二段245號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 17,
-          "time": null,
-          "name": null,
+          "time": "14:57",
+          "name": "永大路二段179號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 18,
-          "time": null,
-          "name": null,
+          "time": "14:58",
+          "name": "永大路二段133號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 19,
-          "time": null,
-          "name": null,
+          "time": "15:00",
+          "name": "永大路二段93號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 20,
-          "time": null,
-          "name": null,
+          "time": "15:02",
+          "name": "永大路二段25號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 21,
-          "time": null,
-          "name": null,
+          "time": "15:04",
+          "name": "大灣路798號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 22,
-          "time": null,
-          "name": null,
+          "time": "15:05",
+          "name": "大灣路848號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 23,
-          "time": null,
-          "name": null,
+          "time": "15:07",
+          "name": "大灣路914號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 24,
-          "time": null,
-          "name": null,
+          "time": "15:10",
+          "name": "大灣路962號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 25,
-          "time": null,
-          "name": null,
+          "time": "15:14",
+          "name": "大灣路1022號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 26,
-          "time": null,
-          "name": null,
+          "time": "15:17",
+          "name": "大灣路1060號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 27,
-          "time": null,
-          "name": null,
+          "time": "15:18",
+          "name": "復興路14號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 28,
-          "time": null,
-          "name": null,
+          "time": "15:21",
+          "name": "復興路31號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 29,
-          "time": null,
-          "name": null,
+          "time": "15:25",
+          "name": "崑大路141號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 30,
-          "time": null,
-          "name": null,
+          "time": "15:27",
+          "name": "崑大路118號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 31,
-          "time": null,
-          "name": null,
+          "time": "15:29",
+          "name": "大灣路951號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 32,
-          "time": null,
-          "name": null,
+          "time": "15:33",
+          "name": "大灣路927號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 33,
-          "time": null,
-          "name": null,
+          "time": "15:36",
+          "name": "大灣路869號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 34,
-          "time": null,
-          "name": null,
+          "time": "15:37",
+          "name": "大灣路759號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 35,
-          "time": null,
-          "name": null,
+          "time": "15:38",
+          "name": "大灣路721號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 36,
-          "time": null,
-          "name": null,
+          "time": "15:40",
+          "name": "大灣路677號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 37,
-          "time": null,
-          "name": null,
+          "time": "15:42",
+          "name": "大灣路601號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 38,
-          "time": null,
-          "name": null,
+          "time": "15:43",
+          "name": "南興路99號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 39,
-          "time": null,
-          "name": null,
+          "time": "15:47",
+          "name": "南興路13號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 40,
-          "time": null,
-          "name": null,
+          "time": "15:48",
+          "name": "南興路70號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 8
         },
         {
           "sequence": 41,
-          "time": null,
-          "name": null,
+          "time": "15:56",
+          "name": "南興路138號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 42,
-          "time": null,
-          "name": null,
+          "time": "16:48",
+          "name": "國光5街2號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 43,
-          "time": null,
-          "name": null,
+          "time": "16:55",
+          "name": "大灣路942巷371弄180號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 44,
-          "time": null,
-          "name": null,
+          "time": "17:00",
+          "name": "大灣路942巷347號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 45,
-          "time": null,
-          "name": null,
+          "time": "17:08",
+          "name": "大灣路942巷27號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 46,
-          "time": null,
-          "name": null,
+          "time": "17:10",
+          "name": "大仁街5號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 47,
-          "time": null,
-          "name": null,
+          "time": "17:18",
+          "name": "大仁街218號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 48,
-          "time": null,
-          "name": null,
+          "time": "17:19",
+          "name": "國光五街61號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 49,
-          "time": null,
-          "name": null,
+          "time": "17:21",
+          "name": "永大路一段285號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 50,
-          "time": null,
-          "name": null,
+          "time": "17:26",
+          "name": "永大路一段9號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 51,
-          "time": null,
-          "name": null,
+          "time": "17:29",
+          "name": "永大路一段126號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 52,
-          "time": null,
-          "name": null,
+          "time": "17:31",
+          "name": "大灣東路50號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 53,
-          "time": null,
-          "name": null,
+          "time": "17:34",
+          "name": "大灣東路222號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 54,
-          "time": null,
-          "name": null,
+          "time": "17:39",
+          "name": "大灣東路460號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 55,
-          "time": null,
-          "name": null,
+          "time": "17:42",
+          "name": "大灣東路606號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 56,
-          "time": null,
-          "name": null,
+          "time": "17:46",
+          "name": "大灣東路279號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 57,
-          "time": null,
-          "name": null,
+          "time": "17:49",
+          "name": "大灣東路63號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 58,
-          "time": null,
-          "name": null,
+          "time": "17:55",
+          "name": "永大路一段330號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 59,
-          "time": null,
-          "name": null,
+          "time": "18:58",
+          "name": "立興街52號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 60,
-          "time": null,
-          "name": null,
+          "time": "18:59",
+          "name": "立興街70號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 61,
-          "time": null,
-          "name": null,
+          "time": "19:00",
+          "name": "立興街94號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 62,
-          "time": null,
-          "name": null,
+          "time": "19:02",
+          "name": "立興街144號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 63,
-          "time": null,
-          "name": null,
+          "time": "19:05",
+          "name": "大灣路770號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 64,
-          "time": null,
-          "name": null,
+          "time": "19:07",
+          "name": "永大二段90號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 65,
-          "time": null,
-          "name": null,
+          "time": "19:14",
+          "name": "永大二段380號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 66,
-          "time": null,
-          "name": null,
+          "time": "19:16",
+          "name": "永大二段432號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 67,
-          "time": null,
-          "name": null,
+          "time": "19:18",
+          "name": "永大二段580號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 68,
-          "time": null,
-          "name": null,
+          "time": "19:21",
+          "name": "永大二段828號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 69,
-          "time": null,
-          "name": null,
+          "time": "19:23",
+          "name": "永大二段966號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 70,
-          "time": null,
-          "name": null,
+          "time": "19:25",
+          "name": "永大二段1050號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 71,
-          "time": null,
-          "name": null,
+          "time": "19:28",
+          "name": "永大二段1162號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 72,
-          "time": null,
-          "name": null,
+          "time": "19:30",
+          "name": "永大二段1346號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 73,
-          "time": null,
-          "name": null,
+          "time": "19:32",
+          "name": "永大二段1416號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 74,
-          "time": null,
-          "name": null,
+          "time": "19:35",
+          "name": "永大二段1528號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 75,
-          "time": null,
-          "name": null,
+          "time": "19:41",
+          "name": "永大路三段60號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 76,
-          "time": null,
-          "name": null,
+          "time": "19:43",
+          "name": "永大路三段328號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 77,
-          "time": null,
-          "name": null,
+          "time": "19:50",
+          "name": "永大路三段562號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 78,
-          "time": null,
-          "name": null,
+          "time": "19:52",
+          "name": "永大路三段618巷12號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         },
         {
           "sequence": 79,
-          "time": null,
-          "name": null,
+          "time": "19:55",
+          "name": "永大路三段618巷72號",
           "village": null,
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "BATCH_TRANSCRIBED_UNVERIFIED",
+          "source_official_url": "https://hwms.moenv.gov.tw/dispPageBox/route/routeCP.aspx?dbid=6731489550&ddsPageID=LINEPIC",
+          "source_pdf_page": 9
         }
       ]
     },
@@ -13176,6 +13319,6 @@
       ]
     }
   ],
-  "merged_source_records": 55,
-  "missing_stop_details": 1531
+  "merged_source_records": 119,
+  "missing_stop_details": 1467
 }
