@@ -1,0 +1,9 @@
+{
+  "version": "2026-10-29",
+  "scope": "Yongkang nighttime 24 vehicles; staging only",
+  "status": "PENDING_STOP_TRANSCRIPTION",
+  "total_stops_expected": 1586,
+  "source_file": "永康夜間24車逐站轉錄稽核_20261029.csv",
+  "source_note": "Audit counts only; no complete stop addresses/times. Do not display as verified stop schedule.",
+  "routes": []
+}
