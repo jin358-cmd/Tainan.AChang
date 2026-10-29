@@ -48,6 +48,7 @@
 <label class="planner-field"><span>拜訪日期</span><input type="date" id="planDate" /></label>
 <label class="planner-field"><span>指定里別</span><select id="plannerAreaSelect" aria-label="選擇跟巡里別"><option value="all">全部</option></select></label>
 <div class="planner-shifts"><strong>清運時段</strong><div class="shift-row"><button class="shift on" data-shift="日間"><span class="legend-pin day">☀</span> 日間</button><button class="shift" data-shift="夜間"><span class="legend-pin night">☾</span> 夜間</button></div></div>
+<div id="dayRouteCategoryPicker" class="planner-route-picker" aria-label="日間路線分類"><strong>日間路線分類</strong><div class="shift-row"><button type="button" class="shift on" data-day-category="six">🚛 日間 1～6 車</button><button type="button" class="shift" data-day-category="ab">📍 週三／五 A／B 線</button></div><p class="mini-note">日間 1～6 車目前顯示經截圖核對的首站；沿線停靠站待逐筆確認。週三／五 A／B 原資料保留。</p></div>
 <div class="planner-route-picker"><strong>選擇車次</strong><div id="routeButtons" class="route-buttons" aria-label="本時段車次清單"></div></div>
 </div>
  
@@ -69,6 +70,6 @@
 <div id="toast" class="toast" role="status" hidden></div>
 
 <script defer src="./day-routes.js"></script>
-<script defer src="./app.js?v=203"></script>
+<script defer src="./app.js?v=204"></script>
 </body>
 </html>
