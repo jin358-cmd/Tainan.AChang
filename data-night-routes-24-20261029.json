@@ -653,19 +653,21 @@
         },
         {
           "sequence": 6,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "14:37",
+          "name": "大灣路三段107號",
+          "village": "埔園里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "MANUAL_PDF_TRANSCRIPTION_PENDING_SECOND_REVIEW",
+          "source_pdf_page": 8
         },
         {
           "sequence": 7,
-          "time": null,
-          "name": null,
-          "village": null,
+          "time": "14:39",
+          "name": "大灣路三段79號",
+          "village": "埔園里",
           "recycling_weekdays": null,
-          "verification_status": "PENDING_SOURCE_TRANSCRIPTION"
+          "verification_status": "MANUAL_PDF_TRANSCRIPTION_PENDING_SECOND_REVIEW",
+          "source_pdf_page": 8
         },
         {
           "sequence": 8,
@@ -13166,6 +13168,6 @@
       ]
     }
   ],
-  "merged_source_records": 45,
-  "missing_stop_details": 1541
+  "merged_source_records": 47,
+  "missing_stop_details": 1539
 }
