@@ -53,6 +53,16 @@ test('planner initializes the selected shift as daytime without overriding later
  assert.doesNotMatch(app,/renderPlanner\(\)[\s\S]{0,80}shift='日間'/);
 });
 
+test('route-time preferences are local, bounded, subject-isolated, and never business data',()=>{
+ const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
+ assert.match(app,/VISIT_TIME_PREF_KEY = 'achang-visit-time-preferences-v1'/);
+ assert.match(app,/visitPreferenceSubject\(\)[\s\S]*Math\.imul\(hash,16777619\)/);
+ assert.match(app,/group==='ab'\?`weekday-\$\{visitPreferenceWeekday\(\)\}`:'all-dates'/);
+ assert.match(app,/slice\(0,100\)/);
+ assert.match(app,/rememberVisitTimePreference\(\);renderPlanner\(\)/);
+ assert.doesNotMatch(app,/onlineApi\([^\n]*visitTimePreference/i);
+});
+
 test('frontend distinguishes immutable PDF rows from active overlay total and defaults all-village preview safely',()=>{
  const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
  assert.match(app,/plannerArea='all'/);assert.match(app,/dayShiftWindow\(\)\{return shift==='日間'&&dayRouteCategory==='six'\?\{start:'',end:'08:05'\}/);assert.match(app,/原始 PDF 160 筆保持不變/);assert.match(app,/plannerArea!=='all'\?rosterAvailable\(area\):\[\]/);
