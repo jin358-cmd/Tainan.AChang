@@ -5,8 +5,19 @@ if(!panel)return;
 const status=panel.querySelector('[data-gps-status]');
 const list=panel.querySelector('[data-gps-vehicles]');
 const clean=v=>String(v??'');
+let vehicleMarkers=[];
+function drawMap(items){
+ for(const m of vehicleMarkers){try{m.remove()}catch{}}vehicleMarkers=[];
+ const map=window.achangGpsMap?.();if(!map||!window.maplibregl)return;
+ for(const v of items.filter(x=>x.live)){
+  const el=document.createElement('div');el.textContent='🚛';el.title='垃圾車 '+(v.car||'')+'｜'+v.time;
+  el.style.cssText='font-size:25px;filter:drop-shadow(0 1px 3px #444);cursor:pointer';
+  const marker=new window.maplibregl.Marker({element:el}).setLngLat([v.longitude,v.latitude]).addTo(map);
+  vehicleMarkers.push(marker);
+ }
+}
 function draw(items){
-  list.replaceChildren();
+  list.replaceChildren();drawMap(items);
   for(const v of items){
     const row=document.createElement('div');row.className='gps-vehicle-row';
     const a=document.createElement('a');a.target='_blank';a.rel='noopener noreferrer';
@@ -29,4 +40,5 @@ async function refresh(){
 }
 panel.querySelector('[data-gps-refresh]').addEventListener('click',refresh);
 refresh();
+setInterval(()=>{if(!document.hidden)refresh()},30000);
 })();
