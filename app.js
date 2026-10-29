@@ -28,7 +28,7 @@ function loadState(){for(const k of [KEY,PRIOR_KEY,LEGACY_KEY]){try{const raw=lo
 const MAP_LOAD_TIMEOUT_MS=8000;
 const MAPLIBRE_JS='https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.js';
 const MAPLIBRE_CSS='https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.css';
-let state=loadState(),data=null,baseStops=[],dayRouteDocument=null,officialRouteDocument=null,dayRouteCategory='six',dayCatalogStatus={weekday:'',active:0,pending:0,notice:'',closedReason:''},areas=[],routes=[],page='areas',selectedArea='復興里',shift='夜間',date=today(),chosenRoute='',plannerArea='復興里',visitTimeStart='',visitTimeEnd='',visitTimeCustomized=false,areaPage=0,teamArea='',toastTimer=null,installPrompt=null,map=null,markers=[],mapFailed=false,mapLoaded=false,mapLoadTimer=null,mapAttempt=0,mapInitPromise=null,mapFailureMessage='',pinTarget=null,layerState={volunteer:true,day:false,night:false,gps:false},pickerKind='',volunteerId='',volunteerPhone='';
+let state=loadState(),data=null,baseStops=[],dayRouteDocument=null,dayShiftWindows=null,officialRouteDocument=null,dayRouteCategory='six',dayCatalogStatus={weekday:'',active:0,pending:0,notice:'',closedReason:''},areas=[],routes=[],page='areas',selectedArea='復興里',shift='夜間',date=today(),chosenRoute='',plannerArea='復興里',visitTimeStart='',visitTimeEnd='',visitTimeCustomized=false,areaPage=0,teamArea='',toastTimer=null,installPrompt=null,map=null,markers=[],mapFailed=false,mapLoaded=false,mapLoadTimer=null,mapAttempt=0,mapInitPromise=null,mapFailureMessage='',pinTarget=null,layerState={volunteer:true,day:false,night:false,gps:false},pickerKind='',volunteerId='',volunteerPhone='';
 const personNorm=p=>({id:String(p.id||`P${Date.now()}`),name:String(p.name||'').trim().slice(0,80),phone:String(p.phone||'').slice(0,80),address:String(p.address||'').slice(0,300),residentArea:String(p.residentArea||'待確認'),assignment:areas.includes(p.assignment)?p.assignment:'',serviceLat:coord(p.serviceLat)?p.serviceLat:null,serviceLon:coord(p.serviceLon)?p.serviceLon:null});
 const residentLabel=p=>{const s=String(p?.residentArea||'').trim().replace(/里里$/,'里');return /十里以外|十里外|待確認/.test(s)?'十里外':s&&s!=='未填寫'?s:''};
 const residentHtml=p=>residentLabel(p)?`原里：${esc(residentLabel(p))} · `:'';
@@ -50,12 +50,15 @@ function routeRows(){const rows=sourceRouteRows(),adapter=window.AChangRouteTime
 function sourceExcluded(row){return window.AChangRouteTime?.struck(row)===true}
 function schedulableRouteRows(){return routeRows().filter(row=>!sourceExcluded(row))}
 function resetVisitTime(){visitTimeStart='';visitTimeEnd='';visitTimeCustomized=false}
+function dayShiftWindow(){const row=sourceRouteRows()[0];return shift==='日間'&&dayRouteCategory==='six'?dayShiftWindows?.routes?.[row?.['車次']]||null:null}
+function timeOptionsWithEndpoint(options,value){const result=[...options];if(value&&!result.includes(value))result.push(value);return result.sort((a,b)=>a.localeCompare(b))}
 function renderVisitTimeFilter(rows){
  const start=$('#visitStartTime'),end=$('#visitEndTime'),hint=$('#visitTimeHint'),adapter=window.AChangRouteTime;
  if(!start||!end||!hint||!adapter)return;
- const fixedDay=rows.some(row=>row['固定日間']),startOptions=fixedDay?adapter.startTimes(rows):adapter.times(rows),endOptions=fixedDay?adapter.endTimes(rows):adapter.times(rows);
+ const fixedDay=rows.some(row=>row['固定日間']),windowPreset=dayShiftWindow(),sourceOptions=adapter.times(rows);
+ const startOptions=fixedDay?adapter.startTimes(rows):timeOptionsWithEndpoint(sourceOptions,windowPreset?.start),endOptions=fixedDay?adapter.endTimes(rows):timeOptionsWithEndpoint(sourceOptions,windowPreset?.end);
  const allowedStart=new Set(startOptions),allowedEnd=new Set(endOptions);
- if(fixedDay&&!visitTimeCustomized){visitTimeStart=startOptions[0]||'';visitTimeEnd=endOptions.at(-1)||''}
+ if(!visitTimeCustomized&&(fixedDay||windowPreset)){visitTimeStart=windowPreset?.start||startOptions[0]||'';visitTimeEnd=windowPreset?.end||endOptions.at(-1)||''}
  if(visitTimeStart&&!allowedStart.has(visitTimeStart))visitTimeStart='';
  if(visitTimeEnd&&!allowedEnd.has(visitTimeEnd))visitTimeEnd='';
  const optionHtml=options=>'<option value="">全部時段</option>'+options.map(value=>`<option value="${esc(value)}">${esc(value)}</option>`).join('');
@@ -678,7 +681,7 @@ async function restoreSavedSessionOnResume(){
 }
 
 async function boot(){try{
- const [pub,dayRoutes,officialDay,officialNight]=await Promise.all([fetch('./data-public.json',{cache:'no-store'}),fetch('./data-day-routes-20250402.json',{cache:'no-store'}),fetch('./data-official-day-20261030.source.json',{cache:'no-store'}),fetch('./data-official-night-20261030.source.json',{cache:'no-store'})]);if(!pub.ok||!dayRoutes.ok||!officialDay.ok||!officialNight.ok)throw Error('地圖資料無法讀取');data=await pub.json();areas=data.areas;baseStops=[...(data.stops||[])];dayRouteDocument=await dayRoutes.json();officialRouteDocument={day:await officialDay.json(),night:await officialNight.json()};applyDayRoutes();
+ const [pub,dayRoutes,shiftWindows,officialDay,officialNight]=await Promise.all([fetch('./data-public.json',{cache:'no-store'}),fetch('./data-day-routes-20250402.json',{cache:'no-store'}),fetch('./data-day-shift-windows-20261029.json',{cache:'no-store'}),fetch('./data-official-day-20261030.source.json',{cache:'no-store'}),fetch('./data-official-night-20261030.source.json',{cache:'no-store'})]);if(!pub.ok||!dayRoutes.ok||!shiftWindows.ok||!officialDay.ok||!officialNight.ok)throw Error('地圖資料無法讀取');data=await pub.json();areas=data.areas;baseStops=[...(data.stops||[])];dayRouteDocument=await dayRoutes.json();dayShiftWindows=await shiftWindows.json();officialRouteDocument={day:await officialDay.json(),night:await officialNight.json()};applyDayRoutes();
  state=makeState([]);state.demo=false;areaPage=Math.floor(areas.indexOf(selectedArea)/CARD_PAGE_SIZE);const pa=$('#plannerAreaSelect');pa.innerHTML=areas.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('')+'<option value="all">全部</option>';
  const sel=$('#peopleAreaFilter');sel.innerHTML='<option value="all">全部里別</option>'+areas.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('');
  $('#peopleFilter').value='pending';bind();showAuth();const googleHandled=await completeGoogleOAuth();if(!googleHandled&&!previewOnly())await authStart();if(previewOnly())previewLoginButton();lastSessionCheck=Date.now();document.addEventListener('visibilitychange',()=>{restoreSavedSessionOnResume();if(document.visibilityState==='hidden')stopGpsRefresh()});window.addEventListener('pageshow',e=>{if(e.persisted)restoreSavedSessionOnResume()});
