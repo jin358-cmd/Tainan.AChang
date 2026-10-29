@@ -265,6 +265,7 @@ function areaCentroid(a){const feature=data.geo.features.find(f=>f.properties.na
 function startPin(key){const r=data.stops.find(x=>stopKey(x)===key);if(!r)return;pinTarget=key;go('areas');toast('請於地圖點選站點實際位置')}
 function applyPin(lon,lat){if(!pinTarget)return;const r=data.stops.find(x=>stopKey(x)===pinTarget);if(!r)return;const key=pinTarget;if(!confirm(`將「${r['停靠點原文']}」標記於 ${lat.toFixed(5)}, ${lon.toFixed(5)}？此座標需再核對。`))return;state.pins[key]={lon:+lon.toFixed(6),lat:+lat.toFixed(6),status:'人工標點待核對'};pinTarget=null;save();updateMap();toast('已標記站點（待現場核對）')}
 function clearMapLoadTimer(){if(mapLoadTimer){clearTimeout(mapLoadTimer);mapLoadTimer=null}}
+window.achangGpsMap=()=>map;
 function teardownMap(){clearMapLoadTimer();markers.forEach(marker=>{try{marker.remove()}catch(e){}});markers=[];const current=map;map=null;mapLoaded=false;if(current){try{current.remove()}catch(e){console.warn('MapLibre cleanup error',e?.message||'')}}$('#mapLibre')?.replaceChildren()}
 function showMapCanvas(){const canvas=$('#mapLibre'),fallback=$('#mapFallback');if(canvas)canvas.style.display='block';if(fallback){fallback.hidden=true;fallback.innerHTML='';fallback.onclick=null}mapFailed=false;mapFailureMessage='';$('#mapLegendStatus').textContent=''}
 function fatalMapStartupError(message){return /worker|webgl|context lost|securityerror|content security policy|\bcsp\b|not supported|unsupported/i.test(message||'')}
