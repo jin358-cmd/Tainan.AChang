@@ -1,0 +1,8 @@
+{
+  "archived_at": "2026-10-30",
+  "reason": "Owner-authorized replacement by full PDF transcription; retained for rollback and historical lookup only.",
+  "source_file": "data-public.json",
+  "baseline_commit": "8209d878",
+  "active_in_planner": false,
+  "notes": "No member, volunteer, assignment, task, or authentication data is included in this archive marker. The original stop rows remain unchanged in data-public.json."
+}

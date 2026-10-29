@@ -60,13 +60,11 @@ test('GPS adapter emits bounded non-sensitive timing telemetry for success and f
  assert.doesNotMatch(source,/console\.(?:info|warn)\([^\n]*(?:raw|payload|authorization|token)/i);
 });
 
-test('GPS layer polls every six minutes, avoids overlaps, pauses hidden tabs, and never fabricates movement',()=>{
+test('GPS layer is hidden and runtime polling is disabled while rollback adapter remains available',()=>{
  const app=read('app.js'),html=read('index.html'),api=read('api/gps-vehicles.js');
- assert.match(html,/id="layerGps"[^>]*checked/);assert.match(html,/🚛/);assert.match(html,/id="gpsLayerStatus"/);
- assert.match(app,/GPS_REFRESH_MS=360000/);assert.match(app,/if\(gpsRequest\)return gpsRequest/);assert.match(app,/document\.visibilityState==='hidden'/);
- assert.match(app,/保留上次約略位置/);assert.match(app,/資料時間/);assert.match(app,/非導航用途/);
- assert.match(app,/function gpsVehicleStale\(vehicle\)/);assert.match(app,/const stale=gpsVehicleStale\(v\)/);assert.match(app,/console\.warn\('GPS 更新失敗',gpsLastError\);updateMap\(\)/);
- assert.doesNotMatch(app,/gpsLatestReportedAt\s*=\s*new Date|reported_at\s*=\s*new Date/);
+ assert.doesNotMatch(html,/id="layerGps"/);assert.doesNotMatch(html,/id="gpsLayerStatus"/);assert.doesNotMatch(html,/>垃圾車<\/label>/);
+ assert.doesNotMatch(app,/onlineApi\('gps-vehicles'\)/);assert.doesNotMatch(app,/gpsToggle\.onchange|loadGpsVehicles|scheduleGpsRefresh|startGpsRefresh/);
+ assert.doesNotMatch(app,/垃圾車 GPS 更新失敗|官方 GPS 約略位置|非導航用途/);
  assert.doesNotMatch(api,/data-gps-snapshot|owner_snapshot/);assert.match(api,/redirect:'error'/);assert.match(api,/AbortController/);
 });
 

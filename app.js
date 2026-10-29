@@ -28,7 +28,7 @@ function loadState(){for(const k of [KEY,PRIOR_KEY,LEGACY_KEY]){try{const raw=lo
 const MAP_LOAD_TIMEOUT_MS=8000;
 const MAPLIBRE_JS='https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.js';
 const MAPLIBRE_CSS='https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.css';
-let state=loadState(),data=null,baseStops=[],dayRouteDocument=null,sixRouteDocument=null,dayRouteCategory='six',dayCatalogStatus={weekday:'',active:0,pending:0,notice:'',closedReason:''},areas=[],routes=[],page='areas',selectedArea='復興里',shift='夜間',date=today(),chosenRoute='',plannerArea='復興里',visitTimeStart='',visitTimeEnd='',areaPage=0,teamArea='',toastTimer=null,installPrompt=null,map=null,markers=[],mapFailed=false,mapLoaded=false,mapLoadTimer=null,mapAttempt=0,mapInitPromise=null,mapFailureMessage='',pinTarget=null,layerState={volunteer:true,day:false,night:false,gps:true},pickerKind='',volunteerId='',volunteerPhone='';
+let state=loadState(),data=null,baseStops=[],dayRouteDocument=null,officialRouteDocument=null,dayRouteCategory='six',dayCatalogStatus={weekday:'',active:0,pending:0,notice:'',closedReason:''},areas=[],routes=[],page='areas',selectedArea='復興里',shift='夜間',date=today(),chosenRoute='',plannerArea='復興里',visitTimeStart='',visitTimeEnd='',areaPage=0,teamArea='',toastTimer=null,installPrompt=null,map=null,markers=[],mapFailed=false,mapLoaded=false,mapLoadTimer=null,mapAttempt=0,mapInitPromise=null,mapFailureMessage='',pinTarget=null,layerState={volunteer:true,day:false,night:false,gps:false},pickerKind='',volunteerId='',volunteerPhone='';
 const personNorm=p=>({id:String(p.id||`P${Date.now()}`),name:String(p.name||'').trim().slice(0,80),phone:String(p.phone||'').slice(0,80),address:String(p.address||'').slice(0,300),residentArea:String(p.residentArea||'待確認'),assignment:areas.includes(p.assignment)?p.assignment:'',serviceLat:coord(p.serviceLat)?p.serviceLat:null,serviceLon:coord(p.serviceLon)?p.serviceLon:null});
 const residentLabel=p=>{const s=String(p?.residentArea||'').trim().replace(/里里$/,'里');return /十里以外|十里外|待確認/.test(s)?'十里外':s&&s!=='未填寫'?s:''};
 const residentHtml=p=>residentLabel(p)?`原里：${esc(residentLabel(p))} · `:'';
@@ -63,18 +63,12 @@ function renderVisitTimeFilter(rows){
 }
 function applyDayRoutes(){
  const adapter=window.AChangDayRoutes;
- if(!data||!adapter||!dayRouteDocument){if(data)data.stops=[...baseStops];return}
+ const official=window.AChangOfficialRoutes;
+ if(!data||!adapter||!dayRouteDocument||!officialRouteDocument||!official){if(data)data.stops=[];return}
  const result=adapter.stopsForDate(dayRouteDocument,date);
- const selectedSix=Array.isArray(sixRouteDocument?.routes)?sixRouteDocument.routes:[];
- const weekday=result.weekday;
- const sixRows=selectedSix.filter(x=>Array.isArray(x.weekdays)&&x.weekdays.includes(weekday)).map((r,i)=>({
-  '時段':'日間','車次':'日間'+r.number,'車牌':'','路線ID':'DAY:SIX:'+r.number,
-  '站點ID':'DAY:SIX:'+r.number+':START','里別':'','固定日間':true,'日間分類':'six',
-  '清運次序':1,'停靠點原文':r.name+'（首站；沿線資料待核）',
-  '到達':r.start,'離開':'','適用星期':weekday,'來源順序':i+1,
-  '定位狀態':'來源未提供座標，不顯示地圖站點','備註':'僅首站已核對；不得視為完整沿線班表'
- }));
- data.stops=[...baseStops.filter(row=>row['時段']!=='日間'),...result.stops.map(x=>({...x,'日間分類':'ab'})),...sixRows];
+ const verified=official.validate(officialRouteDocument.day,officialRouteDocument.night);
+ if(!verified.valid||verified.dayRoutes!==6||verified.nightRoutes!==24){data.stops=[];dayCatalogStatus={weekday:result.weekday,active:0,pending:0,notice:'官方 PDF 站點資料驗證失敗，已停止載入。',closedReason:''};return}
+ data.stops=[...verified.day.map(x=>({...x,'日間分類':'six'})),...verified.night,...result.stops.map(x=>({...x,'日間分類':'ab'}))];
  dayCatalogStatus={weekday:result.weekday,active:result.stops.length,pending:result.pending.length,notice:result.serviceNotice||'',closedReason:result.closedReason||''};
 }
 function hasSchedule(r){const p=state.plans[planId()];const record=p?.stops?.[stopKey(r)];return !!record?.chosen||!!record?.people?.length||!!p?.teams?.[r['里別']]?.length}
@@ -338,12 +332,12 @@ function mapFailureLabel(message){if(/載入逾時/.test(message||''))return'互
 function loadMapStyles(){const current=$('#mapLibreStyles');if(current?.dataset.loaded==='true')return Promise.resolve();current?.remove();return new Promise((resolve,reject)=>{const link=document.createElement('link');link.id='mapLibreStyles';link.rel='stylesheet';link.href=MAPLIBRE_CSS;const timer=setTimeout(()=>{link.remove();reject(Error('MapLibre 樣式載入逾時'))},MAP_LOAD_TIMEOUT_MS);link.onload=()=>{clearTimeout(timer);link.dataset.loaded='true';resolve()};link.onerror=()=>{clearTimeout(timer);link.remove();reject(Error('MapLibre 樣式無法載入'))};document.head.append(link)})}
 function loadMapLibrary(){const styles=loadMapStyles();if(window.maplibregl)return styles.then(()=>window.maplibregl);const library=new Promise((resolve,reject)=>{const prior=$('#mapLibreScript');if(prior)prior.remove();const script=document.createElement('script');script.id='mapLibreScript';script.src=MAPLIBRE_JS;script.async=true;const timer=setTimeout(()=>{script.remove();reject(Error('MapLibre 程式庫載入逾時'))},MAP_LOAD_TIMEOUT_MS);script.onload=()=>{clearTimeout(timer);window.maplibregl?resolve(window.maplibregl):reject(Error('MapLibre 載入後未初始化'))};script.onerror=()=>{clearTimeout(timer);script.remove();reject(Error('MapLibre 程式庫無法載入'))};document.head.append(script)});return Promise.all([library,styles]).then(([lib])=>lib)}
 function failMapStartup(message,attempt=mapAttempt){if(attempt!==mapAttempt||mapLoaded)return;console.warn('MapLibre startup failed',message);teardownMap();drawFallback(mapFailureLabel(message))}
-function initMap(){if(map||mapLoaded)return Promise.resolve();if(mapInitPromise)return mapInitPromise;mapInitPromise=(async()=>{showMapCanvas();let lib;try{lib=await loadMapLibrary()}catch(e){drawFallback(e?.message||'互動地圖程式庫無法載入');return}if(!(lib.supported?.()??true)){drawFallback('此瀏覽器無法啟用互動地圖');return}const attempt=++mapAttempt;try{const instance=new lib.Map({container:'mapLibre',style:'https://tiles.openfreemap.org/styles/liberty',center:[120.24,23.005],zoom:13.9,minZoom:12,maxZoom:18,maxBounds:[[120.205,22.968],[120.281,23.049]],attributionControl:false,dragRotate:false,pitchWithRotate:false});map=instance;instance.addControl(new lib.NavigationControl({showCompass:false}),'top-right');instance.addControl(new lib.AttributionControl({compact:true,customAttribution:'<a href="https://data.tainan.gov.tw/Resource/2c8a70d5-06f2-4353-9e92-c40d33bcd969" target="_blank" rel="noopener noreferrer">臺南市垃圾車位置資料</a> · 約略位置，非導航用途'}),'bottom-right');mapLoadTimer=setTimeout(()=>failMapStartup('互動地圖載入逾時',attempt),MAP_LOAD_TIMEOUT_MS);instance.on('load',()=>{if(attempt!==mapAttempt||instance!==map)return;clearMapLoadTimer();mapLoaded=true;mapFailed=false;mapFailureMessage='';if(!instance.getSource('villages'))instance.addSource('villages',{type:'geojson',data:data.geo});if(!instance.getLayer('village-fill'))instance.addLayer({id:'village-fill',type:'fill',source:'villages',paint:{'fill-color':['get','color'],'fill-opacity':0.19}});if(!instance.getLayer('village-lines'))instance.addLayer({id:'village-lines',type:'line',source:'villages',paint:{'line-color':['get','color'],'line-width':2.8}});instance.on('click','village-fill',e=>{if(pinTarget){applyPin(e.lngLat.lng,e.lngLat.lat);return}const a=e.features?.[0]?.properties?.name;if(a&&visibleMapAreas().includes(a)){openAreaPreview(a);$('#mapLegendStatus').textContent='已選取 '+a}});instance.on('click',e=>{if(pinTarget)applyPin(e.lngLat.lng,e.lngLat.lat)});instance.on('move',()=>{if(!$('#areaPopup').hidden)positionAreaPopup()});updateMap();if(page==='map')requestAnimationFrame(()=>{instance.resize();centerTodayVillage()})});instance.on('error',e=>{if(attempt!==mapAttempt||instance!==map)return;const message=e?.error?.message||'';console.warn('MapLibre map error',message);if(!mapLoaded&&fatalMapStartupError(message))failMapStartup(message,attempt)})}catch(e){if(attempt===mapAttempt){const message=e?.message||'互動地圖無法啟動';console.warn('MapLibre startup exception',message);teardownMap();drawFallback(mapFailureLabel(message))}}})().finally(()=>{mapInitPromise=null});return mapInitPromise}
+function initMap(){if(map||mapLoaded)return Promise.resolve();if(mapInitPromise)return mapInitPromise;mapInitPromise=(async()=>{showMapCanvas();let lib;try{lib=await loadMapLibrary()}catch(e){drawFallback(e?.message||'互動地圖程式庫無法載入');return}if(!(lib.supported?.()??true)){drawFallback('此瀏覽器無法啟用互動地圖');return}const attempt=++mapAttempt;try{const instance=new lib.Map({container:'mapLibre',style:'https://tiles.openfreemap.org/styles/liberty',center:[120.24,23.005],zoom:13.9,minZoom:12,maxZoom:18,maxBounds:[[120.205,22.968],[120.281,23.049]],attributionControl:false,dragRotate:false,pitchWithRotate:false});map=instance;instance.addControl(new lib.NavigationControl({showCompass:false}),'top-right');instance.addControl(new lib.AttributionControl({compact:true}),'bottom-right');mapLoadTimer=setTimeout(()=>failMapStartup('互動地圖載入逾時',attempt),MAP_LOAD_TIMEOUT_MS);instance.on('load',()=>{if(attempt!==mapAttempt||instance!==map)return;clearMapLoadTimer();mapLoaded=true;mapFailed=false;mapFailureMessage='';if(!instance.getSource('villages'))instance.addSource('villages',{type:'geojson',data:data.geo});if(!instance.getLayer('village-fill'))instance.addLayer({id:'village-fill',type:'fill',source:'villages',paint:{'fill-color':['get','color'],'fill-opacity':0.19}});if(!instance.getLayer('village-lines'))instance.addLayer({id:'village-lines',type:'line',source:'villages',paint:{'line-color':['get','color'],'line-width':2.8}});instance.on('click','village-fill',e=>{if(pinTarget){applyPin(e.lngLat.lng,e.lngLat.lat);return}const a=e.features?.[0]?.properties?.name;if(a&&visibleMapAreas().includes(a)){openAreaPreview(a);$('#mapLegendStatus').textContent='已選取 '+a}});instance.on('click',e=>{if(pinTarget)applyPin(e.lngLat.lng,e.lngLat.lat)});instance.on('move',()=>{if(!$('#areaPopup').hidden)positionAreaPopup()});updateMap();if(page==='map')requestAnimationFrame(()=>{instance.resize();centerTodayVillage()})});instance.on('error',e=>{if(attempt!==mapAttempt||instance!==map)return;const message=e?.error?.message||'';console.warn('MapLibre map error',message);if(!mapLoaded&&fatalMapStartupError(message))failMapStartup(message,attempt)})}catch(e){if(attempt===mapAttempt){const message=e?.message||'互動地圖無法啟動';console.warn('MapLibre startup exception',message);teardownMap();drawFallback(mapFailureLabel(message))}}})().finally(()=>{mapInitPromise=null});return mapInitPromise}
 function retryMap(){teardownMap();mapFailed=false;mapFailureMessage='';showMapCanvas();requestAnimationFrame(()=>{initMap().then(()=>{map?.resize();updateMap()})})}
 function marker(icon,lon,lat,type,title,onClick=null,count=0,leader=false){if(!map||!coord(lon)||!coord(lat))return;const outer=document.createElement('div');outer.className='marker-container';const tag=document.createElement('div');tag.className='map-marker '+type+(count?' group':'');tag.title=title;const span=document.createElement('span');if(icon==='avatar'){span.innerHTML='<svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><circle cx="12" cy="7.3" r="4.1" fill="currentColor"/><path d="M3.3 22v-3.5c0-4.5 3.5-7.1 8.7-7.1s8.7 2.6 8.7 7.1V22" fill="currentColor"/></svg>'}else span.textContent=icon;tag.append(span);if(count){const b=document.createElement('small');b.textContent=count;tag.append(b)}if(leader){const crown=document.createElement('b');crown.className='marker-crown';crown.textContent='👑';tag.append(crown)}outer.append(tag);if(onClick)tag.addEventListener('click',e=>{e.stopPropagation();onClick()});const m=new window.maplibregl.Marker({element:outer,anchor:'bottom'}).setLngLat([lon,lat]).addTo(map);markers.push(m)}
 /* Assigned stations are scoped to the logged-in volunteer and the local service day. */
 function visibleShiftStops(area,shiftName){
- const rows=data.stops.filter(r=>r['里別']===area&&r['時段']===shiftName);
+ const rows=data.stops.filter(r=>r['里別']===area&&r['時段']===shiftName&&!sourceExcluded(r));
  if(liveRole!=='volunteer')return rows;
  const mine=liveTasks.filter(t=>t.volunteer_id===liveMemberId&&t.visit_date===today()&&t.area===area&&t.shift===shiftName);
  const unique=new Map();
@@ -372,33 +366,19 @@ function openShiftStopPopup(area,shiftName){
  root.innerHTML='<div class="popup-top"><strong class="popup-area-name">'+esc(area)+' · '+esc(shiftName)+' '+rows.length+'站</strong><button type="button" data-close-area aria-label="關閉站點">✕</button></div><div class="assigned-stop-list">'+items+'</div>';
  root.hidden=false;requestAnimationFrame(positionAreaPopup);
 }
-const GPS_REFRESH_MS=360000,GPS_STALE_MS=900000;
-let gpsVehicles=[],gpsFetchedAt=0,gpsLatestReportedAt='',gpsRequest=null,gpsTimer=null,gpsLastError='';
-const gpsDateLabel=value=>{const date=new Date(value);return Number.isNaN(date.getTime())?'時間未知':new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(date)};
-function gpsStale(){const sourceTime=new Date(gpsLatestReportedAt).getTime();return !!gpsLastError||!sourceTime||Date.now()-sourceTime>GPS_STALE_MS}
-function gpsVehicleStale(vehicle){const sourceTime=new Date(vehicle?.reported_at).getTime();return !!gpsLastError||!sourceTime||Date.now()-sourceTime>GPS_STALE_MS}
-function updateGpsStatus(){
- const node=$('#gpsLayerStatus');if(!node)return;node.classList.toggle('error',!!gpsLastError);node.classList.toggle('stale',!gpsLastError&&gpsStale());
- if(!layerState.gps){node.textContent='垃圾車 GPS 圖層已關閉';return}
- if(gpsLastError){node.textContent='垃圾車 GPS 更新失敗；保留上次約略位置（'+gpsLastError+'）';return}
- if(!gpsFetchedAt){node.textContent='垃圾車 GPS：正在取得永康區資料…';return}
- node.textContent='垃圾車 GPS：'+gpsVehicles.length+' 輛 · 資料時間 '+gpsDateLabel(gpsLatestReportedAt)+' · 最近讀取 '+gpsDateLabel(gpsFetchedAt)+(gpsStale()?' · 資料可能已過期':' · 每 6 分鐘更新');
+function stopGpsRefresh(){}
+function updateMapLayerNotice(){
+ const node=$('#mapLayerNotice');if(!node||!data)return;
+ const messages=[];
+ for(const [label,enabled] of [['日間',layerState.day],['夜間',layerState.night]]){
+  if(!enabled)continue;
+  const rows=data.stops.filter(row=>row['時段']===label&&!sourceExcluded(row));
+  const routes=new Set(rows.map(routeKey)).size,located=rows.filter(row=>areas.includes(row['里別'])).length;
+  messages.push(located?`${label}圖層：${routes} 車次・${rows.length} 站；目前十里可依來源里別顯示 ${located} 站。`:`${label}圖層：${routes} 車次・${rows.length} 站；來源未提供可核對的十里里別或座標，未放置假標記。`);
+ }
+ node.hidden=messages.length===0;node.textContent=messages.join(' ');
 }
-function stopGpsRefresh(){clearTimeout(gpsTimer);gpsTimer=null}
-function scheduleGpsRefresh(){stopGpsRefresh();if(!liveRole||!layerState.gps)return;gpsTimer=setTimeout(async()=>{if(document.visibilityState!=='hidden')await loadGpsVehicles();scheduleGpsRefresh()},GPS_REFRESH_MS)}
-function startGpsRefresh(){stopGpsRefresh();if(!liveRole||!layerState.gps){updateGpsStatus();return}loadGpsVehicles();scheduleGpsRefresh()}
-async function loadGpsVehicles(){
- if(!liveRole||!layerState.gps||document.visibilityState==='hidden')return;
- if(gpsRequest)return gpsRequest;
- gpsRequest=onlineApi('gps-vehicles').then(result=>{
-  if(result.live!==true)throw new Error('來源未標示為即時官方資料');
-  gpsVehicles=Array.isArray(result.vehicles)?result.vehicles.filter(v=>Number.isFinite(v.longitude)&&Number.isFinite(v.latitude)):[];
-  gpsFetchedAt=Date.parse(result.fetched_at)||Date.now();gpsLatestReportedAt=result.latest_reported_at||'';gpsLastError='';
-  updateMap();
- }).catch(error=>{gpsLastError=String(error.message||'連線失敗').slice(0,120);console.warn('GPS 更新失敗',gpsLastError);updateMap()}).finally(()=>{gpsRequest=null;updateGpsStatus()});
- return gpsRequest;
-}
-function updateMap(){if(page!=='map')return;if(mapFailed){drawFallback();return}if(!map||!map.getLayer('village-fill'))return;highlightMapSelection();markers.forEach(m=>m.remove());markers=[];
+function updateMap(){if(page!=='map')return;updateMapLayerNotice();if(mapFailed){drawFallback();return}if(!map||!map.getLayer('village-fill'))return;highlightMapSelection();markers.forEach(m=>m.remove());markers=[];
  for(const a of visibleMapAreas()){
   const c=areaCentroid(a),cnt=assignedPeople(a).length,lead=leaderOf(a);
   const areaLabel=document.createElement('div');areaLabel.className='map-area-label'+(a===selectedArea?' selected':'');areaLabel.textContent=a;
@@ -418,18 +398,6 @@ function updateMap(){if(page!=='map')return;if(mapFailed){drawFallback();return}
   if((r['時段']==='日間'&&!layerState.day)||(r['時段']==='夜間'&&!layerState.night))continue;
   marker(r['時段']==='日間'?'☀':'☾',pos.lon,pos.lat,r['時段']==='日間'?'day':'night',r['到達']+' '+r['停靠點原文'],()=>openShiftStopPopup(r['里別'],r['時段']));
  }
- if(layerState.gps&&(liveRole==='admin'||liveRole==='volunteer')){
-  for(const v of gpsVehicles){
-   const label=document.createElement('div');
-   label.className='map-marker gps-truck';
-   label.textContent='🚛';
-   const stale=gpsVehicleStale(v);label.title=v.plate+' · '+v.location+' · 資料時間 '+gpsDateLabel(v.reported_at)+(stale?'（可能已過期）':'（官方 GPS 約略位置）');
-   label.style.cssText='background:#8B5CF6;color:white;border:2px solid white;border-radius:50%;padding:5px;cursor:pointer;font-size:20px;box-shadow:0 2px 7px #34215b80';
-   markers.push(new window.maplibregl.Marker({element:label}).setLngLat([v.longitude,v.latitude])
-    .setPopup(new window.maplibregl.Popup({offset:24}).setText(v.plate+' · '+v.location+' · 資料時間 '+gpsDateLabel(v.reported_at)+(stale?' · 更新異常，保留上次位置':' · 官方 GPS 約略位置，非導航用途'))).addTo(map));
-  }
- }
-
 }
 function positionAreaPopup(){const pop=$('#areaPopup');if(pop.hidden)return;if(liveRole==='admin'&&page==='map'){pop.classList.remove('owner-center-popup');const box=$('#mapBox');if(!box||!data)return;if(window.matchMedia?.('(max-width:620px)').matches){pop.style.setProperty('left','50%','important');pop.style.setProperty('top','50%','important');pop.style.setProperty('transform','translate(-50%,-50%)','important');return}pop.style.setProperty('transform','none','important');let x=box.clientWidth/2,y=box.clientHeight/2;const c=areaCentroid(selectedArea);if(map&&!mapFailed){const p=map.project(c);x=p.x;y=p.y}else{const w=box.clientWidth,h=box.clientHeight;x=(c[0]-120.224)/(120.256-120.224)*w;y=(23.022-c[1])/(23.022-22.990)*h}const pw=Math.min(430,Math.max(210,box.clientWidth-20)),ph=Math.min(pop.scrollHeight||250,box.clientHeight-12);let left=x+32;if(left+pw>box.clientWidth-6)left=x-pw-32;left=Math.max(6,Math.min(left,box.clientWidth-pw-6));let top=Math.max(7,Math.min(y-45,box.clientHeight-ph-7));pop.style.setProperty('left',left+'px','important');pop.style.setProperty('top',top+'px','important');return;}pop.classList.add('owner-center-popup');}
 function openAreaPreview(a,taskGroup=null){if(liveRole==='admin'&&page==='map'){if(!areas.includes(a))return;selectedArea=a;highlightMapSelection();const list=sortedMembers(a),visible=list.slice(0,6);const people=visible.map(p=>{const leader=p.id===leaderId(a);return '<div class="popup-contact '+(leader?'leader-row':'')+'"><strong>'+esc(p.name)+(leader?' <span class="popup-crown" aria-hidden="true">👑</span>':'')+'</strong>'+telLink(p)+'</div>'}).join('');const root=$('#areaPopup'),box=$('#mapBox');if(root.parentElement!==box)box.append(root);root.classList.remove('owner-center-popup');root.classList.add('map-attached-popup','restored-map-popup');root.style.removeProperty('left');root.style.removeProperty('top');root.innerHTML='<div class="popup-top"><div><strong class="popup-area-name">'+esc(a)+'</strong><span class="popup-count">已分配 '+list.length+' 人</span></div><button type="button" data-close-area aria-label="關閉里別名單">✕</button></div><div class="popup-contacts">'+(people||'<span class="mini-note">目前尚無服務志工</span>')+(list.length>6?'<small class="popup-more">另有 '+(list.length-6)+' 位，請至服務分區查看</small>':'')+'</div><button type="button" class="popup-detail-btn" data-view-assignment="'+esc(a)+'">前往此里分配 →</button>';root.hidden=false;requestAnimationFrame(positionAreaPopup);return;}if(taskGroup){const match=liveTasks.some(t=>t.volunteer_id===liveMemberId&&t.area===a&&[t.visit_date,t.shift,taskRouteToken(t),t.area].join('|')===taskGroup);if(!match)return;}else if(!visibleMapAreas().includes(a))return;selectedArea=a;if(page==='map')highlightMapSelection();const list=liveRole==='volunteer'?(previewDemoMode?[{id:liveMemberId,name:liveDisplayName,phone:''}]:groupContacts.filter(p=>p.area===a&&p.id!==liveMemberId)):sortedMembers(a);const people=list.map(p=>'<div class="popup-contact '+(p.isLeader?'leader-row':'')+'"><strong>'+esc(p.name)+(p.isLeader?' <span class="popup-crown" aria-hidden="true">👑</span>':'')+'</strong>'+telLink(p)+'</div>').join('');const root=$('#areaPopup');if(page!=='map'&&root.parentElement!==document.body)document.body.append(root);else if(page==='map'&&root.parentElement!==$('#mapBox'))$('#mapBox').append(root);root.innerHTML='<div class="popup-top"><div><span class="popup-eyebrow">當日小組任務</span><strong class="popup-area-name">'+esc(a)+'</strong><span class="popup-count">同組 '+list.length+' 位夥伴</span></div><button type="button" data-close-area aria-label="關閉里別名單">✕</button></div><div class="popup-contacts">'+(people||'<span class="mini-note">目前沒有其他小組成員</span>')+'</div>';root.hidden=false;root.classList.add('owner-center-popup');requestAnimationFrame(positionAreaPopup);}
@@ -521,7 +489,7 @@ function updateAccessControls(){
 
 async function secureSignOut(){stopGpsRefresh();if(previewDemoMode){previewDemoMode=false;clearInterval(liveTimer);liveTimer=null;showAuth();return;}try{await onlineApi('session','DELETE')}catch{}clearInterval(liveTimer);liveTimer=null;liveTasks=[];state=makeState([]);showAuth()}
 async function authStart(){try{
- const session=await onlineApi('session');liveRole=session.role;liveMemberId=session.memberId;liveDisplayName=session.displayName||'';startGpsRefresh();
+ const session=await onlineApi('session');liveRole=session.role;liveMemberId=session.memberId;liveDisplayName=session.displayName||'';
  $('#secureLogin').hidden=true;$('#app').hidden=false;$('#accountBadge')?.remove();const adminTop=$('#adminHeaderAction');if(adminTop){adminTop.hidden=liveRole!=='admin';}updateAccessControls();
  if(liveRole==='admin'){
   $('#volunteerLoginBtn').hidden=true;
@@ -702,10 +670,10 @@ async function restoreSavedSessionOnResume(){
 }
 
 async function boot(){try{
- const [pub,dayRoutes,sixRoutes]=await Promise.all([fetch('./data-public.json',{cache:'no-store'}),fetch('./data-day-routes-20250402.json',{cache:'no-store'}),fetch('./data-day-routes-six-20261029.json',{cache:'no-store'})]);if(!pub.ok)throw Error('地圖資料無法讀取');data=await pub.json();areas=data.areas;baseStops=[...(data.stops||[])];if(dayRoutes.ok)dayRouteDocument=await dayRoutes.json();if(sixRoutes.ok)sixRouteDocument=await sixRoutes.json();applyDayRoutes();
+ const [pub,dayRoutes,officialDay,officialNight]=await Promise.all([fetch('./data-public.json',{cache:'no-store'}),fetch('./data-day-routes-20250402.json',{cache:'no-store'}),fetch('./data-official-day-20261030.source.json',{cache:'no-store'}),fetch('./data-official-night-20261030.source.json',{cache:'no-store'})]);if(!pub.ok||!dayRoutes.ok||!officialDay.ok||!officialNight.ok)throw Error('地圖資料無法讀取');data=await pub.json();areas=data.areas;baseStops=[...(data.stops||[])];dayRouteDocument=await dayRoutes.json();officialRouteDocument={day:await officialDay.json(),night:await officialNight.json()};applyDayRoutes();
  state=makeState([]);state.demo=false;areaPage=Math.floor(areas.indexOf(selectedArea)/CARD_PAGE_SIZE);const pa=$('#plannerAreaSelect');pa.innerHTML=areas.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('')+'<option value="all">全部</option>';
  const sel=$('#peopleAreaFilter');sel.innerHTML='<option value="all">全部里別</option>'+areas.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('');
- $('#peopleFilter').value='pending';bind();const gpsToggle=$('#layerGps');if(gpsToggle)gpsToggle.onchange=e=>{layerState.gps=e.target.checked;if(layerState.gps)startGpsRefresh();else stopGpsRefresh();updateGpsStatus();updateMap()};showAuth();const googleHandled=await completeGoogleOAuth();if(!googleHandled&&!previewOnly())await authStart();if(previewOnly())previewLoginButton();lastSessionCheck=Date.now();document.addEventListener('visibilitychange',()=>{restoreSavedSessionOnResume();if(document.visibilityState==='visible'&&liveRole&&layerState.gps){if(!gpsFetchedAt||Date.now()-gpsFetchedAt>=GPS_REFRESH_MS)loadGpsVehicles();scheduleGpsRefresh()}else if(document.visibilityState==='hidden')stopGpsRefresh()});window.addEventListener('pageshow',e=>{if(e.persisted){restoreSavedSessionOnResume();startGpsRefresh()}});
+ $('#peopleFilter').value='pending';bind();showAuth();const googleHandled=await completeGoogleOAuth();if(!googleHandled&&!previewOnly())await authStart();if(previewOnly())previewLoginButton();lastSessionCheck=Date.now();document.addEventListener('visibilitychange',()=>{restoreSavedSessionOnResume();if(document.visibilityState==='hidden')stopGpsRefresh()});window.addEventListener('pageshow',e=>{if(e.persisted)restoreSavedSessionOnResume()});
  if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }catch(e){console.error(e);openSecureLogin();$('#authStatus').textContent='網站暫時無法完成登入，請重新整理後再試'}
 }

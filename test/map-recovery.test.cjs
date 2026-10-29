@@ -33,16 +33,15 @@ test('map startup has bounded failure, cleanup and retry guards', () => {
 });
 
 test('map asset revision and service-worker cache advance together', () => {
-  assert.match(html, /styles\.css\?v=208/);
-  assert.match(html, /app\.js\?v=205/);
-  assert.match(sw, /achang-pwa-shell-v150-route-time-filter/);
+  assert.match(html, /styles\.css\?v=209/);
+  assert.match(html, /app\.js\?v=206/);
+  assert.match(sw, /achang-pwa-shell-v151-map-layer-status/);
 });
 
-test('map uses one compact native attribution entry with GPS source retained', () => {
+test('map uses only the provider native compact attribution entry', () => {
   assert.doesNotMatch(html, /map-source-info|查看地圖與垃圾車資料來源/);
-  assert.match(app, /new lib\.AttributionControl\(\{compact:true,customAttribution:/);
-  assert.match(app, /臺南市垃圾車位置資料/);
-  assert.match(app, /約略位置，非導航用途/);
+  assert.match(app, /new lib\.AttributionControl\(\{compact:true\}\)/);
+  assert.doesNotMatch(app, /customAttribution/);
   assert.doesNotMatch(html, /<p class="map-foot">/);
 });
 
