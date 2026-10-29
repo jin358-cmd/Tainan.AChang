@@ -1,0 +1,221 @@
+{
+  "schema_version": "1.0",
+  "created_date": "2026-10-29",
+  "scope": "Yongkang daytime and nighttime trash collection consolidated source index",
+  "deployment": "TEST_BRANCH_ONLY_NOT_PRODUCTION",
+  "daytime": {
+    "route_count": 6,
+    "expected_stop_count": 160,
+    "actual_stops_file": "data/daytime-160-stops.json",
+    "verified_file_record_count": 160,
+    "geo_coordinates_verified": false
+  },
+  "nighttime": {
+    "source_pdf": "永康區清運路線930(夜間)(3).pdf",
+    "source_date": "2025-09-06",
+    "route_count": 24,
+    "expected_stops_from_last_sequence": 1588,
+    "actual_transcribed_stop_records": 0,
+    "record_status": "PENDING_EXTRACTION",
+    "routes": [
+      {
+        "vehicle": "夜間1",
+        "plate": "430-UG",
+        "pdf_page_start": 5,
+        "pdf_page_end": 7,
+        "expected_stops": 67,
+        "full_stops_status": "PENDING_EXTRACTION"
+      },
+      {
+        "vehicle": "夜間2",
+        "plate": "KET-3008",
+        "pdf_page_start": 8,
+        "pdf_page_end": 9,
+        "expected_stops": 79,
+        "full_stops_status": "PENDING_EXTRACTION"
+      },
+      {
+        "vehicle": "夜間6",
+        "plate": "180-UT",
+        "pdf_page_start": 10,
+        "pdf_page_end": 11,
+        "expected_stops": 55,
+        "full_stops_status": "PENDING_EXTRACTION"
+      },
+      {
+        "vehicle": "夜間8",
+        "plate": "KEN-3201",
+        "pdf_page_start": 12,
+        "pdf_page_end": 13,
+        "expected_stops": 72,
+        "full_stops_status": "PENDING_EXTRACTION"
+      },
+      {
+        "vehicle": "夜間9",
+        "plate": "KEH-2071",
+        "pdf_page_start": 14,
+        "pdf_page_end": 14,
+        "expected_stops": 40,
+        "full_stops_status": "PENDING_EXTRACTION"
+      },
+      {
+        "vehicle": "夜間10",
+        "plate": "795-N3",
+        "pdf_page_start": 15,
+        "pdf_page_end": 16,
+        "expected_stops": 58,
+        "full_stops_status": "PENDING_EXTRACTION"
+      },
+      {
+        "vehicle": "夜間11",
+        "plate": "KER-3730",
+        "pdf_page_start": 17,
+        "pdf_page_end": 18,
+        "expected_stops": 74,
+        "full_stops_status": "PENDING_EXTRACTION"
+      },
+      {
+        "vehicle": "夜間15",
+        "plate": "KEP-5796",
+        "pdf_page_start": 19,
+        "pdf_page_end": 21,
+        "expected_stops": 81,
+        "full_stops_status": "PENDING_EXTRACTION"
+      },
+      {
+        "vehicle": "夜間18",
+        "plate": "260-VL",
+        "pdf_page_start": 22,
+        "pdf_page_end": 24,
+        "expected_stops": 53,
+        "full_stops_status": "PENDING_EXTRACTION"
+      },
+      {
+        "vehicle": "夜間19",
+        "plate": "217-UW",
+        "pdf_page_start": 25,
+        "pdf_page_end": 26,
+        "expected_stops": 62,
+        "full_stops_status": "PENDING_EXTRACTION"
+      },
+      {
+        "vehicle": "夜間22",
+        "plate": "KER-3731",
+        "pdf_page_start": 27,
+        "pdf_page_end": 29,
+        "expected_stops": 96,
+        "full_stops_status": "PENDING_EXTRACTION"
+      },
+      {
+        "vehicle": "夜間23",
+        "plate": "KEC-6167",
+        "pdf_page_start": 30,
+        "pdf_page_end": 32,
+        "expected_stops": 104,
+        "full_stops_status": "PENDING_EXTRACTION"
+      },
+      {
+        "vehicle": "夜間25",
+        "plate": "KEH-6509",
+        "pdf_page_start": 33,
+        "pdf_page_end": 34,
+        "expected_stops": 55,
+        "full_stops_status": "PENDING_EXTRACTION"
+      },
+      {
+        "vehicle": "夜間26",
+        "plate": "KEP-5980",
+        "pdf_page_start": 35,
+        "pdf_page_end": 36,
+        "expected_stops": 45,
+        "full_stops_status": "PENDING_EXTRACTION"
+      },
+      {
+        "vehicle": "夜間28",
+        "plate": "182-UT",
+        "pdf_page_start": 37,
+        "pdf_page_end": 39,
+        "expected_stops": 116,
+        "full_stops_status": "PENDING_EXTRACTION"
+      },
+      {
+        "vehicle": "夜間30",
+        "plate": "249-UT",
+        "pdf_page_start": 40,
+        "pdf_page_end": 41,
+        "expected_stops": 52,
+        "full_stops_status": "PENDING_EXTRACTION"
+      },
+      {
+        "vehicle": "夜間31",
+        "plate": "218-UW",
+        "pdf_page_start": 42,
+        "pdf_page_end": 44,
+        "expected_stops": 86,
+        "full_stops_status": "PENDING_EXTRACTION"
+      },
+      {
+        "vehicle": "夜間32",
+        "plate": "219-UW",
+        "pdf_page_start": 45,
+        "pdf_page_end": 46,
+        "expected_stops": 48,
+        "full_stops_status": "PENDING_EXTRACTION"
+      },
+      {
+        "vehicle": "夜間33",
+        "plate": "181-UT",
+        "pdf_page_start": 47,
+        "pdf_page_end": 49,
+        "expected_stops": 72,
+        "full_stops_status": "PENDING_EXTRACTION"
+      },
+      {
+        "vehicle": "夜間35",
+        "plate": "433-UG",
+        "pdf_page_start": 50,
+        "pdf_page_end": 50,
+        "expected_stops": 36,
+        "full_stops_status": "PENDING_EXTRACTION"
+      },
+      {
+        "vehicle": "夜間37",
+        "plate": "KEB-5939",
+        "pdf_page_start": 51,
+        "pdf_page_end": 51,
+        "expected_stops": 36,
+        "full_stops_status": "PENDING_EXTRACTION"
+      },
+      {
+        "vehicle": "夜間38",
+        "plate": "KEB-5952",
+        "pdf_page_start": 52,
+        "pdf_page_end": 55,
+        "expected_stops": 130,
+        "full_stops_status": "PENDING_EXTRACTION"
+      },
+      {
+        "vehicle": "夜間40",
+        "plate": "KEJ-6795",
+        "pdf_page_start": 56,
+        "pdf_page_end": 57,
+        "expected_stops": 42,
+        "full_stops_status": "PENDING_EXTRACTION"
+      },
+      {
+        "vehicle": "夜間42",
+        "plate": "220-UW",
+        "pdf_page_start": 58,
+        "pdf_page_end": 58,
+        "expected_stops": 29,
+        "full_stops_status": "PENDING_EXTRACTION"
+      }
+    ],
+    "legacy_records": "40 records remain in data-public.json; do not merge with PDF as replacement",
+    "policy": "New PDF authoritative; preserve old 40 records as isolated archive; no public deploy until full transcription and verification."
+  },
+  "full_stops_expected": 1748,
+  "full_stops_import_status": "PARTIAL_DAYTIME_ONLY",
+  "map_integration_status": "PENDING",
+  "readback_status": "PENDING"
+}
