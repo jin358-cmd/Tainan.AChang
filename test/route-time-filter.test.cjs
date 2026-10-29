@@ -28,3 +28,18 @@ test('active filters preserve duplicate station numbers and source order',()=>{
 test('invalid filter values fail closed and a valid empty range is explicit',()=>{
  assert.deepEqual(filter.filter(rows,'18:6',''),[]);assert.deepEqual(filter.filter(rows,'12:00','13:00'),[]);
 });
+
+test('fixed daytime start and end options come from the source interval endpoints',()=>{
+ const intervals=[
+  {id:'first','到達':'09:15','離開':'09:45'},
+  {id:'middle','到達':'13:30','離開':'13:45'},
+  {id:'last','到達':'15:00','離開':'15:15'}
+ ];
+ assert.deepEqual(filter.startTimes(intervals),['09:15','13:30','15:00']);
+ assert.deepEqual(filter.endTimes(intervals),['09:45','13:45','15:15']);
+ assert.deepEqual(filter.filterIntervals(intervals,'13:30','13:45').map(row=>row.id),['middle']);
+ assert.deepEqual(filter.filterIntervals(intervals,'15:00','15:15').map(row=>row.id),['last']);
+ assert.deepEqual(filter.filterIntervals(intervals,'09:15','15:15').map(row=>row.id),['first','middle','last']);
+ assert.deepEqual(filter.filterIntervals(intervals).map(row=>row.id),['first','middle','last']);
+ assert.deepEqual(filter.filterIntervals(intervals,'15:15','09:15'),[]);
+});

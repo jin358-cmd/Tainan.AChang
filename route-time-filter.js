@@ -17,6 +17,17 @@
   }
   return result;
  }
+ function endpointTimes(rows,field,fallback=''){
+  const seen=new Set(),result=[];
+  for(const row of Array.isArray(rows)?rows:[]){
+   if(struck(row))continue;
+   const value=legalTime(row?.[field])||legalTime(fallback?row?.[fallback]:'');
+   if(value&&!seen.has(value)){seen.add(value);result.push(value)}
+  }
+  return result;
+ }
+ const startTimes=rows=>endpointTimes(rows,'到達');
+ const endTimes=rows=>endpointTimes(rows,'離開','到達');
  function filter(rows,start='',end=''){
   const source=Array.isArray(rows)?rows:[],from=String(start||''),to=String(end||'');
   if(!from&&!to)return source.slice();
@@ -28,5 +39,15 @@
    return from?value>=from:value<=to;
   });
  }
- return {legalTime,struck,times,filter};
+ function filterIntervals(rows,start='',end=''){
+  const source=Array.isArray(rows)?rows:[],from=String(start||''),to=String(end||'');
+  if(!from&&!to)return source.slice();
+  if(from&&!legalTime(from)||to&&!legalTime(to)||from&&to&&from>to)return [];
+  return source.filter(row=>{
+   if(struck(row))return false;
+   const rowStart=legalTime(row?.['到達']),rowEnd=legalTime(row?.['離開'])||rowStart;if(!rowStart||!rowEnd)return false;
+   return (!from||rowStart>=from)&&(!to||rowEnd<=to);
+  });
+ }
+ return {legalTime,struck,times,startTimes,endTimes,filter,filterIntervals};
 });
