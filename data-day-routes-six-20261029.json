@@ -15,7 +15,11 @@
       ],
       "verified_scope": "first_stop_only",
       "plate": "KEP-5860",
-      "plate_source_page": 5
+      "plate_source_page": 5,
+      "garbage_collection": true,
+      "recycling_status": "待核",
+      "recycling_weekdays": [],
+      "recycling_note": "回收服務尚未核對"
     },
     {
       "number": 2,
@@ -30,7 +34,11 @@
       ],
       "verified_scope": "first_stop_only",
       "plate": "008-UT",
-      "plate_source_page": 7
+      "plate_source_page": 7,
+      "garbage_collection": true,
+      "recycling_status": "無",
+      "recycling_weekdays": [],
+      "recycling_note": "Owner 確認此車次不提供資源回收"
     },
     {
       "number": 3,
@@ -45,7 +53,11 @@
       ],
       "verified_scope": "first_stop_only",
       "plate": "009-UT",
-      "plate_source_page": 8
+      "plate_source_page": 8,
+      "garbage_collection": true,
+      "recycling_status": "有",
+      "recycling_weekdays": [],
+      "recycling_note": "Owner 確認有資源回收，日期待核"
     },
     {
       "number": 4,
@@ -60,7 +72,11 @@
       ],
       "verified_scope": "first_stop_only",
       "plate": "KER-3760",
-      "plate_source_page": 11
+      "plate_source_page": 11,
+      "garbage_collection": true,
+      "recycling_status": "待核",
+      "recycling_weekdays": [],
+      "recycling_note": "回收服務尚未核對"
     },
     {
       "number": 5,
@@ -75,7 +91,11 @@
       ],
       "verified_scope": "first_stop_only",
       "plate": "KER-2025",
-      "plate_source_page": 12
+      "plate_source_page": 12,
+      "garbage_collection": true,
+      "recycling_status": "無",
+      "recycling_weekdays": [],
+      "recycling_note": "Owner 確認此車次不提供資源回收"
     },
     {
       "number": 6,
@@ -90,7 +110,11 @@
       ],
       "verified_scope": "first_stop_only",
       "plate": "AAQ-059",
-      "plate_source_page": 13
+      "plate_source_page": 13,
+      "garbage_collection": true,
+      "recycling_status": "無",
+      "recycling_weekdays": [],
+      "recycling_note": "Owner 確認此車次不提供資源回收"
     }
   ]
 }
