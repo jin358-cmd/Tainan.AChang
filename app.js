@@ -28,7 +28,7 @@ function loadState(){for(const k of [KEY,PRIOR_KEY,LEGACY_KEY]){try{const raw=lo
 const MAP_LOAD_TIMEOUT_MS=8000;
 const MAPLIBRE_JS='https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.js';
 const MAPLIBRE_CSS='https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.css';
-let state=loadState(),data=null,baseStops=[],dayRouteDocument=null,dayShiftWindows=null,officialRouteDocument=null,dayRouteCategory='six',dayCatalogStatus={weekday:'',active:0,pending:0,notice:'',closedReason:''},areas=[],routes=[],page='areas',selectedArea='復興里',shift='夜間',date=today(),chosenRoute='',plannerArea='復興里',visitTimeStart='',visitTimeEnd='',visitTimeCustomized=false,areaPage=0,teamArea='',toastTimer=null,installPrompt=null,map=null,markers=[],mapFailed=false,mapLoaded=false,mapLoadTimer=null,mapAttempt=0,mapInitPromise=null,mapFailureMessage='',pinTarget=null,layerState={volunteer:true,day:false,night:false,gps:false},pickerKind='',volunteerId='',volunteerPhone='';
+let state=loadState(),data=null,baseStops=[],dayRouteDocument=null,dayShiftWindows=null,officialRouteDocument=null,routeStopOverlays=[],dayRouteCategory='six',dayCatalogStatus={weekday:'',active:0,pending:0,notice:'',closedReason:''},areas=[],routes=[],page='areas',selectedArea='復興里',shift='夜間',date=today(),chosenRoute='',plannerArea='all',visitTimeStart='',visitTimeEnd='',visitTimeCustomized=false,areaPage=0,teamArea='',toastTimer=null,installPrompt=null,map=null,markers=[],mapFailed=false,mapLoaded=false,mapLoadTimer=null,mapAttempt=0,mapInitPromise=null,mapFailureMessage='',pinTarget=null,layerState={volunteer:true,day:false,night:false,gps:false},pickerKind='',volunteerId='',volunteerPhone='';
 const personNorm=p=>({id:String(p.id||`P${Date.now()}`),name:String(p.name||'').trim().slice(0,80),phone:String(p.phone||'').slice(0,80),address:String(p.address||'').slice(0,300),residentArea:String(p.residentArea||'待確認'),assignment:areas.includes(p.assignment)?p.assignment:'',serviceLat:coord(p.serviceLat)?p.serviceLat:null,serviceLon:coord(p.serviceLon)?p.serviceLon:null});
 const residentLabel=p=>{const s=String(p?.residentArea||'').trim().replace(/里里$/,'里');return /十里以外|十里外|待確認/.test(s)?'十里外':s&&s!=='未填寫'?s:''};
 const residentHtml=p=>residentLabel(p)?`原里：${esc(residentLabel(p))} · `:'';
@@ -50,7 +50,7 @@ function routeRows(){const rows=sourceRouteRows(),adapter=window.AChangRouteTime
 function sourceExcluded(row){return window.AChangRouteTime?.struck(row)===true}
 function schedulableRouteRows(){return routeRows().filter(row=>!sourceExcluded(row))}
 function resetVisitTime(){visitTimeStart='';visitTimeEnd='';visitTimeCustomized=false}
-function dayShiftWindow(){const row=sourceRouteRows()[0];return shift==='日間'&&dayRouteCategory==='six'?dayShiftWindows?.routes?.[row?.['車次']]||null:null}
+function dayShiftWindow(){return shift==='日間'&&dayRouteCategory==='six'?{start:'',end:'08:05'}:null}
 function timeOptionsWithEndpoint(options,value){const result=[...options];if(value&&!result.includes(value))result.push(value);return result.sort((a,b)=>a.localeCompare(b))}
 function renderVisitTimeFilter(rows){
  const start=$('#visitStartTime'),end=$('#visitEndTime'),hint=$('#visitTimeHint'),adapter=window.AChangRouteTime;
@@ -58,7 +58,7 @@ function renderVisitTimeFilter(rows){
  const fixedDay=rows.some(row=>row['固定日間']),windowPreset=dayShiftWindow(),sourceOptions=adapter.times(rows);
  const startOptions=fixedDay?adapter.startTimes(rows):timeOptionsWithEndpoint(sourceOptions,windowPreset?.start),endOptions=fixedDay?adapter.endTimes(rows):timeOptionsWithEndpoint(sourceOptions,windowPreset?.end);
  const allowedStart=new Set(startOptions),allowedEnd=new Set(endOptions);
- if(!visitTimeCustomized&&(fixedDay||windowPreset)){visitTimeStart=windowPreset?.start||startOptions[0]||'';visitTimeEnd=windowPreset?.end||endOptions.at(-1)||''}
+ if(!visitTimeCustomized&&(fixedDay||windowPreset)){visitTimeStart=windowPreset?windowPreset.start:(startOptions[0]||'');visitTimeEnd=windowPreset?.end||endOptions.at(-1)||''}
  if(visitTimeStart&&!allowedStart.has(visitTimeStart))visitTimeStart='';
  if(visitTimeEnd&&!allowedEnd.has(visitTimeEnd))visitTimeEnd='';
  const optionHtml=options=>'<option value="">全部時段</option>'+options.map(value=>`<option value="${esc(value)}">${esc(value)}</option>`).join('');
@@ -73,7 +73,8 @@ function applyDayRoutes(){
  const result=adapter.stopsForDate(dayRouteDocument,date);
  const verified=official.validate(officialRouteDocument.day,officialRouteDocument.night);
  if(!verified.valid||verified.dayRoutes!==6||verified.nightRoutes!==24){data.stops=[];dayCatalogStatus={weekday:result.weekday,active:0,pending:0,notice:'官方 PDF 站點資料驗證失敗，已停止載入。',closedReason:''};return}
- data.stops=[...verified.day.map(x=>({...x,'日間分類':'six'})),...verified.night,...result.stops.map(x=>({...x,'日間分類':'ab'}))];
+ const withOverlays=(source,sourceShift)=>{const output=[],seen=new Set();for(const row of source){const token=`${sourceShift}|${row['車次']}|${row['車牌']||''}`;if(seen.has(token))continue;seen.add(token);const originals=source.filter(item=>item['車次']===row['車次']&&(item['車牌']||'')===(row['車牌']||''));const additions=routeStopOverlays.filter(item=>item.status==='active'&&item.shift===sourceShift&&item.route_token===row['車次']&&(item.vehicle||'')===(row['車牌']||'')).sort((a,b)=>a.display_order-b.display_order||String(a.created_at).localeCompare(String(b.created_at)));const merged=originals.slice();for(const item of additions){const normalized={'時段':sourceShift,'車次':item.route_token,'車牌':item.vehicle||'','路線ID':row['路線ID'],'站點ID':`OVERLAY:${item.id}`,'里別':item.area,'清運次序':item.display_order,'原始站點序號':'','停靠點原文':item.stop_name,'Google地圖定位地址':'','到達':String(item.start_time||'').slice(0,5),'離開':String(item.end_time||'').slice(0,5),'垃圾日':'','回收日':'','PDF頁碼':'','PDF列序':'','PDF檔名':'管理員新增站點','來源順序':'','來源刪除線':false,'定位狀態':'未提供座標，不放置假站點','備註':'可恢復封存的管理員站點','管理員站點':true,'overlayId':item.id};merged.splice(Math.min(Math.max(item.display_order-1,0),merged.length),0,normalized)}output.push(...merged)}return output};
+ data.stops=[...withOverlays(verified.day,'日間').map(x=>({...x,'日間分類':'six'})),...withOverlays(verified.night,'夜間'),...result.stops.map(x=>({...x,'日間分類':'ab'}))];
  dayCatalogStatus={weekday:result.weekday,active:result.stops.length,pending:result.pending.length,notice:result.serviceNotice||'',closedReason:result.closedReason||''};
 }
 function hasSchedule(r){const p=state.plans[planId()];const record=p?.stops?.[stopKey(r)];return !!record?.chosen||!!record?.people?.length||!!p?.teams?.[r['里別']]?.length}
@@ -124,11 +125,11 @@ function renderPlanner(){
  const allRows=chosenRoute?routeRows():[];
  const fixedDay=allRows.some(r=>r['固定日間']),rows=fixedDay?allRows:plannerArea==='all'?allRows:allRows.filter(r=>r['里別']===plannerArea);
  const visitTitle=$('#visitRouteTitle');if(visitTitle)visitTitle.textContent=rows.length?`依車次順序拜訪・共 ${rows.length} 站點`:'依車次順序拜訪';
- const regions=fixedDay?(plannerArea==='all'?[]:[plannerArea]):uniq(rows.map(r=>r['里別']));
+ const regions=plannerArea==='all'?[]:fixedDay?[plannerArea]:uniq(rows.map(r=>r['里別']));
  if(!regions.includes(teamArea))teamArea=regions[0]||'';
  if(regions.length)renderAreaTeams(regions);else $('#areaTeamPicker').innerHTML='';
  const assignBtn=$('#plannerAssignArea');if(assignBtn){assignBtn.textContent='指派跟巡'+(teamArea||'服務里');assignBtn.disabled=!teamArea;}
- const actions=$('#areaTeamPicker .team-areas'),target=$('#visitAreaButtons');target.replaceChildren();if(actions)target.appendChild(actions);
+ const actions=$('#areaTeamPicker .team-areas'),target=$('#visitAreaButtons');target.replaceChildren();if(actions)target.appendChild(actions);const add=$('#addRouteStop'),manage=$('#manageRouteStops'),editable=liveRole==='admin'&&!!chosenRoute&&!fixedDay;if(add)add.hidden=!editable;if(manage)manage.hidden=liveRole!=='admin';
  renderStops(rows);
 }
 
@@ -153,9 +154,9 @@ function renderStops(rows){
  const missing=unassignedVisitAreas(rows);
  const missingNotice=missing.length?`<div class="pending-region-summary">${missing.map(esc).join(' · ')} 跟巡：<strong>尚未指派</strong></div>`:'';
  const visitHeader=document.getElementById("visitMissingNotice");if(visitHeader)visitHeader.innerHTML=missingNotice;holder.innerHTML=rows.map(r=>{
-  const excluded=sourceExcluded(r),area=rowArea(r),areaLabel=r['固定日間']?'站點里別待核':area||'未指定服務里',k=stopKey(r),sp=stopPlan(r),team=(plan().teams[area]||[]).filter(id=>state.people.some(x=>x.id===id&&x.assignment===area)),stopMembers=(sp.people||[]).filter(id=>state.people.some(x=>x.id===id&&x.assignment===area)),hasPeople=team.length>0||stopMembers.length>0,status=validStatuses.includes(sp.status)?sp.status:'待訪',visibleStatus=excluded?'source-struck':!hasPeople?'stop-unassigned':status==='完成'?'status-done':status==='進行中'?'status-progress':'status-wait',available=!excluded&&area?rosterAvailable(area):[];
-  const time=r['離開']?`${r['到達']}～${r['離開']}`:r['到達'],source=excluded?'原表刪除線・僅供來源追溯，不可指派':r['固定日間']?`${r['車次']} · 來源順序 ${r['來源順序']}`:`原表第 ${r['清運次序']} 站 · ${r['車牌']} · PDF 第${r['PDF頁碼']}頁 · 選錄站點`;
-  return `<article class="stop-card ${visibleStatus}" data-stop="${esc(k)}"><div class="stop-title"><span class="time">${esc(time)}</span><strong class="stop-address">${esc(r['停靠點原文'])}</strong><span class="stop-area">${esc(areaLabel)}</span></div><div class="stop-sub">${esc(source)}</div><div class="stop-members">${stopMembers.length?stopMembers.map(id=>{const p=state.people.find(x=>x.id===id);return p?`<span class="chip">${esc(p.name)}<button data-stop-remove="${esc(id)}" data-stop="${esc(k)}" aria-label="取消 ${esc(p.name)} 站點安排">×</button></span>`:''}).join(''):''}</div><div class="stop-buttons"><select class="status-select ${visibleStatus}" data-status="${esc(k)}" aria-label="${esc(r['停靠點原文'])} 拜訪狀態" ${excluded?'disabled title="原表刪除線資料僅供追溯"':!hasPeople?'disabled title="請先安排人員"':''}>${validStatuses.map(v=>`<option ${status===v?'selected':''}>${v}</option>`).join('')}</select><button class="assign-person" data-add-stop="${esc(k)}" ${available.length?'':'disabled'}>${excluded?'不可指派':'指派人員'}</button></div></article>`
+  const excluded=sourceExcluded(r),area=rowArea(r),areaLabel=r['固定日間']?'站點里別待核':area||'未指定服務里',k=stopKey(r),sp=stopPlan(r),team=(plan().teams[area]||[]).filter(id=>state.people.some(x=>x.id===id&&x.assignment===area)),stopMembers=(sp.people||[]).filter(id=>state.people.some(x=>x.id===id&&x.assignment===area)),hasPeople=team.length>0||stopMembers.length>0,status=validStatuses.includes(sp.status)?sp.status:'待訪',visibleStatus=excluded?'source-struck':!hasPeople?'stop-unassigned':status==='完成'?'status-done':status==='進行中'?'status-progress':'status-wait',available=!excluded&&area&&plannerArea!=='all'?rosterAvailable(area):[];
+  const time=r['離開']?`${r['到達']}～${r['離開']}`:r['到達'],source=excluded?'原表刪除線・僅供來源追溯，不可指派':r['管理員站點']?`管理員新增・目前清單第 ${sourceOrderForTask(r)} 站・原始 PDF 160 筆保持不變`:r['固定日間']?`${r['車次']} · 來源順序 ${r['來源順序']}`:`原表第 ${r['清運次序']} 站 · ${r['車牌']} · PDF 第${r['PDF頁碼']}頁 · 選錄站點`;
+  return `<article class="stop-card ${visibleStatus} ${r['管理員站點']?'admin-overlay-stop':''}" data-stop="${esc(k)}"><div class="stop-title"><span class="time">${esc(time)}</span><strong class="stop-address">${esc(r['停靠點原文'])}</strong><span class="stop-area">${esc(areaLabel)}</span></div><div class="stop-sub">${esc(source)}</div><div class="stop-members">${stopMembers.length?stopMembers.map(id=>{const p=state.people.find(x=>x.id===id);return p?`<span class="chip">${esc(p.name)}<button data-stop-remove="${esc(id)}" data-stop="${esc(k)}" aria-label="取消 ${esc(p.name)} 站點安排">×</button></span>`:''}).join(''):''}</div><div class="stop-buttons"><select class="status-select ${visibleStatus}" data-status="${esc(k)}" aria-label="${esc(r['停靠點原文'])} 拜訪狀態" ${excluded?'disabled title="原表刪除線資料僅供追溯"':!hasPeople?'disabled title="請先安排人員"':''}>${validStatuses.map(v=>`<option ${status===v?'selected':''}>${v}</option>`).join('')}</select><button class="assign-person" data-add-stop="${esc(k)}" ${available.length?'':'disabled'}>${excluded?'不可指派':'指派人員'}</button>${r.overlayId?`<button class="archive-route-stop" data-archive-route-stop="${esc(r.overlayId)}" data-stop-name="${esc(r['停靠點原文'])}">刪除站點</button>`:''}</div></article>`
  }).join('')}
 
 function addTeam(id){const p=state.people.find(x=>x.id===id);if(!p||p.assignment!==teamArea){toast('請先把志工分配到對應里');return false}const crew=plan().teams[teamArea]||[];if(crew.includes(id))return toast('已安排此志工'),false;const prev=bookingFor(id);if(prev){toast(`${p.name} 此時段已排在 ${prev.label}，請先移除再重新指派`);return false}plan().teams[teamArea]=[...crew,id];save();renderPlanner();renderSummary();toast(`已安排 ${p.name} 跟巡 ${teamArea}`);return true}
@@ -376,16 +377,16 @@ function updateMapLayerNotice(){
  const node=$('#mapLayerNotice');if(!node||!data)return;
  const messages=[];
  if(layerState.day){
-  const pdf=data.stops.filter(row=>row['時段']==='日間'&&row['日間分類']==='six'),active=pdf.filter(row=>!sourceExcluded(row));
+  const all=data.stops.filter(row=>row['時段']==='日間'&&row['日間分類']==='six'),pdf=all.filter(row=>!row['管理員站點']),overlays=all.filter(row=>row['管理員站點']),active=pdf.filter(row=>!sourceExcluded(row));
   const ab=data.stops.filter(row=>row['時段']==='日間'&&row['日間分類']==='ab'&&!sourceExcluded(row));
   const located=active.filter(row=>areas.includes(row['里別'])).length;
-  messages.push(`PDF 日間：${new Set(pdf.map(routeKey)).size} 車次・原始 ${pdf.length} 筆・可用 ${active.length} 筆；十里圖層可依來源里別彙總 ${located} 筆（無站點座標，不放置假站點）。`);
+  messages.push(`PDF 日間：${new Set(pdf.map(routeKey)).size} 車次・原始 ${pdf.length} 筆・可用 ${active.length} 筆；管理員新增 ${overlays.length} 筆，現行共 ${active.length+overlays.length} 筆；十里圖層可依來源里別彙總 ${located+overlays.filter(row=>areas.includes(row['里別'])).length} 筆（無站點座標，不放置假站點）。`);
   messages.push(ab.length?`週三／五 A／B：${new Set(ab.map(routeKey)).size} 路線・${ab.length} 筆，獨立顯示，不併入 PDF 日間統計。`:'週三／五 A／B：所選日期無固定路線，獨立入口保留。');
  }
  if(layerState.night){
-  const pdf=data.stops.filter(row=>row['時段']==='夜間'),active=pdf.filter(row=>!sourceExcluded(row)),struck=pdf.length-active.length;
+  const all=data.stops.filter(row=>row['時段']==='夜間'),pdf=all.filter(row=>!row['管理員站點']),overlays=all.filter(row=>row['管理員站點']),active=pdf.filter(row=>!sourceExcluded(row)),struck=pdf.length-active.length;
   const located=active.filter(row=>areas.includes(row['里別'])).length;
-  messages.push(`PDF 夜間：${new Set(pdf.map(routeKey)).size} 車次・原始 ${pdf.length} 筆・可用 ${active.length} 筆${struck?`（另 ${struck} 筆原表刪除線，僅供追溯、不指派）`:''}；十里圖層可依來源里別彙總 ${located} 筆（無站點座標，不放置假站點）。`);
+  messages.push(`PDF 夜間：${new Set(pdf.map(routeKey)).size} 車次・原始 ${pdf.length} 筆・可用 ${active.length} 筆${struck?`（另 ${struck} 筆原表刪除線，僅供追溯、不指派）`:''}${overlays.length?`；管理員新增 ${overlays.length} 筆，現行共 ${active.length+overlays.length} 筆`:''}；十里圖層可依來源里別彙總 ${located+overlays.filter(row=>areas.includes(row['里別'])).length} 筆（無站點座標，不放置假站點）。`);
  }
  node.hidden=messages.length===0;node.textContent=messages.join(' ');
 }
@@ -539,12 +540,16 @@ async function refreshOnline(quiet=false){if(!liveRole||liveBusy)return;
   const tasks=await onlineApi('tasks');liveTasks=tasks.tasks||[];
   if(liveRole==='volunteer'){const names=[...new Set(liveTasks.filter(t=>t.volunteer_id===liveMemberId&&t.visit_date===today()).map(t=>t.area))];groupContacts=[];for(const area of names){try{const r=await onlineApi('tasks?groupArea='+encodeURIComponent(area));groupContacts.push(...(r.people||[]).map(p=>({id:p.member_id,name:p.display_name,phone:p.phone_e164,isLeader:p.is_leader,area})));}catch(err){console.warn('小組成員查詢失敗',err.message)}}}
   if(liveRole==='admin'){
+   const overlay=await onlineApi('route-stops');routeStopOverlays=overlay.stops||[];applyDayRoutes();
    const roster=await onlineApi('roster');state.people=(roster.people||[]).map(p=>personNorm({id:p.id,name:p.name,phone:p.phone,address:p.address,residentArea:p.resident_area,assignment:p.assignment}));
    state.leaders={};for(const p of roster.people||[])if(p.is_leader&&p.assignment)state.leaders[p.assignment]=p.id;
    syncTaskProjection();render();
   }else{if(page==='reports')renderReports();}
   if(!quiet)toast('線上資料已更新');
  }catch(e){if(e.status===401||e.status===403){showAuth()}else toast('雲端同步失敗：'+e.message)}finally{liveBusy=false}}
+function openRouteStopEditor(){if(!assertAdmin()||!chosenRoute)return;const row=sourceRouteRows()[0];if(!row||row['固定日間'])return toast('週三／週五固定路線暫不新增自訂站點');const next=sourceRouteRows().length+1;showModal('新增路線站點',`<form id="routeStopForm"><p class="mini-note">新增於 ${esc(routeLabel(row))}。原始 PDF 資料不會被修改；此站可日後封存並恢復。</p><label>站點名稱<input name="stopName" required maxlength="240"></label><label>站點里別<input name="area" required maxlength="30" value="${esc(plannerArea==='all'?'':plannerArea)}" placeholder="例如：勝利里"></label><div class="route-stop-time-row"><label>開始時間<input name="startTime" type="time" required></label><label>結束時間<input name="endTime" type="time" required></label></div><label>清單次序<input name="displayOrder" type="number" min="1" max="9999" value="${next}" required></label><button class="primary wide" type="submit">新增站點卡片</button></form>`)}
+function openArchivedRouteStops(){const archived=routeStopOverlays.filter(x=>x.status==='archived');showModal('已封存路線站點',archived.length?`<div class="pick-list">${archived.map(x=>`<div class="pick-row"><div><strong>${esc(x.stop_name)}</strong><small>${esc(x.shift)}・${esc(x.route_token)}・${esc(String(x.start_time).slice(0,5))}～${esc(String(x.end_time).slice(0,5))}</small></div><button data-restore-route-stop="${esc(x.id)}">恢復</button></div>`).join('')}</div>`:'<p class="mini-note">目前沒有已封存站點。</p>')}
+async function mutateRouteStop(method,payload){await onlineApi('route-stops',method,payload);const overlay=await onlineApi('route-stops');routeStopOverlays=overlay.stops||[];applyDayRoutes();renderPlanner()}
 function matchedTasks(row){return liveTasks.filter(t=>t.visit_date===date&&t.shift===row['時段']&&taskRouteToken(t)===(row['路線ID']||row['車牌'])&&t.area===rowArea(row)&&t.stop_address===row['停靠點原文']);}
 function matchedMemberTask(row,id){return matchedTasks(row).find(t=>t.volunteer_id===id)}
 async function doLive(op){if(!assertAdmin())return false;try{await op();await refreshOnline();return true}catch(e){toast('未儲存：'+e.message);return false}}
@@ -651,6 +656,8 @@ bind=function(){originalBind();
  const closeSecureLogin=$('#closeSecureLogin');if(closeSecureLogin)closeSecureLogin.onclick=()=>{$('#secureLogin').hidden=true};
  $('#loginFromRoster').onclick=openSecureLogin;
  $('#addMember').onclick=openNewMemberForm;
+ $('#addRouteStop').onclick=openRouteStopEditor;$('#manageRouteStops').onclick=openArchivedRouteStops;
+ document.addEventListener('click',async e=>{const archive=e.target.closest('[data-archive-route-stop]');if(archive){if(!assertAdmin()||!confirm(`刪除「${archive.dataset.stopName}」站點？\n\n此操作會可恢復封存，不會刪除既有排班與任務快照。`))return;archive.disabled=true;try{await mutateRouteStop('PATCH',{action:'archive',id:archive.dataset.archiveRouteStop});toast('站點已封存，可從「管理封存站點」恢復')}catch(err){archive.disabled=false;toast('站點封存失敗：'+err.message)}return}const restore=e.target.closest('[data-restore-route-stop]');if(restore){if(!assertAdmin())return;restore.disabled=true;try{await mutateRouteStop('PATCH',{action:'restore',id:restore.dataset.restoreRouteStop});closeModal();toast('站點已恢復')}catch(err){restore.disabled=false;toast('站點恢復失敗：'+err.message)}}});
  $('#openRosterAuthorization').onclick=()=>openMemberAdmin();
  document.addEventListener('click',async e=>{const del=e.target.closest('[data-delete-person]');if(del){if(!assertAdmin())return;const id=del.dataset.deletePerson;const person=state.people.find(p=>p.id===id);if(!person)return;showModal('確認封存人員',`<div class="delete-warning"><p>確定將「<strong>${esc(person.name)}</strong>」從目前志工名冊移除？</p><small>這是可恢復的封存，不會永久清除歷史資料。若仍有會員帳號，系統會停止操作，請改由「會員授權」執行受保護的會員封存。</small></div><div class="delete-confirm-actions"><button type="button" class="smallbtn" data-cancel-person-delete>取消</button><button type="button" class="delete-person-confirm" data-confirm-delete-person="${esc(id)}">確認封存</button></div>`);return;}if(e.target.closest('[data-cancel-person-delete]')){closeModal();return;}const confirm=e.target.closest('[data-confirm-delete-person]');if(!confirm)return;if(!assertAdmin())return;const id=confirm.dataset.confirmDeletePerson;confirm.disabled=true;confirm.textContent='封存處理中…';try{await onlineApi('roster','DELETE',{id});await refreshOnline(true);closeModal();toast('人員已封存並從目前名冊移除')}catch(err){confirm.disabled=false;confirm.textContent='確認封存';toast('封存未完成：'+err.message)}});
  $('#secureLoginForm').onsubmit=async e=>{e.preventDefault();$('#authStatus').textContent='登入驗證中…';const d=Object.fromEntries(new FormData(e.target));try{await onlineApi('session','POST',d);await authStart()}catch(err){$('#authStatus').textContent=err.message}};
@@ -659,6 +666,7 @@ bind=function(){originalBind();
  document.addEventListener('click',async e=>{const btn=e.target.closest('button[data-revoke-device]');if(!btn)return;if(!assertAdmin())return;if(!confirm('確定撤銷這台設備？'))return;btn.disabled=true;try{await onlineApi('members','PATCH',{deviceId:btn.dataset.revokeDevice,approved:false});toast('已撤銷指定設備');await openMemberAdmin()}catch(err){toast('撤銷設備失敗：'+err.message);btn.disabled=false}});
  document.addEventListener('click',async e=>{const btn=e.target.closest('button[data-approve-device]');if(!btn)return;if(!assertAdmin())return;btn.disabled=true;try{await onlineApi('members','PATCH',{deviceId:btn.dataset.approveDevice,approved:true});toast('✓ 手機已核准，志工可重新開啟 PWA');await openMemberAdmin()}catch(err){toast('核准手機失敗：'+err.message);btn.disabled=false}});
  $('#modalBody').addEventListener('submit',async e=>{if(e.target.id==='newMemberForm'){e.preventDefault();await submitNewMemberForm(e.target);return}if(e.target.id!=='memberAdminForm')return;e.preventDefault();if(!assertAdmin())return;const d=Object.fromEntries(new FormData(e.target));const x=state.people.find(p=>p.id===d.volunteerId);const normalizePhone=p=>{let n=phoneDigits(p);if(n.startsWith('8869'))n='0'+n.slice(3);return n};if(!x||normalizePhone(x.phone)!==normalizePhone(d.phone)){toast('手機號碼和人員名冊不符');return}if(d.role==='admin'&&!confirm('確認建立「'+x.name+'」的待核准管理員帳號？此帳號核准後可管理名冊與會員授權。'))return;try{await onlineApi('member-admin-v2','POST',{action:'create',memberId:d.volunteerId,phone:d.phone,pin:d.password,role:d.role});toast('✓ 帳號已建立並列入待核准清單');await openMemberAdmin()}catch(err){toast('建立會員失敗：'+err.message)}});
+ $('#modalBody').addEventListener('submit',async e=>{if(e.target.id!=='routeStopForm')return;e.preventDefault();if(!assertAdmin())return;const row=sourceRouteRows()[0],d=Object.fromEntries(new FormData(e.target)),button=e.target.querySelector('button[type="submit"]');button.disabled=true;try{await mutateRouteStop('POST',{action:'create',shift:row['時段'],routeToken:row['車次'],vehicle:row['車牌']||'',area:d.area,stopName:d.stopName,startTime:d.startTime,endTime:d.endTime,displayOrder:Number(d.displayOrder)});closeModal();toast('站點已新增並同步到正式路線')}catch(err){button.disabled=false;toast('新增站點失敗：'+err.message)}});
 };
 save=function(){renderSummary()}; // never persist authenticated personal data to public browser storage
 
