@@ -459,6 +459,38 @@
 #page-reports .volunteer-task-unified-body .task-plate-line .task-plate{font-size:15px!important;font-weight:850!important;letter-spacing:.15px!important}
 #page-reports .volunteer-task-unified-body .task-plate-line .task-plate small{font-size:12px!important;font-weight:700!important;margin-right:3px}
 
+/* Preview-only AI flyer planning entry. It exposes data-quality gates, never
+   fabricated rankings, and leaves the existing mobile task experience intact. */
+#page-reports .flyer-ai-panel{display:none}
+#page-reports .task-date-right-stack{display:contents}
+@media(min-width:800px){
+ #page-reports #reportsContent.task-ai-layout{display:grid;grid-template-columns:minmax(300px,.78fr) minmax(0,1.42fr);align-items:start;gap:12px}
+ #page-reports #reportsContent.task-ai-layout>.flyer-ai-panel{display:block;position:sticky;top:76px;margin:0;background:linear-gradient(160deg,#f7fbff,#eef8f6);border-color:#b9d9d7}
+ #page-reports #reportsContent.task-ai-layout>.task-date-right-stack{display:flex;flex-direction:column;gap:8px;min-width:0}
+ #page-reports .task-date-right-stack>.task-date-category{margin:0;min-width:0}
+ #page-reports .task-date-right-stack>.task-date-current{order:1}
+ #page-reports .task-date-right-stack>.task-date-history{order:2}
+ #page-reports .task-date-right-stack>.task-date-future{order:3}
+}
+#page-reports .flyer-ai-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
+#page-reports .flyer-ai-heading h2{font-size:19px;margin:3px 0 0;color:#173b5e}
+#page-reports .flyer-ai-kicker{font-size:12px;font-weight:900;color:#087b77}
+#page-reports .flyer-quality-pill{flex:none;border-radius:99px;padding:5px 9px;background:#fff2c9;color:#835b0a;font-size:11px;font-weight:900}
+#page-reports .flyer-ai-intro{margin:0 0 12px;color:#5d7487;font-size:12px;line-height:1.6}
+#page-reports .flyer-ai-panel>label,#page-reports .flyer-ai-inputs label{display:block;color:#405e73;font-size:12px;font-weight:850}
+#page-reports .flyer-ai-panel select,#page-reports .flyer-ai-panel input[type=number]{width:100%;min-height:42px;margin-top:5px;padding:8px 10px;border:1px solid #c6d9e2;border-radius:9px;background:#fff;color:#203f56}
+#page-reports .flyer-ai-panel fieldset{display:grid;gap:7px;margin:12px 0;padding:10px;border:1px solid #cadde3;border-radius:10px;background:#ffffffb8}
+#page-reports .flyer-ai-panel legend{padding:0 5px;color:#405e73;font-size:12px;font-weight:850}
+#page-reports .flyer-ai-panel fieldset label{display:flex;align-items:center;gap:7px;font-size:12px;color:#2f5368}
+#page-reports .flyer-ai-panel fieldset input{accent-color:#0b827f}
+#page-reports .flyer-ai-inputs{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+#page-reports .flyer-plan-action{min-height:46px}
+#page-reports .flyer-ai-result{margin-top:10px;padding:11px;border:1px dashed #bdcfd8;border-radius:10px;background:#fff;color:#536c7e;font-size:12px;line-height:1.55}
+#page-reports .flyer-ai-result strong{color:#8b5f0a}
+#page-reports .flyer-ai-result p{margin:5px 0 0}
+#page-reports .flyer-ai-result ul{margin:7px 0;padding-left:20px}
+.planner-area-distance-note{margin:0 0 10px;line-height:1.55}.planner-area-assignment-picker .pick-row>div{display:grid;gap:2px}.planner-area-assignment-picker .pick-row small{color:#708697;font-size:11px;font-weight:750}
+
 /* Highlight outstanding historical confirmations without resizing tabs */
 #page-reports .volunteer-category .history-pending-count{display:inline-block!important;background:#fff0b7!important;color:#863b08!important;border:1px solid #e8a42e!important;border-radius:5px;padding:3px 5px!important;font-size:11px!important;font-weight:850!important;white-space:nowrap;line-height:1.25!important}
 #page-reports .volunteer-category.on .history-pending-count{background:#fff3cc!important;color:#72320a!important}

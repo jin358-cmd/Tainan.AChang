@@ -12,6 +12,7 @@ function contentType(file){return ({'.html':'text/html; charset=utf-8','.js':'te
 
 async function startServer(){
  const observed={calls:[],writes:[],external:[],consoleErrors:[],pageErrors:[]};
+ const tasks=[];
  const overlays=[
   {id:'d4000000-0000-4000-8000-000000000001',shift:'日間',route_token:'日間4',vehicle:'KER-3760',area:'勝利里',stop_name:'二王廟前',start_time:'06:30:00',end_time:'06:45:00',display_order:1,status:'active',created_at:'2026-10-29T00:00:00Z'},
   {id:'d6000000-0000-4000-8000-000000000001',shift:'日間',route_token:'日間6',vehicle:'AAQ-059',area:'大橋里',stop_name:'大橋一街103巷口',start_time:'06:52:00',end_time:'06:54:00',display_order:2,status:'active',created_at:'2026-10-29T00:00:00Z'}
@@ -24,7 +25,14 @@ async function startServer(){
     if(url.pathname==='/api/config')return response.end(JSON.stringify({environment:'test',projectRef:'fhxdpupascsikjsycpbi',supabaseUrl:'https://fhxdpupascsikjsycpbi.supabase.co'}));
     if(url.pathname==='/api/session')return response.end(JSON.stringify({role:'admin',memberId:null,accountId:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',displayName:'合成管理員'}));
     if(url.pathname==='/api/roster')return response.end(JSON.stringify({people:[{id:'22222222-2222-4222-8222-222222222222',name:'合成志工',phone:'+886900000001',address:'合成地址',resident_area:'成功里',assignment:'成功里',is_leader:false}]}));
-    if(url.pathname==='/api/tasks')return response.end(JSON.stringify({tasks:[]}));
+    if(url.pathname==='/api/tasks'){
+     const body=raw?JSON.parse(raw):{};
+     if(request.method==='POST'){
+      const task={id:`task-${tasks.length+1}`,volunteer_id:body.volunteerId,volunteer_name:'合成志工',area:body.area,visit_date:body.date,shift:body.shift,route_id:body.routeId||'',truck:body.truck||'',stop_address:body.address,eta:body.time,stop_order:body.stopOrder,status:'待訪'};
+      tasks.push(task);response.statusCode=201;return response.end(JSON.stringify({task}));
+     }
+     return response.end(JSON.stringify({tasks}));
+    }
     if(url.pathname==='/api/gps-vehicles')return response.end(JSON.stringify({live:true,fetched_at:'2026-10-28T14:00:00Z',latest_reported_at:'2026-10-28T13:59:00Z',vehicles:[]}));
     if(url.pathname==='/api/member-admin-v2')return response.end(JSON.stringify({ok:true,members:[],devices:[]}));
     if(url.pathname==='/api/route-stops'){

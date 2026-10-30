@@ -1,4 +1,4 @@
-const CACHE = 'achang-pwa-shell-v164-task-assignment-merge';
+const CACHE = 'achang-pwa-shell-v165-ai-flyer-preview';
 const SHELL=['./','./index.html','./styles.css','./day-routes.js','./official-routes.js','./route-time-filter.js','./app.js','./data-public.json','./data-legacy-source-archive-20261030.json','./data-day-routes-20250402.json','./data-day-shift-windows-20261029.json','./data-official-day-20261030.source.json','./data-official-night-20261030.source.json','./manifest.webmanifest','./assets/icon.svg','./assets/icon-192.png','./assets/icon-512.png'];
 self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())});
 self.addEventListener('activate',event=>{event.waitUntil((async()=>{const names=await caches.keys();await Promise.all(names.filter(name=>name.startsWith('achang-pwa-shell-')&&name!==CACHE).map(name=>caches.delete(name)));await self.clients.claim()})())});

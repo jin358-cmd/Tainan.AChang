@@ -118,17 +118,42 @@ test('fourth task page exposes three requested groups without changing task APIs
  assert.doesNotMatch(app,/單日進度示範|示範小組：3 項排班任務|task-sample/);
 });
 
-test('desktop task categories stack history and future at left while mobile keeps DOM order',()=>{
- assert.match(app,/root\.classList\.remove\('task-date-layout'\)/);
+test('desktop task page places the gated AI planner at left and all task groups at right',()=>{
+ assert.match(app,/root\.classList\.remove\('task-date-layout','task-ai-layout'\)/);
  assert.match(app,/root\.classList\.toggle\('task-date-layout',days\.length>0\)/);
- assert.match(app,/task-date-left-stack[^\n]*categoryHtml\('history'\)\+categoryHtml\('future'\)[^\n]*categoryHtml\('current'\)/);
- assert.match(styles,/\.task-date-left-stack\{display:contents\}/);
- assert.match(styles,/\.task-date-history\{order:1\}\.task-date-current\{order:2\}\.task-date-future\{order:3\}/);
- assert.match(styles,/@media\(min-width:800px\)\{[\s\S]*#page-reports #reportsContent\.task-date-layout\{[^}]*grid-template-columns:minmax\(0,1fr\) minmax\(0,1fr\)[^}]*align-items:stretch/);
- assert.match(styles,/\.task-date-left-stack\{display:flex;flex-direction:column;gap:8px/);
- assert.match(styles,/\.task-date-left-stack>\.task-date-category:not\(\[open\]\)\{flex:1 1 0\}/);
- assert.match(styles,/\.task-date-current\{align-self:start\}/);
- assert.doesNotMatch(styles,/\.task-date-(?:history|future)\{[^}]*(?:position:absolute|transform:translate)/);
+ assert.match(app,/task-date-right-stack[^\n]*categoryHtml\('history'\)\+categoryHtml\('current'\)\+categoryHtml\('future'\)/);
+ assert.match(app,/flyerPlannerPanel\(\)\+taskContent/);
+ assert.match(styles,/#page-reports \.flyer-ai-panel\{display:none\}/);
+ assert.match(styles,/@media\(min-width:800px\)\{[\s\S]*#page-reports #reportsContent\.task-ai-layout\{[^}]*grid-template-columns:minmax\(300px,\.78fr\) minmax\(0,1\.42fr\)/);
+ assert.match(styles,/\.task-date-right-stack\{display:flex;flex-direction:column;gap:8px/);
+ assert.match(styles,/\.task-date-right-stack>\.task-date-current\{order:1\}/);
+});
+
+test('AI flyer planning remains behind Phase 1 data-quality gates',()=>{
+ assert.match(app,/Phase 1 待核驗/);assert.match(app,/未通過 Phase 1 前不產生 TOP 排名、座標或人流結論/);
+ assert.match(app,/1626 原始筆／1625 可用筆/);assert.match(app,/與舊 1586 版不得混稱同一資料/);
+ assert.match(app,/實測人流、安全與步行可達範圍：尚無核驗資料/);
+ assert.doesNotMatch(app,/TOP 1[^<]*最佳|GIS 驗證通過|正式派工已建立/);
+});
+
+test('the established fixed UI-test alias offers a synthetic read-only admin preview',()=>{
+ assert.match(app,/location\.hostname==='tainan-achang-online-ui-test-tjc1\.vercel\.app'/);
+ assert.match(app,/進入管理員 UI 預覽（唯讀）/);assert.match(app,/function startPreviewAdmin\(\)/);
+ assert.match(app,/if\(previewDemoMode\)\{toast\('隔離預覽僅供檢視，不會寫入資料庫'\);return false\}/);
+});
+
+test('fixed daytime task projection retains its service area while all villages is selected',()=>{
+ assert.match(app,/memberAreas:\{\}/);assert.match(app,/stop\.memberAreas\?\?=\{\};stop\.memberAreas\[t\.volunteer_id\]=t\.area/);
+ assert.match(app,/taskArea=sp\.memberAreas\?\.\[id\]\|\|area/);
+ assert.match(app,/routeUsesAssignmentArea=r=>!!r\?\.\['固定日間'\]\|\|String\(r\?\.\['路線ID'\]\|\|''\)\.startsWith\('PDF:'\)/);
+ assert.match(app,/row\['固定日間'\]\?\(plannerArea==='all'\|\|t\.area===plannerArea\):pdfRoute\|\|t\.area===area/);
+});
+
+test('all-village assignment only prioritizes a verified station village without fabricating distance',()=>{
+ assert.match(app,/const physicalArea=!row\?\.\['固定日間'\]&&areas\.includes\(row\?\.\['里別'\]\)/);
+ assert.match(app,/同里優先顯示；這不等於已驗證的最短路程/);
+ assert.match(app,/距離待核，請人工選擇/);assert.match(app,/不使用志工住址或定位資料/);
+ assert.doesNotMatch(app,/距離約\s*\d|公里內|步行\s*\d/);
 });
 
 test('desktop navigation reuses the five mobile icons without changing labels',()=>{

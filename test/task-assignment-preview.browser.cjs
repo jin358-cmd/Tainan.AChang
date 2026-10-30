@@ -1,0 +1,57 @@
+'use strict';
+
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const http=require('node:http');
+const path=require('node:path');
+const {chromium}=require('playwright');
+
+const root=path.join(__dirname,'..');
+const type=file=>({'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.webmanifest':'application/manifest+json','.svg':'image/svg+xml','.png':'image/png'})[path.extname(file)]||'application/octet-stream';
+
+async function server(){
+ const tasks=[],writes=[];
+ const instance=http.createServer((request,response)=>{
+  const url=new URL(request.url,'http://127.0.0.1');response.setHeader('Cache-Control','no-store');
+  if(url.pathname.startsWith('/api/')){
+   let raw='';request.on('data',chunk=>raw+=chunk);request.on('end',()=>{
+    const body=raw?JSON.parse(raw):{};response.setHeader('Content-Type','application/json');
+    if(url.pathname==='/api/config')return response.end(JSON.stringify({environment:'test',projectRef:'synthetic',supabaseUrl:'https://example.invalid'}));
+    if(url.pathname==='/api/session')return response.end(JSON.stringify({role:'admin',accountId:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',displayName:'合成管理員'}));
+    if(url.pathname==='/api/roster')return response.end(JSON.stringify({people:[{id:'22222222-2222-4222-8222-222222222222',name:'合成志工',phone:'+886900000001',address:'合成地址',resident_area:'成功里',assignment:'成功里',is_leader:false}]}));
+    if(url.pathname==='/api/route-stops')return response.end(JSON.stringify({stops:[]}));
+    if(url.pathname==='/api/tasks'&&request.method==='POST'){
+     writes.push(body);const task={id:'task-1',volunteer_id:body.volunteerId,volunteer_name:'合成志工',area:body.area,visit_date:body.date,shift:body.shift,route_id:body.routeId||'',truck:body.truck||'',stop_address:body.address,eta:body.time,stop_order:body.stopOrder,status:'待訪'};tasks.push(task);response.statusCode=201;return response.end(JSON.stringify({task}));
+    }
+    if(url.pathname==='/api/tasks')return response.end(JSON.stringify({tasks}));
+    if(url.pathname==='/api/member-admin-v2')return response.end(JSON.stringify({ok:true,members:[],devices:[]}));
+    response.statusCode=404;response.end(JSON.stringify({error:'not found'}));
+   });return;
+  }
+  const file=url.pathname==='/'?'index.html':decodeURIComponent(url.pathname.slice(1));
+  try{response.setHeader('Content-Type',type(file));response.end(fs.readFileSync(path.join(root,file)))}catch{response.statusCode=404;response.end('not found')}
+ });
+ await new Promise((resolve,reject)=>{instance.once('error',reject);instance.listen(0,'127.0.0.1',resolve)});
+ return {instance,tasks,writes,origin:`http://127.0.0.1:${instance.address().port}`};
+}
+
+(async()=>{
+ const local=await server(),browser=await chromium.launch({headless:true,executablePath:'/usr/bin/chromium'});
+ try{
+  const context=await browser.newContext({viewport:{width:1293,height:700},serviceWorkers:'block'});
+  await context.route('**/*',route=>new URL(route.request().url()).origin===local.origin?route.continue():route.abort('blockedbyclient'));
+  const page=await context.newPage();await page.goto(local.origin,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelector('#signedInName')?.textContent==='合成管理員');
+  await page.locator('.desktop-nav [data-page="planner"]').click();await page.locator('#planDate').fill('2026-10-29');await page.locator('#planDate').dispatchEvent('change');await page.locator('#plannerAreaSelect').selectOption('all');await page.locator('[data-shift="日間"]').click();await page.locator('[data-day-category="six"]').click();await page.locator('#routeButtons .route-choice').filter({hasText:'日間1'}).click();await page.locator('#visitStartTime').selectOption('');await page.locator('#visitEndTime').selectOption('');
+  const card=page.locator('#stopList .stop-card').first();await card.locator('.assign-person').click();assert.match(await page.locator('.planner-area-distance-note').textContent(),/距離待核|同里優先顯示/);assert.equal(await page.locator('.planner-area-assignment-picker').getByText(/公里|公尺|分鐘步行/).count(),0);await page.locator('[data-stop-assignment-area="成功里"]').click();await page.locator('[data-pick-id="22222222-2222-4222-8222-222222222222"]').click();
+  await page.waitForTimeout(500);if(!await page.locator('#stopList .stop-members').first().textContent().then(text=>text.includes('合成志工')))throw new Error('assignment did not render '+JSON.stringify({writes:local.writes,tasks:local.tasks,stopCards:await page.locator('#stopList .stop-card').count(),members:await page.locator('#stopList .stop-members').allTextContents(),areas:await page.locator('#stopList .stop-area').allTextContents()}));
+  assert.equal(local.writes.length,1);assert.equal(local.writes[0].area,'成功里');assert.equal(local.tasks.length,1);assert.equal(await page.locator('#stopList .stop-members .chip').first().textContent(),'合成志工×');
+  await page.locator('.desktop-nav [data-page="reports"]').click();assert.equal(await page.locator('.flyer-ai-panel').isVisible(),true);assert.equal(await page.locator('.task-date-right-stack').isVisible(),true);assert.match(await page.locator('#flyerAiResult').textContent(),/未通過 Phase 1 前不產生 TOP 排名/);await page.locator('#flyerAiArea').selectOption('成功里');await page.locator('[data-ai-quality-check]').click();assert.match(await page.locator('#flyerAiResult').textContent(),/排名 Gate 尚未通過/);assert.match(await page.locator('#flyerAiResult').textContent(),/不會產生虛構 TOP 排名或正式派工/);if(process.env.CAPTURE_PREVIEW)await page.screenshot({path:'/tmp/achang-ai-desktop.png',fullPage:true});
+  await page.setViewportSize({width:390,height:844});assert.equal(await page.locator('.flyer-ai-panel').isVisible(),false);assert.equal(await page.locator('.task-date-right-stack').isVisible(),true);if(process.env.CAPTURE_PREVIEW)await page.screenshot({path:'/tmp/achang-ai-mobile.png',fullPage:true});
+  process.stdout.write(JSON.stringify({status:'PASS',evidence:'local real Chromium + synthetic authenticated API',cases:['all-villages assignment shows only honest same-village priority / distance-pending guidance','all-villages assignment persists and immediately renders the volunteer name','desktop AI quality panel and task groups render side by side','ranking Gate blocks fabricated TOP output','mobile keeps the existing task-only layout'],writes:local.writes.length},null,2)+'\n');
+  await context.close();
+  const previewHost='tainan-achang-online-ui-test-tjc1.vercel.app',previewWrites=[];
+  const preview=await browser.newContext({viewport:{width:1293,height:700},serviceWorkers:'block'});
+  await preview.route('**/*',async route=>{const request=route.request(),url=new URL(request.url());if(url.hostname!==previewHost)return route.abort('blockedbyclient');if(url.pathname.startsWith('/api/')){if(request.method()!=='GET')previewWrites.push({method:request.method(),path:url.pathname});return route.fulfill({status:503,contentType:'application/json',body:'{"error":"preview fail closed"}'})}const file=url.pathname==='/'?'index.html':decodeURIComponent(url.pathname.slice(1));try{return route.fulfill({status:200,contentType:type(file),body:fs.readFileSync(path.join(root,file))})}catch{return route.fulfill({status:404,body:'not found'})}});
+  const previewPage=await preview.newPage();await previewPage.goto(`https://${previewHost}/`,{waitUntil:'commit',timeout:5000});await previewPage.locator('#previewAdminLogin').waitFor({timeout:5000});await previewPage.locator('#previewAdminLogin').click();assert.equal(await previewPage.locator('.flyer-ai-panel').isVisible(),true);assert.match(await previewPage.locator('#flyerAiResult').textContent(),/未通過 Phase 1 前不產生 TOP 排名/);await previewPage.locator('[data-ai-quality-check]').click();assert.match(await previewPage.locator('#flyerAiResult').textContent(),/排名 Gate 尚未通過/);assert.equal(previewWrites.length,0);await preview.close();
+ }finally{await browser.close();local.instance.closeAllConnections();local.instance.close()}
+})().catch(error=>{console.error(error.stack||error);process.exitCode=1});
