@@ -156,6 +156,14 @@ test('desktop service-area counts match and village tiles show people units with
  assert.doesNotMatch(styles,/@media\(max-width:[^)]+\)[^{]*\{[^}]*area-pill em::after/);
 });
 
+test('service-area pager and planner selector use the owner order without changing backend IDs',()=>{
+ assert.match(app,/SERVICE_AREA_DISPLAY_ORDER=\['光復里','復華里','勝利里','中華里','成功里','復國里','中興里','神洲里','復興里','建國里'\]/);
+ assert.match(app,/serviceAreaLabel=area=>area==='神州里'\?'神洲里':area/);
+ assert.match(app,/const shown=ordered\.slice\(areaPage\*CARD_PAGE_SIZE/);
+ assert.match(app,/pa\.innerHTML='<option value="all">全部<\/option>'\+orderedServiceAreas\(\)\.map/);
+ assert.match(app,/value="\$\{esc\(a\)\}">\$\{esc\(serviceAreaLabel\(a\)\)\}<\/option>/);
+});
+
 test('desktop create and edit member forms share readable field labels and controls',()=>{
  assert.match(styles,/@media\(min-width:800px\)\{#newMemberForm \.member-create-fields>label,#personForm>label\{font-size:15px;line-height:1\.4\}#newMemberForm \.member-create-fields>label>input,#newMemberForm \.member-create-fields>label>select,#personForm>label>input,#personForm>label>select\{min-height:48px;padding:10px 12px;font-size:16px;line-height:1\.35\}\}/);
  assert.doesNotMatch(styles,/@media\(max-width:[^)]+\)[^{]*\{[^}]*(?:#newMemberForm|#personForm)/);
