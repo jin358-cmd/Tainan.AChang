@@ -164,6 +164,9 @@ test('all-village assignment only prioritizes a verified station village without
  assert.match(app,/同里優先顯示；這不等於已驗證的最短路程/);
  assert.match(app,/距離待核，請人工選擇/);assert.match(app,/不使用志工住址或定位資料/);
  assert.doesNotMatch(app,/距離約\s*\d|公里內|步行\s*\d/);
+ assert.match(app,/pick-row \$\{area===physicalArea\?'is-station-village':''\}/);
+ assert.match(styles,/\.planner-area-assignment-picker \.pick-row\.is-station-village\{border-left:6px solid #a7dfbd\}/);
+ assert.match(styles,/\.pick-row\.is-station-village small\{color:#276846;font-size:14px;font-weight:900/);
 });
 
 test('station member chip removes only one stop and places its action at the name upper-right',()=>{
