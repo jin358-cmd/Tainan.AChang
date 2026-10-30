@@ -121,12 +121,16 @@ test('fourth task page exposes three requested groups without changing task APIs
 test('desktop task page places the gated AI planner at left and all task groups at right',()=>{
  assert.match(app,/root\.classList\.remove\('task-date-layout','task-ai-layout'\)/);
  assert.match(app,/root\.classList\.toggle\('task-date-layout',days\.length>0\)/);
- assert.match(app,/task-date-right-stack[^\n]*categoryHtml\('history'\)\+categoryHtml\('current'\)\+categoryHtml\('future'\)/);
+ assert.match(app,/task-date-right-stack[^\n]*categoryHtml\('current'\)\+categoryHtml\('future'\)\+categoryHtml\('history'\)/);
  assert.match(app,/flyerPlannerPanel\(\)\+taskContent/);
  assert.match(styles,/#page-reports \.flyer-ai-panel\{display:none\}/);
  assert.match(styles,/@media\(min-width:800px\)\{[\s\S]*#page-reports #reportsContent\.task-ai-layout\{[^}]*grid-template-columns:minmax\(300px,\.78fr\) minmax\(0,1\.42fr\)/);
  assert.match(styles,/\.task-date-right-stack\{display:flex;flex-direction:column;gap:8px/);
  assert.match(styles,/\.task-date-right-stack>\.task-date-current\{order:1\}/);
+ assert.match(styles,/\.task-date-right-stack>\.task-date-future\{order:2\}/);
+ assert.match(styles,/\.task-date-right-stack>\.task-date-history\{order:3\}/);
+ assert.match(styles,/#page-reports \.task-date-future\{background:#eef9f1;border-color:#a8d8b6\}/);
+ assert.match(styles,/#page-reports \.task-date-future>summary\{color:#245b38\}/);
 });
 
 test('AI flyer planning remains behind Phase 1 data-quality gates',()=>{
@@ -140,6 +144,9 @@ test('the established fixed UI-test alias offers a synthetic admin preview witho
  assert.match(app,/location\.hostname==='tainan-achang-online-ui-test-tjc1\.vercel\.app'/);
  assert.match(app,/進入管理員 UI 預覽（合成資料）/);assert.match(app,/function startPreviewAdmin\(\)/);
  assert.match(app,/if\(previewDemoMode\)\{toast\('隔離預覽僅供檢視，不會寫入資料庫'\);return false\}/);
+ assert.match(app,/achang-preview-admin-tasks-v2/);assert.match(app,/sessionStorage\.removeItem\(PREVIEW_ADMIN_TASK_LEGACY_KEY\)/);
+ assert.match(app,/PREVIEW-TASK-DAY1-1/);assert.match(app,/PREVIEW-TASK-DAY1-2/);assert.match(app,/測試志工A/);
+ assert.match(app,/function resetPreviewAdminTasks\(\)/);assert.match(html,/id="previewResetTasks"[^>]*>重設測試指派/);
 });
 
 test('fixed daytime task projection retains its service area while all villages is selected',()=>{

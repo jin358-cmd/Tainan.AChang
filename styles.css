@@ -469,8 +469,8 @@
  #page-reports #reportsContent.task-ai-layout>.task-date-right-stack{display:flex;flex-direction:column;gap:8px;min-width:0}
  #page-reports .task-date-right-stack>.task-date-category{margin:0;min-width:0}
  #page-reports .task-date-right-stack>.task-date-current{order:1}
- #page-reports .task-date-right-stack>.task-date-history{order:2}
- #page-reports .task-date-right-stack>.task-date-future{order:3}
+ #page-reports .task-date-right-stack>.task-date-future{order:2}
+ #page-reports .task-date-right-stack>.task-date-history{order:3}
 }
 #page-reports .flyer-ai-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
 #page-reports .flyer-ai-heading h2{font-size:19px;margin:3px 0 0;color:#173b5e}
@@ -491,6 +491,7 @@
 #page-reports .flyer-ai-result ul{margin:7px 0;padding-left:20px}
 .planner-area-distance-note{margin:0 0 10px;line-height:1.55}.planner-area-assignment-picker .pick-row>div{display:grid;gap:2px}.planner-area-assignment-picker .pick-row small{color:#708697;font-size:11px;font-weight:750}
 .stop-members .chip{position:relative;padding-right:24px}.stop-members .chip>[data-stop-remove]{position:absolute;top:-6px;right:-6px;width:21px;height:21px;padding:0;display:grid;place-items:center;border:1px solid #e7b5bd;background:#fff;color:#a53143;box-shadow:0 2px 6px #10294722;font-size:14px;line-height:1}
+.preview-planner-tools{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px;padding:10px 12px;border:1px solid #e1c873;border-radius:11px;background:#fff8d9;color:#684e0e;font-size:12px;line-height:1.45}.preview-planner-tools[hidden]{display:none}.preview-planner-actions{display:flex;gap:7px;flex:none}.preview-planner-tools .smallbtn{flex:none;background:#fff;font-size:12px}@media(max-width:530px){.preview-planner-tools{align-items:stretch;flex-direction:column}.preview-planner-actions{display:grid;grid-template-columns:1fr 1fr}.preview-planner-tools .smallbtn{width:100%;padding-inline:6px}}
 
 /* Highlight outstanding historical confirmations without resizing tabs */
 #page-reports .volunteer-category .history-pending-count{display:inline-block!important;background:#fff0b7!important;color:#863b08!important;border:1px solid #e8a42e!important;border-radius:5px;padding:3px 5px!important;font-size:11px!important;font-weight:850!important;white-space:nowrap;line-height:1.25!important}
@@ -1035,11 +1036,10 @@ body.volunteer-session #page-reports .volunteer-stop-item>.task-navigate svg{dis
 .gps-layer-status.stale{color:#a15a13}
 .gps-layer-status.error{color:#b12b40}
 .task-date-category>summary{cursor:pointer;font-weight:900;color:#173b5e}.task-date-category-body{display:grid;gap:8px;margin-top:10px}.task-date-category-body>.task-day{margin:0;box-shadow:none}.task-date-history:not([open])>summary{color:#718398}
-/* Desktop task groups: history and future share the left column while today
-   remains unchanged on the right. Opening history grows naturally and pushes
-   future down; display:contents preserves the original mobile visual order. */
+/* Legacy two-column task layout compatibility. Current preview renders all
+   three groups in the right stack, ordered today, future, then history. */
 .task-date-left-stack{display:contents}
-.task-date-history{order:1}.task-date-current{order:2}.task-date-future{order:3}
+.task-date-current{order:1}.task-date-future{order:2}.task-date-history{order:3}
 @media(min-width:800px){
  #page-reports #reportsContent.task-date-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:stretch;gap:8px}
  #page-reports #reportsContent.task-date-layout>.task-date-left-stack{display:flex;flex-direction:column;gap:8px;min-width:0}
@@ -1068,6 +1068,8 @@ body.volunteer-session #page-reports .volunteer-stop-item>.task-navigate svg{dis
 #page-reports .task-team-plate{font-size:19px;font-weight:950;letter-spacing:.03em;margin-left:auto}
 #page-reports .task-date-history .task-team{background:#fff7dc;border-color:#e6cf7a}
 #page-reports .task-date-history .task-team-route{border-top-color:#eadb9f}
+#page-reports .task-date-future{background:#eef9f1;border-color:#a8d8b6}
+#page-reports .task-date-future>summary{color:#245b38}
 #page-reports .task-member-list{background:#fff0f5;border-top:1px solid #efc2d1}
 @media(max-width:530px){#page-reports .task-team-primary{align-items:flex-start}#page-reports .task-team-identity{gap:7px 10px}#page-reports .task-team-identity>strong,#page-reports .task-team-phone{font-size:16px}#page-reports .task-team-route{font-size:15px;gap:6px}#page-reports .task-team-route>strong,#page-reports .task-team-plate{font-size:17px}#page-reports .task-route-separator{display:inline}#page-reports .task-team-shift{display:inline-flex;gap:4px}#page-reports .task-team-shift .legend-pin{display:grid;width:18px;height:18px;font-size:11px}}
 @media(max-width:530px){#page-reports .task-member-progress{flex-wrap:nowrap;align-items:center;gap:8px}#page-reports .task-member-progress>div{flex:1 1 auto;min-width:0}#page-reports .task-member-progress>.task-progress-status{flex:0 0 auto;margin-left:auto;min-width:100px;min-height:34px;font-size:12px;text-align:center}}
