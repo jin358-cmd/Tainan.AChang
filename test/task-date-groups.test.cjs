@@ -7,6 +7,7 @@ const vm=require('node:vm');
 const app=fs.readFileSync(path.join(__dirname,'..','app.js'),'utf8');
 const styles=fs.readFileSync(path.join(__dirname,'..','styles.css'),'utf8');
 const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+const population=fs.readFileSync(path.join(__dirname,'..','population-data.js'),'utf8');
 
 function classify(nowIso,visitDate,status='待訪'){
  const start=app.indexOf("const taipeiToday=");const end=app.indexOf('function volunteerGroups()',start);assert.ok(start>=0&&end>start);
@@ -135,7 +136,8 @@ test('desktop task page places the gated AI planner at left and all task groups 
 
 test('AI flyer planning remains behind Phase 1 data-quality gates',()=>{
  assert.match(app,/Phase 1 待核驗/);assert.match(app,/里別人口／戶數推估優先/);
- assert.match(app,/官方人口／戶數資料待載入/);assert.match(app,/資料期別與統計口徑須讀取原表後顯示/);
+ assert.match(app,/2026-09 戶籍人口／戶數資料已載入/);assert.match(app,/不是實際居住人口、白天活動人口或站點步行圈人口/);
+ assert.match(population,/官方頁面數值已擷取／原檔一致性待驗/);
  assert.match(app,/1626 原始筆／1625 可用筆/);assert.match(app,/實測人潮現階段不作必要前提/);
  assert.match(app,/不會把全里平均冒充站點步行圈人口/);assert.match(app,/尚未核定新版數值權重/);
  assert.doesNotMatch(app,/TOP 1[^<]*最佳|GIS 驗證通過|正式派工已建立/);
