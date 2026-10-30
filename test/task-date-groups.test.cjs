@@ -136,9 +136,9 @@ test('AI flyer planning remains behind Phase 1 data-quality gates',()=>{
  assert.doesNotMatch(app,/TOP 1[^<]*最佳|GIS 驗證通過|正式派工已建立/);
 });
 
-test('the established fixed UI-test alias offers a synthetic read-only admin preview',()=>{
+test('the established fixed UI-test alias offers a synthetic admin preview without database writes',()=>{
  assert.match(app,/location\.hostname==='tainan-achang-online-ui-test-tjc1\.vercel\.app'/);
- assert.match(app,/進入管理員 UI 預覽（唯讀）/);assert.match(app,/function startPreviewAdmin\(\)/);
+ assert.match(app,/進入管理員 UI 預覽（合成資料）/);assert.match(app,/function startPreviewAdmin\(\)/);
  assert.match(app,/if\(previewDemoMode\)\{toast\('隔離預覽僅供檢視，不會寫入資料庫'\);return false\}/);
 });
 
@@ -154,6 +154,13 @@ test('all-village assignment only prioritizes a verified station village without
  assert.match(app,/同里優先顯示；這不等於已驗證的最短路程/);
  assert.match(app,/距離待核，請人工選擇/);assert.match(app,/不使用志工住址或定位資料/);
  assert.doesNotMatch(app,/距離約\s*\d|公里內|步行\s*\d/);
+});
+
+test('station member chip removes only one stop and places its action at the name upper-right',()=>{
+ assert.match(app,/onlineApi\('tasks','DELETE',\{id:task\.id,scope:'stop'\}\)/);
+ assert.match(app,/不會刪除會員、服務里歸屬或同路線其他站點/);
+ assert.match(app,/savePreviewAdminTasks\(\);syncTaskProjection\(\);renderPlanner\(\)/);
+ assert.match(styles,/\.stop-members \.chip>\[data-stop-remove\]\{position:absolute;top:-6px;right:-6px/);
 });
 
 test('desktop navigation reuses the five mobile icons without changing labels',()=>{

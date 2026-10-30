@@ -158,6 +158,7 @@ function openStopAssignmentAreaPicker(row){
 }
 document.addEventListener('click',event=>{const button=event.target.closest?.('[data-add-stop]');if(!button)return;window.__pendingStopArea='';if(plannerArea!=='all')return;const row=data?.stops?.find(item=>stopKey(item)===button.dataset.addStop);if(!row||sourceExcluded(row))return;event.preventDefault();event.stopImmediatePropagation();openStopAssignmentAreaPicker(row)},true);
 document.addEventListener('click',event=>{const button=event.target.closest?.('[data-stop-assignment-area]');if(!button)return;const area=button.dataset.stopAssignmentArea;if(!areas.includes(area))return;window.__pendingStopArea=area;const row=data?.stops?.find(item=>stopKey(item)===window.__pendingStop);closeModal();pickerKind='stop';pick('stop',{title:`指定 ${serviceAreaLabel(area)} · ${row?.['停靠點原文']||'停靠站'}`,allowed:rosterAvailable(area,assignmentRouteToken(row))})});
+document.addEventListener('click',event=>{const button=event.target.closest?.('[data-stop-remove]');if(!button)return;event.preventDefault();event.stopImmediatePropagation();if(button.disabled)return;button.disabled=true;Promise.resolve(removeStopMember(button.dataset.stop,button.dataset.stopRemove)).finally(()=>{if(document.contains(button))button.disabled=false})},true);
 
 function renderAreaTeams(regions){
  const root=$('#areaTeamPicker'),crew=plan().teams[teamArea]||[],available=rosterAvailable(teamArea,assignmentRouteToken(schedulableRouteRows()[0]));
@@ -201,15 +202,18 @@ const volunteerGroupOpen=new Map();
 
 // Isolated preview UI testing: synthetic-only, no API mutation or production credentials.
 let previewDemoMode=false;
+const PREVIEW_ADMIN_TASK_KEY='achang-preview-admin-tasks-v1';
+function previewAdminTasks(seed){try{const saved=JSON.parse(sessionStorage.getItem(PREVIEW_ADMIN_TASK_KEY)||'null');if(Array.isArray(saved)&&saved.every(task=>String(task?.id||'').startsWith('PREVIEW-TASK-')))return saved}catch{}return seed}
+function savePreviewAdminTasks(){if(!previewDemoMode||liveRole!=='admin')return;try{sessionStorage.setItem(PREVIEW_ADMIN_TASK_KEY,JSON.stringify(liveTasks))}catch{}}
 function previewOnly(){return location.hostname.startsWith('tainan-achang-pin-eipp-test-')||location.hostname==='tainan-achang-pin-eipp-test.vercel.app'||location.hostname==='tainan-achang-online-ui-test-tjc1.vercel.app';}
 function previewLoginButton(){
  if(!previewOnly())return;
  const anchor=document.getElementById('secureLoginForm');
  anchor&&(anchor.hidden=true);const google=document.getElementById('googleOAuthLogin');if(google)google.hidden=true;
  if(anchor&&!document.getElementById('previewDemoLogin')){
-  const admin=document.createElement('button');admin.id='previewAdminLogin';admin.type='button';admin.className='primary wide';admin.style.margin='12px 0';admin.textContent='進入管理員 UI 預覽（唯讀）';admin.onclick=startPreviewAdmin;anchor.before(admin);
+  const admin=document.createElement('button');admin.id='previewAdminLogin';admin.type='button';admin.className='primary wide';admin.style.margin='12px 0';admin.textContent='進入管理員 UI 預覽（合成資料）';admin.onclick=startPreviewAdmin;anchor.before(admin);
   const b=document.createElement('button');b.id='previewDemoLogin';b.type='button';b.className='primary wide';b.style.margin='12px 0';b.textContent='進入志工測試介面（免帳密）';b.onclick=startPreviewDemo;anchor.before(b);
-  const note=document.createElement('p');note.className='mini-note';note.textContent='此預覽僅使用範例資料，不連線寫入正式資料庫。AI 排名與正式帳號登入尚未驗證。';admin.after(note);
+  const note=document.createElement('p');note.className='mini-note';note.textContent='此預覽僅使用範例資料；指派與移除只在本分頁模擬，不連線寫入正式資料庫。AI 排名與正式帳號登入尚未驗證。';admin.after(note);
  }
 
 }
@@ -217,7 +221,7 @@ function startPreviewAdmin(){
  if(!previewOnly())return;
  previewDemoMode=true;liveRole='admin';liveMemberId='PREVIEW-ADMIN-001';liveDisplayName='唯讀測試管理員';state=makeState([{id:'PREVIEW-VOL-001',name:'範例志工',phone:'0900000000',address:'範例地址',residentArea:'成功里',assignment:'成功里'}].map(personNorm));
  const d=taipeiToday(),future=new Date(`${d}T12:00:00+08:00`);future.setDate(future.getDate()+1);const next=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit'}).format(future);
- liveTasks=[{id:'PREVIEW-ADMIN-TODAY',volunteer_id:'PREVIEW-VOL-001',volunteer_name:'範例志工',visit_date:d,shift:'日間',route_id:'PDF:DAY:1',truck:'',area:'成功里',eta:'06:30～06:45',stop_order:1,stop_address:'範例站點',status:'待訪'},{id:'PREVIEW-ADMIN-FUTURE',volunteer_id:'PREVIEW-VOL-001',volunteer_name:'範例志工',visit_date:next,shift:'夜間',route_id:'PDF:NIGHT:8',truck:'',area:'成功里',eta:'19:20～19:35',stop_order:1,stop_address:'範例未來站點',status:'待訪'}];
+ liveTasks=previewAdminTasks([{id:'PREVIEW-TASK-TODAY',volunteer_id:'PREVIEW-VOL-001',volunteer_name:'範例志工',visit_date:d,shift:'日間',route_id:'PDF:DAY:1',truck:'',area:'成功里',eta:'06:30～06:45',stop_order:1,stop_address:'範例站點',status:'待訪'},{id:'PREVIEW-TASK-FUTURE',volunteer_id:'PREVIEW-VOL-001',volunteer_name:'範例志工',visit_date:next,shift:'夜間',route_id:'PDF:NIGHT:8',truck:'',area:'成功里',eta:'19:20～19:35',stop_order:1,stop_address:'範例未來站點',status:'待訪'}]);syncTaskProjection();
  $('#secureLogin').hidden=true;$('#app').hidden=false;updateAccessControls();go('reports');toast('隔離管理員 UI 預覽：所有資料均為範例且禁止寫入');
 }
 function startPreviewDemo(){
@@ -538,7 +542,7 @@ function updateAccessControls(){
  $('#volunteerLoginBtn').textContent='🔐 登入';const adminTop=$('#adminHeaderAction');if(adminTop)adminTop.hidden=!admin;$('#secureLogout').hidden=!liveRole;const nameNode=$('#signedInName');if(nameNode){nameNode.hidden=!liveRole;nameNode.textContent=liveDisplayName||'登入者';}
 }
 
-async function secureSignOut(){stopGpsRefresh();if(previewDemoMode){previewDemoMode=false;clearInterval(liveTimer);liveTimer=null;showAuth();return;}try{await onlineApi('session','DELETE')}catch{}clearInterval(liveTimer);liveTimer=null;liveTasks=[];state=makeState([]);showAuth()}
+async function secureSignOut(){stopGpsRefresh();if(previewDemoMode){previewDemoMode=false;sessionStorage.removeItem(PREVIEW_ADMIN_TASK_KEY);clearInterval(liveTimer);liveTimer=null;showAuth();return;}try{await onlineApi('session','DELETE')}catch{}clearInterval(liveTimer);liveTimer=null;liveTasks=[];state=makeState([]);showAuth()}
 async function authStart(){try{
  const session=await onlineApi('session');liveRole=session.role;liveMemberId=session.memberId;liveAccountId=session.accountId||'';liveDisplayName=session.displayName||'';
  $('#secureLogin').hidden=true;$('#app').hidden=false;$('#accountBadge')?.remove();const adminTop=$('#adminHeaderAction');if(adminTop){adminTop.hidden=liveRole!=='admin';}updateAccessControls();
@@ -600,9 +604,9 @@ assignLeader=async function(id,a){const p=state.people.find(x=>x.id===id);if(!as
  const existing=leaderOf(a);if(existing&&existing.id!==id){const cleared=await doLive(()=>onlineApi('roster','PATCH',{id:existing.id,isLeader:false}));if(!cleared)return}
  await doLive(()=>onlineApi('roster','PATCH',{id,isLeader:true}));};
 addTeam=async function(id){const p=state.people.find(x=>x.id===id);if(!assertAdmin()||!p||p.assignment!==teamArea)return toast('請先分派到對應服務里');const rows=schedulableRouteRows().filter(r=>rowArea(r)===teamArea);if(!rows.length)return toast('目前里別沒有選錄停靠點');const first=rows[0],last=rows.at(-1),route=assignmentRouteToken(first);if(bookingFor(id,route))return toast('同一天同時段已安排其他工作');await doLive(()=>onlineApi('tasks','POST',{volunteerId:id,area:teamArea,date,shift,routeId:route,truck:first['車牌']||'',routeEnd:last['離開']||'',stops:rows.map(r=>({address:r['停靠點原文'],time:r['到達'],stopOrder:sourceOrderForTask(r)}))}));};
-addStopVolunteer=async function(key,id){const row=data.stops.find(r=>stopKey(r)===key),p=state.people.find(x=>x.id===id),area=window.__pendingStopArea||rowArea(row);if(!assertAdmin()||!row||sourceExcluded(row)||!p||p.assignment!==area)return toast('請先分派服務里');window.__pendingStopArea='';const route=assignmentRouteToken(row);if(bookingFor(id,route))return toast('同一天同時段不可重複排班');await doLive(()=>onlineApi('tasks','POST',{volunteerId:id,area,date,shift:row['時段'],routeId:route,truck:row['車牌']||'',routeEnd:row['離開']||'',address:row['停靠點原文'],time:row['到達'],stopOrder:sourceOrderForTask(row)}));};
+addStopVolunteer=async function(key,id){const row=data.stops.find(r=>stopKey(r)===key),p=state.people.find(x=>x.id===id),area=window.__pendingStopArea||rowArea(row);if(!row||sourceExcluded(row)||!p||p.assignment!==area)return toast('請先分派服務里');window.__pendingStopArea='';const route=assignmentRouteToken(row);if(previewDemoMode){const exists=liveTasks.some(task=>task.volunteer_id===id&&task.visit_date===date&&task.shift===row['時段']&&taskRouteToken(task)===route&&task.stop_address===row['停靠點原文']);if(exists)return toast('志工已在此站');liveTasks.push({id:'PREVIEW-TASK-'+Date.now()+'-'+sourceOrderForTask(row),volunteer_id:id,volunteer_name:p.name,visit_date:date,shift:row['時段'],route_id:route,truck:row['車牌']||'',area,eta:row['到達'],stop_order:sourceOrderForTask(row),stop_address:row['停靠點原文'],status:'待訪'});savePreviewAdminTasks();syncTaskProjection();renderPlanner();toast('預覽模擬：已指派 '+p.name+'，未寫入資料庫');return true}if(!assertAdmin())return false;if(bookingFor(id,route))return toast('同一天同時段不可重複排班');await doLive(()=>onlineApi('tasks','POST',{volunteerId:id,area,date,shift:row['時段'],routeId:route,truck:row['車牌']||'',routeEnd:row['離開']||'',address:row['停靠點原文'],time:row['到達'],stopOrder:sourceOrderForTask(row)}));};
 removeTeam=async function(id){const rows=routeRows().filter(r=>rowArea(r)===teamArea);const related=rows.flatMap(r=>matchedTasks(r).filter(x=>x.volunteer_id===id));if(!related.length)return;await doLive(()=>onlineApi('tasks','DELETE',{id:related[0].id}));};
-removeStopMember=async function(key,id){const row=data.stops.find(x=>stopKey(x)===key);if(!row)return;const task=matchedMemberTask(row,id);if(!task)return;const related=liveTasks.filter(x=>x.volunteer_id===id&&x.visit_date===date&&x.shift===shift&&taskRouteToken(x)===(row['路線ID']||row['車牌']));if(related.length>1)return toast('這是整段跟巡指派，請從里別跟巡人員移除');await doLive(()=>onlineApi('tasks','DELETE',{id:task.id}));};
+removeStopMember=async function(key,id){const row=data.stops.find(x=>stopKey(x)===key);if(!row)return false;const task=matchedMemberTask(row,id);if(!task)return false;const person=state.people.find(x=>x.id===id);if(!confirm(`解除「${person?.name||'此志工'}」在「${row['停靠點原文']}」的單站指派？\n\n不會刪除會員、服務里歸屬或同路線其他站點。`))return false;if(previewDemoMode){liveTasks=liveTasks.filter(item=>item.id!==task.id);savePreviewAdminTasks();syncTaskProjection();renderPlanner();toast('預覽模擬：已解除此站指派，未寫入資料庫');return true}return doLive(()=>onlineApi('tasks','DELETE',{id:task.id,scope:'stop'}));};
 setStatus=async function(key,status){const row=data.stops.find(x=>stopKey(x)===key);if(!row||sourceExcluded(row)||!validStatuses.includes(status))return;const ts=matchedTasks(row);if(!ts.length)return toast('請先指派人員');await doLive(async()=>{for(const t of ts)await onlineApi('tasks','PATCH',{id:t.id,status})});};
 savePersonForm=async function(f){if(!assertAdmin())return;const d=Object.fromEntries(new FormData(f));const pay={name:d.name,phone:d.phone,address:d.address,residentArea:d.residentArea,assignment:d.assignment||null};if(d.id)pay.id=d.id;const good=await doLive(()=>onlineApi('roster',d.id?'PATCH':'POST',pay));if(good){closeModal();toast('個人名冊已更新至雲端')}};
 // Update worker's own tasks through authenticated backend, not localStorage.

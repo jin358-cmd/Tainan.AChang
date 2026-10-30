@@ -59,7 +59,17 @@ module.exports=L.run(async(req,res)=>{
   return L.json(res,201,{ok:true,taskIds:(visit.data||[]).map(x=>x.id)});
  }
  const id=L.uuid(b.id),task=await L.getOne('visit_tasks',id,p.token);if(!task)L.problem(404,'找不到站點或無權存取');
- if(req.method==='DELETE'){if(p.role!=='admin')L.problem(403,'只有管理員能取消排班');const r=await L.rest('assignments?id=eq.'+task.assignment_id,p.token,{method:'DELETE'});L.need(r,'取消排班失敗');return L.json(res,200,{ok:true})}
+ if(req.method==='DELETE'){
+  if(p.role!=='admin')L.problem(403,'只有管理員能取消排班');
+  if(b.scope==='stop'){
+   if(task.status!=='incomplete')L.problem(409,'已開始或完成的站點不可直接解除，請保留任務紀錄');
+   const rows=L.need(await L.rest('visit_tasks?assignment_id=eq.'+task.assignment_id+'&select=id,status&order=stop_order.asc',p.token),'同路線站點查核失敗');
+   if(!rows.some(row=>row.id===id))L.problem(409,'站點資料已變更，請重新整理');
+   if(rows.length===1){const removed=await L.rest('assignments?id=eq.'+task.assignment_id,p.token,{method:'DELETE'});L.need(removed,'解除最後一個站點失敗');return L.json(res,200,{ok:true,scope:'stop',assignmentRetained:false})}
+   const removed=await L.rest('visit_tasks?id=eq.'+id,p.token,{method:'DELETE'});L.need(removed,'解除站點指派失敗');return L.json(res,200,{ok:true,scope:'stop',assignmentRetained:true});
+  }
+  const r=await L.rest('assignments?id=eq.'+task.assignment_id,p.token,{method:'DELETE'});L.need(r,'取消排班失敗');return L.json(res,200,{ok:true,scope:'route'});
+ }
  if(p.role==='volunteer'&&p.member_id!==task.member_id)L.problem(403,'不可回報其他人的任務');
  const ev=eventMap[b.status];if(!ev)L.problem(400,'站點狀態不合法');if(p.role==='volunteer'&&ev!=='completed')L.problem(403,'志工只可以回報已完成');
  const payload={id:crypto.randomUUID(),task_id:id,member_id:task.member_id,event_type:ev,base_version:task.server_version,server_version:task.server_version+1,client_created_at:new Date().toISOString()};
