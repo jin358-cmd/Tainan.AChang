@@ -246,13 +246,14 @@ function taskDateCategory(t){
  if(date<day)return 'history';if(date>day)return 'future';return 'current';
 }
 function volunteerGroups(){const groups=new Map();for(const t of myTasks()){const key=[t.visit_date,t.shift,taskRouteToken(t),t.area].join('|');if(!groups.has(key))groups.set(key,[]);groups.get(key).push(t)}return [...groups.values()].sort((a,b)=>a[0].visit_date.localeCompare(b[0].visit_date));}
+function volunteerFlyerPanel(){const area=myTasks().find(task=>areas.includes(task.area))?.area||'',row=flyerPopulationRow(area),source=flyerPopulationData();return '<section class="surface volunteer-flyer-panel" aria-labelledby="volunteerFlyerTitle"><div class="volunteer-flyer-head"><div><span>廣告單發派</span><h2 id="volunteerFlyerTitle">AI 智慧選點資料狀態</h2></div><span class="flyer-quality-pill">Phase 1 待核驗</span></div><p>'+(row?'<strong>'+esc(row.village)+'：'+row.households.toLocaleString('zh-TW')+' 戶／'+row.population.toLocaleString('zh-TW')+' 人</strong>（'+esc(source.period)+' 戶籍人口／戶數）':'目前沒有可對應服務里的公開人口／戶數資料。')+'</p><p>此處僅供志工查看公開規劃依據；尚未建立廣告單發派任務，也不提供管理員選點、排名或派工操作。</p><small>'+(source?esc(source.evidenceStatus)+'；':'')+'地址、可信座標與安全性尚待核驗，不代表實測人潮或站點 TOP 排名。</small></section>'}
 function renderVolunteerTaskList(root){
  const groups=volunteerGroups(),cats={history:[],current:[],future:[]};
  for(const g of groups)cats[taskDateCategory(g[0])].push(g);
  const pending=cats.history.filter(g=>g.some(t=>t.status!=='完成')).length;
  const catLabels={history:'歷史跟巡',current:'當日跟巡',future:'下次跟巡'};
  const selected=cats[volunteerTaskCategory]||[];
- let out='<section class="volunteer-task-unified"><div class="volunteer-task-heading"><h2 class="personal-task-title">跟巡任務</h2></div><div class="volunteer-categories" role="tablist" aria-label="跟巡日期分類">';
+ let out=volunteerFlyerPanel()+'<section class="volunteer-task-unified"><div class="volunteer-task-heading"><h2 class="personal-task-title">跟巡任務</h2></div><div class="volunteer-categories" role="tablist" aria-label="跟巡日期分類">';
  for(const k of ['history','current','future'])
   out+='<button type="button" role="tab" aria-selected="'+(k===volunteerTaskCategory)+'" class="volunteer-category '+(k===volunteerTaskCategory?'on':'')+'" data-vol-category="'+k+'">'+catLabels[k]+(k==='history'&&pending?'<small class="history-pending-count" role="status">● 尚未確認 '+pending+' 筆</small>':'<small>'+cats[k].length+' 筆</small>')+'</button>';
  out+='</div><div class="volunteer-task-unified-body">';
@@ -542,7 +543,7 @@ function openSecureLogin(){if(liveRole==='admin')return openMemberAdmin();previe
 function updateAccessControls(){
  document.body.classList.toggle('volunteer-session',liveRole==='volunteer');
  const admin=liveRole==='admin';
- for(const b of $$('[data-page]')){const pg=b.dataset.page;if(liveRole==='volunteer'){b.hidden=pg==='areas'||pg==='planner'||pg==='people';b.querySelector('span')&&(b.querySelector('span').textContent=pg==='people'?'小組任務':pg==='reports'?'任務':'地圖');}else{b.hidden=false;if(pg==='people'&&b.querySelector('span'))b.querySelector('span').textContent='名冊';}}
+ for(const b of $$('[data-page]')){const pg=b.dataset.page;if(liveRole==='volunteer'){b.hidden=pg==='areas'||pg==='planner'||pg==='people';b.querySelector('span')&&(b.querySelector('span').textContent=pg==='people'?'小組任務':pg==='reports'?'發派任務':'地圖');}else{b.hidden=false;if(pg==='people'&&b.querySelector('span'))b.querySelector('span').textContent='名冊';if(pg==='reports'&&b.querySelector('span'))b.querySelector('span').textContent='發派任務';}}
  for(const id of ['addPerson','addMember','openRosterAuthorization','clearArea']){const control=document.getElementById(id);if(control)control.hidden=!admin;}
  $('#rosterLocked').hidden=admin||liveRole==='volunteer';const rosterFilters=$('#peopleSearch')?.closest('.filter-bar');if(rosterFilters)rosterFilters.hidden=liveRole==='volunteer';$('#peopleList').hidden=!(admin||liveRole==='volunteer');
  $('#volunteerLoginBtn').hidden=!!liveRole;

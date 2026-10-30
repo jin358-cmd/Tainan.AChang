@@ -171,6 +171,7 @@ test('station member chip removes only one stop and places its action at the nam
  assert.match(app,/不會刪除會員、服務里歸屬或同路線其他站點/);
  assert.match(app,/savePreviewAdminTasks\(\);syncTaskProjection\(\);renderPlanner\(\)/);
  assert.match(styles,/\.stop-members \.chip>\[data-stop-remove\]\{position:absolute;top:-6px;right:-6px/);
+ assert.match(styles,/\.stop-members \.chip\{max-width:100%;padding:8px 27px 8px 12px;font-size:15px;font-weight:900/);
 });
 
 test('desktop navigation reuses the five mobile icons without changing labels',()=>{
@@ -179,9 +180,17 @@ test('desktop navigation reuses the five mobile icons without changing labels',(
  assert.match(desktop,/data-page="map"><i[^>]*>◉<\/i><span>地圖<\/span>/);
  assert.match(desktop,/data-page="areas"><i[^>]*>⌖<\/i><span>服務分區<\/span>/);
  assert.match(desktop,/data-page="planner"><i[^>]*>🚛<\/i><span>跟巡排班<\/span>/);
- assert.match(desktop,/data-page="reports"><i[^>]*>✓<\/i><span>任務發派<\/span>/);
+ assert.match(desktop,/data-page="reports"><i[^>]*>✓<\/i><span>發派任務<\/span>/);
  assert.match(desktop,/data-page="people"><i[^>]*>☷<\/i><span>名冊<\/span>/);
  assert.doesNotMatch(desktop,/[①②③④⑤]/);
+});
+
+test('volunteer dispatch page exposes only a read-only flyer planning status',()=>{
+ assert.match(app,/function volunteerFlyerPanel\(\)/);
+ assert.match(app,/此處僅供志工查看公開規劃依據/);
+ assert.match(app,/尚未建立廣告單發派任務，也不提供管理員選點、排名或派工操作/);
+ assert.match(app,/pg==='reports'\?'發派任務':'地圖'/);
+ assert.doesNotMatch(app,/volunteerFlyerPanel[\s\S]{0,1000}data-ai-quality-check/);
 });
 
 test('service-area assignment picker enlarges only desktop village and action text',()=>{
