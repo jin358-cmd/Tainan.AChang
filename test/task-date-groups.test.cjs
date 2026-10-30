@@ -188,12 +188,18 @@ test('desktop navigation reuses the five mobile icons without changing labels',(
  assert.doesNotMatch(desktop,/[①②③④⑤]/);
 });
 
-test('volunteer dispatch page exposes only a read-only flyer planning status',()=>{
+test('volunteer dispatch page exposes an isolated flyer report task without backend writes',()=>{
  assert.match(app,/function volunteerFlyerPanel\(\)/);
- assert.match(app,/此處僅供志工查看公開規劃依據/);
- assert.match(app,/尚未建立廣告單發派任務，也不提供管理員選點、排名或派工操作/);
+ assert.match(app,/PWA 廣告單發派任務/);
+ assert.match(app,/合成示範・非正式派工/);
+ assert.match(app,/待發派','發派中','已完成','無法執行/);
+ assert.match(app,/完成回報不等於管理端驗收/);
+ assert.match(app,/尚待管理端驗收/);
+ assert.match(app,/PREVIEW_FLYER_TASK_KEY='achang-preview-volunteer-flyer-v1'/);
+ assert.match(app,/if\(!previewDemoMode\|\|liveRole!=='volunteer'\)return/);
+ assert.match(app,/不連線寫入正式派工、會員或任務資料/);
  assert.match(app,/pg==='reports'\?'發派任務':'地圖'/);
- assert.doesNotMatch(app,/volunteerFlyerPanel[\s\S]{0,1000}data-ai-quality-check/);
+ assert.doesNotMatch(app,/data-preview-flyer-report[^\n]*onlineApi/);
 });
 
 test('service-area assignment picker enlarges only desktop village and action text',()=>{
