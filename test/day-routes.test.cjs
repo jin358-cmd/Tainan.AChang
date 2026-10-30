@@ -78,6 +78,8 @@ test('frontend and backend keep route identity separate from an optional truck n
  assert.match(app,/visitTitle\.textContent=rows\.length\?`依車次順序拜訪・共 \$\{rows\.length\} 站點`/);
  assert.match(app,/classList\.toggle\('planner-picker-open',kind==='team'\|\|kind==='stop'\)/);
  assert.match(app,/areaLabel=r\['固定日間'\]\?'站點里別待核':area\|\|'未指定服務里'/);
+ assert.doesNotMatch(app,/areas\.indexOf\(selectedArea\)/);
+ assert.match(app,/areaPage=Math\.floor\(serviceAreaIndex\(selectedArea\)\/CARD_PAGE_SIZE\)/);
  assert.match(app,/canAssign=!excluded&&\(plannerArea==='all'\|\|available\.length>0\)/);
  assert.match(app,/data-stop-assignment-area/);
  assert.match(app,/area=window\.__pendingStopArea\|\|rowArea\(row\)/);
