@@ -84,7 +84,8 @@ test('frontend and backend keep route identity separate from an optional truck n
  assert.match(app,/data-stop-assignment-area/);
  assert.match(app,/area=window\.__pendingStopArea\|\|rowArea\(row\)/);
  assert.match(app,/assignBtn\.disabled=!teamArea/);
- assert.match(app,/routeId:first\['路線ID'\]\|\|first\['車牌'\]\|\|first\['車次'\]/);
+ assert.match(app,/const first=rows\[0\],last=rows\.at\(-1\),route=assignmentRouteToken\(first\)/);assert.match(app,/routeId:route/);
+ assert.match(app,/bookingFor\(id,route\)/);assert.match(app,/rosterAvailable\(a,allowedRoute=''\)/);
  assert.match(app,/stopOrder:sourceOrderForTask\(r\)/);
  assert.match(app,/原表刪除線・僅供來源追溯，不可指派/);
  assert.match(app,/schedulableRouteRows\(\)\.filter/);
@@ -111,6 +112,7 @@ test('actual tasks handler persists a fixed daytime route with no fabricated pla
   rest:async(path,token,options={})=>{
    assert.equal(token,'scoped-user-token');writes.push({path,options});
    if(path.startsWith('service_allocations?'))return {ok:true,data:[{member_id:'member'}]};
+   if(path.startsWith('assignments?member_id=eq.'))return {ok:true,data:[]};
    if(path==='assignments?select=id')return {ok:true,status:201,data:[{id:'assignment'}]};
    if(path==='visit_tasks?select=id')return {ok:true,status:201,data:options.body.map((_,index)=>({id:`task-${index+1}`}))};
    throw new Error(`unexpected REST path: ${path}`);
@@ -130,4 +132,33 @@ test('actual tasks handler persists a fixed daytime route with no fabricated pla
   delete require.cache[handlerPath];if(originalHandler)require.cache[handlerPath]=originalHandler;
   if(originalServer)require.cache[serverPath]=originalServer;else delete require.cache[serverPath];
  }
+});
+
+test('tasks handler appends adjacent stops to the same route without duplicating its assignment or original task',async()=>{
+ const serverPath=require.resolve('../lib/server'),handlerPath=require.resolve('../api/tasks');
+ const originalServer=require.cache[serverPath],originalHandler=require.cache[handlerPath],writes=[];
+ const existing={id:'assignment-1',member_id:'member',service_date:'2026-10-30',shift:'day',village:'復華里',route_id:'DAY-4',truck_number:'KEP-5860',starts_at:'06:50:00',ends_at:'07:05:00'};
+ const fake={run:fn=>fn,method:()=>{},authorized:async()=>({role:'admin',token:'token'}),body:req=>req.body,uuid:x=>x,checkText:x=>String(x).trim(),validDate:x=>x,time:x=>x,
+  problem:(status,message)=>{throw Object.assign(new Error(message),{status})},need:(r,message)=>{assert.equal(r.ok,true,message);return r.data},json:(res,status,body)=>{res.statusCode=status;res.body=body},
+  rest:async(path,token,opt={})=>{writes.push({path,opt});assert.equal(token,'token');
+   if(path.startsWith('service_allocations?'))return {ok:true,data:[{member_id:'member'}]};
+   if(path.startsWith('assignments?member_id=eq.'))return {ok:true,data:[existing]};
+   if(path.startsWith('visit_tasks?assignment_id=eq.'))return {ok:true,data:[{id:'task-original',visit_address:'文化路96之1號',stop_order:2,scheduled_at:'2026-10-30T06:50:00+08:00'}]};
+   if(path==='visit_tasks?select=id'){assert.deepEqual(opt.body.map(row=>[row.assignment_id,row.visit_address,row.stop_order,row.scheduled_at]),[['assignment-1','國華街110號(活動中心)',3,'2026-10-30T07:10:00+08:00']]);return {ok:true,status:201,data:[{id:'task-new'}]}}
+   if(path==='assignments?id=eq.assignment-1'){assert.deepEqual(opt.body,{starts_at:'06:50',ends_at:'07:25',updated_at:opt.body.updated_at});assert.match(opt.body.updated_at,/Z$/);return {ok:true,data:[]}}
+   throw new Error('unexpected '+path);
+  }};
+ try{require.cache[serverPath]={id:serverPath,filename:serverPath,loaded:true,exports:fake};delete require.cache[handlerPath];const handler=require(handlerPath),res={};
+  await handler({method:'POST',body:{volunteerId:'member',area:'復華里',date:'2026-10-30',shift:'日間',routeId:'DAY-4',truck:'KEP-5860',routeEnd:'07:25',address:'國華街110號(活動中心)',time:'07:10',stopOrder:3}},res);
+  assert.equal(res.statusCode,201);assert.deepEqual(res.body,{ok:true,taskIds:['task-new'],reused:true});assert.equal(writes.filter(x=>x.path==='assignments?select=id').length,0);
+ }finally{delete require.cache[handlerPath];if(originalHandler)require.cache[handlerPath]=originalHandler;if(originalServer)require.cache[serverPath]=originalServer;else delete require.cache[serverPath]}
+});
+
+test('tasks handler is idempotent for an existing stop and rejects a conflicting route in the same day shift',async()=>{
+ const serverPath=require.resolve('../lib/server'),handlerPath=require.resolve('../api/tasks');const originalServer=require.cache[serverPath],originalHandler=require.cache[handlerPath];
+ const invoke=async(routeId)=>{const writes=[],fake={run:fn=>fn,method:()=>{},authorized:async()=>({role:'admin',token:'token'}),body:req=>req.body,uuid:x=>x,checkText:x=>String(x).trim(),validDate:x=>x,time:x=>x,problem:(status,message)=>{throw Object.assign(new Error(message),{status})},need:(r)=>r.data,json:(res,status,body)=>{res.statusCode=status;res.body=body},rest:async(path,token,opt={})=>{writes.push({path,opt});if(path.startsWith('service_allocations?'))return {ok:true,data:[{}]};if(path.startsWith('assignments?member_id=eq.'))return {ok:true,data:[{id:'assignment-1',village:'復華里',route_id:'DAY-4',starts_at:'06:50:00',ends_at:'07:25:00'}]};if(path.startsWith('visit_tasks?assignment_id=eq.'))return {ok:true,data:[{id:'task-original',visit_address:'文化路96之1號',stop_order:2,scheduled_at:'2026-10-30T06:50:00+08:00'}]};throw new Error('unexpected '+path)}};
+  require.cache[serverPath]={id:serverPath,filename:serverPath,loaded:true,exports:fake};delete require.cache[handlerPath];const handler=require(handlerPath),res={};let error;try{await handler({method:'POST',body:{volunteerId:'member',area:'復華里',date:'2026-10-30',shift:'日間',routeId,truck:routeId==='DAY-4'?'KEP-5860':'OTHER',routeEnd:'07:05',address:'文化路96之1號',time:'06:50',stopOrder:2}},res)}catch(e){error=e}return {res,error,writes}};
+ try{const same=await invoke('DAY-4');assert.equal(same.res.statusCode,200);assert.deepEqual(same.res.body,{ok:true,taskIds:['task-original'],reused:true});assert.equal(same.writes.some(x=>x.opt.method==='POST'),false);
+  const overlap=await invoke('OTHER-ROUTE');assert.equal(overlap.error?.status,409);assert.match(overlap.error.message,/已有其他跟巡排班/);assert.equal(overlap.writes.some(x=>x.opt.method==='POST'),false);
+ }finally{delete require.cache[handlerPath];if(originalHandler)require.cache[handlerPath]=originalHandler;if(originalServer)require.cache[serverPath]=originalServer;else delete require.cache[serverPath]}
 });
