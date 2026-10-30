@@ -134,9 +134,10 @@ test('desktop task page places the gated AI planner at left and all task groups 
 });
 
 test('AI flyer planning remains behind Phase 1 data-quality gates',()=>{
- assert.match(app,/Phase 1 待核驗/);assert.match(app,/未通過 Phase 1 前不產生 TOP 排名、座標或人流結論/);
- assert.match(app,/1626 原始筆／1625 可用筆/);assert.match(app,/與舊 1586 版不得混稱同一資料/);
- assert.match(app,/實測人流、安全與步行可達範圍：尚無核驗資料/);
+ assert.match(app,/Phase 1 待核驗/);assert.match(app,/里別人口／戶數推估優先/);
+ assert.match(app,/官方人口／戶數資料待載入/);assert.match(app,/資料期別與統計口徑須讀取原表後顯示/);
+ assert.match(app,/1626 原始筆／1625 可用筆/);assert.match(app,/實測人潮現階段不作必要前提/);
+ assert.match(app,/不會把全里平均冒充站點步行圈人口/);assert.match(app,/尚未核定新版數值權重/);
  assert.doesNotMatch(app,/TOP 1[^<]*最佳|GIS 驗證通過|正式派工已建立/);
 });
 
