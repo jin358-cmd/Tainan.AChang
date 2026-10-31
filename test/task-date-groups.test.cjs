@@ -202,6 +202,18 @@ test('volunteer dispatch page exposes an isolated flyer report task without back
  assert.doesNotMatch(app,/data-preview-flyer-report[^\n]*onlineApi/);
 });
 
+test('preview multi-stop map uses schematic positions and stable time ordering only',()=>{
+ assert.match(app,/const PREVIEW_MAP_STOPS=\[/);
+ assert.match(app,/x:23,y:68/);
+ assert.match(app,/sort\(\(a,b\)=>a\.time\.localeCompare\(b\.time\)\|\|a\.order-b\.order\)/);
+ assert.match(app,/位置為合成畫面座標，非 GPS、非道路路徑、不可導航/);
+ assert.match(app,/未指派站點仍會顯示/);
+ assert.match(app,/previewMapState\.selected\.has\(stop\.id\)/);
+ assert.match(html,/id="previewMapMarkers"/);
+ assert.match(html,/重設 5 站示例/);
+ assert.doesNotMatch(app,/PREVIEW_MAP_STOPS[\s\S]{0,2400}(?:lon|lat|longitude|latitude):/);
+});
+
 test('service-area assignment picker enlarges only desktop village and action text',()=>{
  assert.match(app,/pick-list person-area-picker/);assert.match(app,/pick-row person-area-row/);assert.match(app,/person-area-assign/);
  assert.match(styles,/@media\(min-width:800px\)\{[^}]*\.desktop-nav button[\s\S]*\.person-area-picker \.person-area-row>strong\{font-size:18px\}[\s\S]*\.person-area-picker \.person-area-assign\{font-size:17px/);
