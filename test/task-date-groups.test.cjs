@@ -192,14 +192,19 @@ test('volunteer dispatch page exposes an isolated flyer report task without back
  assert.match(app,/function volunteerFlyerPanel\(\)/);
  assert.match(app,/PWA 廣告單發派任務/);
  assert.match(app,/合成示範・非正式派工/);
- assert.match(app,/待發派','發派中','已完成','無法執行/);
- assert.match(app,/完成回報不等於管理端驗收/);
+ assert.match(app,/待執行','執行中','已完成','需協調/);
+ assert.match(app,/管理員已直接發派・無需接／不接/);
+ assert.match(app,/需協調／回報困難/);
+ assert.match(app,/待管理端處理，任務未取消/);
+ assert.match(app,/id="previewFlyerStatus" name="previewFlyerStatus"/);
+ assert.match(app,/volunteer-flyer-panel volunteer-task-summary/);
  assert.match(app,/尚待管理端驗收/);
  assert.match(app,/PREVIEW_FLYER_TASK_KEY='achang-preview-volunteer-flyer-v1'/);
  assert.match(app,/if\(!previewDemoMode\|\|liveRole!=='volunteer'\)return/);
- assert.match(app,/不連線寫入正式派工、會員或任務資料/);
+ assert.match(app,/不連線寫入正式資料/);
  assert.match(app,/pg==='reports'\?'發派任務':'地圖'/);
  assert.doesNotMatch(app,/data-preview-flyer-report[^\n]*onlineApi/);
+ assert.doesNotMatch(app,/data-preview-flyer-(?:accept|reject)/);
 });
 
 test('preview multi-stop map uses schematic positions and stable time ordering only',()=>{
