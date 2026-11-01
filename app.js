@@ -345,7 +345,8 @@ function pick(kind,opts){
  const row=kind==='stop'?data.stops.find(r=>stopKey(r)===window.__pendingStop):schedulableRouteRows()[0],route=assignmentRouteToken(row);
  const itemHtml=allowed.length?allowed.map(p=>{
   const reason=dispatch?(!areas.includes(p.assignment)?'尚未分區':bookingFor(p.id,route)?'同時段已有其他車次':kind==='stop'&&matchedMemberTask(row,p.id)?'已指派此站':''):'';
-  return `<div class="pick-row" data-roster-area="${esc(p.assignment||'')}"><div><strong>${esc(p.name)}</strong><br/><small>${esc(serviceAreaLabel(p.assignment)||'待分配')}${reason?' · '+esc(reason):''}</small></div><div class="pick-row-actions"><button data-pick-id="${esc(p.id)}" ${reason?'disabled':''}>${reason==='已指派此站'?'已指派':'選擇'}</button>${kind==='area'&&p.phone?`<button class="lead-pick" data-pick-leader="${esc(p.id)}" title="加入並設為組長">👑 組長</button>`:''}</div></div>`;
+  const pending=dispatch&&reason!=='已指派此站'&&reason!=='同時段已有其他車次';
+  return `<div class="pick-row${pending?' pending-assignment':''}" data-roster-area="${esc(p.assignment||'')}"><div><strong>${esc(p.name)}</strong><br/><small>${esc(serviceAreaLabel(p.assignment)||'待分配')}${reason?' · '+esc(reason):''}</small></div><div class="pick-row-actions"><button data-pick-id="${esc(p.id)}" ${reason?'disabled':''}>${reason==='已指派此站'?'已指派':'選擇'}</button>${kind==='area'&&p.phone?`<button class="lead-pick" data-pick-leader="${esc(p.id)}" title="加入並設為組長">👑 組長</button>`:''}</div></div>`;
  }).join(''):'<div class="empty">目前沒有可選擇的人員，請至人員分區新增。</div>';
  showModal(opts.title,`<div class="pick-list">${itemHtml}</div>`);$('#modal').classList.toggle('planner-picker-open',kind==='team'||kind==='stop');
 }
