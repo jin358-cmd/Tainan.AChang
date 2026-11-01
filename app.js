@@ -272,7 +272,7 @@ function renderVolunteerTaskList(root){
  const pending=cats.history.filter(g=>g.some(t=>t.status!=='完成')).length;
  const catLabels={history:'歷史跟巡',current:'當日跟巡',future:'下次跟巡'};
  const selected=cats[volunteerTaskCategory]||[];
- let out=volunteerFlyerPanel()+'<section class="volunteer-task-unified"><div class="volunteer-task-heading"><h2 class="personal-task-title">跟巡任務</h2></div><div class="volunteer-categories" role="tablist" aria-label="跟巡日期分類">';
+ let out='<section class="volunteer-task-unified"><div class="volunteer-task-heading"><h2 class="personal-task-title">跟巡任務</h2></div><div class="volunteer-categories" role="tablist" aria-label="跟巡日期分類">';
  for(const k of ['history','current','future'])
   out+='<button type="button" role="tab" aria-selected="'+(k===volunteerTaskCategory)+'" class="volunteer-category '+(k===volunteerTaskCategory?'on':'')+'" data-vol-category="'+k+'">'+catLabels[k]+(k==='history'&&pending?'<small class="history-pending-count" role="status">● 尚未確認 '+pending+' 筆</small>':'<small>'+cats[k].length+' 筆</small>')+'</button>';
  out+='</div><div class="volunteer-task-unified-body">';
