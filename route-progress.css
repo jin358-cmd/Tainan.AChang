@@ -1,0 +1,10 @@
+#detail .route-progress{margin:16px 0;color:#54616c;font-size:15px;line-height:1.8}
+#detail .route-progress-legend{display:flex;flex-wrap:wrap;gap:8px 20px;font-weight:700}
+#detail .route-progress-legend span{display:inline-flex;align-items:center;gap:7px}
+#detail .stop-key{width:12px;height:12px;border:2px solid currentColor;border-radius:50%;display:inline-block}
+#detail .progress-past{color:#b42318}
+#detail .progress-next{color:#157347}
+#detail .progress-upcoming{color:#68757e}
+#detail .stop-number{display:flex;align-items:center;justify-content:center;box-sizing:border-box;border:2px solid #929da6;background:white;color:#68757e;line-height:1;font-weight:700}
+#detail .stop-number[data-progress="past"]{border-color:#c43b32;background:#fff0ee;color:#b42318}
+#detail .stop-number[data-progress="next"]{border-color:#16804a;background:#e7f7ed;color:#126438;box-shadow:0 0 0 3px #e7f7ed}

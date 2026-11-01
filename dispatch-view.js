@@ -25,9 +25,15 @@
   if(r['來源刪除線']||!runsToday(r,now))return false;const start=minutes(r['到達']??r.time),end=minutes(r['離開']);
   return start!==null&&(start>=current||(end!==null&&end>=start&&end>=current));
  }).slice(0,limit);}
+ function routeProgress(rows,now=new Date()){
+  const current=clock(now),times=rows.map(r=>r._extras?.['刪除線']?null:minutes(r['到達時間']));
+  let nextIndex=-1;
+  times.forEach((time,i)=>{if(time!==null&&time>=current.minutes&&(nextIndex<0||time<times[nextIndex]))nextIndex=i;});
+  return {...current,nextIndex,states:times.map((time,i)=>time===null?'unverified':time<current.minutes?'past':i===nextIndex?'next':'upcoming')};
+ }
  function taskMatchesStop(task,row,serviceDate){
   if(task.visit_date!==serviceDate||task.shift!==row['時段']||(task.route_id||task.truck||'')!==(row['路線ID']||row['車牌']||'')||task.stop_address!==row['停靠點原文'])return false;
   return task.stop_order===undefined||task.stop_order===null||row['清運次序']===''||Number(task.stop_order)===Number(row._taskOrder??row['清運次序']);
  }
- return {AREA_ORDER,area,sortPeople,compareRoutes,clock,runsToday,sortStops,nextStops,taskMatchesStop};
+ return {AREA_ORDER,area,sortPeople,compareRoutes,clock,runsToday,sortStops,nextStops,routeProgress,taskMatchesStop};
 });

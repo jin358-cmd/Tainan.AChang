@@ -8,6 +8,22 @@ test('Taiwan service date and weekday do not inherit the server timezone',()=>{
  assert.deepEqual(V.clock(monday),{day:'2026-11-02',hhmm:'07:00',minutes:420,weekday:'一'});
  assert.equal(V.clock(new Date('2026-11-02T16:01:00Z')).day,'2026-11-03');
 });
+test('route numbers turn red after arrival, highlight exactly one next stop and advance with Taiwan time',()=>{
+ const rows=['06:59','07:00','07:00','07:05','07:20'].map(t=>({'到達時間':t}));
+ assert.deepEqual(V.routeProgress(rows,monday).states,['past','next','upcoming','upcoming','upcoming']);
+ assert.deepEqual(V.routeProgress(rows,new Date('2026-11-01T23:01:00Z')).states,['past','past','past','next','upcoming']);
+ assert.deepEqual(V.routeProgress(rows,new Date('2026-11-01T23:21:00Z')).states,['past','past','past','past','past']);
+ assert.equal(V.routeProgress(rows,new Date('2026-11-01T22:00:00Z')).nextIndex,0);
+ assert.equal(V.routeProgress(rows,new Date('2026-11-01T23:21:00Z')).nextIndex,-1);
+ assert.deepEqual(rows.map(r=>r['到達時間']),['06:59','07:00','07:00','07:05','07:20']);
+});
+test('invalid times and struck source rows remain grey and never become the next stop',()=>{
+ const rows=[{'到達時間':'07:00',_extras:{'刪除線':true}},{'到達時間':'99:99'},{'到達時間':'18:6'},{'到達時間':'16:57~'},{'到達時間':'07:15'},{'到達時間':'07:05'}];
+ const progress=V.routeProgress(rows,monday);
+ assert.deepEqual(progress.states,['unverified','unverified','unverified','unverified','upcoming','next']);
+ assert.equal(progress.nextIndex,5);
+ assert.deepEqual(V.routeProgress([],monday).states,[]);
+});
 test('upcoming four follow directory vehicle order, preserve source order and never repeat past stops',()=>{
  const rows=[row('日間2',1,'07:01'),row('日間1',1,'06:59'),row('日間1',2,'07:00'),row('日間1',3,'07:10'),row('日間1',4,'07:30'),row('日間1',5,'07:50'),row('日間1',6,'99:99')];
  assert.deepEqual(V.nextStops(rows,monday).map(r=>[r['車次'],r['清運次序']]),[['日間1',2],['日間1',3],['日間1',4],['日間1',5]]);
