@@ -604,13 +604,14 @@ const deviceReady=(async()=>{
  return deviceId;
 })();
 async function onlineApi(endpoint,method='GET',body){
+ if(previewOnly()&&!['GET','HEAD'].includes(method)&&!['session','oauth-session'].includes(endpoint))throw Object.assign(new Error('測試站僅供讀取名冊，不會修改正式資料庫'),{status:403});
  await deviceReady;
  const r=await fetch('/api/'+endpoint,{method,credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json','X-AChang-Device':deviceId},body:body===undefined?undefined:JSON.stringify(body)});
  let doc;try{doc=await r.json()}catch{doc={error:'資料伺服器回傳格式錯誤'}};
  if(!r.ok)throw Object.assign(new Error(doc.error||`HTTP ${r.status}`),{status:r.status});
  return doc;
 }
-function assertAdmin(){if(previewDemoMode){toast('隔離預覽僅供檢視，不會寫入資料庫');return false}if(liveRole!=='admin'){toast('只有管理員可編輯名冊與排班');return false}return true}
+function assertAdmin(){if(previewDemoMode||previewOnly()){toast('隔離預覽僅供檢視，不會寫入資料庫');return false}if(liveRole!=='admin'){toast('只有管理員可編輯名冊與排班');return false}return true}
 function showAuth(){
  document.body.classList.remove('volunteer-session');
  liveRole='';liveMemberId='';liveAccountId='';liveDisplayName='';truckRosterSnapshot=null;truckRosterError='';state=makeState([]);liveTasks=[];

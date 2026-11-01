@@ -23,3 +23,5 @@ test('private names are only supplied by an authenticated admin roster, not synt
  assert.match(app,/people=authenticated\?\(truckRosterSnapshot\|\|state.people\):\[\]/);
  assert.match(app,/truckRosterSnapshot=null;truckRosterError='';state=makeState\(\[\]\)/);
 });
+
+test('test hostname can read the authenticated roster but cannot write production tasks or members',()=>{const fs=require('node:fs'),s=fs.readFileSync(require('node:path').join(__dirname,'../app.js'),'utf8');assert.match(s,/if\(previewOnly\(\)&&!\['GET','HEAD'\]\.includes\(method\)&&!\['session','oauth-session'\]\.includes\(endpoint\)\)/);assert.match(s,/function assertAdmin\(\)\{if\(previewDemoMode\|\|previewOnly\(\)\)/);});
