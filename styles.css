@@ -1137,3 +1137,18 @@ body.volunteer-session #page-reports .volunteer-flyer-report-state{padding:8px 1
 .preview-map-markers{position:absolute;inset:0;z-index:8;pointer-events:none}.preview-map-marker{position:absolute;display:grid;place-items:center;min-width:44px;min-height:44px;padding:4px;border:3px solid #fff;border-radius:50%;transform:translate(-50%,-50%);background:#0b8581;color:#fff;box-shadow:0 3px 12px #092f4066;pointer-events:auto}.preview-map-marker b{font-size:17px;line-height:1}.preview-map-marker span{position:absolute;top:39px;padding:3px 6px;border-radius:6px;background:#173d59;color:#fff;font-size:10px;white-space:nowrap}.preview-map-marker.active{background:#db5b2f;outline:4px solid #ffd65c;z-index:2}
 .preview-map-order{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:10px 0 0;padding:0;list-style:none}.preview-map-order li{min-width:0}.preview-map-order li>button{display:flex;align-items:center;gap:9px;width:100%;min-height:48px;padding:7px 9px;border:1px solid #c7dbe2;border-radius:9px;background:#fff;color:#23475c;text-align:left}.preview-map-order li>button>b{display:grid;place-items:center;flex:0 0 28px;height:28px;border-radius:50%;background:#0b8581;color:#fff}.preview-map-order li>button>span{display:grid;min-width:0}.preview-map-order li>button strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}.preview-map-order li>button small{font-size:10px;color:#718494}.preview-map-order li>button.active{border-color:#db5b2f;background:#fff4e8;box-shadow:inset 0 0 0 1px #db5b2f}
 @media(max-width:620px){.preview-map-demo-head{align-items:stretch}.preview-map-demo-head button{flex:0 0 110px}.preview-map-demo-controls{grid-template-columns:1fr 1fr}.preview-map-candidates,.preview-map-order{grid-template-columns:1fr}.preview-map-choice{grid-template-columns:auto minmax(0,1fr)}.preview-map-choice small{grid-column:2}.preview-map-marker{min-width:40px;min-height:40px}.preview-map-marker span{top:35px}}
+
+/* Readable map planning controls */
+.preview-map-demo{font-size:18px}
+.preview-map-demo h2{font-size:23px}
+.preview-map-demo-controls label{font-size:17px;font-weight:700}
+.preview-map-demo-controls select{font-size:18px;min-height:52px}
+.preview-map-choice{min-height:58px;font-size:18px;gap:12px}
+.preview-map-choice small{font-size:16px}
+.preview-map-choice input{width:20px;height:20px}
+.preview-map-order button{min-height:64px;font-size:18px}
+.preview-map-order strong{font-size:18px}
+.preview-map-order small{font-size:16px}
+.preview-map-demo .mini-note{font-size:16px;line-height:1.65}
+.preview-map-demo-head button{font-size:18px}
+@media(max-width:620px){.preview-map-demo-controls select{font-size:17px}.preview-map-choice{font-size:17px;grid-template-columns:auto minmax(0,1fr)}.preview-map-choice small{grid-column:2;font-size:16px}.preview-map-order strong{font-size:17px}.preview-map-order small{font-size:15px}}
