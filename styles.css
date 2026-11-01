@@ -1152,3 +1152,5 @@ body.volunteer-session #page-reports .volunteer-flyer-report-state{padding:8px 1
 .preview-map-demo .mini-note{font-size:16px;line-height:1.65}
 .preview-map-demo-head button{font-size:18px}
 @media(max-width:620px){.preview-map-demo-controls select{font-size:17px}.preview-map-choice{font-size:17px;grid-template-columns:auto minmax(0,1fr)}.preview-map-choice small{grid-column:2;font-size:16px}.preview-map-order strong{font-size:17px}.preview-map-order small{font-size:15px}}
+
+.candidate-card{background:#fff;border:1px solid #afd3d6;border-radius:12px;padding:14px;margin:12px 0;font-size:17px;overflow-wrap:anywhere}.candidate-card strong{font-size:19px}.candidate-card button{padding:10px;margin:4px;border-radius:8px;background:#e4f2f3;color:#153c59}.flyer-ai-result{font-size:17px}.flyer-ai-result .primary{padding:14px}

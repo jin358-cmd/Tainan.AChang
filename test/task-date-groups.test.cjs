@@ -135,11 +135,11 @@ test('desktop task page places the gated AI planner at left and all task groups 
 });
 
 test('AI flyer planning remains behind Phase 1 data-quality gates',()=>{
- assert.match(app,/Phase 1 待核驗/);assert.match(app,/里別人口／戶數推估優先/);
+ assert.match(app,/候選方案試用/);assert.match(app,/里別人口／戶數推估優先/);
  assert.match(app,/2026-09 戶籍人口／戶數資料已載入/);assert.match(app,/不是實際居住人口、白天活動人口或站點步行圈人口/);
  assert.match(population,/官方頁面數值已擷取／原檔一致性待驗/);
- assert.match(app,/1626 原始筆／1625 可用筆/);assert.match(app,/實測人潮現階段不作必要前提/);
- assert.match(app,/不會把全里平均冒充站點步行圈人口/);assert.match(app,/尚未核定新版數值權重/);
+ assert.match(app,/規則式初選/);assert.match(app,/現場安全待核/);
+ assert.match(app,/人口僅作里別背景，不代表各站人潮/);
  assert.doesNotMatch(app,/TOP 1[^<]*最佳|GIS 驗證通過|正式派工已建立/);
 });
 
@@ -209,7 +209,7 @@ test('volunteer dispatch page exposes an isolated flyer report task without back
 
 test('preview multi-stop map anchors geographic markers and preserves stable time ordering',()=>{
  assert.match(app,/const PREVIEW_MAP_STOPS=\[/);
- assert.match(app,/x:23,y:68/);
+ assert.match(app,/address:r\['停靠點原文'\]/);
  assert.match(app,/sort\(\(a,b\)=>a\.time\.localeCompare\(b\.time\)\|\|a\.order-b\.order\)/);
  assert.match(app,/new maplibregl.Marker/);
  assert.match(app,/setLngLat\(lngLat\)/);
@@ -217,7 +217,7 @@ test('preview multi-stop map anchors geographic markers and preserves stable tim
  assert.match(app,/未指派站點仍會顯示/);
  assert.match(app,/previewMapState\.selected\.has\(stop\.id\)/);
  assert.match(html,/id="previewMapMarkers"/);
- assert.match(html,/重設 5 站示例/);
+ assert.match(html,/重設來源站點/);
  assert.doesNotMatch(app,/PREVIEW_MAP_STOPS[\s\S]{0,2400}(?:lon|lat|longitude|latitude):/);
 });
 

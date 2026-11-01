@@ -33,11 +33,11 @@ test('map startup has bounded failure, cleanup and retry guards', () => {
 });
 
 test('map asset revision and service-worker cache advance together', () => {
-  assert.match(html, /styles\.css\?v=219/);
+  assert.match(html, /styles\.css\?v=220/);
   assert.match(html, /route-time-filter\.js\?v=2/);
   assert.match(html, /population-data\.js\?v=1/);
-  assert.match(html, /app\.js\?v=231/);
-  assert.match(sw, /achang-pwa-shell-v178-preview-map-fonts/);
+  assert.match(html, /app\.js\?v=232/);
+  assert.match(sw, /achang-pwa-shell-v179-candidate-planner/);
 });
 
 test('map uses only the provider native compact attribution entry', () => {
