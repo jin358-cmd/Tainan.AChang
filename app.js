@@ -50,8 +50,8 @@ function assignedCount(){return state.people.filter(p=>areas.includes(p.assignme
 function planId(){return date+'|'+chosenRoute}
 function plan(){if(!state.plans[planId()])state.plans[planId()]={teams:{},stops:{}};return state.plans[planId()]}
 function stopPlan(r){const k=stopKey(r),pl=plan();if(!pl.stops[k])pl.stops[k]={chosen:false,status:'待訪',people:[],note:''};return pl.stops[k]}
-function sourceRouteRows(){return data.stops.filter(x=>routeKey(x)===chosenRoute)}
-function sourceOrderForTask(row){const index=sourceRouteRows().indexOf(row);return index<0?1:index+1}
+function sourceRouteRows(){return data.stops.filter(x=>routeKey(x)===chosenRoute&&(!truckPatrolScope||window.AChangTruckPatrol.areas.includes(x['里別'])))}
+function sourceOrderForTask(row){const index=data.stops.filter(x=>routeKey(x)===chosenRoute).indexOf(row);return index<0?1:index+1}
 function routeRows(){const rows=sourceRouteRows(),adapter=window.AChangRouteTime;if(!adapter)return rows;return rows.some(row=>row['固定日間'])?adapter.filterIntervals(rows,visitTimeStart,visitTimeEnd):adapter.filter(rows,visitTimeStart,visitTimeEnd)}
 function sourceExcluded(row){return window.AChangRouteTime?.struck(row)===true}
 function schedulableRouteRows(){return routeRows().filter(row=>!sourceExcluded(row))}
@@ -111,7 +111,7 @@ function highlightMapSelection(){if(!map||!map.getLayer('village-fill'))return;c
 
 function renderSummary(){const planCurrent=state.plans[planId()];$('#statTotal').textContent=state.people.length;$('#statAssigned').textContent=assignedCount();$('#statPending').textContent=state.people.length-assignedCount();$('#statStops').textContent=Object.values(planCurrent?.stops||{}).filter(v=>v.chosen).length;const banner=$('#modeBanner');banner.hidden=true;banner.textContent=''}
 function go(next){page=next;const mapPopup=$('#areaPopup');if(mapPopup)mapPopup.hidden=true;$$('.page').forEach(el=>el.classList.toggle('active',el.id==='page-'+next));$$('[data-page]').forEach(el=>{el.classList.toggle('on',el.dataset.page===next);el.setAttribute('aria-current',el.dataset.page===next?'page':'false')});render();window.scrollTo({top:0,behavior:'auto'});if(next==='map')requestAnimationFrame(()=>{initMap().then(()=>{map?.resize();try{updateMap();centerTodayVillage()}catch(e){console.warn('地圖顯示錯誤',e);drawFallback('地圖顯示發生問題，請重試')}}).catch(e=>drawFallback(e?.message||'地圖載入失敗'))})}
-function render(){document.body.classList.toggle('read-only-visitor',!liveRole);document.body.classList.toggle('restored-admin-map',liveRole==='admin');renderSummary();if(page==='areas'){if(liveRole==='volunteer'){$('#areaMembers').innerHTML='';$('#pendingMembers').innerHTML='';$('#areaMembers').hidden=true;$('#pendingMembers').hidden=true;$('#areaAssignedCount').textContent='僅管理員可分派';}else renderAreas();}if(page==='planner'){if(liveRole==='volunteer'){$('#plannerContent').hidden=true;$('#plannerGate').hidden=false;$('#plannerGate').innerHTML='<strong>跟巡排班由管理員安排</strong><p>請至「任務」查看你的排班與完成回報。</p>';}else renderPlanner();}if(page==='people'){const ttl=$('#rosterTitle'),sub=$('#rosterSubtitle');if(ttl)ttl.textContent=liveRole==='volunteer'?'小組任務':'志工名冊';if(sub)sub.textContent=liveRole==='volunteer'?'僅顯示本人已參與的排班小組':'會員授權及志工資料由管理員管理';renderPeople();}if(page==='reports')renderReports();if(page==='map')updateMap();if(page==='volunteer')renderVolunteer()}
+function render(){renderTruckPatrol();document.body.classList.toggle('read-only-visitor',!liveRole);document.body.classList.toggle('restored-admin-map',liveRole==='admin');renderSummary();if(page==='areas'){if(liveRole==='volunteer'){$('#areaMembers').innerHTML='';$('#pendingMembers').innerHTML='';$('#areaMembers').hidden=true;$('#pendingMembers').hidden=true;$('#areaAssignedCount').textContent='僅管理員可分派';}else renderAreas();}if(page==='planner'){if(liveRole==='volunteer'){$('#plannerContent').hidden=true;$('#plannerGate').hidden=false;$('#plannerGate').innerHTML='<strong>跟巡排班由管理員安排</strong><p>請至「任務」查看你的排班與完成回報。</p>';}else renderPlanner();}if(page==='people'){const ttl=$('#rosterTitle'),sub=$('#rosterSubtitle');if(ttl)ttl.textContent=liveRole==='volunteer'?'小組任務':'志工名冊';if(sub)sub.textContent=liveRole==='volunteer'?'僅顯示本人已參與的排班小組':'會員授權及志工資料由管理員管理';renderPeople();}if(page==='reports')renderReports();if(page==='map')updateMap();if(page==='volunteer')renderVolunteer()}
 function assignPerson(id,a){const p=state.people.find(x=>x.id===id);if(!p||!areas.includes(a))return false;if(p.assignment===a){toast(`${p.name} 已在 ${a}`);return true}const from=p.assignment;if(from&&!confirm(`將 ${p.name} 從 ${from} 改派到 ${a}？`))return false;if(from)cleanLeader(p.id,from);p.assignment=a;p.serviceLat=null;p.serviceLon=null;for(const v of Object.values(state.plans)){for(const key of Object.keys(v.teams||{}))v.teams[key]=v.teams[key].filter(x=>x!==p.id);for(const r of Object.values(v.stops||{}))r.people=(r.people||[]).filter(x=>x!==p.id)}save();render();toast(`已將 ${p.name} 分配至 ${a}`);return true}
 function removePerson(id){const p=state.people.find(x=>x.id===id);if(!p||!p.assignment)return;const from=p.assignment;cleanLeader(id,from);p.assignment='';p.serviceLat=null;p.serviceLon=null;for(const v of Object.values(state.plans)){for(const [a,ids] of Object.entries(v.teams||{}))v.teams[a]=ids.filter(x=>x!==id);for(const r of Object.values(v.stops||{}))r.people=(r.people||[]).filter(x=>x!==id)}save();render();toast('已移出服務分區及相關跟巡指派')}
 function clearSelectedArea(){const members=assignedPeople(selectedArea);if(!members.length){toast(`${selectedArea} 目前沒有已分配人員`);return}if(!confirm(`只清除「${selectedArea}」的 ${members.length} 位服務分配與其跟巡排班？其他里及總名冊不變。`))return;const ids=new Set(members.map(p=>p.id));for(const p of members){p.assignment='';p.serviceLat=null;p.serviceLon=null}delete state.leaders[selectedArea];for(const entry of Object.values(state.plans)){for(const [a,people] of Object.entries(entry.teams||{}))entry.teams[a]=people.filter(id=>!ids.has(id));for(const r of Object.values(entry.stops||{}))r.people=(r.people||[]).filter(id=>!ids.has(id))}save();render();toast(`已清除 ${selectedArea} 的 ${members.length} 位服務分配`)}
@@ -123,7 +123,7 @@ const an=$('#areaName');an.textContent=selectedArea;an.style.color=data.colors[s
 
 function chooseRoute(){
  applyDayRoutes();
- const matching=data.stops.filter(r=>r['時段']===shift&&(shift!=='日間'||r['日間分類']===dayRouteCategory)&&(r['固定日間']?true:plannerArea==='all'||r['里別']===plannerArea));
+ const matching=data.stops.filter(r=>(!truckPatrolScope||window.AChangTruckPatrol.areas.includes(r['里別']))&&r['時段']===shift&&(shift!=='日間'||r['日間分類']===dayRouteCategory)&&(r['固定日間']?true:plannerArea==='all'||r['里別']===plannerArea));
  routes=uniq(matching.map(routeKey));if(!routes.includes(chosenRoute))chosenRoute=routes[0]||'';
  const holder=$('#routeButtons');
  if(routes.length){const fixedDay=shift==='日間'&&dayRouteCategory==='ab'&&matching.some(row=>row['固定日間']),scopeNote=fixedDay?(plannerArea==='all'?'全部里別僅供預覽；指派前請選擇服務里。來源未提供站點里別。':`${plannerArea} 人員會跟巡整條官方路線；來源未提供站點里別，不代表這些站點屬於 ${plannerArea}。`):'';
@@ -132,7 +132,29 @@ function chooseRoute(){
  holder.innerHTML=`<span class="mini-note">${dayCatalogStatus.closedReason?esc(dayCatalogStatus.closedReason):noFixedDay?'所選日期沒有週三／週五固定日間路線。':shift==='日間'&&plannerArea==='all'?'請先選擇服務里，再選擇週三／週五 A、B 路線。':'此里於所選時段暫無已核對站點，請切換里別或時段。'}</span>`;
 }
 
+let truckPatrolScope=false;
+let truckRosterSnapshot=null;
+let truckRosterError='';
+function renderTruckPatrol(){
+ const root=$('#truckPatrolPanel'),adapter=window.AChangTruckPatrol;if(!root||!adapter||!data)return;
+ const authenticated=liveRole==='admin'&&!previewDemoMode;
+ const people=authenticated?(truckRosterSnapshot||state.people):[];
+ const model=adapter.build(data.stops,people);
+ const link=(url,label)=>`<a class="smallbtn truck-route-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${label} ↗</a>`;
+ root.innerHTML=`<div class="surface-head"><div><h2>五里垃圾車跟巡</h2><p>復華・勝利・中華・復國・中興｜日間／夜間</p>${truckPatrolScope?'<p>目前只顯示五里內站點。<button type="button" class="smallbtn" data-truck-clear>返回全部路線</button></p>':''}</div><button type="button" class="smallbtn" data-truck-roster-refresh>${authenticated?'重新讀取名冊':'登入讀取現有名冊'}</button></div><p class="truck-roster-status" role="status">${truckRosterError?esc(truckRosterError):authenticated?`現有名冊 ${model.total} 人可安排；已排除 @ 開頭 ${model.excluded} 人。依名冊順序產生建議，每人只列入一組。`:'路線可直接查看；真實姓名請以管理員登入後讀取，不使用測試姓名。'}</p>${authenticated?'<p class="mini-note">以下為分組建議，尚未發派任務；每組每次 2 人出勤，其餘輪替。可出勤時間待確認。</p>':''}<div class="truck-patrol-grid">${model.groups.map((g,i)=>`<article class="truck-patrol-card"><h3>${esc(g.route)} <span>${esc(g.plates.join('／')||'車牌待核')}</span></h3><p>${esc(g.villages.join(' → ')||'五里內無站點')}・${g.stops.length} 站</p><div class="truck-route-actions">${g.links?link(g.links.info,'路線資訊')+link(g.links.map,'路線圖'):'<span class="mini-note">官方連結待核；先查看下方來源站點。</span>'}<button type="button" class="smallbtn" data-truck-open="${i}">在排班頁查看</button></div><details><summary>查看五里站點（${g.stops.length}）</summary><ol class="truck-stop-list">${g.stops.map(r=>`<li><strong>${esc(r['到達']||'時間待核')}</strong> ${esc(r['里別'])}｜${esc(r['停靠點原文'])}<small>清運：${esc(r['垃圾日']||'待核')}</small></li>`).join('')}</ol></details><div class="truck-crew"><strong>建議名單 ${authenticated?g.people.length:0}／${g.capacity} 人</strong>${authenticated?g.people.map((p,j)=>`<span class="chip">${j+1}. ${esc(p.name)}</span>`).join('')||'<span>尚無可安排人員</span>':'<span>登入後顯示資料庫人名</span>'}</div></article>`).join('')}</div>${authenticated?`<div class="truck-waiting"><strong>待安排 ${model.waiting.length} 人</strong> ${model.waiting.map(p=>esc(p.name)).join('、')||'無'}${model.total!==35?`<p>目前可安排 ${model.total} 人，與原估 35 人不同；保留全部名單，不自動刪減。</p>`:''}</div>`:''}`;
+}
+document.addEventListener('click',async event=>{
+ const button=event.target.closest?.('[data-truck-roster-refresh],[data-truck-open],[data-truck-clear]');if(!button)return;
+ if(button.hasAttribute('data-truck-clear')){truckPatrolScope=false;renderPlanner();return;}
+ if(button.hasAttribute('data-truck-open')){const group=window.AChangTruckPatrol?.catalog[Number(button.dataset.truckOpen)];if(!group)return;truckPatrolScope=true;shift=group.shift;dayRouteCategory='six';plannerArea='all';chosenRoute=routeKey(data.stops.find(r=>r['時段']===group.shift&&r['車次']===group.route)||{});resetVisitTime();renderPlanner();$('#routeButtons')?.scrollIntoView({block:'center',behavior:'smooth'});return;}
+ if(previewDemoMode||liveRole!=='admin'){openDatabaseRosterLogin();return;}
+ button.disabled=true;try{const roster=await onlineApi('roster');truckRosterSnapshot=roster.people||[];truckRosterError='';}catch(e){truckRosterSnapshot=null;truckRosterError='名冊未載入：'+e.message;}finally{renderTruckPatrol();}
+});
+function openDatabaseRosterLogin(){
+ openSecureLogin();const form=$('#secureLoginForm');if(form)form.hidden=false;const google=$('#googleOAuthLogin');if(google)google.hidden=false;$('#authStatus').textContent='請使用現有管理員帳號登入，讀取真實志工名冊。';form?.querySelector('input[name="login"]')?.focus();
+}
 function renderPlanner(){
+ renderTruckPatrol();
  const gate=$('#plannerGate'),content=$('#plannerContent'),locked=liveRole==='admin'&&assignedCount()===0;
  gate.hidden=!locked;content.hidden=locked;if(locked)return;
  $('#planDate').value=date;$('#plannerAreaSelect').value=plannerArea;
@@ -591,7 +613,7 @@ async function onlineApi(endpoint,method='GET',body){
 function assertAdmin(){if(previewDemoMode){toast('隔離預覽僅供檢視，不會寫入資料庫');return false}if(liveRole!=='admin'){toast('只有管理員可編輯名冊與排班');return false}return true}
 function showAuth(){
  document.body.classList.remove('volunteer-session');
- liveRole='';liveMemberId='';liveAccountId='';liveDisplayName='';state=makeState([]);liveTasks=[];
+ liveRole='';liveMemberId='';liveAccountId='';liveDisplayName='';truckRosterSnapshot=null;truckRosterError='';state=makeState([]);liveTasks=[];
  for(const selector of ['#peopleList','#pendingMembers','#areaMembers','#volunteerSchedules','#areaPopup','#modalBody']){const el=$(selector);if(el)el.innerHTML=''}
  $('#modal').hidden=true;
  $('#secureLogin').hidden=true;$('#app').hidden=false;
@@ -618,7 +640,7 @@ function updateAccessControls(){
 
 async function secureSignOut(){stopGpsRefresh();if(previewDemoMode){previewDemoMode=false;sessionStorage.removeItem(PREVIEW_ADMIN_TASK_KEY);clearInterval(liveTimer);liveTimer=null;showAuth();return;}try{await onlineApi('session','DELETE')}catch{}clearInterval(liveTimer);liveTimer=null;liveTasks=[];state=makeState([]);showAuth()}
 async function authStart(){try{
- const session=await onlineApi('session');liveRole=session.role;liveMemberId=session.memberId;liveAccountId=session.accountId||'';liveDisplayName=session.displayName||'';
+ const session=await onlineApi('session');previewDemoMode=false;truckRosterSnapshot=null;liveRole=session.role;liveMemberId=session.memberId;liveAccountId=session.accountId||'';liveDisplayName=session.displayName||'';
  $('#secureLogin').hidden=true;$('#app').hidden=false;$('#accountBadge')?.remove();const adminTop=$('#adminHeaderAction');if(adminTop){adminTop.hidden=liveRole!=='admin';}updateAccessControls();
  if(liveRole==='admin'){
   $('#volunteerLoginBtn').hidden=true;
@@ -659,7 +681,7 @@ async function refreshOnline(quiet=false){if(!liveRole||liveBusy)return;
   if(liveRole==='volunteer'){const names=[...new Set(liveTasks.filter(t=>t.volunteer_id===liveMemberId&&t.visit_date===today()).map(t=>t.area))];groupContacts=[];for(const area of names){try{const r=await onlineApi('tasks?groupArea='+encodeURIComponent(area));groupContacts.push(...(r.people||[]).map(p=>({id:p.member_id,name:p.display_name,phone:p.phone_e164,isLeader:p.is_leader,area})));}catch(err){console.warn('小組成員查詢失敗',err.message)}}}
   if(liveRole==='admin'){
    const overlay=await onlineApi('route-stops');routeStopOverlays=overlay.stops||[];applyDayRoutes();
-   const roster=await onlineApi('roster');state.people=(roster.people||[]).map(p=>personNorm({id:p.id,name:p.name,phone:p.phone,address:p.address,residentArea:p.resident_area,assignment:p.assignment}));
+   const roster=await onlineApi('roster');truckRosterSnapshot=roster.people||[];state.people=(roster.people||[]).map(p=>personNorm({id:p.id,name:p.name,phone:p.phone,address:p.address,residentArea:p.resident_area,assignment:p.assignment}));
    state.leaders={};for(const p of roster.people||[])if(p.is_leader&&p.assignment)state.leaders[p.assignment]=p.id;
    syncTaskProjection();render();
   }else{if(page==='reports')renderReports();}
