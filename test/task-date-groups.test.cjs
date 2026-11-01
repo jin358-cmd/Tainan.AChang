@@ -54,7 +54,7 @@ test('map popup enlarges member identity and centers the existing assignment but
  assert.match(styles,/@media\(min-width:621px\)[\s\S]*\.popup-contact strong\{[^}]*white-space:nowrap/);
  assert.match(styles,/@media\(min-width:621px\)[\s\S]*\.popup-crown\{position:relative;top:-2px\}/);
  assert.match(app,/const pw=Math\.min\(430,Math\.max\(210,box\.clientWidth-20\)\)/);
- assert.match(app,/document\.addEventListener\('click',e=>\{const close=e\.target\.closest\?\.\('\[data-close-area\]'\)[\s\S]*e\.stopPropagation\(\);p\.hidden=true;\},true\)/);
+ assert.match(app,/document\.addEventListener\('click',e=>\{const close=e\.target\.closest\?\.\('\[data-close-area\]'\)[\s\S]*e\.stopPropagation\(\);activeShiftPopup=null;p\.hidden=true;\},true\)/);
 });
 
 test('mobile settings sheet is content-sized with the device card directly after exports',()=>{
@@ -135,7 +135,7 @@ test('desktop navigation reuses the five mobile icons without changing labels',(
  const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
  const desktop=html.match(/<nav class="desktop-nav"[\s\S]*?<\/nav>/)?.[0]||'';
  assert.match(desktop,/data-page="map"><i[^>]*>◉<\/i><span>地圖<\/span>/);
- assert.match(desktop,/data-page="areas"><i[^>]*>⌖<\/i><span>服務分區<\/span>/);
+ assert.match(desktop,/data-page="areas"><i[^>]*>⌖<\/i><span>人員分區<\/span>/);
  assert.match(desktop,/data-page="planner"><i[^>]*>🚛<\/i><span>跟巡排班<\/span>/);
  assert.match(desktop,/data-page="reports"><i[^>]*>✓<\/i><span>任務發派<\/span>/);
  assert.match(desktop,/data-page="people"><i[^>]*>☷<\/i><span>名冊<\/span>/);
