@@ -515,7 +515,7 @@ function openSecureLogin(){if(liveRole==='admin')return openMemberAdmin();previe
 function updateAccessControls(){
  document.body.classList.toggle('volunteer-session',liveRole==='volunteer');
  const admin=liveRole==='admin';
- for(const b of $$('[data-page]')){const pg=b.dataset.page;if(liveRole==='volunteer'){b.hidden=pg==='areas'||pg==='planner'||pg==='people';b.querySelector('span')&&(b.querySelector('span').textContent=pg==='people'?'小組任務':pg==='reports'?'任務':'地圖');}else{b.hidden=false;if(pg==='people'&&b.querySelector('span'))b.querySelector('span').textContent='名冊';}}
+ for(const b of $$('[data-page]')){const pg=b.dataset.page;if(liveRole==='volunteer'){b.hidden=pg==='areas'||pg==='planner'||pg==='people';b.querySelector('span')&&(b.querySelector('span').textContent=pg==='people'?'小組任務':pg==='reports'?'任務':pg==='trucks'?'清潔車列表':'地圖');}else{b.hidden=false;if(pg==='people'&&b.querySelector('span'))b.querySelector('span').textContent='名冊';}}
  for(const id of ['addPerson','addMember','openRosterAuthorization','clearArea']){const control=document.getElementById(id);if(control)control.hidden=!admin;}
  $('#rosterLocked').hidden=admin||liveRole==='volunteer';const rosterFilters=$('#peopleSearch')?.closest('.filter-bar');if(rosterFilters)rosterFilters.hidden=liveRole==='volunteer';$('#peopleList').hidden=!(admin||liveRole==='volunteer');
  $('#volunteerLoginBtn').hidden=!!liveRole;
