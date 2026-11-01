@@ -251,7 +251,7 @@ function previewAdminTasks(seed){try{sessionStorage.removeItem(PREVIEW_ADMIN_TAS
 function savePreviewAdminTasks(){if(!previewDemoMode||liveRole!=='admin')return;try{sessionStorage.setItem(PREVIEW_ADMIN_TASK_KEY,JSON.stringify(liveTasks))}catch{}}
 function previewFocusTestCard(){requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelector('.stop-members .chip')?.scrollIntoView({block:'center',behavior:'auto'})))}
 function resetPreviewAdminTasks(){if(!previewDemoMode||liveRole!=='admin')return;liveTasks=previewAdminTaskSeed();savePreviewAdminTasks();syncTaskProjection();date=taipeiToday();shift='日間';dayRouteCategory='six';plannerArea='all';chosenRoute='';resetVisitTime();go('planner');previewFocusTestCard();toast('已重設 2 個可見站點的合成指派，未寫入資料庫')}
-function previewOnly(){return location.hostname.startsWith('tainan-achang-pin-eipp-test-')||location.hostname==='tainan-achang-pin-eipp-test.vercel.app'||location.hostname==='tainan-achang-online-ui-test-tjc1.vercel.app';}
+function previewOnly(){return location.hostname.startsWith('tainan-achang-pin-eipp-test-')||location.hostname==='tainan-achang-pin-eipp-test.vercel.app'||(location.hostname==='tainan-achang-online-ui-test-tjc1.vercel.app'||location.hostname==='achang-test.pmos.space');}
 function previewLoginButton(){
  if(!previewOnly())return;
  const anchor=document.getElementById('secureLoginForm');
