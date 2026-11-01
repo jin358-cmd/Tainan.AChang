@@ -165,7 +165,7 @@ test('all-village assignment only prioritizes a verified station village without
  assert.match(app,/距離待核，請人工選擇/);assert.match(app,/不使用志工住址或定位資料/);
  assert.doesNotMatch(app,/距離約\s*\d|公里內|步行\s*\d/);
  assert.match(app,/pick-row \$\{area===physicalArea\?'is-station-village':''\}/);
- assert.match(styles,/\.planner-area-assignment-picker \.pick-row\.is-station-village\{border-left:6px solid #a7dfbd\}/);
+ assert.match(styles,/\.planner-area-assignment-picker \.pick-row\.is-station-village\{background:#d9f3e3!important/);
  assert.match(styles,/\.pick-row\.is-station-village small\{color:#276846;font-size:14px;font-weight:900/);
 });
 
@@ -207,11 +207,13 @@ test('volunteer dispatch page exposes an isolated flyer report task without back
  assert.doesNotMatch(app,/data-preview-flyer-(?:accept|reject)/);
 });
 
-test('preview multi-stop map uses schematic positions and stable time ordering only',()=>{
+test('preview multi-stop map anchors geographic markers and preserves stable time ordering',()=>{
  assert.match(app,/const PREVIEW_MAP_STOPS=\[/);
  assert.match(app,/x:23,y:68/);
  assert.match(app,/sort\(\(a,b\)=>a\.time\.localeCompare\(b\.time\)\|\|a\.order-b\.order\)/);
- assert.match(app,/位置為合成畫面座標，非 GPS、非道路路徑、不可導航/);
+ assert.match(app,/new maplibregl.Marker/);
+ assert.match(app,/setLngLat\(lngLat\)/);
+ assert.match(app,/map.easeTo/);
  assert.match(app,/未指派站點仍會顯示/);
  assert.match(app,/previewMapState\.selected\.has\(stop\.id\)/);
  assert.match(html,/id="previewMapMarkers"/);
