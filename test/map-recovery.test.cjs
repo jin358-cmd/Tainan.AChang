@@ -36,8 +36,8 @@ test('map asset revision and service-worker cache advance together', () => {
   assert.match(html, /styles\.css\?v=218/);
   assert.match(html, /route-time-filter\.js\?v=2/);
   assert.match(html, /population-data\.js\?v=1/);
-  assert.match(html, /app\.js\?v=230/);
-  assert.match(sw, /achang-pwa-shell-v176-preview-original-tasks/);
+  assert.match(html, /app\.js\?v=231/);
+  assert.match(sw, /achang-pwa-shell-v177-preview-assigned-map/);
 });
 
 test('map uses only the provider native compact attribution entry', () => {
