@@ -14,7 +14,10 @@
       "name": "永科",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "",
+      "address_status": "not_found",
+      "address_review": "地址未找到；保留色塊供檢視，跳過排班"
     },
     {
       "id": "ACHANG-W三-A-02",
@@ -26,7 +29,9 @@
       "color": "#8B5CF6",
       "review_required": false,
       "review_note": "114.4.2 公告正確版已確認班次與來源順序；保留原候審紀錄供稽核",
-      "location_verified": false
+      "location_verified": false,
+      "address": "臺南市永康區西勢路19巷60號",
+      "address_status": "located"
     },
     {
       "id": "ACHANG-W三-A-03",
@@ -37,7 +42,9 @@
       "name": "東灣里活動中心",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "臺南市永康區民族路291號",
+      "address_status": "located"
     },
     {
       "id": "ACHANG-W三-A-04",
@@ -48,7 +55,9 @@
       "name": "網寮里里長服務處",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "臺南市永康區網寮里永大一路255號",
+      "address_status": "located"
     },
     {
       "id": "ACHANG-W三-A-05",
@@ -59,7 +68,9 @@
       "name": "北興路213號旁（大灣七街路口）",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "臺南市永康區北興路213號旁（大灣七街路口）",
+      "address_status": "located"
     },
     {
       "id": "ACHANG-W三-A-06",
@@ -71,7 +82,9 @@
       "color": "#8B5CF6",
       "review_required": false,
       "review_note": "114.4.2 公告正確版確認為北灣里國聖宮；保留 XLSX 異文供稽核",
-      "location_verified": false
+      "location_verified": false,
+      "address": "臺南市永康區大同街100號",
+      "address_status": "located"
     },
     {
       "id": "ACHANG-W三-A-07",
@@ -82,7 +95,9 @@
       "name": "龍埔里活動中心",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "臺南市永康區永大路三段618巷111號",
+      "address_status": "located"
     },
     {
       "id": "ACHANG-W三-A-08",
@@ -93,7 +108,9 @@
       "name": "烏竹里活動中心",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "臺南市永康區烏竹北街85號",
+      "address_status": "located"
     },
     {
       "id": "ACHANG-W三-B-09",
@@ -104,7 +121,9 @@
       "name": "中正二街161號（正德宮）",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "臺南市永康區中正二街161號",
+      "address_status": "located"
     },
     {
       "id": "ACHANG-W三-B-10",
@@ -116,7 +135,9 @@
       "color": "#8B5CF6",
       "review_required": false,
       "review_note": "114.4.2 公告正確版已確認大橋活動中心；保留原候審紀錄供稽核",
-      "location_verified": false
+      "location_verified": false,
+      "address": "臺南市永康區大橋三街230號",
+      "address_status": "located"
     },
     {
       "id": "ACHANG-W三-B-11",
@@ -128,7 +149,9 @@
       "color": "#8B5CF6",
       "review_required": false,
       "review_note": "114.4.2 公告正確版確認為如意居；保留 XLSX 異文供稽核",
-      "location_verified": false
+      "location_verified": false,
+      "address": "臺南市永康區永明街261-12號",
+      "address_status": "located"
     },
     {
       "id": "ACHANG-W三-B-12",
@@ -139,7 +162,10 @@
       "name": "龍埔街（慈聖宮）",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "",
+      "address_status": "not_found",
+      "address_review": "地址未找到；保留色塊供檢視，跳過排班"
     },
     {
       "id": "ACHANG-W三-B-13",
@@ -150,7 +176,9 @@
       "name": "龍埔街50號",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "臺南市永康區龍埔街50號",
+      "address_status": "located"
     },
     {
       "id": "ACHANG-W三-B-14",
@@ -161,7 +189,9 @@
       "name": "國光八街&大勇路(9-1公園)",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "臺南市永康區國光八街與大勇路口",
+      "address_status": "located"
     },
     {
       "id": "ACHANG-W三-B-15",
@@ -172,7 +202,9 @@
       "name": "自強路468巷（中正廟）",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "臺南市永康區自強路468巷內",
+      "address_status": "located"
     },
     {
       "id": "ACHANG-W三-B-16",
@@ -183,7 +215,10 @@
       "name": "正強里舊活動中心",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "",
+      "address_status": "not_found",
+      "address_review": "地址未找到；保留色塊供檢視，跳過排班"
     },
     {
       "id": "ACHANG-W五-A-17",
@@ -195,7 +230,10 @@
       "color": "#8B5CF6",
       "review_required": false,
       "review_note": "114.4.2 公告正確版確認為統領國；保留 XLSX 異文供稽核",
-      "location_verified": false
+      "location_verified": false,
+      "address": "",
+      "address_status": "not_found",
+      "address_review": "地址未找到；保留色塊供檢視，跳過排班"
     },
     {
       "id": "ACHANG-W五-A-18",
@@ -206,7 +244,10 @@
       "name": "振興路與五福街82巷口",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "",
+      "address_status": "not_found",
+      "address_review": "地址未找到；保留色塊供檢視，跳過排班"
     },
     {
       "id": "ACHANG-W五-A-19",
@@ -217,7 +258,10 @@
       "name": "六合里活動中心",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "",
+      "address_status": "not_found",
+      "address_review": "地址未找到；保留色塊供檢視，跳過排班"
     },
     {
       "id": "ACHANG-W五-A-20",
@@ -228,7 +272,10 @@
       "name": "中興里天后宮",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "",
+      "address_status": "not_found",
+      "address_review": "地址未找到；保留色塊供檢視，跳過排班"
     },
     {
       "id": "ACHANG-W五-A-21",
@@ -239,7 +286,10 @@
       "name": "中華西街（長億城公園）",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "",
+      "address_status": "not_found",
+      "address_review": "地址未找到；保留色塊供檢視，跳過排班"
     },
     {
       "id": "ACHANG-W五-A-22",
@@ -250,7 +300,10 @@
       "name": "東橋活動中心",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "",
+      "address_status": "not_found",
+      "address_review": "地址未找到；保留色塊供檢視，跳過排班"
     },
     {
       "id": "ACHANG-W五-A-23",
@@ -262,7 +315,10 @@
       "color": "#8B5CF6",
       "review_required": false,
       "review_note": "114.4.2 公告正確版已確認復華里活動中心；保留原候審紀錄供稽核",
-      "location_verified": false
+      "location_verified": false,
+      "address": "",
+      "address_status": "not_found",
+      "address_review": "地址未找到；保留色塊供檢視，跳過排班"
     },
     {
       "id": "ACHANG-W五-A-24",
@@ -274,7 +330,10 @@
       "color": "#8B5CF6",
       "review_required": false,
       "review_note": "114.4.2 公告正確版已確認復國里活動中心；保留原候審紀錄供稽核",
-      "location_verified": false
+      "location_verified": false,
+      "address": "",
+      "address_status": "not_found",
+      "address_review": "地址未找到；保留色塊供檢視，跳過排班"
     },
     {
       "id": "ACHANG-W五-B-25",
@@ -285,7 +344,10 @@
       "name": "永科",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "",
+      "address_status": "not_found",
+      "address_review": "地址未找到；保留色塊供檢視，跳過排班"
     },
     {
       "id": "ACHANG-W五-B-26",
@@ -296,7 +358,10 @@
       "name": "新民街47巷口",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "",
+      "address_status": "not_found",
+      "address_review": "地址未找到；保留色塊供檢視，跳過排班"
     },
     {
       "id": "ACHANG-W五-B-27",
@@ -307,7 +372,10 @@
       "name": "塩興里(桂田停車場)",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "",
+      "address_status": "not_found",
+      "address_review": "地址未找到；保留色塊供檢視，跳過排班"
     },
     {
       "id": "ACHANG-W五-B-28",
@@ -318,7 +386,10 @@
       "name": "中央氣象局永康氣象站",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "",
+      "address_status": "not_found",
+      "address_review": "地址未找到；保留色塊供檢視，跳過排班"
     },
     {
       "id": "ACHANG-W五-B-29",
@@ -329,7 +400,10 @@
       "name": "大灣三街&大安街口",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "",
+      "address_status": "not_found",
+      "address_review": "地址未找到；保留色塊供檢視，跳過排班"
     },
     {
       "id": "ACHANG-W五-B-30",
@@ -340,7 +414,10 @@
       "name": "大灣路942巷56號對面",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "",
+      "address_status": "not_found",
+      "address_review": "地址未找到；保留色塊供檢視，跳過排班"
     },
     {
       "id": "ACHANG-W五-B-31",
@@ -351,7 +428,10 @@
       "name": "崑山市場公園",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "",
+      "address_status": "not_found",
+      "address_review": "地址未找到；保留色塊供檢視，跳過排班"
     },
     {
       "id": "ACHANG-W五-B-32",
@@ -362,7 +442,10 @@
       "name": "西灣里活動中心",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "",
+      "address_status": "not_found",
+      "address_review": "地址未找到；保留色塊供檢視，跳過排班"
     }
   ]
 }
