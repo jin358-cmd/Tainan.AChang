@@ -17,14 +17,15 @@
   const routes=Array.isArray(document?.routes)?document.routes:[];
   return routes.map((source,index)=>{
    const weekday=String(source?.weekday||'').trim(),start=timeValue(source?.start),end=timeValue(source?.end);
-   const name=String(source?.name||'').trim(),route=String(source?.route||'').trim();
+   const name=String(source?.name||'').trim(),route=String(source?.route||'').trim(),address=String(source?.address||'').trim(),addressStatus=String(source?.address_status||'not_found').trim();
    const id=String(source?.id||`DAY-${weekday}-${route}-${index+1}`).trim(),reasons=[];
    if(!ALLOWED.has(weekday))reasons.push('星期待確認');
    if(!start)reasons.push('開始時間待確認');
    if(!name)reasons.push('站名待確認');
    if(!route)reasons.push('路線待確認');
    if(source?.review_required===true)reasons.push('來源衝突待核');
-   return {id,weekday,route,name,start,end,sourceOrder:index+1,enabled:reasons.length===0,pendingReasons:reasons,reviewNote:String(source?.review_note||'').trim()};
+   if(addressStatus!=='located'||!address)reasons.push('地址未找到');
+   return {id,weekday,route,name,address,addressStatus,start,end,sourceOrder:index+1,enabled:reasons.length===0,pendingReasons:reasons,reviewNote:String(source?.review_note||'').trim()};
   });
  }
  function stopsForDate(document,date){
@@ -38,7 +39,7 @@
   const stops=active.map(row=>{
    const order=(routeOrder.get(row.route)||0)+1;routeOrder.set(row.route,order);
    return {'時段':'日間','車次':`日間 ${row.route}線`,'車牌':'','路線ID':`DAY:${row.weekday}:${row.route}`,'站點ID':row.id,
-    '里別':'','固定日間':true,'清運次序':order,'停靠點原文':row.name,'Google地圖定位地址':'','到達':row.start,'離開':row.end,
+    '里別':'','固定日間':true,'清運次序':order,'停靠點原文':row.name,'補充地址':row.address,'Google地圖定位地址':row.address,'地址狀態':row.addressStatus,'固定日間待核':false,'到達':row.start,'離開':row.end,
     '適用星期':row.weekday,'來源順序':row.sourceOrder,'定位狀態':'未提供座標，不顯示地圖站點','備註':'週三／週五固定日間來源'};
   });
   return {weekday,stops,pending,serviceNotice,closedReason:''};
