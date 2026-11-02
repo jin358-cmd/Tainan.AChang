@@ -45,10 +45,10 @@ test('truck directory keeps the route view concise and renders directional route
   const directoryCss = fs.readFileSync(path.join(__dirname, '..', 'route-directory.css'), 'utf8');
   assert.match(directory, /class="route-name/);
   assert.match(directory, /class="route-open/);
-  assert.match(directory, /marker id="route-arrow"/);
+  assert.match(directory, /class="route-direction"/);
   assert.doesNotMatch(directory, /來源：\$\{esc\(g\.rows\[0\]/);
   assert.match(directoryCss, /#directory th,#directory td,#routeTable th,#routeTable td\{text-align:center\}/);
-  assert.match(directoryCss, /\.connector line\{stroke:#e81f28/);
+  assert.match(directoryCss, /\.route-direction\{position:absolute/);
 });
 
 test('map uses only the provider native compact attribution entry', () => {
