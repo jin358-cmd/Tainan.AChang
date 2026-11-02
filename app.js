@@ -762,7 +762,7 @@ async function boot(){try{
 }
 
 // Production Google OAuth: validated by Supabase and membership authorization API.
-const GOOGLE_AUTH_URL='https://ctskglmglevronvnkpmm.supabase.co/auth/v1/authorize?provider=google&redirect_to=';
+const GOOGLE_AUTH_URL='/api/oauth-start?redirect_to=';
 document.addEventListener('click',event=>{
  const button=event.target.closest('#googleOAuthLogin');if(!button)return;
  const redirect=location.origin+location.pathname;
