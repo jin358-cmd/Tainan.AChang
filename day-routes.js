@@ -25,6 +25,7 @@
    if(!route)reasons.push('路線待確認');
    if(source?.review_required===true)reasons.push('來源衝突待核');
    if(addressStatus!=='located'||!address)reasons.push('地址未找到');
+   if(addressStatus!=='located'||!address)reasons.push('地址未找到');
    return {id,weekday,route,name,address,addressStatus,start,end,sourceOrder:index+1,enabled:reasons.length===0,pendingReasons:reasons,reviewNote:String(source?.review_note||'').trim()};
   });
  }
