@@ -124,11 +124,15 @@ const an=$('#areaName');an.textContent=selectedArea;an.style.color=data.colors[s
 
 function chooseRoute(){
  applyDayRoutes();
+ const targetAreaNames=new Set(areas.map(area=>String(area).trim().replace(/里$/,'').replace(/^神州$/,'神洲')));
+ const routeCoverage=new Map();
+ if(shift==='夜間')for(const row of data.stops){if(row['時段']!=='夜間'||row['來源刪除線'])continue;const key=routeKey(row),stats=routeCoverage.get(key)||{total:0,target:0};stats.total++;const area=String(row['里別']||'').trim().replace(/里$/,'').replace(/^神州$/,'神洲');if(targetAreaNames.has(area))stats.target++;routeCoverage.set(key,stats)}
+ const primaryTenAreaRoutes=new Set([...routeCoverage].filter(([,stats])=>stats.total>0&&stats.target>stats.total/2).map(([key])=>key));
  const matching=data.stops.filter(r=>r['時段']===shift&&(shift!=='日間'||r['日間分類']===dayRouteCategory)&&(r['固定日間']?true:plannerArea==='all'||r['里別']===plannerArea));
  routes=uniq(matching.map(routeKey));if(!routes.includes(chosenRoute))chosenRoute=routes[0]||'';
  const holder=$('#routeButtons');
  if(routes.length){const fixedDay=shift==='日間'&&dayRouteCategory==='ab'&&matching.some(row=>row['固定日間']),scopeNote=fixedDay?(plannerArea==='all'?'來源未提供站點里別；指派人員沿用名冊中的人員分區。':`目前顯示完整官方路線；來源未提供站點里別，不代表這些站點屬於 ${plannerArea}。`):'';
-  const note=[fixedDay?dayCatalogStatus.notice:'',fixedDay&&dayCatalogStatus.pending?`本日另有 ${dayCatalogStatus.pending} 筆來源待確認，未列入排班。`:'',scopeNote].filter(Boolean).join('；');holder.innerHTML=routes.map(key=>{const row=matching.find(item=>routeKey(item)===key),sourceRows=matching.filter(item=>routeKey(item)===key),collection=shift==='日間'&&dayRouteCategory==='six'?` 🗑️${sourceRows.some(item=>String(item['回收日']||'').trim())?' ♻️':''}`:'';return `<button class="route-choice ${chosenRoute===key?'on':''}" type="button" data-route="${esc(key)}">${esc(routeLabel(row||{}))}${collection}</button>`}).join('')+(note?`<p class="mini-note day-route-notice">${esc(note)}</p>`:'');return}
+  const note=[fixedDay?dayCatalogStatus.notice:'',fixedDay&&dayCatalogStatus.pending?`本日另有 ${dayCatalogStatus.pending} 筆來源待確認，未列入排班。`:'',scopeNote].filter(Boolean).join('；');holder.innerHTML=routes.map(key=>{const row=matching.find(item=>routeKey(item)===key),sourceRows=matching.filter(item=>routeKey(item)===key),collection=shift==='日間'&&dayRouteCategory==='six'?` 🗑️${sourceRows.some(item=>String(item['回收日']||'').trim())?' ♻️':''}`:'';const areaRoute=shift==='夜間'&&primaryTenAreaRoutes.has(key),areaClass=areaRoute?' yk-ten-area-route':'',areaTitle=areaRoute?' title="主要涵蓋永康志工地圖十里範圍（過半數站點）"':'';return `<button class="route-choice ${chosenRoute===key?'on':''}${areaClass}"${areaTitle} type="button" data-route="${esc(key)}">${esc(routeLabel(row||{}))}${collection}</button>`}).join('')+(note?`<p class="mini-note day-route-notice">${esc(note)}</p>`:'');return}
  const noFixedDay=shift==='日間'&&dayRouteCategory==='ab'&&dayCatalogStatus.weekday&&!['星期三','星期五'].includes(dayCatalogStatus.weekday);
  holder.innerHTML=`<span class="mini-note">${dayCatalogStatus.closedReason?esc(dayCatalogStatus.closedReason):noFixedDay?'所選日期沒有週三／週五固定日間路線。':shift==='日間'&&plannerArea==='all'?'請先選擇服務里，再選擇週三／週五 A、B 路線。':'此里於所選時段暫無已核對站點，請切換里別或時段。'}</span>`;
 }
