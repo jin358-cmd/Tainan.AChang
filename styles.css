@@ -1081,3 +1081,5 @@ body.restored-admin-map #page-map #areaPopup.restored-map-popup[hidden]{display:
 .map-day-route-picker{display:flex;align-items:center;gap:10px;margin:8px 12px;font-size:14px;font-weight:750}.map-day-route-picker select{flex:1;min-width:0;padding:8px;border:1px solid #b9cbd5;border-radius:7px;background:white;color:#24435b}
 
 .planner-picker-open .pick-list .pick-row.pending-assignment{background:var(--yellow);border-color:var(--yellow-b);border-left:5px solid #e8be50}.planner-picker-open .pick-list .pick-row.pending-assignment small{color:#765c25}
+
+.stop-card.address-missing{background:#fff0f0!important;border:2px solid #e5484d!important;border-left:8px solid #c62828!important}.address-missing-badge{display:inline-flex;align-items:center;margin-left:8px;padding:4px 8px;border-radius:6px;background:#c62828;color:#fff;font-size:11px;font-weight:900;white-space:nowrap}.stop-card.address-missing .stop-sub{color:#a51f24;font-weight:850}
