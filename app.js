@@ -34,6 +34,7 @@ function loadState(){for(const k of [KEY,PRIOR_KEY,LEGACY_KEY]){try{const raw=lo
 const MAP_LOAD_TIMEOUT_MS=8000;
 const MAPLIBRE_JS='https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.js';
 const MAPLIBRE_CSS='https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.css';
+const MAP_SHIFT_WINDOWS={日間:{start:'06:15',end:'08:10'},夜間:{start:'19:00',end:'20:30'}};
 let state=loadState(),data=null,baseStops=[],dayRouteDocument=null,dayShiftWindows=null,officialRouteDocument=null,routeStopOverlays=[],dayRouteCategory='six',dayCatalogStatus={weekday:'',active:0,pending:0,notice:'',closedReason:''},areas=[],routes=[],page='areas',selectedArea='復興里',shift='日間',date=today(),chosenRoute='',plannerArea='all',visitTimeStart='',visitTimeEnd='',visitTimeCustomized=false,visitTimeLoadedKey='',areaPage=0,teamArea='',toastTimer=null,installPrompt=null,map=null,markers=[],mapFailed=false,mapLoaded=false,mapLoadTimer=null,mapAttempt=0,mapInitPromise=null,mapFailureMessage='',pinTarget=null,layerState={volunteer:false,day:false,night:false,gps:false},pickerKind='',volunteerId='',volunteerPhone='';
 const personNorm=p=>({id:String(p.id||`P${Date.now()}`),name:String(p.name||'').trim().slice(0,80),phone:String(p.phone||'').slice(0,80),address:String(p.address||'').slice(0,300),residentArea:String(p.residentArea||'待確認'),assignment:areas.includes(p.assignment)?p.assignment:'',serviceLat:coord(p.serviceLat)?p.serviceLat:null,serviceLon:coord(p.serviceLon)?p.serviceLon:null});
 const residentLabel=p=>{const s=String(p?.residentArea||'').trim().replace(/里里$/,'里');return /十里以外|十里外|待確認/.test(s)?'十里外':s&&s!=='未填寫'?s:''};
@@ -376,6 +377,32 @@ function marker(icon,lon,lat,type,title,onClick=null,count=0,leader=false){if(!m
 /* Assigned stations are scoped to the logged-in volunteer and the local service day. */
 let activeShiftPopup=null;
 let selectedMapDayRoute='';
+function mapScheduleDate(){return liveRole==='volunteer'?(window.AChangDispatchView?.clock?.().day||date):date}
+function mapTasksForStop(row){
+ if(!row||!data||!window.AChangDispatchView?.taskMatchesStop)return [];
+ const key=stopKey(row),source=data.stops.find(item=>stopKey(item)===key)||row;
+ const routeRows=data.stops.filter(item=>routeKey(item)===routeKey(source)),index=routeRows.findIndex(item=>stopKey(item)===key);
+ const order=index>=0?index+1:Number(source['清運次序']),matchRow={...source,_taskOrder:order};
+ return liveTasks.filter(task=>(liveRole!=='volunteer'||task.volunteer_id===liveMemberId)&&window.AChangDispatchView.taskMatchesStop(task,matchRow,mapScheduleDate()));
+}
+function mapStopArea(row){return areas.includes(row?.['里別'])?row['里別']:''}
+function mapStopPosition(row){const pos=state.pins?.[stopKey(row)];return pos&&coord(pos.lon)&&coord(pos.lat)?pos:null}
+function mapTimeWindowIncludes(row,shiftName){
+ const window=MAP_SHIFT_WINDOWS[shiftName];if(!window)return false;
+ const start=String(row?.['到達']||'').slice(0,5),end=String(row?.['離開']||start).slice(0,5);
+ if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(start)||!/^([01]\d|2[0-3]):[0-5]\d$/.test(end)||end<start)return false;
+ return start<=window.end&&end>=window.start;
+}
+function mapShiftStops(area,shiftName){
+ const unique=new Map();
+ for(const row of data?.stops||[]){
+  if(row['時段']!==shiftName||sourceExcluded(row)||area&&mapStopArea(row)!==area||!mapTimeWindowIncludes(row,shiftName))continue;
+  if(!mapTasksForStop(row).length)continue;
+  unique.set(stopKey(row),row);
+ }
+ const view=window.AChangDispatchView;
+ return [...unique.values()].sort((a,b)=>view.compareRoutes(a['車次'],b['車次'])||Number(a['清運次序']||0)-Number(b['清運次序']||0));
+}
 function dayLayerStops(){
  if(liveRole==='volunteer')return [...new Map(visibleMapAreas().flatMap(a=>visibleShiftStops(a,'日間')).map(r=>[[r['車次'],r['清運次序'],r['停靠點原文']].join('|'),r])).values()];
  const fixed=window.AChangDayRoutes.stopsForDate(dayRouteDocument,window.AChangDispatchView.clock().day).stops;
@@ -397,34 +424,39 @@ function visibleShiftStops(area,shiftName){
  }
  return view.sortStops([...unique.values()]);
 }
-function openShiftStopPopup(area,shiftName,showAll=false){
- const day=shiftName==='日間',view=window.AChangDispatchView,now=new Date(),clock=view.clock(now);
+function openShiftStopPopup(area,shiftName,showAll=false,routeName=''){
+ const day=shiftName==='日間',view=window.AChangDispatchView,clock=view.clock();
  let all,routeOptions=[];
  if(day){
-  const source=dayLayerStops();routeOptions=[...new Set(source.map(r=>r['車次']))].sort(view.compareRoutes);
-  if(routeOptions.includes(area))selectedMapDayRoute=area;
-  else if(areas.includes(area))selectedMapDayRoute=view.sortStops(source.filter(r=>r['里別']===area))[0]?.['車次']||selectedMapDayRoute;
-  if(!routeOptions.includes(selectedMapDayRoute))selectedMapDayRoute=routeOptions.find(route=>view.nextStops(source.filter(r=>r['車次']===route),now).length)||routeOptions[0]||'';
-  area=selectedMapDayRoute;all=view.sortStops(source.filter(r=>r['車次']===area));
- }else all=visibleShiftStops(area,shiftName);
+  const source=mapShiftStops('',shiftName);
+  routeOptions=[...new Set(source.map(row=>row['車次']).filter(Boolean))].sort(view.compareRoutes);
+  const areaRoutes=areas.includes(area)?[...new Set(source.filter(row=>mapStopArea(row)===area).map(row=>row['車次']).filter(Boolean))]:[];
+  if(routeName&&routeOptions.includes(routeName))selectedMapDayRoute=routeName;
+  else if(routeOptions.includes(area))selectedMapDayRoute=area;
+  else if(areaRoutes.length)selectedMapDayRoute=areaRoutes.includes(selectedMapDayRoute)?selectedMapDayRoute:areaRoutes[0];
+  if(!routeOptions.includes(selectedMapDayRoute))selectedMapDayRoute=routeOptions[0]||'';
+  area=selectedMapDayRoute;
+  all=view.sortStops(source.filter(row=>row['車次']===area));
+ }else all=mapShiftStops(area,shiftName);
  if(!all.length)return;
- const rows=day&&!showAll?view.nextStops(all,now,4):all;
+ const rows=day&&!showAll?all.slice(0,4):all;
  activeShiftPopup={area,shiftName,showAll};
  const root=$('#areaPopup'),box=$('#mapBox');
  const scroll=root.querySelector('.assigned-stop-list')?.scrollTop||0;
  if(root.parentElement!==box)box.append(root);
  const items=rows.map((r,i)=>{
-  const time=r['到達']??'',address=r['停靠點原文']??'';
+  const time=r['到達']??'',address=r['停靠點原文']??'',assigned=mapTasksForStop(r).length;
   const destination='台南市永康區'+String(address).replace(/^台南市(?:永康區)?/,'').replace(/^永康區/,'');
   const url='https://www.google.com/maps/dir/?api=1&travelmode=driving&destination='+encodeURIComponent(destination);
-  return '<div class="assigned-stop-row"><span>'+esc(time)+'</span><div class="assigned-stop-description"><strong>'+esc(address)+'</strong><small>'+esc([r['車次'],r['車牌'],r['里別'],'原站序 '+r['清運次序']].filter(Boolean).join(' · '))+(day&&showAll&&!view.runsToday(r,now)?' · 今日未排清運':'')+'</small></div><a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer" aria-label="導航到第'+(i+1)+'站：'+esc(address)+'"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg><span>導航到站點</span></a></div>';
+  return '<div class="assigned-stop-row"><span>'+esc(time)+'</span><div class="assigned-stop-description"><strong>'+esc(address)+'</strong><small>'+esc([r['車次'],r['車牌'],mapStopArea(r),'已排入 '+assigned+' 人','原站序 '+r['清運次序']].filter(Boolean).join(' · '))+'</small></div><a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer" aria-label="導航到第'+(i+1)+'站：'+esc(address)+'"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg><span>導航到站點</span></a></div>';
  }).join('');
+ const window=MAP_SHIFT_WINDOWS[shiftName];
  root.classList.remove('restored-map-popup','map-attached-popup');
- root.classList.add('owner-center-popup','assigned-stops-popup');root.classList.toggle('night-stops-popup',shiftName==='夜間');root.classList.toggle('day-stops-popup',shiftName==='日間');
- root.innerHTML='<div class="popup-top"><strong class="popup-area-name">'+esc(area)+(day?(showAll?' 全部 '+rows.length+'站':' 接下來 '+rows.length+'站'):' · '+esc(shiftName)+' '+rows.length+'站')+'</strong><button type="button" data-close-area aria-label="關閉站點">✕</button></div>'+
- (day?'<label class="map-day-route-picker">日間車次<select id="mapDayRouteSelect" aria-label="地圖日間車次">'+routeOptions.map(route=>'<option value="'+esc(route)+'" '+(route===area?'selected':'')+'>'+esc(route+' '+(dayLayerStops().find(r=>r['車次']===route)?.['車牌']||''))+'</option>').join('')+'</select></label><p class="day-popup-clock">台灣時間 '+esc(clock.day+' '+clock.hhmm)+' · 表定時間每30秒更新'+(showAll?'（含非今日班表）':'；完整車次含十里外站點')+'</p>':'')+
- '<div class="assigned-stop-list">'+(items||'<p class="day-stops-empty">今日沒有後續日間站點，可查看下方完整班表。</p>')+'</div>'+
- (day?'<button type="button" class="day-stops-toggle" data-day-stops-toggle="'+(showAll?'upcoming':'all')+'">'+(showAll?'收合，僅顯示接下來4站':'顯示全部 '+all.length+' 個站點')+'</button>':'');
+ root.classList.add('owner-center-popup','assigned-stops-popup');root.classList.toggle('night-stops-popup',shiftName==='夜間');root.classList.toggle('day-stops-popup',day);
+ root.innerHTML='<div class="popup-top"><strong class="popup-area-name">'+esc(day?area+' 已排入 '+all.length+' 站':area+' · '+shiftName+' 已排入 '+all.length+' 站')+'</strong><button type="button" data-close-area aria-label="關閉站點">✕</button></div>'+
+ (day?'<label class="map-day-route-picker">日間車次<select id="mapDayRouteSelect" aria-label="地圖日間車次">'+routeOptions.map(route=>'<option value="'+esc(route)+'" '+(route===area?'selected':'')+'>'+esc(route+' '+(mapShiftStops('',shiftName).find(r=>r['車次']===route)?.['車牌']||''))+'</option>').join('')+'</select></label><p class="day-popup-clock">排班日期 '+esc(mapScheduleDate())+' · 日間時段 '+esc(window.start+'–'+window.end)+' · 台灣時間 '+esc(clock.hhmm)+'</p>':'<p class="day-popup-clock">排班日期 '+esc(mapScheduleDate())+' · 夜間時段 '+esc(window.start+'–'+window.end)+'</p>')+
+ '<div class="assigned-stop-list">'+items+'</div>'+
+ (day?'<button type="button" class="day-stops-toggle" data-day-stops-toggle="'+(showAll?'upcoming':'all')+'">'+(showAll?'收合至前 4 站':'顯示全部 '+all.length+' 個已排入站點')+'</button>':'');
  const list=root.querySelector('.assigned-stop-list');if(list)list.scrollTop=scroll;
  root.hidden=false;requestAnimationFrame(positionAreaPopup);
 }
@@ -440,21 +472,23 @@ function stopGpsRefresh(){}
 function updateMapLayerNotice(){
  const node=$('#mapLayerNotice');if(!node||!data)return;
  const messages=[];
- if(layerState.day){
-  const all=data.stops.filter(row=>row['時段']==='日間'&&row['日間分類']==='six'),pdf=all.filter(row=>!row['管理員站點']),overlays=all.filter(row=>row['管理員站點']),active=pdf.filter(row=>!sourceExcluded(row));
-  const ab=data.stops.filter(row=>row['時段']==='日間'&&row['日間分類']==='ab'&&!sourceExcluded(row));
-  const located=active.filter(row=>areas.includes(row['里別'])).length;
-  messages.push(`依清潔車列表車次順序顯示今日接下來4站；表定時間每30秒更新，可於站點視窗下方展開全部。PDF 日間：${new Set(pdf.map(routeKey)).size} 車次・原始 ${pdf.length} 筆・可用 ${active.length} 筆；管理員新增 ${overlays.length} 筆，現行共 ${active.length+overlays.length} 筆；十里圖層可依來源里別彙總 ${located+overlays.filter(row=>areas.includes(row['里別'])).length} 筆（無站點座標，不放置假站點）。`);
-  messages.push(ab.length?`週三／五 A／B：${new Set(ab.map(routeKey)).size} 路線・${ab.length} 筆，獨立顯示，不併入 PDF 日間統計。`:'週三／五 A／B：所選日期無固定路線，獨立入口保留。');
+ for(const [shiftName,enabled] of [['日間',layerState.day],['夜間',layerState.night]]){
+  if(!enabled)continue;
+  const window=MAP_SHIFT_WINDOWS[shiftName],rows=mapShiftStops('',shiftName);
+  const exact=rows.filter(row=>!!mapStopPosition(row)).length;
+  const areaLocated=rows.filter(row=>areas.includes(mapStopArea(row))).length;
+  const noArea=rows.filter(row=>!areas.includes(mapStopArea(row))).length;
+  const assignments=rows.reduce((sum,row)=>sum+mapTasksForStop(row).length,0);
+  const scope=liveRole==='volunteer'?'本人':'全體';
+  messages.push(`${shiftName} ${window.start}–${window.end}｜${mapScheduleDate()}：${scope}已排入 ${rows.length} 個行車點（${assignments} 筆人員指派）；精確標點 ${exact} 個，未定位但有里別 ${Math.max(0,areaLocated-exact)} 個按里別彙總${noArea?`，另 ${noArea} 個缺少里別資料，不放置假位置`:''}。`);
  }
- if(layerState.night){
-  const all=data.stops.filter(row=>row['時段']==='夜間'),pdf=all.filter(row=>!row['管理員站點']),overlays=all.filter(row=>row['管理員站點']),active=pdf.filter(row=>!sourceExcluded(row)),struck=pdf.length-active.length;
-  const located=active.filter(row=>areas.includes(row['里別'])).length;
-  messages.push(`PDF 夜間：${new Set(pdf.map(routeKey)).size} 車次・原始 ${pdf.length} 筆・可用 ${active.length} 筆${struck?`（另 ${struck} 筆原表刪除線，僅供追溯、不指派）`:''}${overlays.length?`；管理員新增 ${overlays.length} 筆，現行共 ${active.length+overlays.length} 筆`:''}；十里圖層可依來源里別彙總 ${located+overlays.filter(row=>areas.includes(row['里別'])).length} 筆（無站點座標，不放置假站點）。`);
- }
+ if(messages.length&&!liveRole)messages.push('登入後才能讀取排班任務；未排入的站點不會出現在此圖層。');
  node.hidden=messages.length===0;node.textContent=messages.join(' ');
 }
-function updateMap(){if(page!=='map')return;updateMapLayerNotice();if(mapFailed){drawFallback();return}if(!map||!map.getLayer('village-fill'))return;highlightMapSelection();markers.forEach(m=>m.remove());markers=[];
+function updateMap(){
+ if(page!=='map')return;
+ updateMapLayerNotice();if(mapFailed){drawFallback();return}if(!map||!map.getLayer('village-fill'))return;
+ highlightMapSelection();markers.forEach(m=>m.remove());markers=[];
  for(const a of visibleMapAreas()){
   const c=areaCentroid(a),cnt=assignedPeople(a).length,lead=leaderOf(a);
   const areaLabel=document.createElement('div');areaLabel.className='map-area-label'+(a===selectedArea?' selected':'');areaLabel.textContent=a;
@@ -465,20 +499,27 @@ function updateMap(){if(page!=='map')return;updateMapLayerNotice();if(mapFailed)
   }
   for(const [shiftName,enabled,type,delta] of [['日間',layerState.day,'day',-0.0007],['夜間',layerState.night,'night',0.0007]]){
    if(!enabled)continue;
-   const rows=visibleShiftStops(a,shiftName);
-   if(rows.length)marker(shiftName==='日間'?'☀':'☾',c[0]+delta,c[1]-0.0008,type,a+' '+shiftName+' '+rows.length+'站',()=>openShiftStopPopup(a,shiftName),rows.length);
+   const rows=mapShiftStops(a,shiftName),unlocated=rows.filter(row=>!mapStopPosition(row));
+   if(unlocated.length){
+    const window=MAP_SHIFT_WINDOWS[shiftName],title=`${a}｜${shiftName} ${window.start}–${window.end} 已排入 ${unlocated.length} 個未定位站點（里別彙總）`;
+    marker('✓',c[0]+delta,c[1]-0.0008,type,title,()=>openShiftStopPopup(a,shiftName),unlocated.length);
+   }
   }
  }
- if(liveRole!=='volunteer')for(const r of data.stops){
-  const pos=state.pins[stopKey(r)];if(!pos||!coord(pos.lon)||!coord(pos.lat))continue;
-  if((r['時段']==='日間'&&!layerState.day)||(r['時段']==='夜間'&&!layerState.night))continue;
-  marker(r['時段']==='日間'?'☀':'☾',pos.lon,pos.lat,r['時段']==='日間'?'day':'night',r['到達']+' '+r['停靠點原文'],()=>openShiftStopPopup(r['里別'],r['時段']));
+ if(liveRole!=='volunteer')for(const [shiftName,enabled,type] of [['日間',layerState.day,'day'],['夜間',layerState.night,'night']]){
+  if(!enabled)continue;
+  for(const row of mapShiftStops('',shiftName)){
+   const pos=mapStopPosition(row);if(!pos)continue;
+   const tasks=mapTasksForStop(row),window=MAP_SHIFT_WINDOWS[shiftName],area=mapStopArea(row);
+   const title=`${row['到達']} ${row['停靠點原文']}｜${routeLabel(row)}｜${shiftName} ${window.start}–${window.end} 已排入 ${tasks.length} 人`;
+   marker('✓',pos.lon,pos.lat,type,title,()=>openShiftStopPopup(area||row['車次'],shiftName,false,row['車次']));
+  }
  }
 }
 function positionAreaPopup(){const pop=$('#areaPopup');if(pop.hidden)return;if(liveRole==='admin'&&page==='map'){pop.classList.remove('owner-center-popup');const box=$('#mapBox');if(!box||!data)return;if(window.matchMedia?.('(max-width:620px)').matches){pop.style.setProperty('left','50%','important');pop.style.setProperty('top','50%','important');pop.style.setProperty('transform','translate(-50%,-50%)','important');return}pop.style.setProperty('transform','none','important');let x=box.clientWidth/2,y=box.clientHeight/2;const c=areaCentroid(selectedArea);if(map&&!mapFailed){const p=map.project(c);x=p.x;y=p.y}else{const w=box.clientWidth,h=box.clientHeight;x=(c[0]-120.224)/(120.256-120.224)*w;y=(23.022-c[1])/(23.022-22.990)*h}const pw=Math.min(430,Math.max(210,box.clientWidth-20)),ph=Math.min(pop.scrollHeight||250,box.clientHeight-12);let left=x+32;if(left+pw>box.clientWidth-6)left=x-pw-32;left=Math.max(6,Math.min(left,box.clientWidth-pw-6));let top=Math.max(7,Math.min(y-45,box.clientHeight-ph-7));pop.style.setProperty('left',left+'px','important');pop.style.setProperty('top',top+'px','important');return;}pop.classList.add('owner-center-popup');}
 function openAreaPreview(a,taskGroup=null){activeShiftPopup=null;if(liveRole==='admin'&&page==='map'){if(!areas.includes(a))return;selectedArea=a;highlightMapSelection();const list=sortedMembers(a),visible=list.slice(0,6);const people=visible.map(p=>{const leader=p.id===leaderId(a);return '<div class="popup-contact '+(leader?'leader-row':'')+'"><strong>'+esc(p.name)+(leader?' <span class="popup-crown" aria-hidden="true">👑</span>':'')+'</strong>'+telLink(p)+'</div>'}).join('');const root=$('#areaPopup'),box=$('#mapBox');if(root.parentElement!==box)box.append(root);root.classList.remove('owner-center-popup');root.classList.add('map-attached-popup','restored-map-popup');root.style.removeProperty('left');root.style.removeProperty('top');root.innerHTML='<div class="popup-top"><div><strong class="popup-area-name">'+esc(a)+'</strong><span class="popup-count">已分配 '+list.length+' 人</span></div><button type="button" data-close-area aria-label="關閉里別名單">✕</button></div><div class="popup-contacts">'+(people||'<span class="mini-note">目前尚無服務志工</span>')+(list.length>6?'<small class="popup-more">另有 '+(list.length-6)+' 位，請至人員分區查看</small>':'')+'</div><button type="button" class="popup-detail-btn" data-view-assignment="'+esc(a)+'">前往此里分配 →</button>';root.hidden=false;requestAnimationFrame(positionAreaPopup);return;}if(taskGroup){const match=liveTasks.some(t=>t.volunteer_id===liveMemberId&&t.area===a&&[t.visit_date,t.shift,taskRouteToken(t),t.area].join('|')===taskGroup);if(!match)return;}else if(!visibleMapAreas().includes(a))return;selectedArea=a;if(page==='map')highlightMapSelection();const list=liveRole==='volunteer'?(previewDemoMode?[{id:liveMemberId,name:liveDisplayName,phone:''}]:groupContacts.filter(p=>p.area===a&&p.id!==liveMemberId)):sortedMembers(a);const people=list.map(p=>'<div class="popup-contact '+(p.isLeader?'leader-row':'')+'"><strong>'+esc(p.name)+(p.isLeader?' <span class="popup-crown" aria-hidden="true">👑</span>':'')+'</strong>'+telLink(p)+'</div>').join('');const root=$('#areaPopup');if(page!=='map'&&root.parentElement!==document.body)document.body.append(root);else if(page==='map'&&root.parentElement!==$('#mapBox'))$('#mapBox').append(root);root.innerHTML='<div class="popup-top"><div><span class="popup-eyebrow">當日小組任務</span><strong class="popup-area-name">'+esc(a)+'</strong><span class="popup-count">同組 '+list.length+' 位夥伴</span></div><button type="button" data-close-area aria-label="關閉里別名單">✕</button></div><div class="popup-contacts">'+(people||'<span class="mini-note">目前沒有其他小組成員</span>')+'</div>';root.hidden=false;root.classList.add('owner-center-popup');requestAnimationFrame(positionAreaPopup);}
 function showAreaDetails(a){if(!areas.includes(a))return;const people=assignedPeople(a);const body=people.length?people.map(p=>`<div class="detail-person"><div><strong>${esc(p.name)}</strong>${residentHtml(p)?`<small>${residentHtml(p)}</small>`:''}<small>${esc(p.address||'未提供地址')}</small></div>${telLink(p)}</div>`).join(''):'<div class="empty">此里尚未分配志工</div>';showModal(`${a}｜已分配 ${people.length} 人`,`<div class="detail-person-list">${body}</div><button class="primary wide" data-view-assignment="${esc(a)}">前往此里分配</button>`)}
-function drawFallback(message=mapFailureMessage){clearMapLoadTimer();mapFailed=true;mapLoaded=false;mapFailureMessage=message||'互動地圖暫時無法載入';$('#mapLibre').style.display='none';const root=$('#mapFallback');root.hidden=false;const f=data.geo.features,minX=120.224,maxX=120.256,minY=22.990,maxY=23.022,w=780,h=640;const proj=(lon,lat)=>[(lon-minX)/(maxX-minX)*w,(maxY-lat)/(maxY-minY)*h];let svg=`<svg class="offline-map-svg" viewBox="0 0 ${w} ${h}" role="img" aria-label="十里分區離線參考圖"><rect width="780" height="640" fill="#eaf2f6"/><path d="M0 130H780M0 260H780M0 420H780M0 560H780M130 0V640M320 0V640M520 0V640M680 0V640" stroke="#d1dfe8" stroke-width="11" fill="none"/>`;for(const z of f){if(liveRole==='volunteer'&&!visibleMapAreas().includes(z.properties.name))continue;const xy=z.geometry.coordinates[0].map(p=>proj(p[0],p[1])),an=z.properties.name,c=areaCentroid(an),ct=proj(c[0],c[1]),sel=an===selectedArea;svg+=`<polygon data-fallback-area="${esc(an)}" points="${xy.map(p=>p.map(n=>n.toFixed(1)).join(',')).join(' ')}" fill="${z.properties.color}" fill-opacity="${sel?.52:.25}" stroke="${sel?'#dc263b':z.properties.color}" stroke-width="${sel?9:3}"/>`;const cnt=assignedPeople(an).length,dayCount=visibleShiftStops(an,'日間').length,nightCount=visibleShiftStops(an,'夜間').length;let badges=[];if(layerState.volunteer)badges.push(['avatar',cnt,'#f28a2f',!!leaderOf(an)]);if(layerState.day&&dayCount)badges.push(['☀',dayCount,'#eab43a',false]);if(layerState.night&&nightCount)badges.push(['☾',nightCount,'#5558ad',false]);svg+=`<text data-fallback-area="${esc(an)}" x="${ct[0]}" y="${ct[1]-31}" text-anchor="middle" class="offline-map-label" fill="${sel?'#0e6374':'#25465f'}">${esc(an)}</text>`;badges.forEach((b,i)=>{const dx=(i-(badges.length-1)/2)*44;svg+=`<g data-fallback-area="${esc(an)}" ${b[0]==='☀'?'data-fallback-shift="日間"':b[0]==='☾'?'data-fallback-shift="夜間"':''} class="offline-badge"><circle data-fallback-area="${esc(an)}" cx="${ct[0]+dx}" cy="${ct[1]+3}" r="21" fill="${b[2]}" stroke="#fff" stroke-width="3"/><text data-fallback-area="${esc(an)}" x="${ct[0]+dx}" y="${ct[1]+9}" text-anchor="middle" fill="white" font-size="16" font-weight="900">${b[0]==='avatar'?'👤':b[0]}${b[1]}</text>${b[3]?`<text data-fallback-area="${esc(an)}" x="${ct[0]+dx+15}" y="${ct[1]-15}" font-size="17">👑</text>`:''}</g>`})}svg+=`</svg><div class="map-recovery" role="status"><strong>${esc(mapFailureMessage)}</strong><button type="button" class="map-retry" data-retry-map>重試互動地圖</button></div>`;root.innerHTML=svg;root.onclick=e=>{if(e.target.closest('[data-retry-map]')){retryMap();return}const badge=e.target.closest('[data-fallback-shift]');if(badge){openShiftStopPopup(badge.dataset.fallbackArea,badge.dataset.fallbackShift);return}const a=e.target?.closest('[data-fallback-area]')?.getAttribute('data-fallback-area')||e.target?.getAttribute('data-fallback-area');if(a&&!pinTarget){openAreaPreview(a);$('#mapLegendStatus').textContent='已選取 '+a;drawFallback();requestAnimationFrame(positionAreaPopup);return}if(pinTarget){const box=root.querySelector('svg').getBoundingClientRect(),xx=(e.clientX-box.left)/box.width*w,yy=(e.clientY-box.top)/box.height*h;applyPin(minX+xx/w*(maxX-minX),maxY-yy/h*(maxY-minY))}};$('#mapLegendStatus').textContent='十里分區參考地圖'}
+function drawFallback(message=mapFailureMessage){clearMapLoadTimer();mapFailed=true;mapLoaded=false;mapFailureMessage=message||'互動地圖暫時無法載入';$('#mapLibre').style.display='none';const root=$('#mapFallback');root.hidden=false;const f=data.geo.features,minX=120.224,maxX=120.256,minY=22.990,maxY=23.022,w=780,h=640;const proj=(lon,lat)=>[(lon-minX)/(maxX-minX)*w,(maxY-lat)/(maxY-minY)*h];let svg=`<svg class="offline-map-svg" viewBox="0 0 ${w} ${h}" role="img" aria-label="十里分區離線參考圖"><rect width="780" height="640" fill="#eaf2f6"/><path d="M0 130H780M0 260H780M0 420H780M0 560H780M130 0V640M320 0V640M520 0V640M680 0V640" stroke="#d1dfe8" stroke-width="11" fill="none"/>`;for(const z of f){if(liveRole==='volunteer'&&!visibleMapAreas().includes(z.properties.name))continue;const xy=z.geometry.coordinates[0].map(p=>proj(p[0],p[1])),an=z.properties.name,c=areaCentroid(an),ct=proj(c[0],c[1]),sel=an===selectedArea;svg+=`<polygon data-fallback-area="${esc(an)}" points="${xy.map(p=>p.map(n=>n.toFixed(1)).join(',')).join(' ')}" fill="${z.properties.color}" fill-opacity="${sel?.52:.25}" stroke="${sel?'#dc263b':z.properties.color}" stroke-width="${sel?9:3}"/>`;const cnt=assignedPeople(an).length,dayCount=mapShiftStops(an,'日間').length,nightCount=mapShiftStops(an,'夜間').length;let badges=[];if(layerState.volunteer)badges.push(['avatar',cnt,'#f28a2f',!!leaderOf(an)]);if(layerState.day&&dayCount)badges.push(['☀',dayCount,'#eab43a',false]);if(layerState.night&&nightCount)badges.push(['☾',nightCount,'#5558ad',false]);svg+=`<text data-fallback-area="${esc(an)}" x="${ct[0]}" y="${ct[1]-31}" text-anchor="middle" class="offline-map-label" fill="${sel?'#0e6374':'#25465f'}">${esc(an)}</text>`;badges.forEach((b,i)=>{const dx=(i-(badges.length-1)/2)*44;svg+=`<g data-fallback-area="${esc(an)}" ${b[0]==='☀'?'data-fallback-shift="日間"':b[0]==='☾'?'data-fallback-shift="夜間"':''} class="offline-badge"><circle data-fallback-area="${esc(an)}" cx="${ct[0]+dx}" cy="${ct[1]+3}" r="21" fill="${b[2]}" stroke="#fff" stroke-width="3"/><text data-fallback-area="${esc(an)}" x="${ct[0]+dx}" y="${ct[1]+9}" text-anchor="middle" fill="white" font-size="16" font-weight="900">${b[0]==='avatar'?'👤':b[0]}${b[1]}</text>${b[3]?`<text data-fallback-area="${esc(an)}" x="${ct[0]+dx+15}" y="${ct[1]-15}" font-size="17">👑</text>`:''}</g>`})}svg+=`</svg><div class="map-recovery" role="status"><strong>${esc(mapFailureMessage)}</strong><button type="button" class="map-retry" data-retry-map>重試互動地圖</button></div>`;root.innerHTML=svg;root.onclick=e=>{if(e.target.closest('[data-retry-map]')){retryMap();return}const badge=e.target.closest('[data-fallback-shift]');if(badge){openShiftStopPopup(badge.dataset.fallbackArea,badge.dataset.fallbackShift);return}const a=e.target?.closest('[data-fallback-area]')?.getAttribute('data-fallback-area')||e.target?.getAttribute('data-fallback-area');if(a&&!pinTarget){openAreaPreview(a);$('#mapLegendStatus').textContent='已選取 '+a;drawFallback();requestAnimationFrame(positionAreaPopup);return}if(pinTarget){const box=root.querySelector('svg').getBoundingClientRect(),xx=(e.clientX-box.left)/box.width*w,yy=(e.clientY-box.top)/box.height*h;applyPin(minX+xx/w*(maxX-minX),maxY-yy/h*(maxY-minY))}};$('#mapLegendStatus').textContent='十里分區參考地圖'}
 function centerTodayVillage(){if(!map||!mapLoaded||liveRole!=='volunteer')return;const names=visibleMapAreas();if(!names.length)return;const current=myTasks().find(t=>t.visit_date===today());const area=current?.area||names[0];const feature=data?.geo?.features?.find(f=>f.properties?.name===area);if(!feature)return;const coords=(feature.geometry?.type==='MultiPolygon'?feature.geometry.coordinates.flat(2):feature.geometry.coordinates.flat(1)).filter(p=>Array.isArray(p)&&Number.isFinite(p[0])&&Number.isFinite(p[1]));if(!coords.length)return;const xs=coords.map(p=>p[0]),ys=coords.map(p=>p[1]);map.fitBounds([[Math.min(...xs),Math.min(...ys)],[Math.max(...xs),Math.max(...ys)]],{padding:65,duration:400,maxZoom:15.5});}
 function mapFit(){if(map&&mapLoaded)map.fitBounds([[120.226,22.989],[120.253,23.022]],{padding:25,duration:400});else if(mapFailed)drawFallback()}
 document.addEventListener('click',e=>{
