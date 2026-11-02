@@ -24,7 +24,7 @@
    if(!name)reasons.push('站名待確認');
    if(!route)reasons.push('路線待確認');
    if(source?.review_required===true)reasons.push('來源衝突待核');
-   return {id,weekday,route,name,start,end,sourceOrder:index+1,enabled:reasons.length===0,pendingReasons:reasons,reviewNote:String(source?.review_note||'').trim()};
+   return {id,weekday,route,name,address:String(source?.address||'').trim(),start,end,sourceOrder:index+1,enabled:reasons.length===0,pendingReasons:reasons,reviewNote:String(source?.review_note||'').trim()};
   });
  }
  function stopsForDate(document,date){
@@ -38,7 +38,7 @@
   const stops=active.map(row=>{
    const order=(routeOrder.get(row.route)||0)+1;routeOrder.set(row.route,order);
    return {'時段':'日間','車次':`日間 ${row.route}線`,'車牌':'','路線ID':`DAY:${row.weekday}:${row.route}`,'站點ID':row.id,
-    '里別':'','固定日間':true,'清運次序':order,'停靠點原文':row.name,'Google地圖定位地址':'','到達':row.start,'離開':row.end,
+    '里別':'','固定日間':true,'清運次序':order,'停靠點原文':row.name,'補充地址':row.address,'Google地圖定位地址':row.address,'到達':row.start,'離開':row.end,
     '適用星期':row.weekday,'來源順序':row.sourceOrder,'定位狀態':'未提供座標，不顯示地圖站點','備註':'週三／週五固定日間來源'};
   });
   return {weekday,stops,pending,serviceNotice,closedReason:''};
