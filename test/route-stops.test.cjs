@@ -50,7 +50,7 @@ test('planner initializes the selected shift as daytime without overriding later
  assert.match(app,/shift='日間'/);
  assert.match(html,/class="shift on" data-shift="日間"/);
  assert.match(app,/\$\$\('\[data-shift\]'\)\.forEach\(b=>b\.onclick=\(\)=>\{shift=b\.dataset\.shift/);
- assert.doesNotMatch(app,/renderPlanner\(\)[\s\S]{0,80}shift='日間'/);
+ const plannerStart=app.indexOf('function renderPlanner()'),plannerEnd=app.indexOf('\nfunction ',plannerStart+1);assert.ok(plannerStart>=0&&plannerEnd>plannerStart);assert.doesNotMatch(app.slice(plannerStart,plannerEnd),/shift='日間'/);assert.match(app,/function selectWeekdayRoute\(weekday\)\{\s*shift='日間';dayRouteCategory='ab';date=weekRouteDate\(weekday\)/);
 });
 
 test('route-time preferences are local, bounded, subject-isolated, and never business data',()=>{
