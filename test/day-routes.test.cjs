@@ -2,7 +2,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const root=path.join(__dirname,'..'),adapter=require('../day-routes.js');
 const source=require('../data-day-routes-20250402.json');
-const app=fs.readFileSync(path.join(root,'app.js'),'utf8'),tasks=fs.readFileSync(path.join(root,'api/tasks.js'),'utf8'),html=fs.readFileSync(path.join(root,'index.html'),'utf8'),sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
+const app=fs.readFileSync(path.join(root,'app.js'),'utf8'),dayRoutes=fs.readFileSync(path.join(root,'day-routes.js'),'utf8'),tasks=fs.readFileSync(path.join(root,'api/tasks.js'),'utf8'),html=fs.readFileSync(path.join(root,'index.html'),'utf8'),sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
 
 test('Taipei calendar dates select only Wednesday and Friday fixed daytime catalogs',()=>{
  assert.equal(adapter.weekdayForDate('2026-10-28'),'星期三');
@@ -64,9 +64,17 @@ test('day adapter preserves document order instead of numerically or chronologic
  assert.deepEqual(result.stops.map(row=>row['清運次序']),[1,2]);
 });
 
+test('weekday quick picks select this week and night filters default to 19:00 through the final option',()=>{
+ assert.match(html,/data-weekday-route="3"/);assert.match(html,/data-weekday-route="5"/);
+ assert.match(app,/function weekRouteDate\(weekday\)/);assert.match(app,/function selectWeekdayRoute\(weekday\)/);
+ assert.match(app,/\$\$\('\[data-day-category\]'\)\.forEach/);assert.match(app,/\$\$\('\[data-weekday-route\]'\)\.forEach/);assert.doesNotMatch(app,/(?<!\$)\$\('\[data-(?:day-category|weekday-route)\]'\)\.forEach/);
+ assert.match(app,/function visitTimePreset\(\)\{if\(shift==='夜間'\)return \{start:'19:00',end:''\};return dayShiftWindow\(\)\}/);
+ assert.match(app,/visitTimeEnd=windowPreset\?\.end\|\|endOptions\.at\(-1\)\|\|''/);
+});
+
 test('frontend and backend keep route identity separate from an optional truck number',()=>{
  assert.match(html,/day-routes\.js/);assert.match(html,/route-time-filter\.js/);assert.match(sw,/data-day-routes-20250402\.json/);assert.match(sw,/route-time-filter\.js/);
- assert.match(app,/fetch\('\.\/data-day-routes-20250402\.json'/);
+ assert.match(app,/fetch\('\.\/api\/day-route-catalog'/);
  assert.match(app,/r\['固定日間'\]\?true:plannerArea==='all'/);
  assert.match(app,/本日另有.*來源待確認，未列入排班/);
  assert.match(app,/fixedDay\?dayCatalogStatus\.notice:''/);
