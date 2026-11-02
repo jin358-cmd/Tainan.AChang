@@ -2,4 +2,4 @@
 
 body.embedded header{display:none}body.embedded main{margin:0 auto;padding:0 4px}body.embedded section{border-radius:10px}
 
-#directory>.note,#detail>.note,#routeMeta{display:none}#directory th,#directory td,#routeTable th,#routeTable td{text-align:center}.route-name{display:inline-flex;align-items:center;justify-content:center;gap:6px}.day-route span{color:#d78a00}.night-route span{color:#4a65a8}.route-open{background:#e5f5e9;border-color:#96c7a3;color:#17613a}.route-open:hover{background:#d3edda;border-color:#65a979}.connector line{stroke:#e81f28;stroke-width:4;marker-end:url(#route-arrow)}.connector marker path{fill:#e81f28}
+#directory>.note,#detail>.note,#routeMeta{display:none}#directory th,#directory td,#routeTable th,#routeTable td{text-align:center}.route-name{display:inline-flex;align-items:center;justify-content:center;gap:6px}.day-route span{color:#d78a00}.night-route span{color:#4a65a8}.route-open{background:#e5f5e9;border-color:#96c7a3;color:#17613a}.route-open:hover{background:#d3edda;border-color:#65a979}.connector{z-index:4}.connector line{stroke:#e81f28;stroke-width:4;marker-end:url(#route-arrow)}.connector marker path{fill:#e81f28}
