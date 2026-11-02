@@ -36,7 +36,19 @@ test('map asset revision and service-worker cache advance together', () => {
   assert.match(html, /styles\.css\?v=211/);
   assert.match(html, /route-time-filter\.js\?v=2/);
   assert.match(html, /app\.js\?v=221/);
-  assert.match(sw, /achang-pwa-shell-v188-arrival-only/);
+  assert.match(html, /route-directory\.js\?v=3/);
+  assert.match(sw, /achang-pwa-shell-v189-route-directory-layout/);
+});
+
+test('truck directory keeps the route view concise and renders directional route arrows', () => {
+  const directory = fs.readFileSync(path.join(__dirname, '..', 'route-directory.js'), 'utf8');
+  const directoryCss = fs.readFileSync(path.join(__dirname, '..', 'route-directory.css'), 'utf8');
+  assert.match(directory, /class="route-name/);
+  assert.match(directory, /class="route-open/);
+  assert.match(directory, /marker id="route-arrow"/);
+  assert.doesNotMatch(directory, /來源：\$\{esc\(g\.rows\[0\]/);
+  assert.match(directoryCss, /#directory th,#directory td,#routeTable th,#routeTable td\{text-align:center\}/);
+  assert.match(directoryCss, /\.connector line\{stroke:#e81f28/);
 });
 
 test('map uses only the provider native compact attribution entry', () => {

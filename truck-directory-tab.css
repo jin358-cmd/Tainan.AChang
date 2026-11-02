@@ -3,3 +3,5 @@
 
 
 }
+
+@scope (.truck-directory-host){:scope #directory>.note,:scope #detail>.note,:scope #routeMeta{display:none}:scope #directory th,:scope #directory td,:scope #routeTable th,:scope #routeTable td{text-align:center}:scope .route-name{display:inline-flex;align-items:center;justify-content:center;gap:6px}:scope .day-route span{color:#d78a00}:scope .night-route span{color:#4a65a8}:scope .route-open{background:#e5f5e9;border-color:#96c7a3;color:#17613a}:scope .route-open:hover{background:#d3edda;border-color:#65a979}:scope .connector line{stroke:#e81f28;stroke-width:4;marker-end:url(#route-arrow)}:scope .connector marker path{fill:#e81f28}}
