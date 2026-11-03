@@ -120,7 +120,7 @@ test('a staged-only person has draft removal while saved vehicle members alone h
  assert.doesNotMatch(panel().innerHTML,new RegExp('data-remove-person="'+person.id+'"'));assert.match(panel().innerHTML,/移出暫排/);assert.match(panel().innerHTML,new RegExp('data-remove-person="'+second.id+'"'));
 });
 test('obsolete station toolbar is removed and route cards retain only service icons',()=>{
- for(const name of ['index.html','route-directory.html']){const html=fs.readFileSync(require.resolve('../'+name),'utf8');assert.doesNotMatch(html,/routeSelectionToolbar|routePickPeople|routeSelectAll|routeClearSelection/);assert.match(html,/route-progress-clock-row.*?routeProgressClock.*?routeClearAssignments/s);}
+ for(const name of ['index.html','route-directory.html']){const html=fs.readFileSync(require.resolve('../'+name),'utf8');assert.doesNotMatch(html,/routeSelectionToolbar|routePickPeople|routeSelectAll|routeClearSelection/);assert.match(html,/route-progress-legend.*?routeFullToggle.*?routeClearAssignments/s);assert.doesNotMatch(html,/routeProgressClock|route-progress-clock-row/);}
  const directory=fs.readFileSync(require.resolve('../route-directory'),'utf8');assert.doesNotMatch(directory,/已準備 \$\{snapshot|🗑️ 清運：|♻️ 回收：/);assert.match(directory,/點擊全選站點/);
 });
 

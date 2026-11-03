@@ -66,7 +66,7 @@
   for(const stop of model.stops){
    if(!stop.position)continue;const [x,y]=project(stop.position);
    make('circle',{cx:x,cy:y,r:10,fill:stop.color,stroke:'#fff','stroke-width':3,'data-route-stop':stop.id});
-   make('text',{x:x+16,y:y-16,'font-size':36,'font-family':'Arial, sans-serif','font-weight':800,fill:'#17384f',stroke:'#fff','stroke-width':7,'paint-order':'stroke','data-stop-number':stop.order}).textContent=String(stop.order);
+   make('text',{x:x+16,y:y-16,'font-size':68,'font-family':'Arial, sans-serif','font-weight':800,fill:'#17384f',stroke:'#fff','stroke-width':9,'paint-order':'stroke','data-stop-number':stop.order}).textContent=String(stop.order);
   }
   make('text',{x:12,y:HEIGHT-12,'font-size':14,fill:'#17384f',stroke:'#fff','stroke-width':3,'paint-order':'stroke'}).textContent='© OpenFreeMap · © OpenMapTiles · © OpenStreetMap contributors · 依站序連線';
   return svg;

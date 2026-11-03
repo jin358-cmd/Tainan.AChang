@@ -7,7 +7,8 @@ const left=document.createElement('aside');left.className='map-route-left truck-
 const center=document.createElement('div');center.className='map-route-center';
 const right=document.createElement('aside');right.className='map-route-right truck-directory-host';right.setAttribute('aria-label','完整路線圖及詳細列表');
 const empty=document.createElement('p');empty.className='map-route-empty';empty.textContent='請從車次列表選擇車次，單點站點卡片複選，連點兩下全選該車次站點。';right.append(empty);
-[...page.children].forEach(node=>center.append(node));left.append(controls,directory);right.append(detail);workspace.append(left,center,right);page.append(workspace);host.hidden=true;host.setAttribute('aria-hidden','true');
+const filterCard=document.createElement('section');filterCard.className='route-filter-card truck-directory-host';filterCard.setAttribute('aria-label','車次篩選');filterCard.append(controls);const summary=byId('directoryRouteSummary');if(summary)filterCard.append(summary);
+[...page.children].forEach(node=>center.append(node));left.append(directory);right.append(detail);workspace.append(left,center,right);page.append(filterCard,workspace);host.hidden=true;host.setAttribute('aria-hidden','true');
 const jump=document.createElement('button');jump.type='button';jump.className='map-route-list-jump';jump.textContent='選擇車次／人員分配';jump.onclick=()=>left.scrollIntoView({block:'start',behavior:'smooth'});center.prepend(jump);
 document.body.classList.add('map-route-integrated');
 function resize(){document.body.classList.toggle('map-route-desktop',desktop.matches);const active=window.AChangRouteDirectory?.activeRoute?.();if(active)window.AChangRouteDirectory.openRoute(active,{syncMap:false,reveal:false});window.dispatchEvent(new Event('resize'));}

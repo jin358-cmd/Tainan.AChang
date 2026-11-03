@@ -22,8 +22,8 @@ test('selecting a nighttime directory route synchronizes the map on a narrow scr
 
 test('expanded full route uses the original diagram position and keeps the compact status controls above it',()=>{
  for(const name of ['index.html','route-directory.html']){
-  const html=fs.readFileSync(path.join(root,name),'utf8'),heading=html.indexOf('class="route-detail-controls"'),legend=html.indexOf('class="route-progress-legend"'),clock=html.indexOf('class="route-progress-clock-row"'),full=html.indexOf('class="route-full-disclosure"'),diagram=html.indexOf('id="routeDiagram"');
-  assert.ok(heading<legend&&legend<clock&&clock<full&&full<diagram);assert.match(html,/>列印路線<\/button>/);assert.match(html,/>已過站<\/span>/);
+  const html=fs.readFileSync(path.join(root,name),'utf8'),heading=html.indexOf('class="route-detail-controls"'),legend=html.indexOf('class="route-progress-legend"'),clear=html.indexOf('id="routeClearAssignments"'),full=html.indexOf('class="route-full-disclosure"'),diagram=html.indexOf('id="routeDiagram"');
+  assert.ok(heading<legend&&legend<clear&&clear<full&&full<diagram);assert.match(html,/>列印路線<\/button>/);assert.match(html,/>已過站<\/span>/);
  }
  const css=fs.readFileSync(path.join(root,'route-progress.css'),'utf8');assert.match(css,/#detail\.full-route-open #routeDiagram,#detail\.full-route-open #routeTable\{display:none!important\}/);
 });

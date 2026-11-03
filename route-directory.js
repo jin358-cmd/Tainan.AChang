@@ -9,7 +9,6 @@ function updateProgress(){
  const progress=window.AChangDispatchView.routeProgress(active.rows),labels={past:'已過站',next:'下一站',upcoming:'尚未到站',unverified:'原表刪除線或時間待核'};
  $('routeDiagram').querySelectorAll('.stop-number').forEach((number,i)=>{const state=progress.states[i];number.dataset.progress=state;number.title=`第${number.textContent.trim()}站：${labels[state]}`;number.setAttribute('aria-label',number.title);});
  if(expandedRoute===active.route){const source=groups.find(g=>g.route===active.route),full=window.AChangDispatchView.routeProgress(source.rows);$('routeFullDiagram').querySelectorAll('.stop-number').forEach((number,i)=>{const state=full.states[i];number.dataset.progress=state;number.title=`第${number.textContent.trim()}站：${labels[state]}`;number.setAttribute('aria-label',number.title);});}
- $('routeProgressClock').textContent=`${progress.day} ${progress.hhmm}｜每30秒更新`;
 }
 function renderDirectoryTimeOptions(rows){
  const legal=value=>/^([01]\d|2[0-3]):[0-5]\d$/.test(String(value||''));
@@ -57,7 +56,7 @@ function stationCards(rows,route){let html='';for(let i=0;i<rows.length;i+=3){ht
 function stationTable(rows){return '<table><thead><tr><th>順序</th><th>時間</th><th>里別</th><th>站點</th><th>🗑️ 清運／♻️ 回收</th></tr></thead><tbody>'+rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r['到達時間'])}</td><td>${esc(r['里別'])}</td><td>${esc(r['站點名稱／地址'])}${r._addressNote?`<span class="station-address-note">備註：${esc(r._addressNote)}</span>`:''}${r._extras?.['刪除線']?'（原表刪除線）':''}</td><td><span class="service-day">🗑️ ${esc(r['清運星期']||'未提供')}</span><span class="service-day">♻️ ${esc(r['資源回收星期']||'未提供')}</span></td></tr>`).join('')+'</tbody></table>';}
 function renderFullRoute(){
  const holder=$('routeFullContent'),button=$('routeFullToggle'),source=groups.find(g=>g.route===active?.route),open=!!source&&expandedRoute===source.route;
- holder.hidden=!open;$('detail').classList?.toggle('full-route-open',open);button.setAttribute('aria-expanded',String(open));button.textContent=open?'▾ 收合全部':'▸ 查看全部';button.title='查看全部路線，定位到目前下一站';
+ holder.hidden=!open;$('detail').classList?.toggle('full-route-open',open);button.setAttribute('aria-expanded',String(open));button.textContent=open?'▾ 收合全部站點':'▸ 查看全部站點';button.title='查看全部路線，定位到目前下一站';
  if(open){$('routeFullDiagram').innerHTML=stationCards(source.rows.map((r,i)=>({...r,_directoryOrder:i+1})),source.route);$('routeFullTable').innerHTML=stationTable(source.rows);}else{$('routeFullDiagram').innerHTML='';$('routeFullTable').innerHTML='';}
 }
 function scrollToRouteProgress(){
@@ -115,7 +114,7 @@ async function printActiveRoute(){
  const measureSheet=()=>{
   content.style.transform='none';content.style.position='static';content.style.inset='auto';content.style.width='190mm';sheet.style.height='auto';
   if(!visual.hidden)connectDiagram(diagram);
-  if(snapshot.shift==='日間'){const scale=window.AChangRoutePrint?.paperScale(content.scrollHeight,sheet.getBoundingClientRect().width)||1;sheet.style.height=Math.ceil(content.scrollHeight*scale)+'px';sheet.dataset.printPages='1';content.style.transform=`scale(${scale})`;content.style.transformOrigin='top left';content.style.position='absolute';content.style.inset='0 auto auto 0';}
+  if(snapshot.shift==='日間'&&!visual.hidden){const scale=window.AChangRoutePrint?.paperScale(content.scrollHeight,sheet.getBoundingClientRect().width)||1;sheet.style.height=Math.ceil(content.scrollHeight*scale)+'px';sheet.dataset.printPages='1';content.style.transform=`scale(${scale})`;content.style.transformOrigin='top left';content.style.position='absolute';content.style.inset='0 auto auto 0';}
  };
  document.getElementById('routePrintPreview')?.remove();
  const preview=document.createElement('section');preview.id='routePrintPreview';preview.className='route-print-preview';preview.setAttribute('role','dialog');preview.setAttribute('aria-modal','true');preview.setAttribute('aria-label','路線列印預覽');
@@ -127,8 +126,8 @@ async function printActiveRoute(){
  const closeButton=document.createElement('button');closeButton.type='button';closeButton.textContent='返回地圖';closeButton.onclick=()=>{preview.remove();sheet.remove();button.focus();};preview.onkeydown=event=>{if(event.key==='Escape'){event.preventDefault();event.stopPropagation();closeButton.onclick();}};
  actions.append(label,modes,printButton,closeButton);preview.append(actions);document.body.append(preview);let paper=null;
  const setMode=mode=>{
-  const listOnly=mode==='list';visual.hidden=listOnly;sheet.dataset.printMode=listOnly?'list':'full';fullButton.setAttribute('aria-pressed',String(!listOnly));listButton.setAttribute('aria-pressed',String(listOnly));
-  label.textContent=(listOnly?'僅列表清單':'完整全部')+(snapshot.shift==='日間'?' · A4 一張':' · 路線列印');measureSheet();
+  const listOnly=mode==='list';visual.hidden=listOnly;sheet.dataset.printMode=listOnly?'list':'full';sheet.classList.toggle('route-print-day',snapshot.shift==='日間'&&!listOnly);if(listOnly)delete sheet.dataset.printPages;fullButton.setAttribute('aria-pressed',String(!listOnly));listButton.setAttribute('aria-pressed',String(listOnly));
+  label.textContent=(listOnly?'僅列表清單':'完整全部')+(listOnly?' · A4 大字列印':snapshot.shift==='日間'?' · A4 一張':' · 路線列印');measureSheet();
   const next=sheet.cloneNode(true);next.removeAttribute('id');next.className='route-print-review-paper route-print-compact truck-directory-host';if(paper)paper.replaceWith(next);else preview.append(next);paper=next;
   status.textContent='';status.hidden=true;
  };

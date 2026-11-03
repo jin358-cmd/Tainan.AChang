@@ -86,7 +86,7 @@
 .route-print-compact .route-stop time{font-size:15px}
 .route-print-compact .route-stop a{font-size:10px;padding:4px;line-height:1.35;overflow-wrap:anywhere}
 .route-print-compact .route-stop small{font-size:9px;line-height:1.3;margin-top:4px}
-.route-print-compact .stop-number{width:40px;height:40px;min-height:40px;font-size:24px;line-height:36px;margin:7px auto;padding:0}
+.route-print-compact .stop-number{width:48px;height:48px;min-height:48px;font-size:32px!important;font-weight:900!important;line-height:44px;margin:7px auto;padding:0}
 .route-print-compact .route-person-chip{font-size:10px;padding:3px;line-height:1.25}
 .route-print-compact .table-wrap{overflow:visible!important}
 .route-print-compact table{width:100%;min-width:0!important;border-collapse:collapse;font-size:10px;line-height:1.25}
@@ -101,7 +101,7 @@
  #routePrintSurface.route-print-compact svg{max-height:88mm}
  #routePrintSurface.route-print-compact .diagram{display:grid!important;padding:7px 0!important}
  #routePrintSurface.route-print-compact .route-row{display:contents!important}
- #routePrintSurface.route-print-compact .stop-number{width:40px;height:40px;min-height:40px;font-size:24px;line-height:36px;margin:7px auto}
+ #routePrintSurface.route-print-compact .stop-number{width:48px;height:48px;min-height:48px;font-size:32px!important;font-weight:900!important;line-height:44px;margin:7px auto}
  #routePrintSurface.route-print-compact .route-stop a{font-size:10px;line-height:1.35}
  #routePrintSurface.route-print-compact table{font-size:10px}
  #routePrintSurface.route-print-compact th,#routePrintSurface.route-print-compact td{padding:4px 5px;line-height:1.3}
@@ -120,3 +120,7 @@
 
 .day-route-address-line>p{font-size:18px;font-weight:750;line-height:1.6;overflow-wrap:anywhere}.day-route-contact strong{font-size:18px;line-height:1.5}
 .map-route-right .route-stop>a{font-size:16px;line-height:1.6}.map-route-right .route-person-chip{font-size:16px}
+
+.route-print-compact[data-print-mode="list"] table,.route-print-compact[data-print-mode="list"] th,.route-print-compact[data-print-mode="list"] td{font-size:18px!important;line-height:1.6}
+.route-print-compact[data-print-mode="list"] th,.route-print-compact[data-print-mode="list"] td{padding:10px 8px!important}
+.route-print-compact[data-print-mode="list"] tr{break-inside:avoid;page-break-inside:avoid}.route-print-compact[data-print-mode="list"] thead{display:table-header-group}
