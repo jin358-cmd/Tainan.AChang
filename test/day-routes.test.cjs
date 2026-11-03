@@ -172,3 +172,17 @@ test('tasks handler is idempotent for an existing stop and rejects a conflicting
  }finally{delete require.cache[handlerPath];if(originalHandler)require.cache[handlerPath]=originalHandler;if(originalServer)require.cache[serverPath]=originalServer;else delete require.cache[serverPath]}
 });
 
+
+
+test('planner can reuse a released route through the atomic batch instead of being blocked by cancelled history',async()=>{
+ const serverPath=require.resolve('../lib/server'),handlerPath=require.resolve('../api/tasks'),originalServer=require.cache[serverPath],originalHandler=require.cache[handlerPath],writes=[];
+ const fake={run:fn=>fn,method:()=>{},authorized:async()=>({role:'admin',token:'token'}),body:req=>req.body,uuid:x=>x,checkText:x=>String(x).trim(),validDate:x=>x,time:x=>x,problem:(status,message)=>{throw Object.assign(new Error(message),{status})},need:r=>r.data,json:(res,status,body)=>{res.statusCode=status;res.body=body},rest:async(path,token,options={})=>{
+  writes.push({path,options});if(path.startsWith('service_allocations?'))return {ok:true,data:[{}]};
+  if(path.startsWith('assignments?member_id='))return {ok:true,data:[{id:'old',village:'復華里',route_id:'OLD-ROUTE',released_at:'2026-11-03T00:00:00Z'},{id:'target',village:'復華里',route_id:'TARGET',released_at:'2026-11-03T00:00:00Z'}]};
+  assert.equal(path,'rpc/achang_assign_route_batch');assert.equal(options.body.p_items[0].route_id,'TARGET');assert.equal(options.body.p_items[0].end_time,'07:00');return {ok:true,data:{createdCount:0,taskIds:['original-task']}};
+ }};
+ try{require.cache[serverPath]={id:serverPath,filename:serverPath,loaded:true,exports:fake};delete require.cache[handlerPath];const handler=require(handlerPath),res={};
+  await handler({method:'POST',body:{volunteerId:'member',area:'復華里',date:'2026-11-03',shift:'日間',routeId:'TARGET',truck:'TEST',address:'原站',time:'06:50',routeEnd:'07:00',stopOrder:1}},res);
+  assert.deepEqual(res.body,{ok:true,taskIds:['original-task'],reused:true});assert.equal(writes.filter(x=>x.options.method==='POST').length,1);
+ }finally{delete require.cache[handlerPath];if(originalHandler)require.cache[handlerPath]=originalHandler;if(originalServer)require.cache[serverPath]=originalServer;else delete require.cache[serverPath]}
+});

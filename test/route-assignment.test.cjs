@@ -147,7 +147,12 @@ test('clearing a vehicle stages only that date and route, preserves other work, 
 
 test('all-selection uses the selected time window, follows range changes, and can be cancelled again',()=>{
  const {emit,node,panel,cards,setWindow}=assignmentHarness({visible:[a.站點ID]});
- emit('achang:focus-route-stop',{id:a.站點ID,route:a.車次,all:true,stopIds:[a.站點ID]});assert.equal(cards.filter(c=>c.states.has('assignment-target')).length,1);assert.equal(node('routeTitle').children.at(-1).textContent,'（站點已全選）');assert.match(panel().innerHTML,/目前時段 1 站/);
+ emit('achang:focus-route-stop',{id:a.站點ID,route:a.車次,all:true,stopIds:[a.站點ID]});assert.equal(cards.filter(c=>c.states.has('assignment-target')).length,1);assert.equal(node('routeTitle').children.at(-1).textContent,'（站點已全選）');assert.doesNotMatch(panel().innerHTML,/route-assignment-target|<h3>/);
  setWindow([b.站點ID]);emit('achang:directory-route',{route:a.車次});assert.equal(cards[0].states.has('assignment-target'),false);assert.equal(cards[1].states.has('assignment-target'),true);assert.equal(node('routeTitle').children.at(-1).textContent,'（站點已全選）');
  emit('achang:focus-route-stop',{id:b.站點ID,route:a.車次,all:true,stopIds:[b.站點ID]});assert.equal(cards.filter(c=>c.states.has('assignment-target')).length,0);assert.equal(panel().hidden,true);assert.equal(node('routeTitle').children.at(-1).textContent,'（點擊全選站點）');
+});
+
+test('database duplicate reservation messages become a readable conflict while the draft is retained',async()=>{
+ const fake={...L,rest:async path=>({ok:!path.startsWith('rpc/'),data:path.startsWith('rpc/')?{code:'23505',message:'duplicate key value violates unique constraint "achang_one_shift_per_day"'}:[]})};
+ await assert.rejects(()=>saveBatch({batchId:'3bc211b4-bc21-4cd7-a7c2-a960958a96d4',items:[{volunteerId:person.id,stopId:a.站點ID,date:'2026-11-03'}]},{token:'admin'},fake),e=>e.status===409&&e.message.includes('其他有效排班')&&!e.message.includes('duplicate key'));
 });

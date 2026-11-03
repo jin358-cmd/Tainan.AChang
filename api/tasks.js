@@ -36,7 +36,13 @@ module.exports=L.run(async(req,res)=>{
   const arrival=cleaned[0].time;
   if(!AREAS.includes(village)||!sh)L.problem(400,'里別或時段無效');
   const alloc=await L.rest('service_allocations?member_id=eq.'+mid+'&village=eq.'+encodeURIComponent(village)+'&select=member_id&limit=1',p.token);if(!L.need(alloc,'分派里別查核失敗').length)L.problem(400,'請先分派志工到對應服務里');
-  const existingResult=await L.rest('assignments?member_id=eq.'+mid+'&service_date=eq.'+d+'&shift=eq.'+sh+'&select=*&limit=2',p.token),existing=L.need(existingResult,'既有排班查核失敗')[0];
+  const existingResult=await L.rest('assignments?member_id=eq.'+mid+'&service_date=eq.'+d+'&shift=eq.'+sh+'&select=*&order=released_at.asc.nullsfirst&limit=1000',p.token),existingRows=L.need(existingResult,'既有排班查核失敗'),existing=existingRows.find(row=>!row.released_at)||existingRows.find(row=>row.village===village&&String(row.route_id||row.truck_number||'')===routeId);
+  if(existing?.released_at){
+   const items=cleaned.map(row=>({member_id:mid,service_date:d,shift:sh,village,route_id:routeId,truck,address:row.visit_address,stop_order:row.stop_order,time:row.time,end_time:later(row.time,routeEnd)||row.time}));
+   const saved=await L.rest('rpc/achang_assign_route_batch',p.token,{method:'POST',body:{p_batch_id:crypto.randomUUID(),p_items:items}});
+   if(!saved.ok)L.problem(saved.data?.code==='23505'?409:502,saved.data?.message||'重新分配未成功');
+   return L.json(res,saved.data.createdCount?201:200,{ok:true,taskIds:saved.data.taskIds||[],reused:true});
+  }
   if(existing){
    if(existing.village!==village||String(existing.route_id||existing.truck_number||'')!==routeId)L.problem(409,'同日同時段此志工已有其他跟巡排班');
    const taskResult=await L.rest('visit_tasks?assignment_id=eq.'+existing.id+'&select=id,visit_address,stop_order,scheduled_at&order=stop_order.asc',p.token),current=L.need(taskResult,'既有巡點查核失敗');
