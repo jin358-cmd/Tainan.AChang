@@ -58,8 +58,8 @@
    legend.hidden=!toggle.checked;
    if(!toggle.checked){status.textContent='路線圖層已關閉';pending.hidden=true;return;}
    if(!catalog){status.textContent=failed?'路線座標載入失敗，重新整理後可再試':'正在載入路線座標…';pending.hidden=true;return;}
-   status.textContent=`${select.value==='all'?'全部6車次':select.value} · ${model.total}站 · 已標示${model.located}站 · 待定位${model.pending.length}站`;
-   pending.hidden=model.pending.length===0;
+   status.textContent=`${select.value==='all'?'全部6車次':select.value} · ${model.total}站 · 已標示${model.located}站`;
+   pending.hidden=true;
    const summary=pending.querySelector('summary');summary.textContent=`待定位 ${model.pending.length} 站`;
    pendingList.replaceChildren();
    for(const stop of model.pending){const li=document.createElement('li');li.textContent=`${stop.route} 第${stop.order}站 ${stop.time} ${stop.name}：${stop.notes.join('；')}`;pendingList.append(li);}
