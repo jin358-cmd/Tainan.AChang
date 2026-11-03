@@ -87,7 +87,8 @@ function create({getContext,getRows,submit}){
   const records=draft.items(),removals=draft.removals(),changeCount=draft.size(),people=ctx.people.filter(eligible);
   const count=new Set(records.map(x=>x.volunteerId)).size;
   const atRoute=(person)=>records.some(x=>x.volunteerId===person.id&&x.date===serviceDate&&x.route===route)||personTasks(person.id).some(t=>scope.some(stop=>stop.路線ID===(t.route_id||t.truck)));
-  const assigned=people.filter(atRoute),waiting=people.filter(person=>!atRoute(person));
+  const routeId=scope[0]?.路線ID,chosen=records.find(x=>x.date===serviceDate&&x.routeId===routeId&&x.isRouteLeader),leaderFor=person=>chosen?chosen.volunteerId===person.id:personTasks(person.id).some(t=>(t.route_id||t.truck)===routeId&&t.is_route_leader);
+  const assigned=people.filter(atRoute).sort((a,b)=>Number(leaderFor(b))-Number(leaderFor(a))),waiting=people.filter(person=>!atRoute(person));
   const cardFor=person=>{
    const staged=records.filter(x=>x.volunteerId===person.id&&x.date===serviceDate),saved=personTasks(person.id);
    const here=routeScope?scope.length>0&&scope.every(stop=>staged.some(x=>x.stopId===stop.站點ID)):staged.some(x=>x.stopId===selected);
@@ -95,9 +96,8 @@ function create({getContext,getRows,submit}){
    const blocked=scope.some(stop=>saved.some(t=>t.shift===stop.時段&&(t.route_id||t.truck)!==stop.路線ID)||staged.some(x=>x.shift===stop.時段&&x.routeId!==stop.路線ID));
    let labels=[...staged.map(x=>`暫排：${x.route} 第${x.order}站 ${x.time}`),...saved.map(t=>`已分配：${String(t.route_id||t.truck).replace(/^PDF:(日間|夜間):([^:]+):.*$/,'$2')} 第${t.stop_order}站 ${t.eta}`)];
    if(labels.length>8){const summarize=(entries,label)=>{const groups=new Map();for(const entry of entries){const token=entry.route||String(entry.route_id||entry.truck).replace(/^PDF:(日間|夜間):([^:]+):.*$/,'$2');if(!groups.has(token))groups.set(token,[]);groups.get(token).push(Number(entry.order||entry.stop_order));}return [...groups].map(([route,orders])=>`${label}：${route} · ${orders.length} 站（第${Math.min(...orders)}～${Math.max(...orders)}站）`);};labels=[...summarize(staged,'暫排'),...summarize(saved,'已分配')];}
-   const routeId=scope[0]?.路線ID,chosen=records.find(x=>x.date===serviceDate&&x.routeId===routeId&&x.isRouteLeader);
-   const leader=chosen?chosen.volunteerId===person.id:saved.some(t=>(t.route_id||t.truck)===routeId&&t.is_route_leader);
-   const crown=atRoute(person)?`<button type="button" data-route-person-leader="${esc(person.id)}" class="${leader?'leader-on':''}" ${busy?'disabled':''} title="選擇本車次組長，確認分配後儲存">${leader?'👑 組長':'♛ 設組長'}</button>`:'';
+   const leader=leaderFor(person);
+   const crown=atRoute(person)?`<button type="button" data-route-person-leader="${esc(person.id)}" class="${leader?'leader-on':''}" ${busy?'disabled':''} title="選擇本車次組長，確認分配後儲存">${leader?'<span class="route-leader-icon" aria-hidden="true">👑</span> 組長':'♛ 設組長'}</button>`:'';
    const removable=scope.some(stop=>tasksAt(stop).some(t=>t.volunteer_id===person.id))||staged.some(x=>scope.some(stop=>stop.站點ID===x.stopId));
    const removeButton=atRoute(person)?`<button type="button" class="route-person-delete" data-remove-person="${esc(person.id)}" ${busy||!removable?'disabled':''} title="移除目前所選站點的配員，確認後儲存">移除配員</button>`:'';
    return window.AChangMemberCards.renderCard(person,{area:person.assignment||'',leader,allocations:labels,className:`route-assignment-person ${atRoute(person)?'has-assignment':''}`,actions:`${crown}${removeButton}<button type="button" data-stage-person="${esc(person.id)}" ${busy||!scope.length||already||blocked?'disabled':''}>${already?'已分配':here?'移出暫排':blocked?'其他車次':scope.length>1?'＋ 加入所選站點':'＋ 加入本站'}</button>`});

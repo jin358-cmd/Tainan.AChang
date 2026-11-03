@@ -70,7 +70,7 @@
    if(!detail||!detailStopId)return;detail.querySelector('.day-route-staffing')?.remove();
    const staffing=getStaffing(detailStopId)||{people:[]},box=document.createElement('section');box.className='day-route-staffing';box.setAttribute('aria-label','站點分配人員');
    const heading=document.createElement('h4');heading.textContent=`分配人員${staffing.date?' · '+staffing.date:''}`;box.append(heading);
-   for(const person of staffing.people||[]){const row=document.createElement('div');row.className='day-route-contact';const name=document.createElement('strong');name.textContent=(person.leader?'👑 ':'')+person.name+(person.staged?' · 暫排':'');const phone=document.createElement('span');phone.innerHTML=window.AChangMemberCards?.phoneLink(person)||'';row.append(name,phone);box.append(row);}
+   for(const person of [...(staffing.people||[])].sort((a,b)=>Number(!!b.leader)-Number(!!a.leader))){const row=document.createElement('div');row.className='day-route-contact'+(person.leader?' is-route-leader':'');const name=document.createElement('strong');name.textContent=person.name+(person.staged?' · 暫排':'');if(person.leader){const crown=document.createElement('span');crown.className='map-leader-crown';crown.textContent='👑';crown.setAttribute('aria-label','組長');name.prepend(crown);}const phone=document.createElement('span');phone.innerHTML=window.AChangMemberCards?.phoneLink(person)||'';row.append(name,phone);box.append(row);}
    if(!staffing.people?.length){const empty=document.createElement('small');empty.textContent='目前沒有可顯示的已分配人員';box.append(empty);}detail.append(box);
   }
   function showStop(id){
@@ -81,8 +81,8 @@
    const title=document.createElement('strong');title.textContent=`${stop.route} · 第${stop.order}站 · ${stop.plate}`;
    const name=document.createElement('p');name.textContent=stop.name;
    const address=document.createElement('div');address.className='day-route-address-line';const navigate=document.createElement('a');navigate.className='day-route-navigate';navigate.textContent='導航';navigate.target='_blank';navigate.rel='noopener noreferrer';navigate.setAttribute('aria-label','導航到'+stop.name);const destination=stop.position?stop.position[1]+','+stop.position[0]:'臺南市永康區'+(stop.addressNote||stop.name);navigate.href='https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(destination)+'&travelmode=driving';address.append(name,navigate);
-   const time=document.createElement('p');time.textContent=[stop.time+(/^\d\d:\d\d$/.test(stop.end)?'～'+stop.end:''),stop.village].filter(Boolean).join(' · ');
-   detail.append(close,title,address,time);if(stop.addressNote){const note=document.createElement('p');note.textContent='備註：'+stop.addressNote;detail.append(note);}mapBox.append(detail);refreshDetailStaffing();
+   const time=document.createElement('p');time.className='day-route-time-line';const timeValue=document.createElement('span');timeValue.className='day-route-time';timeValue.textContent=stop.time+(/^\d\d:\d\d$/.test(stop.end)?'～'+stop.end:'');const village=document.createElement('span');village.className='day-route-village';village.textContent=stop.village?' · '+stop.village:'';time.append(timeValue,village);
+   detail.append(close,title,time,address);if(stop.addressNote){const note=document.createElement('p');note.textContent='備註：'+stop.addressNote;detail.append(note);}mapBox.append(detail);refreshDetailStaffing();
   }
   function renderControls(){
    select.disabled=!toggle.checked;
