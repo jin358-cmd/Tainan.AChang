@@ -19,3 +19,18 @@ test('selecting a nighttime directory route synchronizes the map on a narrow scr
  assert.equal(node('mapRouteLayerSelect').value,'夜間42');assert.equal(node('layerRoutes').checked,true);assert.equal(node('directory').hidden,false);assert.deepEqual(changes,[['mapRouteLayerSelect','夜間42','change']]);
  handlers.get('achang:directory-route')({detail:{route:'日間3',syncMap:false}});assert.equal(changes.length,1);handlers.get('achang:directory-overview')({detail:{shift:'夜間'}});assert.equal(node('mapRouteLayerSelect').value,'night-all');assert.equal(node('layerRoutes').checked,true);assert.equal(node('detail').hidden,true);assert.equal(changes.at(-1)[1],'night-all');
 });
+
+test('expanded full route uses the original diagram position and keeps the compact status controls above it',()=>{
+ for(const name of ['index.html','route-directory.html']){
+  const html=fs.readFileSync(path.join(root,name),'utf8'),heading=html.indexOf('class="route-detail-controls"'),legend=html.indexOf('class="route-progress-legend"'),clock=html.indexOf('class="route-progress-clock-row"'),full=html.indexOf('class="route-full-disclosure"'),diagram=html.indexOf('id="routeDiagram"');
+  assert.ok(heading<legend&&legend<clock&&clock<full&&full<diagram);assert.match(html,/>列印路線<\/button>/);assert.match(html,/>已過站<\/span>/);
+ }
+ const css=fs.readFileSync(path.join(root,'route-progress.css'),'utf8');assert.match(css,/#detail\.full-route-open #routeDiagram,#detail\.full-route-open #routeTable\{display:none!important\}/);
+});
+test('expanding scrolls the next station below fixed controls while preserving earlier and later station cards',()=>{
+ const source=fs.readFileSync(path.join(root,'route-directory.js'),'utf8'),start=source.indexOf('function scrollToRouteProgress('),end=source.indexOf('function assignRoute(',start);let scrolled,selector;
+ const cards=[1,2,3].map(order=>({order,getBoundingClientRect:()=>({top:order*300})})),numbers=cards.map(card=>({closest:()=>card}));
+ const diagram={querySelector:query=>query.includes('next')?numbers[1]:numbers[2],querySelectorAll:()=>numbers},scroller={getBoundingClientRect:()=>({top:100}),scrollBy:options=>scrolled=options},detail={closest:()=>scroller,querySelector:()=>({getBoundingClientRect:()=>({height:120})})};
+ const context=vm.createContext({active:{route:'日間1'},expandedRoute:'日間1',document:{body:{classList:{contains:()=>true}}},$:id=>{if(id==='detail')return detail;selector=id;return diagram;}});vm.runInContext(source.slice(start,end),context);context.scrollToRouteProgress();
+ assert.equal(selector,'routeFullDiagram');assert.equal(scrolled.top,360);assert.equal(scrolled.behavior,'smooth');assert.equal(cards.length,3,'previous and future cards remain in the complete sequence');
+});

@@ -14,6 +14,12 @@
 #detail .route-progress{display:flex;flex-wrap:wrap;align-items:center;gap:5px 10px}#detail .route-progress-legend{flex:1 1 auto;gap:7px 12px}#detail .route-progress>.route-full-toggle{margin-left:auto;flex:none;white-space:nowrap;padding:4px 7px;font-size:12px;min-height:28px}#detail .route-progress-clock-row{flex:1 0 100%}.route-full-disclosure{border-top:0;padding-top:0;margin-top:0}
 #detail .route-progress-legend{flex:1 1 0;min-width:0}
 
-#detail .route-progress-clock-row{order:-1;display:flex;align-items:center;gap:8px;margin-bottom:3px;width:100%}#detail #routeProgressClock{flex:1;min-width:0}#detail #routeClearAssignments{flex:none;margin-left:auto;min-height:30px;padding:4px 8px;border:1px solid #c2cfd9;border-radius:7px;background:#fff;color:#315872;font-size:12px;white-space:nowrap}#detail #routeClearAssignments[hidden]{display:none!important}.route-all-selected{display:inline-block;margin-left:7px;color:#1c629e;font-size:13px;font-weight:800;white-space:nowrap;vertical-align:middle}
+#detail .route-progress-clock-row{order:2;display:flex;align-items:center;gap:8px;margin-bottom:3px;width:100%}#detail #routeProgressClock{flex:1;min-width:0}#detail #routeClearAssignments{flex:none;margin-left:auto;min-height:30px;padding:4px 8px;border:1px solid #df8790;border-radius:7px;background:#fff1f2;color:#b42332;font-weight:800;font-size:13px;white-space:nowrap}#detail #routeClearAssignments[hidden]{display:none!important}.route-all-selected{display:inline-block;margin-left:7px;color:#1c629e;font-size:13px;font-weight:800;white-space:nowrap;vertical-align:middle}
 
 .route-all-selected.is-all-selected{color:#177744;font-weight:900}
+
+.route-detail-controls{position:sticky;top:0;z-index:8;background:#fff;padding:0 0 8px}
+#detail .route-progress{margin:6px 0 0}#detail .route-progress-clock-row{margin-top:5px}
+#detail #routeClearAssignments:hover{background:#ffe1e5;border-color:#b42332}
+#detail.full-route-open #routeDiagram,#detail.full-route-open #routeTable{display:none!important}
+#detail .route-full-disclosure{margin:0;padding:0;border:0}#detail #routeFullContent{padding:0;border:0;background:transparent}
