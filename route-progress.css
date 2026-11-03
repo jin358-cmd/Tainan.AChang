@@ -10,3 +10,5 @@
 #detail .stop-number[data-progress="next"]{position:relative;z-index:1;border-color:#a16b00;background:#fff34d;color:#624300;box-shadow:0 0 15px #ffdc00;animation:next-stop-yellow-ripple 1.8s ease-out infinite}
 @keyframes next-stop-yellow-ripple{0%{box-shadow:0 0 12px #ffdc00,0 0 0 0 #ffcc00cc}100%{box-shadow:0 0 18px #ffdc00,0 0 0 20px #ffcc0000}}
 @media(prefers-reduced-motion:reduce){#detail .stop-number[data-progress="next"]{animation:none;box-shadow:0 0 0 5px #ffe677,0 0 16px #ffdc00}}
+
+#detail .route-progress{display:flex;flex-wrap:wrap;align-items:center;gap:5px 10px}#detail .route-progress-legend{flex:1 1 auto;gap:7px 12px}#detail .route-progress>.route-full-toggle{margin-left:auto;flex:none;white-space:nowrap;padding:4px 7px;font-size:12px;min-height:28px}#detail #routeProgressClock{flex:1 0 100%}.route-full-disclosure{border-top:0;padding-top:0;margin-top:0}

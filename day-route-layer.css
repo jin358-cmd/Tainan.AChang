@@ -108,3 +108,4 @@
 }
 
 .route-print-review-paper{position:relative;background:#fff;margin:12px auto;box-shadow:0 2px 14px #14314b22;min-height:40mm}.route-print-actions{align-items:center;flex-wrap:wrap}.route-print-actions strong{margin-right:auto;font-size:16px}.route-print-preview .route-print-review-paper .route-row{display:contents!important}.route-print-preview .route-print-review-paper .diagram{display:grid!important}.route-print-preview .route-print-review-paper .route-print-content{width:190mm}.route-print-preview{overflow:auto!important}.route-print-preview .route-print-review-paper table{width:100%}
+.route-print-review-paper{background:#fff!important}

@@ -91,3 +91,22 @@ test('opening the application starts on the map and task dispatch is the second 
  for(const type of ['desktop-nav','bottom-nav']){const nav=html.match(new RegExp('<nav class="'+type+'"[^>]*>(.*?)</nav>','s'))[1];assert.deepEqual([...nav.matchAll(/data-page="([^"]+)"/g)].map(x=>x[1]),['map','reports','areas','planner','people']);}
  assert.match(html,/id="page-map" class="page active/);assert.match(app,/routes=\[\],page='map'/);assert.doesNotMatch(app,/await refreshOnline\(\);go\('areas'\)/);
 });
+
+test('selecting stations waits for the personnel button and clearing removes every highlight',()=>{
+ const listeners=new Map(),nodes=new Map();
+ class Node{
+  constructor(){this.dataset={};this.hidden=false;this.children=[];this.states=new Set();this.classList={contains:k=>this.states.has(k),add:k=>this.states.add(k),toggle:(k,force)=>{const on=force===undefined?!this.states.has(k):!!force;if(on)this.states.add(k);else this.states.delete(k);return on;}};}
+  append(x){x.parentElement=this;this.children.push(x);}setAttribute(){}addEventListener(){}querySelector(){return null;}getBoundingClientRect(){return {left:800,top:100};}
+ }
+ const node=id=>{if(!nodes.has(id))nodes.set(id,new Node());return nodes.get(id);};node('page-map').states.add('active');
+ const cards=[new Node(),new Node()],buttons=[a,b].map((r,i)=>{const n=new Node();n.dataset.focusStop=r.站點ID;n.closest=()=>cards[i];return n;});
+ const document={getElementById:node,createElement:()=>new Node(),body:new Node(),documentElement:{clientWidth:1400,clientHeight:1000},querySelectorAll:()=>buttons,addEventListener:(type,fn)=>{if(!listeners.has(type))listeners.set(type,[]);listeners.get(type).push(fn);}};
+ const window={AChangRouteDirectory:{activeRoute:()=>a.車次},addEventListener(){}};
+ const ctx=vm.createContext({document,window,Intl,Date,console});vm.runInContext(fs.readFileSync(require.resolve('../route-assignment'),'utf8'),ctx);
+ ctx.AChangRouteAssignment.create({getContext:()=>({role:'admin',subject:'admin-test',people:[],tasks:[],date:'2026-11-03'}),getRows:()=>[a,b],submit:()=>{throw Error('must not save during selection');}});
+ const emit=(type,detail)=>listeners.get(type).forEach(fn=>fn({detail}));
+ assert.equal(cards.filter(c=>c.states.has('assignment-target')).length,0);
+ emit('achang:focus-route-stop',{id:a.站點ID,route:a.車次});emit('achang:focus-route-stop',{id:b.站點ID,route:b.車次});
+ assert.equal(cards.filter(c=>c.states.has('assignment-target')).length,2);assert.equal(node('detail').children.length,0,'the personnel picker must wait until explicitly requested');
+ emit('achang:clear-route-selection');assert.equal(cards.filter(c=>c.states.has('assignment-target')).length,0);assert.equal(node('routePickPeople').disabled,true);
+});

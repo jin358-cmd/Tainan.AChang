@@ -5,3 +5,5 @@
 .directory-shift-control{min-width:0;font-size:15px;color:#244c64}
 
 .directory-heading{gap:4px 8px}.directory-heading h3{font-size:15px}.directory-route-summary{font-size:13px;flex:1;min-width:220px}.directory-route-summary:before{content:'／';margin-right:5px}.map-route-left .controls #resultCount{display:none!important}
+
+.map-route-left .directory-heading h3{font-size:20px;font-weight:900;line-height:1.4}.map-route-left #vehicles .route-row-selected{background:#dcecff!important;box-shadow:inset 5px 0 #2379bc}.map-route-left #vehicles .route-row-selected td{font-weight:800}

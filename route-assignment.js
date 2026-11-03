@@ -60,7 +60,7 @@ function create({getContext,getRows,submit}){
   const all=rows(),ctx=context(),currentDraft=draft.items();$('routeTitle')?.classList.toggle('assignment-route-selected',Boolean(routeScope?.ids.length&&ctx.role==='admin'));$('routeTitle')?.setAttribute('aria-pressed',String(Boolean(routeScope?.ids.length&&ctx.role==='admin')));
   document.querySelectorAll('#routeDiagram [data-focus-stop],#routeFullDiagram [data-focus-stop]').forEach(button=>{
    const row=all.find(r=>r.站點ID===button.dataset.focusStop);if(!row)return;
-   const picked=(selected===row.站點ID||routeScope?.ids.includes(row.站點ID))&&ctx.role==='admin';button.classList.toggle('assignment-selected',picked);button.setAttribute('aria-pressed',String(picked));
+   const picked=Boolean((selected===row.站點ID||routeScope?.ids.includes(row.站點ID))&&ctx.role==='admin');button.classList.toggle('assignment-selected',picked);button.setAttribute('aria-pressed',String(picked));
    const card=button.closest('.route-stop');if(!card)return;card.classList.toggle('assignment-target',picked);card.setAttribute('aria-pressed',String(picked));card.querySelector('.route-assigned-people')?.remove();
    if(ctx.role!=='admin')return;
    const box=document.createElement('div');box.className='route-assigned-people';

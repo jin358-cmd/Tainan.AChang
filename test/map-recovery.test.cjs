@@ -36,15 +36,15 @@ test('map asset revision and service-worker cache advance together', () => {
   assert.match(html, /styles\.css\?v=212/);
   assert.match(html, /route-time-filter\.js\?v=2/);
   assert.match(html, /app\.js\?v=230/);
-  assert.match(html, /route-directory\.js\?v=21/);
-  assert.match(sw, /achang-pwa-shell-v219-route-selection-one-page/);
+  assert.match(html, /route-directory\.js\?v=22/);
+  assert.match(sw, /achang-pwa-shell-v220-route-row-selection/);
 });
 
 test('truck directory keeps the route view concise and renders directional route arrows', () => {
   const directory = fs.readFileSync(path.join(__dirname, '..', 'route-directory.js'), 'utf8');
   const directoryCss = fs.readFileSync(path.join(__dirname, '..', 'route-directory.css'), 'utf8');
   assert.match(directory, /class="route-name/);
-  assert.match(directory, /class="route-open/);
+  assert.doesNotMatch(directory, /class="route-open/);assert.match(directory, /route-row-selected/);
   assert.match(directory, /class="route-direction"/);
   assert.doesNotMatch(directory, /來源：\$\{esc\(g\.rows\[0\]/);
   assert.match(directoryCss, /#directory th,#directory td,#routeTable th,#routeTable td\{text-align:center\}/);
