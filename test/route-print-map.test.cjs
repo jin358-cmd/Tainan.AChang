@@ -71,7 +71,7 @@ test('print diagram connectors follow every next station, including a reversed r
  const vm=require('node:vm'),points=[{left:10,top:10,width:40,height:40},{left:230,top:10,width:40,height:40},{left:230,top:230,width:40,height:40},{left:10,top:230,width:40,height:40}];let html='';
  const context=vm.createContext({Math});vm.runInContext(source.slice(start,end),context);
  context.connectDiagram({querySelector:()=>null,getBoundingClientRect:()=>({left:0,top:0}),querySelectorAll:()=>points.map(bounds=>({getBoundingClientRect:()=>bounds})),insertAdjacentHTML:(_,value)=>html=value});
- assert.equal((html.match(/class="route-direction"/g)||[]).length,3);assert.match(html,/rotate\(0deg\)/);assert.match(html,/rotate\(90deg\)/);assert.match(html,/rotate\(180deg\)/);
+ assert.equal((html.match(/class="route-direction"/g)||[]).length,2);assert.match(html,/rotate\(0deg\)/);assert.match(html,/data-connection="row-transition" data-from="2" data-to="3"/);assert.match(html,/rotate\(180deg\)/);
 });
 
 test('day-route paper scaling keeps the complete content within one A4 content height',()=>{
@@ -80,9 +80,23 @@ test('day-route paper scaling keeps the complete content within one A4 content h
  for(const height of [1100,1800,4000]){const scale=printer.paperScale(height,width);assert.ok(scale>0&&scale<=1);assert.ok(height*scale<277*96/25.4);}
 });
 
-test('the third-to-fourth station arrow stays below the upper card and points into the next card header',()=>{
+function diagramFor(cards){
  const source=fs.readFileSync(require.resolve('../route-directory'),'utf8'),start=source.indexOf('function connectDiagram('),end=source.indexOf('function stationCards(',start),vm=require('node:vm');let html='';
- const cards=[{left:10,top:36,width:138,height:265},{left:165,top:36,width:138,height:265},{left:321,top:36,width:138,height:265},{left:165,top:337,width:138,height:274}];
- const context=vm.createContext({Math});vm.runInContext(source.slice(start,end),context);context.connectDiagram({querySelector:()=>null,getBoundingClientRect:()=>({left:0,top:0}),querySelectorAll:()=>cards.map(card=>({getBoundingClientRect:()=>({left:card.left+49,top:card.top+44,width:40,height:40}),closest:()=>({getBoundingClientRect:()=>card})})),insertAdjacentHTML:(_,value)=>html=value});
- const transition=html.match(/<span[^>]*data-connection="row-transition"[^>]*>/)[0];assert.match(transition,/data-from="3" data-to="4"/);assert.match(transition,/top:321px/);const angle=Number(transition.match(/rotate\(([^d]+)deg\)/)[1]);assert.ok(angle>90&&angle<180);assert.equal((html.match(/data-connection="between-cards"/g)||[]).length,2);
+ const context=vm.createContext({Math});vm.runInContext(source.slice(start,end),context);context.connectDiagram({querySelector:()=>null,getBoundingClientRect:()=>({left:0,top:0}),querySelectorAll:()=>cards.map(card=>({getBoundingClientRect:()=>({left:card.left+card.width/2-20,top:card.top+44,width:40,height:40}),closest:()=>({getBoundingClientRect:()=>card})})),insertAdjacentHTML:(_,value)=>html=value});return html;
+}
+test('a partial live row connects from the previous card through the gutter without crossing either card',()=>{
+ const cards=[{left:10,top:36,width:138,height:265},{left:165,top:36,width:138,height:265},{left:321,top:36,width:138,height:265},{left:165,top:337,width:138,height:274}],html=diagramFor(cards);
+ const transition=html.match(/<svg[^>]*data-connection="row-transition"[^>]*>.*?<\/svg>/)[0];
+ assert.match(transition,/data-from="3" data-to="4"/);assert.match(transition,/d="M 390 303 V 319 H 234 V 327"/);
+ assert.match(transition,/points="234,335 228,326 240,326"/,'the final arrow points down at the next card border, above its time');
+ assert.equal((html.match(/data-connection="between-cards"/g)||[]).length,2);
+});
+test('six-column print returns left after stations 32 and 38, then down toward 33 and 39',()=>{
+ const cards=Array.from({length:14},(_,i)=>({left:(i%6)*120,top:Math.floor(i/6)*232,width:112,height:200})),html=diagramFor(cards);
+ const transitions=[...html.matchAll(/<svg[^>]*data-connection="row-transition"[^>]*>.*?<\/svg>/g)].map(match=>match[0]);
+ assert.equal(transitions.length,2);
+ assert.match(transitions[0],/data-from="6" data-to="7"/);assert.match(transitions[0],/d="M 656 202 V 216 H 56 V 222"/);
+ assert.match(transitions[1],/data-from="12" data-to="13"/);assert.match(transitions[1],/d="M 656 434 V 448 H 56 V 454"/);
+ assert.match(transitions[0],/points="349,216 361,211 361,221"/,'the return arrow points left inside the row gutter');
+ assert.equal((html.match(/data-connection="between-cards"/g)||[]).length,11);
 });

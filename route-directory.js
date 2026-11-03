@@ -42,7 +42,13 @@ function connectDiagram(root){
  const arrows=points.slice(1).map((point,i)=>{
   const from=points[i],sameRow=Math.abs(from.card.top-point.card.top)<6;let start,end;
   if(sameRow){const dx=point.x-from.x,direction=Math.sign(dx)||1,length=Math.min(76,Math.max(28,Math.abs(dx)-100)),mid=(from.x+point.x)/2;start={x:mid-direction*length/2,y:from.y};end={x:mid+direction*length/2,y:point.y};}
-  else{const direction=Math.sign(point.x-from.x),offset=Math.min(40,point.card.width*.25);start={x:from.card.left+from.card.width/2,y:from.card.bottom+20};end={x:point.card.left+point.card.width/2-direction*offset,y:point.card.top+Math.min(22,point.card.height*.1)};}
+  else{
+   // Return through the row gutter, then enter the next card from above.
+   // Keeping the entire path outside cards protects times, addresses and names.
+   const gapY=(from.card.bottom+point.card.top)/2,endY=point.card.top-2,dx=point.x-from.x,direction=Math.sign(dx),midX=(from.x+point.x)/2;
+   const turnHead=Math.abs(dx)>40?`<polygon points="${midX+direction*7},${gapY} ${midX-direction*5},${gapY-5} ${midX-direction*5},${gapY+5}"/>`:'';
+   return `<svg class="route-row-return" data-connection="row-transition" data-from="${i+1}" data-to="${i+2}" width="100%" height="100%" style="position:absolute;inset:0;max-height:none;height:100%;overflow:visible;pointer-events:none" xmlns="http://www.w3.org/2000/svg"><path d="M ${from.x} ${from.card.bottom+2} V ${gapY} H ${point.x} V ${endY-8}" fill="none" stroke="#e81f28" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><g fill="#e81f28">${turnHead}<polygon points="${point.x},${endY} ${point.x-6},${endY-9} ${point.x+6},${endY-9}"/></g></svg>`;
+  }
   const dx=end.x-start.x,dy=end.y-start.y,distance=Math.hypot(dx,dy);if(distance<8)return '';const angle=Math.atan2(dy,dx)*180/Math.PI,length=Math.max(4,distance-12);
   return `<span class="route-direction" data-connection="${sameRow?'between-cards':'row-transition'}" data-from="${i+1}" data-to="${i+2}" style="left:${start.x}px;top:${start.y}px;width:${length}px;transform:rotate(${angle}deg)"></span>`;
  }).join('');root.insertAdjacentHTML('afterbegin',`<div class="connector" aria-hidden="true">${arrows}</div>`);

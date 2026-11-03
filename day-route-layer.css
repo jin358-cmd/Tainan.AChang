@@ -80,7 +80,7 @@
 .route-print-compact p{font-size:11px;line-height:1.35;margin:3px 0 6px}
 .route-print-compact .route-print-crew{font-size:12px;line-height:1.4;font-weight:700}
 .route-print-compact svg{display:block;width:100%;height:auto;max-height:88mm}
-.route-print-compact .diagram{display:grid!important;grid-template-columns:repeat(var(--print-columns,6),minmax(0,1fr));gap:8px;position:relative;padding:7px 0!important;overflow:visible!important;margin:0}
+.route-print-compact .diagram{display:grid!important;grid-template-columns:repeat(var(--print-columns,6),minmax(0,1fr));gap:32px 8px;position:relative;padding:7px 0!important;overflow:visible!important;margin:0}
 .route-print-compact .route-row{display:contents!important}
 .route-print-compact .route-stop{min-width:0!important;width:auto!important;padding:6px!important;font-size:10px;break-inside:avoid}
 .route-print-compact .route-stop time{font-size:15px}
