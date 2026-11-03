@@ -81,8 +81,6 @@
    legend.hidden=!toggle.checked;
    if(!toggle.checked){status.textContent='車次路線已關閉';pending.hidden=true;return;}
    if(!catalog){status.textContent=failed?'路線座標載入失敗，重新整理後可再試':'正在載入路線座標…';pending.hidden=true;return;}
-   const aggregate=filterModelWindow(build(getRows(),catalog,directoryShift==='夜間'?'night-all':directoryShift==='日間'?'all':'all-routes'),rangeStart,rangeEnd),summary=document.getElementById('directoryRouteSummary');
-   if(summary)summary.textContent=`${directoryShift==='日間'?'日間6車次':directoryShift==='夜間'?'夜間24車次':'30車次'}．共${String(aggregate.total).replace(/\d/g,d=>String.fromCharCode(d.charCodeAt(0)+0xfee0))}站點｜到站 ${rangeStart||'不限'}～${rangeEnd||'不限'}`;
    const count=String(model.total).replace(/\d/g,digit=>String.fromCharCode(digit.charCodeAt(0)+0xfee0));
    status.textContent=`${select.value==='all'?'全部日間6車次':select.value==='night-all'?'全部夜間24車次':select.value==='all-routes'?'全部30車次':select.value}．共${count}站點`;
    pending.hidden=true;
