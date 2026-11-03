@@ -14,7 +14,7 @@ test('draft reuses a confirmation ID after failure and rotates it after editing'
  d.stage(second,a,'2026-11-03','勝利里');assert.equal(d.payload(()=> 'second').batchId,'second');d.clear();assert.equal(d.items().length,0);
 });
 test('draft rejects excluded members, invalid dates, struck stops, and persisted route conflicts',()=>{
- assert.equal(eligible({...person,name:'@測試員'}),false);assert.equal(eligible({...person,name:'＠測試員'}),false);assert.equal(eligible({...person,name:'PMOS管理員'}),false);
+ assert.equal(eligible({...person,name:'@測試員'}),true);assert.equal(eligible({...person,name:'＠測試員'}),true);assert.equal(eligible({...person,name:'PMOS管理員'}),false);assert.equal(eligible({...person,name:'＠陳建彰'}),true);
  const d=createDraft();assert.throws(()=>d.stage(person,a,'2026-02-30','復華里'),/日期/);assert.throws(()=>d.stage(person,{...a,來源刪除線:true},'2026-11-03','復華里'),/停用/);assert.throws(()=>d.stage(person,a,'2026-11-03',''),/里別/);
  assert.throws(()=>d.stage(person,a,'2026-11-03','復華里',[{volunteer_id:person.id,visit_date:'2026-11-03',shift:'日間',route_id:'other',area:'復華里'}]),/其他車次/);
  d.stage(person,a,'2026-11-03','復華里',[{volunteer_id:person.id,visit_date:'2026-11-03',shift:'夜間',route_id:'other'}]);assert.equal(d.items().length,1);

@@ -1,6 +1,6 @@
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;if(root)root.AChangRouteAssignment=api;})(typeof globalThis!=='undefined'?globalThis:this,function(){
 'use strict';
-const eligible=person=>!!person?.id&&!!person.name&&!/^[@＠]/.test(person.name.trim())&&!['陳中原','陳中新','露西','PMOS管理員'].includes(person.name.trim());
+const eligible=person=>!!person?.id&&!!person.name&&!['陳中原','陳中新','露西','PMOS管理員'].includes(person.name.trim());
 const legalTime=value=>/^([01]\d|2[0-3]):[0-5]\d$/.test(value||'');
 const key=item=>[item.volunteerId,item.date,item.stopId].join('|');
 function createDraft(){

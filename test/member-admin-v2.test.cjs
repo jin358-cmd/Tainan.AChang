@@ -380,3 +380,15 @@ test('legacy members route keeps protected device management but rejects account
  await assert.rejects(()=>module.exports({method:'PATCH',headers:{},body:{enabled:false,authUserId:'33333333-3333-4333-8333-333333333333'}},{}),error=>error.status===410);
 });
 
+
+
+test('approving or restoring an account refreshes allocation people before reopening member administration',async()=>{
+ const vm=require('node:vm'),source=read('app.js'),marker=" document.addEventListener('click',async e=>{const btn=e.target.closest('button[data-member-action]')",handlerSource=source.split('\n').find(line=>line.startsWith(marker));
+ assert.ok(handlerSource);
+ for(const action of ['approve','reactivate']){
+  let handler;const calls=[],button={dataset:{memberAction:action,accountId:'fixture-account'}};
+  const context={document:{addEventListener:(event,fn)=>{handler=fn;}},assertAdmin:()=>true,confirm:()=>true,onlineApi:async(endpoint,method,body)=>calls.push([endpoint,method,body.action]),refreshOnline:async quiet=>calls.push(['refresh',quiet]),toast:()=>{},openMemberAdmin:async()=>calls.push(['modal'])};
+  vm.runInNewContext(handlerSource,context);await handler({target:{closest:()=>button}});
+  assert.deepEqual(calls,[['member-admin-v2','PATCH',action],['refresh',true],['modal']]);
+ }
+});

@@ -35,13 +35,14 @@ test('expanding scrolls the next station below fixed controls while preserving e
  assert.equal(selector,'routeFullDiagram');assert.equal(scrolled.top,360);assert.equal(scrolled.behavior,'smooth');assert.equal(cards.length,3,'previous and future cards remain in the complete sequence');
 });
 
-test('mobile table keeps directions while station cards have no navigation button',()=>{
+test('mobile station cards expose a separate directions icon that does not select personnel',()=>{
  const source=fs.readFileSync(path.join(root,'route-directory.js'),'utf8');
  const context=vm.createContext({encodeURIComponent,esc:value=>String(value)});
  vm.runInContext(source.slice(source.indexOf('function stationNavigation('),source.indexOf('function renderFullRoute(')),context);
  const row={'站點名稱／地址':'大橋國小後側門',_addressNote:'大橋一街103巷204號','到達時間':'07:00',_directoryOrder:3};
  const card=context.stationCards([row],'日間6'),table=context.stationTable([row]);
- assert.doesNotMatch(card,/route-stop-navigation|maps\/dir|<span>導航<\/span>/);
+ assert.match(card,/route-stop-navigation/);assert.match(card,/maps\/dir/);
  assert.match(card,/data-assign-stop=/);
+ vm.runInContext(source.slice(source.indexOf('function selectCard('),source.indexOf('function openRoute(')),context);let prevented=false;const target={getAttribute:()=> 'false'};context.selectCard({target:{closest:selector=>selector==='[data-assign-stop]'?target:selector==='.route-stop-navigation'?{}:null},preventDefault:()=>{prevented=true;}});assert.equal(prevented,false);
  assert.match(table,/class="station-table-navigate"/);assert.match(table,/google\.com\/maps\/dir\/\?api=1/);assert.match(table,/travelmode=driving/);assert.match(decodeURIComponent(table),/destination=臺南市永康區大橋一街103巷204號/);
 });

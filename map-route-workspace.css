@@ -100,3 +100,16 @@
 
 /* Mobile vehicle list: one header and six complete route rows. */
 @media screen and (max-width:1199px){.map-route-left #directory .table-wrap{max-height:381px;overflow-y:auto}.map-route-left #directory thead tr{height:44px}.map-route-left #directory th{font-size:16px;line-height:1.4}.map-route-left #directory tbody tr{height:56px}.map-route-left #directory th,.map-route-left #directory td{padding:8px 6px!important;white-space:nowrap}}
+
+.route-stop .route-stop-navigation{display:none}
+.route-progress .route-full-toggle[aria-expanded="true"]{background:#dcecff;border:2px solid #2875b7;color:#154e80;font-weight:850;box-shadow:inset 0 0 0 1px #fff}
+@media screen and (max-width:1199px){
+ .map-route-right #routeTable,.map-route-right #routeFullTable{display:none!important}
+ .map-route-right .route-stop>a:not(.route-stop-navigation){grid-column:2;grid-row:2;text-align:left}
+ .map-route-right .route-stop>small:not(.station-address-note){grid-row:3}
+ .map-route-right .route-stop>.station-address-note{grid-row:4}
+ .map-route-right .route-assigned-people{grid-row:5}
+ .map-route-right .route-stop>a.route-stop-navigation{grid-column:2;grid-row:1;justify-self:start;display:inline-flex;align-items:center;justify-content:center;min-height:38px;width:40px;padding:5px;border:1px solid #93bacd;border-radius:7px;background:#eaf6ff;text-decoration:none}
+ .map-route-right .route-stop-navigation svg{width:23px;height:27px}.map-route-right .route-stop-navigation span{display:none}
+}
+.route-print-compact .route-stop .route-stop-navigation{display:none!important}
