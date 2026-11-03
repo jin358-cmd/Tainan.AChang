@@ -22,8 +22,7 @@ function move(){
 }
 document.addEventListener('achang:directory-route',event=>{
  empty.hidden=true;
- if(!desktop.matches)return;
- directory.hidden=false;
+ if(desktop.matches)directory.hidden=false;
  if(event.detail?.syncMap===false)return;
  const name=event.detail.route,select=byId('mapRouteLayerSelect'),toggle=byId('layerRoutes');
  if(window.AChangDayRouteLayer?.isRoute(name)&&select&&toggle){toggle.checked=true;select.value=name;select.dispatchEvent(new Event('change',{bubbles:true}));}
