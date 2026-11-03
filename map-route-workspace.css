@@ -84,3 +84,17 @@
 }
 
 .desktop-nav button{font-size:18px;gap:9px}.desktop-nav button i{font-size:26px}.bottom-nav button i{font-size:25px!important;line-height:1.1!important}.bottom-nav button span{font-size:15px!important;line-height:1.2!important}.bottom-nav button{min-height:56px!important;gap:3px!important}
+
+.route-stop .route-stop-navigation,.station-table-navigate{display:none}.station-table-address{font-weight:inherit}
+@media screen and (max-width:1199px){
+ .map-route-right .route-stop>time{font-size:20px;font-weight:900;line-height:1.4;color:#94460e;background:#fff0ce;border-radius:6px;padding:3px 4px}
+ .map-route-right .route-stop>a:not(.route-stop-navigation){font-size:19px;font-weight:850}
+ .map-route-right .route-stop>button.stop-number{grid-row:2}
+ .map-route-right .route-stop>a.route-stop-navigation{grid-column:1;grid-row:3;display:inline-flex;align-items:center;justify-content:center;gap:4px;min-height:36px;padding:5px 4px;font-size:14px;line-height:1.2;font-weight:800;white-space:nowrap;border:1px solid #93bacd;border-radius:7px;background:#eaf6ff;color:#155c88;text-decoration:none}
+ .map-route-right .route-stop-navigation svg,.map-route-right .station-table-navigate svg{width:18px;height:21px;flex:none}
+ .map-route-right #routeTable td[data-label="時間"],.map-route-right #routeFullTable td[data-label="時間"]{font-size:20px;font-weight:900;color:#94460e;background:#fff0ce;border-radius:6px;padding:3px 6px!important}
+ .map-route-right .station-table-place{display:flex;align-items:flex-start;gap:8px}
+ .map-route-right .station-table-address{flex:1;min-width:0;font-size:19px;font-weight:850;line-height:1.65;overflow-wrap:anywhere}
+ .map-route-right .station-table-navigate{display:inline-flex;align-items:center;justify-content:center;gap:5px;flex:none;padding:6px 8px;min-height:38px;border:1px solid #93bacd;border-radius:7px;background:#eaf6ff;color:#155c88;font-size:15px;font-weight:800;text-decoration:none;white-space:nowrap}
+}
+.route-print-compact .route-stop .route-stop-navigation,.route-print-compact .station-table-navigate{display:none!important}.route-print-compact .station-table-address{font-weight:400}
