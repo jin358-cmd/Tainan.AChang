@@ -23,3 +23,26 @@
 
 .route-stop button.stop-number{padding:0;cursor:pointer;font:inherit;font-weight:700;border:2px solid currentColor;line-height:28px;min-height:32px;display:block}
 .route-stop button.stop-number:hover,.route-stop button.stop-number:focus-visible{outline:3px solid #ff982b;outline-offset:3px;box-shadow:0 0 14px #ff982b90}
+
+.map-route-layer-status{flex:0 0 auto;font-size:18px;font-weight:800;color:#244c64;white-space:nowrap}
+.map-route-layer-legend .route-color-choice{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #cbdbe4;border-radius:7px;padding:6px 9px;font-size:14px;color:#244c64;cursor:pointer}
+.map-route-layer-legend .route-color-choice:hover,.map-route-layer-legend .route-color-choice:focus-visible{background:#e5f6ee;outline:2px solid #16877e;outline-offset:1px}
+.route-print-surface{display:none}
+@media print{
+ @page{size:A4 portrait;margin:12mm}
+ body>*:not(#routePrintSurface){display:none!important}
+ #routePrintSurface{display:block!important;width:100%!important;color:#172f40;background:#fff;font:12px Arial,sans-serif;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+ #routePrintSurface>svg{display:block;width:100%;height:auto;max-height:215mm;break-inside:avoid}
+ #routePrintSurface h1{font-size:20px}#routePrintSurface h2{font-size:17px;margin-top:18px;break-after:avoid}
+ #routePrintSurface .table-wrap{overflow:visible!important}#routePrintSurface table{width:100%;min-width:0!important;border-collapse:collapse;font-size:11px}
+ #routePrintSurface th,#routePrintSurface td{padding:7px;border:1px solid #cad5dc;text-align:center}
+ #routePrintSurface thead{display:table-header-group}#routePrintSurface tr{break-inside:avoid}
+ #routePrintSurface .diagram{display:block!important;overflow:visible;padding:12px 0}#routePrintSurface .route-row{display:flex;gap:10px;break-inside:avoid;margin-bottom:18px}
+ #routePrintSurface .route-stop{flex:1;min-width:0;padding:6px;font-size:11px}#routePrintSurface .stop-number{margin:8px auto}
+ #routePrintSurface button{color:#172f40;background:white}
+}
+
+.map-route-right .route-stop button.stop-number{width:42px;height:42px;min-height:42px;line-height:38px;font-size:21px;font-weight:800}
+.map-route-right .route-stop a{font-size:16px;font-weight:700;line-height:1.65;padding:8px 6px}
+.map-route-right .route-stop time{font-size:18px;font-weight:800}
+.map-route-right .route-stop small{font-size:13px;line-height:1.7}

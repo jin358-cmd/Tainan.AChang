@@ -67,7 +67,7 @@
    legend.hidden=!toggle.checked;
    if(!toggle.checked){status.textContent='路線圖層已關閉';pending.hidden=true;return;}
    if(!catalog){status.textContent=failed?'路線座標載入失敗，重新整理後可再試':'正在載入路線座標…';pending.hidden=true;return;}
-   status.textContent=`${select.value==='all'?'全部6車次':select.value} · ${model.total}站 · 已標示${model.located}站`;
+   status.textContent=`${select.value==='all'?'全部6車次':select.value} · ${model.total}站`;
    pending.hidden=true;
    const summary=pending.querySelector('summary');summary.textContent=`待定位 ${model.pending.length} 站`;
    pendingList.replaceChildren();
@@ -156,11 +156,20 @@
   function changed(){focusId=null;fitRequested=true;closeDetail();onChange?.();}
   toggle.addEventListener('change',changed);select.addEventListener('change',changed);
   legend.replaceChildren();
-  COLORS.forEach((color,index)=>{const key=document.createElement('span'),swatch=document.createElement('i');swatch.style.backgroundColor=color;key.append(swatch,document.createTextNode(`日間${index+1}`));legend.append(key);});
+  COLORS.forEach((color,index)=>{const key=document.createElement('button'),swatch=document.createElement('i');key.type='button';key.className='route-color-choice';key.setAttribute('aria-label',`切換日間${index+1}`);key.onclick=()=>{toggle.checked=true;select.value=`日間${index+1}`;select.dispatchEvent(new Event('change',{bubbles:true}));};swatch.style.backgroundColor=color;key.append(swatch,document.createTextNode(`日間${index+1}`));legend.append(key);});
   const note=document.createElement('span');note.className='route-sequence-note';note.textContent='→ 依站序連線';legend.append(note);
   fetch('./data-day-route-locations-20261103.json',{cache:'no-store'}).then(response=>{if(!response.ok)throw Error('route locations unavailable');return response.json();}).then(value=>{
    if(value.version!==1||value.stops?.filter(stop=>String(stop.source_id||'').startsWith('PDF:DAY:')).length!==160)throw Error('invalid route location catalog');catalog=value;onChange?.();
   }).catch(error=>{failed=true;renderControls();console.warn('日間路線座標未能載入',error.message);});
+  window.AChangRouteMapPrint=route=>{
+   if(!catalog||!/^日間[1-6]$/.test(route))return null;
+   const oldModel=model,oldFocus=focusId,checked=toggle.checked;
+   try{
+    model=build(getRows(),catalog,route);focusId=null;toggle.checked=true;
+    const holder=document.createElement('div');holder.append(document.createElementNS('http://www.w3.org/2000/svg','svg'));renderFallback(holder);
+    const svg=holder.querySelector('svg');if(svg){svg.removeAttribute('class');svg.setAttribute('width','780');svg.setAttribute('height','640');}return svg;
+   }finally{model=oldModel;focusId=oldFocus;toggle.checked=checked;}
+  };
   setInterval(()=>{if(!document.hidden)refreshGlow();},30000);
   setInterval(()=>{if(document.hidden||!toggle.checked||!map?.getLayer('day-route-next-glow'))return;const phase=(Date.now()%1600)/1600;map.setPaintProperty('day-route-next-glow','circle-radius',11+11*Math.sin(phase*Math.PI)**2);map.setPaintProperty('day-route-next-glow','circle-opacity',.25+.35*Math.cos(phase*Math.PI)**2);},100);
   return {sync,renderFallback,closeDetail,focusStop};
