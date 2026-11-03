@@ -37,7 +37,7 @@ test('map asset revision and service-worker cache advance together', () => {
   assert.match(html, /route-time-filter\.js\?v=2/);
   assert.match(html, /app\.js\?v=233/);
   assert.match(html, /route-directory\.js\?v=29/);
-  assert.match(sw, /achang-pwa-shell-v233-readable-route-filters/);
+  assert.match(sw, /achang-pwa-shell-v234-filter-safe-picker/);
 });
 
 test('truck directory keeps the route view concise and renders directional route arrows', () => {

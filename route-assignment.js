@@ -64,7 +64,7 @@ function create({getContext,getRows,submit}){
  function placePanel(){
   if(panel.hidden)return;const diagram=$('detail')?.getBoundingClientRect();if(!diagram)return;
   const width=Math.min(600,document.documentElement.clientWidth-24),desktop=document.body.classList.contains('map-route-desktop');
-  const top=Math.max(74,Math.min(diagram.top,($('page-map')?.getBoundingClientRect().top||74)+8));
+  const workspaceTop=$('detail')?.closest?.('.map-route-workspace')?.getBoundingClientRect().top;const top=Math.max(74,Math.min(diagram.top,(workspaceTop??$('page-map')?.getBoundingClientRect().top??74)+8));
   panel.style.width=width+'px';panel.style.left=(desktop?Math.max(12,diagram.left-width+2):12)+'px';panel.style.top=top+'px';const height=Math.max(300,document.documentElement.clientHeight-top-12);panel.style.maxHeight=height+'px';panel.style.height=height+'px';$('detail')?.classList.add('has-allocation-extension');
  }
  const windowRows=()=>{const ids=new Set(window.AChangRouteDirectory?.activeStopIds?.()||[]),route=window.AChangRouteDirectory?.activeRoute?.();return rows().filter(r=>r.車次===route&&ids.has(r.站點ID)&&legalTime(r.到達)&&!r.來源刪除線);};
