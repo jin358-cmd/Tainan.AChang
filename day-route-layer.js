@@ -75,7 +75,7 @@
    if(!map.getSource(SOURCE)){
     map.addSource(SOURCE,{type:'geojson',data:model.lines});
     map.addSource(SOURCE+'-points',{type:'geojson',data:model.points});
-    map.addLayer({id:LAYERS[0],type:'line',source:SOURCE,paint:{'line-color':['get','color'],'line-width':3,'line-dasharray':[2,1],'line-opacity':.9}});
+    map.addLayer({id:LAYERS[0],type:'line',source:SOURCE,paint:{'line-color':['get','color'],'line-width':6,'line-opacity':.9}});
     map.addLayer({id:LAYERS[1],type:'symbol',source:SOURCE,layout:{'symbol-placement':'line','symbol-spacing':90,'text-field':'›','text-font':['Noto Sans Regular'],'text-size':23,'text-keep-upright':false,'text-rotation-alignment':'map','text-allow-overlap':false},paint:{'text-color':['get','color'],'text-halo-color':'#ffffff','text-halo-width':1}});
     map.addLayer({id:LAYERS[2],type:'circle',source:SOURCE+'-points',paint:{'circle-radius':6,'circle-color':['get','color'],'circle-stroke-color':'#ffffff','circle-stroke-width':2}});
     map.addLayer({id:LAYERS[3],type:'symbol',source:SOURCE+'-points',layout:{'text-field':['to-string',['get','order']],'text-font':['Noto Sans Regular'],'text-size':12,'text-offset':[0,-1.1],'text-allow-overlap':false},paint:{'text-color':'#18384f','text-halo-color':'#ffffff','text-halo-width':2}});
@@ -107,7 +107,7 @@
    COLORS.forEach((color,index)=>{const marker=make('marker',{id:`day-route-arrow-${index}`,viewBox:'0 0 10 10',refX:5,refY:5,markerWidth:4,markerHeight:4,orient:'auto-start-reverse'},defs);make('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:color},marker);});
    for(const feature of model.lines.features){
     const [p,q]=feature.geometry.coordinates.map(project),mid=[(p[0]+q[0])/2,(p[1]+q[1])/2],index=Number(feature.properties.route.slice(-1))-1;
-    make('path',{d:`M${p}L${mid}L${q}`,fill:'none',stroke:feature.properties.color,'stroke-width':3,'stroke-dasharray':'6 3','marker-mid':`url(#day-route-arrow-${index})`});
+    make('path',{d:`M${p}L${mid}L${q}`,fill:'none',stroke:feature.properties.color,'stroke-width':6,'stroke-linecap':'round','stroke-linejoin':'round','marker-mid':`url(#day-route-arrow-${index})`});
    }
    for(const stop of model.stops){
     if(!stop.position)continue;const p=project(stop.position),circle=make('circle',{cx:p[0],cy:p[1],r:select.value==='all'?5:7,fill:stop.color,stroke:'#fff','stroke-width':2,'data-route-stop':stop.id,tabindex:0,role:'button','aria-label':`${stop.route}第${stop.order}站 ${stop.time} ${stop.name}`});
