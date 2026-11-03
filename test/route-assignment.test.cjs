@@ -102,11 +102,17 @@ test('selecting stations waits for the personnel button and clearing removes eve
  const cards=[new Node(),new Node()],buttons=[a,b].map((r,i)=>{const n=new Node();n.dataset.focusStop=r.站點ID;n.closest=()=>cards[i];return n;});
  const document={getElementById:node,createElement:()=>new Node(),body:new Node(),documentElement:{clientWidth:1400,clientHeight:1000},querySelectorAll:()=>buttons,addEventListener:(type,fn)=>{if(!listeners.has(type))listeners.set(type,[]);listeners.get(type).push(fn);}};
  const window={AChangRouteDirectory:{activeRoute:()=>a.車次},addEventListener(){}};
- const ctx=vm.createContext({document,window,Intl,Date,console});vm.runInContext(fs.readFileSync(require.resolve('../route-assignment'),'utf8'),ctx);
- ctx.AChangRouteAssignment.create({getContext:()=>({role:'admin',subject:'admin-test',people:[],tasks:[],date:'2026-11-03'}),getRows:()=>[a,b],submit:()=>{throw Error('must not save during selection');}});
+ document.dispatchEvent=()=>{};const ctx=vm.createContext({document,window,Intl,Date,console,CustomEvent:class{constructor(type,options={}){this.type=type;this.detail=options.detail;}}});vm.runInContext(fs.readFileSync(require.resolve('../route-assignment'),'utf8'),ctx);
+ const controller=ctx.AChangRouteAssignment.create({getContext:()=>({role:'admin',subject:'admin-test',people:[],tasks:[],date:'2026-11-03'}),getRows:()=>[a,b],submit:()=>{throw Error('must not save during selection');}});
  const emit=(type,detail)=>listeners.get(type).forEach(fn=>fn({detail}));
  assert.equal(cards.filter(c=>c.states.has('assignment-target')).length,0);
  emit('achang:focus-route-stop',{id:a.站點ID,route:a.車次});emit('achang:focus-route-stop',{id:b.站點ID,route:b.車次});
  assert.equal(cards.filter(c=>c.states.has('assignment-target')).length,2);assert.equal(node('detail').children.length,0,'the personnel picker must wait until explicitly requested');
- emit('achang:clear-route-selection');assert.equal(cards.filter(c=>c.states.has('assignment-target')).length,0);assert.equal(node('routePickPeople').disabled,true);
+ emit('achang:focus-route-stop',{id:a.站點ID,route:a.車次,all:true,stopIds:[a.站點ID,b.站點ID]});assert.equal(cards.filter(c=>c.states.has('assignment-target')).length,0,'pressing all again cancels all');emit('achang:focus-route-stop',{id:a.站點ID,route:a.車次,all:true,stopIds:[a.站點ID,b.站點ID]});assert.equal(cards.filter(c=>c.states.has('assignment-target')).length,2);emit('achang:clear-route-selection');assert.equal(cards.filter(c=>c.states.has('assignment-target')).length,0);assert.equal(node('routePickPeople').disabled,true);
+});
+
+test('map popup staffing keeps private contacts behind the current session and volunteer task scope',()=>{
+ const app=fs.readFileSync(require.resolve('../app.js'),'utf8'),start=app.indexOf('function routeStopStaffing('),end=app.indexOf('function mapScheduleDate(',start),privateData={date:'2026-11-03',people:[{id:'private',name:'私密名冊',phone:'0912345678'}]};
+ const context=vm.createContext({liveRole:'',routeAssignmentController:{staffing:()=>privateData},mapScheduleDate:()=> '2026-11-03',data:{stops:[{站點ID:'one'}]},mapTasksForStop:()=>[{volunteer_id:'own',is_route_leader:true}],groupContacts:[{id:'own',name:'本人',phone:'0911111111'},{id:'other',name:'其他車次',phone:'0922222222'}]});
+ vm.runInContext(app.slice(start,end),context);assert.equal(context.routeStopStaffing('one').people.length,0);context.liveRole='admin';assert.equal(context.routeStopStaffing('one'),privateData);context.liveRole='volunteer';assert.deepEqual(Array.from(context.routeStopStaffing('one').people,p=>p.id),['own']);context.liveRole='';assert.equal(context.routeStopStaffing('one').people.length,0);
 });

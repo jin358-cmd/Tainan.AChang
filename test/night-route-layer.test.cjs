@@ -38,10 +38,10 @@ test('night menu synchronizes shift, paints yellow waves, and station detail omi
  node('mapRouteLayerSelect').value='all';node('shift').value='日間';node('directoryStartTime').value='06:15';node('directoryEndTime').value='07:50';
  const map={getSource:id=>sources.get(id),addSource:(id,value)=>sources.set(id,{...value,setData(data){this.data=data;}}),addLayer:layer=>layers.set(layer.id,layer),getLayer:id=>layers.get(id),setLayoutProperty(){},setPaintProperty:(...x)=>paints.push(x),setMaxBounds(){},fitBounds(){},on:(type,id,handler)=>{if(type==='click')events.set(id,handler);},getCanvas:()=>({style:{}})};
  const document={hidden:false,getElementById:id=>id==='mapFallback'?null:node(id),createElement:()=>new Node(),createTextNode:text=>({textContent:text}),addEventListener:(type,fn)=>events.set(type,fn)};
- const window={AChangDispatchView:progress,AChangRouteDirectory:{setShift(shift){node('shift').value=shift;events.get('achang:route-time-filter')({detail:{shift,start:'16:30',end:'18:30'}});}}};
+ const window={AChangMemberCards:require('../member-cards'),AChangDispatchView:progress,AChangRouteDirectory:{setShift(shift){node('shift').value=shift;events.get('achang:route-time-filter')({detail:{shift,start:'16:30',end:'18:30'}});}}};
  const context=vm.createContext({document,window,console,Date,Event:class{constructor(type){this.type=type;}},setInterval:fn=>timers.push(fn),fetch:async file=>({ok:true,json:async()=>file.includes('night')?nightCatalog:require('../data-day-route-locations-20261103.json')})});
  vm.runInContext(fs.readFileSync(require.resolve('../day-route-layer.js'),'utf8'),context);
- controller=context.AChangDayRouteLayer.create({getRows:()=>[...day,...night],onChange:()=>controller?.sync(map)});
+ controller=context.AChangDayRouteLayer.create({getRows:()=>[...day,...night],getStaffing:()=>({date:'2026-11-03',people:[{id:'fixture-person',name:'測試志工',phone:'0912345678',leader:true}]}),onChange:()=>controller?.sync(map)});
  await new Promise(resolve=>setImmediate(resolve));controller.sync(map);
  node('mapRouteLayerSelect').value='夜間2';node('mapRouteLayerSelect').change();
  assert.equal(node('shift').value,'夜間');assert.equal(node('mapRouteLayerSelect').value,'夜間2');
@@ -51,7 +51,7 @@ test('night menu synchronizes shift, paints yellow waves, and station detail omi
  assert.equal(layers.get('day-route-next-ring-1').paint['circle-stroke-color'],'#ffcc00');
  timers[1]();assert.ok(paints.some(x=>x[0]==='day-route-next-ring-0'&&x[1]==='circle-radius'));
  events.get('day-route-points')({features:[points[0]]});
- const detail=node('mapBox').children.at(-1);assert.equal(detail.children.length,4);assert.ok(!detail.children.some(n=>String(n.textContent).includes('門牌精準度')));
+ const detail=node('mapBox').children.at(-1);assert.equal(detail.children.length,5);const address=detail.children.find(x=>x.className==='day-route-address-line'),navigation=address.children.find(x=>x.className==='day-route-navigate');assert.ok(navigation.href.startsWith('https://www.google.com/maps/dir/?api=1&destination='));assert.ok(navigation.href.includes('travelmode=driving'));const staff=detail.children.find(x=>x.className==='day-route-staffing');assert.equal(staff.children[1].children[0].textContent,'👑 測試志工');assert.match(staff.children[1].children[1].innerHTML,/tel:0912345678/);assert.ok(!detail.children.some(n=>String(n.textContent).includes('門牌精準度')));
  events.get('achang:route-time-filter')({detail:{shift:'日間',start:'06:15',end:'07:50'}});
  assert.equal(node('mapRouteLayerSelect').value,'all');assert.ok(sources.get('achang-day-routes-points').data.features.every(f=>f.properties.route.startsWith('日間')));
 });

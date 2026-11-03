@@ -60,21 +60,29 @@
    if(result.nextIndex>=0)ids.add(stops[eligible[result.nextIndex]].id);
   }return ids;
  }
- function create({getRows,onChange,onSelect}){
+ function create({getRows,getStaffing=()=>({people:[]}),onChange,onSelect}){
   const toggle=document.getElementById('layerRoutes'),select=document.getElementById('mapRouteLayerSelect'),status=document.getElementById('mapRouteLayerStatus'),legend=document.getElementById('mapRouteLayerLegend'),pending=document.getElementById('mapRoutePending'),pendingList=document.getElementById('mapRoutePendingList'),mapBox=document.getElementById('mapBox');
   if(!toggle||!select||!status||!mapBox)return null;
-  let catalog=null,map=null,attachedMap=null,model=build([],null),fitRequested=true,failed=false,detail=null,focusId=null,directoryShift=document.getElementById('shift')?.value||'日間',rangeStart=document.getElementById('directoryStartTime')?.value||'',rangeEnd=document.getElementById('directoryEndTime')?.value||'',fullModel=model;
+  let catalog=null,map=null,attachedMap=null,model=build([],null),fitRequested=true,failed=false,detail=null,detailStopId=null,focusId=null,directoryShift=document.getElementById('shift')?.value||'日間',rangeStart=document.getElementById('directoryStartTime')?.value||'',rangeEnd=document.getElementById('directoryEndTime')?.value||'',fullModel=model;
   const byId=id=>model.stops.find(stop=>stop.id===id);
-  const closeDetail=()=>{detail?.remove();detail=null;};
+  const closeDetail=()=>{detail?.remove();detail=null;detailStopId=null;};
+  function refreshDetailStaffing(){
+   if(!detail||!detailStopId)return;detail.querySelector('.day-route-staffing')?.remove();
+   const staffing=getStaffing(detailStopId)||{people:[]},box=document.createElement('section');box.className='day-route-staffing';box.setAttribute('aria-label','站點分配人員');
+   const heading=document.createElement('h4');heading.textContent=`分配人員${staffing.date?' · '+staffing.date:''}`;box.append(heading);
+   for(const person of staffing.people||[]){const row=document.createElement('div');row.className='day-route-contact';const name=document.createElement('strong');name.textContent=(person.leader?'👑 ':'')+person.name+(person.staged?' · 暫排':'');const phone=document.createElement('span');phone.innerHTML=window.AChangMemberCards?.phoneLink(person)||'';row.append(name,phone);box.append(row);}
+   if(!staffing.people?.length){const empty=document.createElement('small');empty.textContent='目前沒有可顯示的已分配人員';box.append(empty);}detail.append(box);
+  }
   function showStop(id){
    const stop=byId(id);if(!stop)return;
-   onSelect?.();closeDetail();
+   onSelect?.();closeDetail();detailStopId=id;
    detail=document.createElement('aside');detail.className='day-route-point-detail';detail.setAttribute('aria-label','路線站點資訊');
    const close=document.createElement('button');close.type='button';close.className='day-route-detail-close';close.setAttribute('aria-label','關閉站點資訊');close.textContent='✕';close.onclick=closeDetail;
    const title=document.createElement('strong');title.textContent=`${stop.route} · 第${stop.order}站 · ${stop.plate}`;
    const name=document.createElement('p');name.textContent=stop.name;
+   const address=document.createElement('div');address.className='day-route-address-line';const navigate=document.createElement('a');navigate.className='day-route-navigate';navigate.textContent='導航';navigate.target='_blank';navigate.rel='noopener noreferrer';navigate.setAttribute('aria-label','導航到'+stop.name);const destination=stop.position?stop.position[1]+','+stop.position[0]:'臺南市永康區'+(stop.addressNote||stop.name);navigate.href='https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(destination)+'&travelmode=driving';address.append(name,navigate);
    const time=document.createElement('p');time.textContent=[stop.time+(/^\d\d:\d\d$/.test(stop.end)?'～'+stop.end:''),stop.village].filter(Boolean).join(' · ');
-   detail.append(close,title,name,time);if(stop.addressNote){const note=document.createElement('p');note.textContent='備註：'+stop.addressNote;detail.append(note);}mapBox.append(detail);
+   detail.append(close,title,address,time);if(stop.addressNote){const note=document.createElement('p');note.textContent='備註：'+stop.addressNote;detail.append(note);}mapBox.append(detail);refreshDetailStaffing();
   }
   function renderControls(){
    select.disabled=!toggle.checked;
@@ -118,6 +126,7 @@
    rangeStart=next.start||'';rangeEnd=next.end||'';focusId=null;fitRequested=true;closeDetail();sync(map);onChange?.();
   });
   document.addEventListener('achang:focus-route-stop',event=>focusStop(event.detail||{}));
+  document.addEventListener('achang:route-crew-view',refreshDetailStaffing);document.addEventListener('achang:assignment-context',refreshDetailStaffing);
   function renderMap(){
    if(!map||!catalog)return;
    if(!map.getSource(SOURCE)){

@@ -79,3 +79,10 @@ test('day-route paper scaling keeps the complete content within one A4 content h
  assert.equal(printer.paperScale(600,width),1);
  for(const height of [1100,1800,4000]){const scale=printer.paperScale(height,width);assert.ok(scale>0&&scale<=1);assert.ok(height*scale<277*96/25.4);}
 });
+
+test('the third-to-fourth station arrow stays below the upper card and points into the next card header',()=>{
+ const source=fs.readFileSync(require.resolve('../route-directory'),'utf8'),start=source.indexOf('function connectDiagram('),end=source.indexOf('function stationCards(',start),vm=require('node:vm');let html='';
+ const cards=[{left:10,top:36,width:138,height:265},{left:165,top:36,width:138,height:265},{left:321,top:36,width:138,height:265},{left:165,top:337,width:138,height:274}];
+ const context=vm.createContext({Math});vm.runInContext(source.slice(start,end),context);context.connectDiagram({querySelector:()=>null,getBoundingClientRect:()=>({left:0,top:0}),querySelectorAll:()=>cards.map(card=>({getBoundingClientRect:()=>({left:card.left+49,top:card.top+44,width:40,height:40}),closest:()=>({getBoundingClientRect:()=>card})})),insertAdjacentHTML:(_,value)=>html=value});
+ const transition=html.match(/<span[^>]*data-connection="row-transition"[^>]*>/)[0];assert.match(transition,/data-from="3" data-to="4"/);assert.match(transition,/top:321px/);const angle=Number(transition.match(/rotate\(([^d]+)deg\)/)[1]);assert.ok(angle>90&&angle<180);assert.equal((html.match(/data-connection="between-cards"/g)||[]).length,2);
+});
