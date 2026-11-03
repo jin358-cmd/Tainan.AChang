@@ -73,3 +73,9 @@ test('print diagram connectors follow every next station, including a reversed r
  context.connectDiagram({querySelector:()=>null,getBoundingClientRect:()=>({left:0,top:0}),querySelectorAll:()=>points.map(bounds=>({getBoundingClientRect:()=>bounds})),insertAdjacentHTML:(_,value)=>html=value});
  assert.equal((html.match(/class="route-direction"/g)||[]).length,3);assert.match(html,/rotate\(0deg\)/);assert.match(html,/rotate\(90deg\)/);assert.match(html,/rotate\(180deg\)/);
 });
+
+test('day-route paper scaling keeps the complete content within one A4 content height',()=>{
+ const width=190*96/25.4;
+ assert.equal(printer.paperScale(600,width),1);
+ for(const height of [1100,1800,4000]){const scale=printer.paperScale(height,width);assert.ok(scale>0&&scale<=1);assert.ok(height*scale<277*96/25.4);}
+});

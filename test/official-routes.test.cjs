@@ -48,3 +48,9 @@ test('invalid or original unusual time text is preserved, never corrected',()=>{
  assert.ok(values.includes('04:59'));assert.ok(values.includes('14:40'));assert.ok(values.includes('18:6'));
  assert.equal(require('../route-time-filter.js').legalTime('18:6'),'');
 });
+
+test('day6 owner corrections preserve the PDF and attach the rear-gate address as a separate note',()=>{
+ const rows=api.normalize(day,'日間'),first=rows.find(x=>x.站點ID==='PDF:DAY:0158'),school=rows.find(x=>x.站點ID==='PDF:DAY:0159');
+ assert.equal(first.停靠點原文,'中華西街196巷2號');assert.equal(first.來源原文['站點名稱／地址'],'中華西路196巷口');assert.equal(school.停靠點原文,'大橋國小後側門');assert.equal(school.地址備註,'大橋一街103巷204號');assert.equal(school.Google地圖定位地址,'大橋一街103巷204號');
+ const positions=require('../data-day-route-locations-20261103.json'),model=require('../day-route-layer').build(rows,positions,'日間6');assert.equal(model.located,3);assert.equal(model.stops.find(x=>x.id===school.站點ID).addressNote,school.地址備註);
+});

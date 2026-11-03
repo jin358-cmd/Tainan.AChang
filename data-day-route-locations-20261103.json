@@ -1938,7 +1938,7 @@
     },
     {
       "source_id": "PDF:DAY:0158",
-      "source_name": "中華西路196巷口",
+      "source_name": "中華西街196巷2號",
       "route": "日間6",
       "official_route_id": "52",
       "original_order": 1,
@@ -1946,7 +1946,10 @@
       "longitude": 120.225818,
       "latitude": 23.017032,
       "status": "official_stop",
-      "notes": []
+      "notes": [],
+      "original_source_name": "中華西路196巷口",
+      "address_correction_source": "Owner 2026-11-03",
+      "address_confirmed": true
     },
     {
       "source_id": "PDF:DAY:0159",
@@ -1958,7 +1961,9 @@
       "longitude": 120.226842,
       "latitude": 23.021101,
       "status": "official_stop",
-      "notes": []
+      "notes": [],
+      "address_note": "大橋一街103巷204號",
+      "address_correction_source": "Owner 2026-11-03"
     },
     {
       "source_id": "PDF:DAY:0160",

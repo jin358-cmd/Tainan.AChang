@@ -71,3 +71,40 @@
  #routePrintSurface .route-direction:after{border-left-color:#c33}
  #routePrintSurface .route-person-chip button{display:none!important}
 }
+
+/* Compact paper layout: map, stop cards and table share one day-route sheet. */
+.route-print-compact{width:190mm!important;font:11px Arial,sans-serif;color:#172f40}
+.route-print-content{width:100%;padding:0}
+.route-print-compact h1{font-size:18px;line-height:1.3;margin:0 0 4px}
+.route-print-compact h2{font-size:13px;line-height:1.3;margin:7px 0 4px;break-after:avoid}
+.route-print-compact p{font-size:11px;line-height:1.35;margin:3px 0 6px}
+.route-print-compact .route-print-crew{font-size:12px;line-height:1.4;font-weight:700}
+.route-print-compact svg{display:block;width:100%;height:auto;max-height:88mm}
+.route-print-compact .diagram{display:grid!important;grid-template-columns:repeat(var(--print-columns,6),minmax(0,1fr));gap:8px;position:relative;padding:7px 0!important;overflow:visible!important;margin:0}
+.route-print-compact .route-row{display:contents!important}
+.route-print-compact .route-stop{min-width:0!important;width:auto!important;padding:6px!important;font-size:10px;break-inside:avoid}
+.route-print-compact .route-stop time{font-size:15px}
+.route-print-compact .route-stop a{font-size:10px;padding:4px;line-height:1.35;overflow-wrap:anywhere}
+.route-print-compact .route-stop small{font-size:9px;line-height:1.3;margin-top:4px}
+.route-print-compact .stop-number{width:40px;height:40px;min-height:40px;font-size:24px;line-height:36px;margin:7px auto;padding:0}
+.route-print-compact .route-person-chip{font-size:10px;padding:3px;line-height:1.25}
+.route-print-compact .table-wrap{overflow:visible!important}
+.route-print-compact table{width:100%;min-width:0!important;border-collapse:collapse;font-size:10px;line-height:1.25}
+.route-print-compact th,.route-print-compact td{padding:4px 5px!important;border:1px solid #cbd6df;text-align:center;line-height:1.3}
+.station-address-note{display:block;font-size:12px;line-height:1.45;color:#42617a}
+@media print{
+ @page{size:A4 portrait;margin:10mm}
+ #routePrintSurface.route-print-compact{font-size:11px}
+ #routePrintSurface.route-print-day{position:relative!important;width:190mm!important;max-height:275mm;break-inside:avoid;page-break-inside:avoid;overflow:hidden}
+ #routePrintSurface.route-print-compact h1{font-size:18px;margin:0 0 4px}
+ #routePrintSurface.route-print-compact h2{font-size:13px;margin:7px 0 4px}
+ #routePrintSurface.route-print-compact svg{max-height:88mm}
+ #routePrintSurface.route-print-compact .diagram{display:grid!important;padding:7px 0!important}
+ #routePrintSurface.route-print-compact .route-row{display:contents!important}
+ #routePrintSurface.route-print-compact .stop-number{width:40px;height:40px;min-height:40px;font-size:24px;line-height:36px;margin:7px auto}
+ #routePrintSurface.route-print-compact .route-stop a{font-size:10px;line-height:1.35}
+ #routePrintSurface.route-print-compact table{font-size:10px}
+ #routePrintSurface.route-print-compact th,#routePrintSurface.route-print-compact td{padding:4px 5px;line-height:1.3}
+}
+
+.route-print-review-paper{position:relative;background:#fff;margin:12px auto;box-shadow:0 2px 14px #14314b22;min-height:40mm}.route-print-actions{align-items:center;flex-wrap:wrap}.route-print-actions strong{margin-right:auto;font-size:16px}.route-print-preview .route-print-review-paper .route-row{display:contents!important}.route-print-preview .route-print-review-paper .diagram{display:grid!important}.route-print-preview .route-print-review-paper .route-print-content{width:190mm}.route-print-preview{overflow:auto!important}.route-print-preview .route-print-review-paper table{width:100%}

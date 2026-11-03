@@ -26,7 +26,7 @@
    const group=groups.get(token),location=positions.get(row['站點ID']);
    const matched=location&&norm(location.source_name)===norm(row['停靠點原文']);
    const valid=matched&&location.status==='official_stop'&&Number.isFinite(location.longitude)&&Number.isFinite(location.latitude)&&location.longitude>120&&location.longitude<121&&location.latitude>22&&location.latitude<24;
-   const stop={id:row['站點ID'],route:token,plate:row['車牌']||'',order,name:row['停靠點原文']||'',time:row['到達']||'',end:row['離開']||'',village:row['里別']||'',color:routeColor(token),position:valid?[location.longitude,location.latitude]:null,notes:matched?(location.notes||[]):['尚無可核對的官方清運點座標'],status:valid?'官方清運點（門牌精準度待驗證）':matched&&location.address_confirmed?'地址已確認；座標待定位':'待確認'};
+   const stop={id:row['站點ID'],route:token,plate:row['車牌']||'',order,name:row['停靠點原文']||'',addressNote:row['地址備註']||'',time:row['到達']||'',end:row['離開']||'',village:row['里別']||'',color:routeColor(token),position:valid?[location.longitude,location.latitude]:null,notes:matched?(location.notes||[]):['尚無可核對的官方清運點座標'],status:valid?'官方清運點（門牌精準度待驗證）':matched&&location.address_confirmed?'地址已確認；座標待定位':'待確認'};
    group.push(stop);stops.push(stop);
    if(!valid){pending.push(stop);continue;}
    points.features.push({type:'Feature',geometry:{type:'Point',coordinates:stop.position},properties:{id:stop.id,route:stop.route,order:stop.order,color:stop.color}});
@@ -74,7 +74,7 @@
    const title=document.createElement('strong');title.textContent=`${stop.route} · 第${stop.order}站 · ${stop.plate}`;
    const name=document.createElement('p');name.textContent=stop.name;
    const time=document.createElement('p');time.textContent=[stop.time+(/^\d\d:\d\d$/.test(stop.end)?'～'+stop.end:''),stop.village].filter(Boolean).join(' · ');
-   detail.append(close,title,name,time);mapBox.append(detail);
+   detail.append(close,title,name,time);if(stop.addressNote){const note=document.createElement('p');note.textContent='備註：'+stop.addressNote;detail.append(note);}mapBox.append(detail);
   }
   function renderControls(){
    select.disabled=!toggle.checked;
@@ -184,7 +184,7 @@
   function renderLegend(){legend.hidden=true;legend.replaceChildren();}
   renderLegend();
   const loadCatalog=async(file,prefix,count)=>{const response=await fetch(file,{cache:'no-store'});if(!response.ok)throw Error('route locations unavailable');const value=await response.json();if(value.version!==1||value.stops?.filter(stop=>String(stop.source_id||'').startsWith(prefix)).length!==count)throw Error('invalid route location catalog');return value;};
-  Promise.all([loadCatalog('./data-day-route-locations-20261103.json','PDF:DAY:',160),loadCatalog('./data-night-route-locations-20261103.json','PDF:NIGHT:',1626)]).then(([day,night])=>{
+  Promise.all([loadCatalog('./data-day-route-locations-20261103.json?v=2','PDF:DAY:',160),loadCatalog('./data-night-route-locations-20261103.json','PDF:NIGHT:',1626)]).then(([day,night])=>{
    catalog={...day,stops:[...day.stops,...night.stops]};sync(map);onChange?.();
   }).catch(error=>{failed=true;renderControls();console.warn('車次路線座標未能載入',error.message);});
   window.AChangRouteMapPrint=async(route,selection={})=>{

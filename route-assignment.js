@@ -57,7 +57,7 @@ function create({getContext,getRows,submit}){
   panel.style.width=width+'px';panel.style.left=(desktop?Math.max(12,diagram.left-width+2):12)+'px';panel.style.top=top+'px';const height=Math.max(300,document.documentElement.clientHeight-top-24);panel.style.maxHeight=height+'px';panel.style.height=Math.min(800,height)+'px';$('detail')?.classList.add('has-allocation-extension');
  }
  function paintStops(){
-  const all=rows(),ctx=context(),currentDraft=draft.items();$('routeTitle')?.classList.toggle('assignment-route-selected',Boolean(routeScope&&opened&&ctx.role==='admin'));$('routeTitle')?.setAttribute('aria-pressed',String(Boolean(routeScope&&opened&&ctx.role==='admin')));
+  const all=rows(),ctx=context(),currentDraft=draft.items();$('routeTitle')?.classList.toggle('assignment-route-selected',Boolean(routeScope?.ids.length&&ctx.role==='admin'));$('routeTitle')?.setAttribute('aria-pressed',String(Boolean(routeScope?.ids.length&&ctx.role==='admin')));
   document.querySelectorAll('#routeDiagram [data-focus-stop],#routeFullDiagram [data-focus-stop]').forEach(button=>{
    const row=all.find(r=>r.站點ID===button.dataset.focusStop);if(!row)return;
    const picked=(selected===row.站點ID||routeScope?.ids.includes(row.站點ID))&&ctx.role==='admin';button.classList.toggle('assignment-selected',picked);button.setAttribute('aria-pressed',String(picked));
@@ -74,6 +74,7 @@ function create({getContext,getRows,submit}){
  }
  function render(){
   const ctx=context();if(!serviceDate)serviceDate=ctx.date||today();if(ctx.role!=='admin'||ctx.subject!==session){if(session&&ctx.subject!==session||ctx.role!=='admin'){draft.clear();selected=null;routeScope=null;opened=false;message='';}session=ctx.role==='admin'?ctx.subject:'';}
+  const scopeCount=targets().length,toolbar=$('routeSelectionToolbar');if(toolbar)toolbar.hidden=ctx.role!=='admin';if($('routeSelectionStatus'))$('routeSelectionStatus').textContent=scopeCount?`${routeScope?.route||''} · 已選 ${scopeCount} 站`:'尚未選取站點';for(const id of ['routePickPeople','routeClearSelection'])if($(id))$(id).disabled=busy||!scopeCount;if($('routeSelectAll'))$('routeSelectAll').disabled=busy||!window.AChangRouteDirectory?.activeRoute?.();
   const inMap=$('page-map')?.classList.contains('active');panel.hidden=ctx.role!=='admin'||!opened||!inMap;if(ctx.role!=='admin')panel.replaceChildren();launcher.hidden=ctx.role!=='admin'||opened||draft.size()===0||!inMap;launcher.textContent=`開啟分配草稿（${draft.size()}）`;paintStops();$('detail')?.classList.toggle('has-allocation-extension',!panel.hidden);if(panel.hidden)return;
   mount();const row=target(),scope=targets(),route=routeScope?.route||row?.車次;if(!serviceDate)serviceDate=ctx.date||today();
   const records=draft.items(),removals=draft.removals(),changeCount=draft.size(),people=ctx.people.filter(eligible);
@@ -136,10 +137,15 @@ function create({getContext,getRows,submit}){
  document.addEventListener('achang:focus-route-stop',event=>{
   if(context().role!=='admin'||busy)return;const detail=event.detail||{},same=routeScope?.route===detail.route;
   const ids=detail.all?detail.stopIds||[]:same?(routeScope.ids.includes(detail.id)?routeScope.ids.filter(id=>id!==detail.id):[...routeScope.ids,detail.id]):[detail.id];
-  selected=null;routeScope={route:detail.route,ids,mode:detail.all?'all':'selection'};opened=true;message=detail.all?'已全選此車次全部可分配站點':'單點卡片複選／取消，連點同一站兩下可全選整條路線';render();
+  selected=null;routeScope={route:detail.route,ids,mode:detail.all?'all':'selection'};opened=false;message='已選定站點，請按「人員選擇」安排同一人或同組人員';render();
  });
- document.addEventListener('achang:assign-route',event=>{if(context().role!=='admin'||busy)return;selected=null;routeScope={route:event.detail.route,ids:event.detail.stopIds,mode:'window'};opened=true;message='';render();});
+ document.addEventListener('achang:assign-route',event=>{if(context().role!=='admin'||busy)return;selected=null;routeScope={route:event.detail.route,ids:event.detail.stopIds,mode:'window'};opened=false;message='已選定目前時段站點，請按「人員選擇」';render();});
  document.addEventListener('achang:directory-route',event=>{if(routeScope){routeScope=routeScope.route===event.detail?.route?{...routeScope,ids:routeScope.mode==='window'?(window.AChangRouteDirectory?.activeStopIds?.()||routeScope.ids):routeScope.ids.filter(id=>rows().some(row=>row.站點ID===id))}:null;}render();});
+ const clearSelection=()=>{if(busy)return;selected=null;routeScope=null;opened=false;message='已取消站點選取，分配草稿仍保留';render();};
+ document.addEventListener('achang:clear-route-selection',clearSelection);
+ document.addEventListener('achang:open-route-people',()=>{if(context().role!=='admin'||busy||!targets().length)return;opened=true;render();});
+ document.addEventListener('click',event=>{if(!routeScope||busy||!$('page-map')?.classList.contains('active'))return;if(event.target.closest('#routePrintPreview,#routeAssignmentPanel,.route-assignment-launcher,.route-selection-toolbar,.route-stop,button,input,select,textarea,label,a,summary,[role=button],[data-open],.day-route-point-detail,#mapLayerSettings'))return;clearSelection();});
+ document.addEventListener('keydown',event=>{if(!routeScope||busy||event.target.closest('#routePrintPreview'))return;const editable=event.target.closest('button,input,select,textarea,a,summary,[role=button],[contenteditable=true]');if(event.key==='Escape'||event.key===' '&&!editable){event.preventDefault();clearSelection();}});
  document.addEventListener('achang:route-view',()=>render());document.addEventListener('achang:assignment-context',()=>render());window.addEventListener('resize',()=>{mount();render();});document.addEventListener('scroll',placePanel,true);document.addEventListener('click',event=>{const nav=event.target.closest('[data-page]');if(nav){if(nav.dataset.page!=='map')opened=false;render();}});
  window.addEventListener('beforeunload',event=>{if(draft.size()){event.preventDefault();event.returnValue='';}});
  render();return {refresh:render,draft};
