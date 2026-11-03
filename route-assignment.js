@@ -54,8 +54,8 @@ function create({getContext,getRows,submit}){
   });
  }
  function render(){
-  const ctx=context();if(ctx.role!=='admin'||ctx.subject!==session){if(session&&ctx.subject!==session||ctx.role!=='admin'){draft.clear();selected=null;opened=false;message='';}session=ctx.role==='admin'?ctx.subject:'';}
-  const inMap=$('page-map')?.classList.contains('active');panel.hidden=ctx.role!=='admin'||!opened||!inMap;launcher.hidden=ctx.role!=='admin'||opened||draft.items().length===0||!inMap;launcher.textContent=`開啟分配草稿（${draft.items().length}）`;paintStops();if(panel.hidden)return;
+  const ctx=context();if(!serviceDate)serviceDate=ctx.date||today();if(ctx.role!=='admin'||ctx.subject!==session){if(session&&ctx.subject!==session||ctx.role!=='admin'){draft.clear();selected=null;opened=false;message='';}session=ctx.role==='admin'?ctx.subject:'';}
+  const inMap=$('page-map')?.classList.contains('active');panel.hidden=ctx.role!=='admin'||!opened||!inMap;if(ctx.role!=='admin')panel.replaceChildren();launcher.hidden=ctx.role!=='admin'||opened||draft.items().length===0||!inMap;launcher.textContent=`開啟分配草稿（${draft.items().length}）`;paintStops();if(panel.hidden)return;
   mount();const row=target();if(!serviceDate)serviceDate=ctx.date||today();
   const records=draft.items(),people=ctx.people.filter(eligible);
   const count=new Set(records.map(x=>x.volunteerId)).size;
