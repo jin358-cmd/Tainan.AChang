@@ -56,7 +56,7 @@
  function create({getRows,onChange,onSelect}){
   const toggle=document.getElementById('layerRoutes'),select=document.getElementById('mapRouteLayerSelect'),status=document.getElementById('mapRouteLayerStatus'),legend=document.getElementById('mapRouteLayerLegend'),pending=document.getElementById('mapRoutePending'),pendingList=document.getElementById('mapRoutePendingList'),mapBox=document.getElementById('mapBox');
   if(!toggle||!select||!status||!mapBox)return null;
-  let catalog=null,map=null,attachedMap=null,model=build([],null),fitRequested=true,failed=false,detail=null,focusId=null,rangeStart='',rangeEnd='',fullModel=model;
+  let catalog=null,map=null,attachedMap=null,model=build([],null),fitRequested=true,failed=false,detail=null,focusId=null,rangeStart=document.getElementById('directoryStartTime')?.value||'',rangeEnd=document.getElementById('directoryEndTime')?.value||'',fullModel=model;
   const byId=id=>model.stops.find(stop=>stop.id===id);
   const closeDetail=()=>{detail?.remove();detail=null;};
   function showStop(id){
