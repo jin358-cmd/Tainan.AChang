@@ -6,7 +6,7 @@ const workspace=document.createElement('div');workspace.className='map-route-wor
 const left=document.createElement('aside');left.className='map-route-left truck-directory-host';left.setAttribute('aria-label','日間夜間車次與搜尋');
 const center=document.createElement('div');center.className='map-route-center';
 const right=document.createElement('aside');right.className='map-route-right truck-directory-host';right.setAttribute('aria-label','完整路線圖及詳細列表');
-const empty=document.createElement('p');empty.className='map-route-empty';empty.textContent='請從車次列表選擇車次，再點選站點號碼分配人員。';right.append(empty);
+const empty=document.createElement('p');empty.className='map-route-empty';empty.textContent='請從車次列表選擇車次，單點站點卡片複選，連點兩下全選該車次站點。';right.append(empty);
 [...page.children].forEach(node=>center.append(node));left.append(controls,directory);right.append(detail);workspace.append(left,center,right);page.append(workspace);host.hidden=true;host.setAttribute('aria-hidden','true');
 const jump=document.createElement('button');jump.type='button';jump.className='map-route-list-jump';jump.textContent='選擇車次／人員分配';jump.onclick=()=>left.scrollIntoView({block:'start',behavior:'smooth'});center.prepend(jump);
 document.body.classList.add('map-route-integrated');

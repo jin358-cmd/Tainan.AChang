@@ -53,3 +53,21 @@
 .service-day{display:block;white-space:nowrap;line-height:1.8;text-align:left}
 
 .map-route-layer-legend{max-height:140px;overflow:auto;padding:3px}
+/* Measure the printable diagram at its actual paper width before opening print. */
+.route-print-preparing{display:block;position:fixed;left:-20000px;top:0;width:186mm;padding:0;background:#fff;color:#172f40;font:12px Arial,sans-serif}
+.route-print-preparing>svg{display:block;width:100%;height:auto}
+.route-print-preparing .diagram{display:block!important;overflow:visible;padding:12px 0}
+.route-print-preparing .route-row{display:flex;gap:10px;margin-bottom:30px}
+.route-print-preparing .route-stop{flex:1;min-width:0;padding:6px;font-size:11px}
+.route-print-preparing .stop-number{display:block;width:46px;height:46px;min-height:46px;padding:0;margin:10px auto;line-height:42px;font-size:26px;font-weight:800;border:2px solid #244c64;border-radius:50%;background:#fff;color:#17384f}
+.route-print-preparing .route-person-chip button{display:none}
+.route-print-crew{font-size:16px;font-weight:700;line-height:1.6}
+@media print{
+ #routePrintSurface.route-print-preparing{position:static;left:auto;top:auto;width:100%!important}
+ #routePrintSurface .stop-number{width:46px;height:46px;min-height:46px;font-size:26px;line-height:42px;font-weight:800;margin:10px auto;padding:0;border:2px solid #244c64;border-radius:50%}
+ #routePrintSurface .route-row{margin-bottom:30px}
+ #routePrintSurface .connector{display:block!important;z-index:4}
+ #routePrintSurface .route-direction{height:3px;background:#c33;print-color-adjust:exact}
+ #routePrintSurface .route-direction:after{border-left-color:#c33}
+ #routePrintSurface .route-person-chip button{display:none!important}
+}

@@ -60,3 +60,16 @@ test('requested route labels and every daytime option carry the requested text a
  assert.match(js,/．共\$\{count\}站點/);
  assert.match(directory,/await window\.AChangRouteMapPrint\?\.\(snapshot\.route,\{start,end,stopIds:snapshot\.rows\.map/);
 });
+
+test('common vehicle crew is printed once only when every selected station has the exact same people',()=>{
+ const a={id:'one',name:'甲志工',leader:true},b={id:'two',name:'乙志工',leader:false};
+ assert.deepEqual(printer.commonCrew([[a,b],[b,a]]),[a,b]);assert.deepEqual(printer.commonCrew([[a,b],[a]]),[]);assert.deepEqual(printer.commonCrew([[a],[]]),[]);assert.deepEqual(printer.commonCrew([]),[]);
+});
+
+test('print diagram connectors follow every next station, including a reversed row',()=>{
+ const source=fs.readFileSync(require.resolve('../route-directory'),'utf8'),start=source.indexOf('function connectDiagram('),end=source.indexOf('function stationCards(',start);
+ const vm=require('node:vm'),points=[{left:10,top:10,width:40,height:40},{left:230,top:10,width:40,height:40},{left:230,top:230,width:40,height:40},{left:10,top:230,width:40,height:40}];let html='';
+ const context=vm.createContext({Math});vm.runInContext(source.slice(start,end),context);
+ context.connectDiagram({querySelector:()=>null,getBoundingClientRect:()=>({left:0,top:0}),querySelectorAll:()=>points.map(bounds=>({getBoundingClientRect:()=>bounds})),insertAdjacentHTML:(_,value)=>html=value});
+ assert.equal((html.match(/class="route-direction"/g)||[]).length,3);assert.match(html,/rotate\(0deg\)/);assert.match(html,/rotate\(90deg\)/);assert.match(html,/rotate\(180deg\)/);
+});

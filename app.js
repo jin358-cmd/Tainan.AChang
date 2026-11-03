@@ -36,7 +36,7 @@ const MAPLIBRE_JS='https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre
 const MAPLIBRE_CSS='https://cdn.jsdelivr.net/npm/maplibre-gl@5.15.0/dist/maplibre-gl.css';
 let dayMapRouteLayer=null;
 const MAP_SHIFT_WINDOWS={日間:{start:'06:15',end:'08:10'},夜間:{start:'19:00',end:'20:30'}};
-let state=loadState(),data=null,baseStops=[],dayRouteDocument=null,dayShiftWindows=null,officialRouteDocument=null,routeStopOverlays=[],dayRouteCategory='six',dayCatalogStatus={weekday:'',active:0,pending:0,notice:'',closedReason:''},areas=[],routes=[],page='areas',selectedArea='復興里',shift='日間',date=today(),chosenRoute='',plannerArea='all',visitTimeStart='',visitTimeEnd='',visitTimeCustomized=false,visitTimeLoadedKey='',areaPage=0,teamArea='',toastTimer=null,installPrompt=null,map=null,markers=[],mapFailed=false,mapLoaded=false,mapLoadTimer=null,mapAttempt=0,mapInitPromise=null,mapFailureMessage='',pinTarget=null,layerState={volunteer:false,day:false,night:false,gps:false},pickerKind='',volunteerId='',volunteerPhone='';
+let state=loadState(),data=null,baseStops=[],dayRouteDocument=null,dayShiftWindows=null,officialRouteDocument=null,routeStopOverlays=[],dayRouteCategory='six',dayCatalogStatus={weekday:'',active:0,pending:0,notice:'',closedReason:''},areas=[],routes=[],page='map',selectedArea='復興里',shift='日間',date=today(),chosenRoute='',plannerArea='all',visitTimeStart='',visitTimeEnd='',visitTimeCustomized=false,visitTimeLoadedKey='',areaPage=0,teamArea='',toastTimer=null,installPrompt=null,map=null,markers=[],mapFailed=false,mapLoaded=false,mapLoadTimer=null,mapAttempt=0,mapInitPromise=null,mapFailureMessage='',pinTarget=null,layerState={volunteer:false,day:false,night:false,gps:false},pickerKind='',volunteerId='',volunteerPhone='';
 const personNorm=p=>({id:String(p.id||`P${Date.now()}`),name:String(p.name||'').trim().slice(0,80),phone:String(p.phone||'').slice(0,80),address:String(p.address||'').slice(0,300),residentArea:String(p.residentArea||'待確認'),assignment:areas.includes(p.assignment)?p.assignment:'',serviceLat:coord(p.serviceLat)?p.serviceLat:null,serviceLon:coord(p.serviceLon)?p.serviceLon:null});
 const residentLabel=p=>{const s=String(p?.residentArea||'').trim().replace(/里里$/,'里');return /十里以外|十里外|待確認/.test(s)?'十里外':s&&s!=='未填寫'?s:''};
 const residentHtml=p=>residentLabel(p)?`原里：${esc(residentLabel(p))} · `:'';
@@ -612,7 +612,7 @@ function showAuth(){
  $('#rosterLocked').hidden=false;$('#peopleList').hidden=true;
  $('#clearArea').hidden=true;
  const z=$('#authStatus');z.textContent='首次登入或裝置授權失效時，請輸入已核准的帳號與密碼';
- render();go('areas');previewLoginButton();
+ render();go('map');previewLoginButton();
 }
 function openSecureLogin(){if(liveRole==='admin')return openMemberAdmin();previewLoginButton();$('#secureLogin').hidden=false;$('#secureLoginForm input[name="login"]').focus()}
 function updateAccessControls(){
@@ -632,7 +632,7 @@ async function authStart(){try{
  if(liveRole==='admin'){
   $('#volunteerLoginBtn').hidden=true;
   $$('.bottom-nav,.desktop-nav').forEach(x=>x.hidden=false);
-  await refreshOnline();go('areas');
+  await refreshOnline();go('map');
  }else{
   $('#volunteerLoginBtn').hidden=true;
   $$('.bottom-nav,.desktop-nav').forEach(x=>x.hidden=false);

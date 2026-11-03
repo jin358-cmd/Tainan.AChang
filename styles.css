@@ -1085,3 +1085,10 @@ body.restored-admin-map #page-map #areaPopup.restored-map-popup[hidden]{display:
 .planner-picker-open .pick-list .pick-row.pending-assignment{background:var(--yellow);border-color:var(--yellow-b);border-left:5px solid #e8be50}.planner-picker-open .pick-list .pick-row.pending-assignment small{color:#765c25}
 
 #dayRouteWeekdayPicker[hidden]{display:none!important}
+
+/* Compact the history disclosure and bring the next-visit disclosure directly below it. */
+@media(min-width:800px){
+ #page-reports #reportsContent.task-date-layout>.task-date-left-stack>.task-date-history:not([open]){flex:0 0 auto;padding:6px 13px}
+ #page-reports #reportsContent.task-date-layout>.task-date-left-stack>.task-date-history:not([open])>summary{min-height:28px;line-height:28px}
+ #page-reports #reportsContent.task-date-layout>.task-date-left-stack>.task-date-future:not([open]){flex:0 0 auto}
+}

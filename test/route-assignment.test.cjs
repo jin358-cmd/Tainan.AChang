@@ -68,3 +68,26 @@ test('vehicle leader selection is staged, exclusive per route, and saved with th
  await saveBatch({...d.payload(()=> 'ignored'),batchId:'3bc211b4-bc21-4cd7-a7c2-a960958a96d4'},{token:'admin'},fake);assert.equal(canonical.filter(x=>x.is_route_leader).length,1);assert.equal(canonical.find(x=>x.is_route_leader).member_id,second.id);
  d.clear();assert.deepEqual(d.items(),[]);
 });
+
+test('saved allocation removals stay in the draft, can be undone, and join the same atomic payload',()=>{
+ const d=createDraft(),task={id:'4bc211b4-bc21-4cd7-a7c2-a960958a96d4',visit_date:'2026-11-03',route_id:a.路線ID,stop_order:1};
+ d.removeSaved(task,person.name);d.removeSaved(task,person.name);assert.equal(d.size(),1);assert.deepEqual(d.payload(()=> 'first').items,[{action:'remove',taskId:task.id}]);
+ d.stage(second,b,'2026-11-03','復華里');assert.equal(d.size(),2);assert.equal(d.payload(()=> 'second').items.length,2);
+ d.cancelRemoval(task.id);assert.equal(d.removals().length,0);assert.equal(d.size(),1);d.clear();assert.equal(d.size(),0);
+});
+test('removal API derives the member and vehicle from the saved allocation rather than client fields',async()=>{
+ let canonical;const taskId='4bc211b4-bc21-4cd7-a7c2-a960958a96d4',assignmentId='5bc211b4-bc21-4cd7-a7c2-a960958a96d4';
+ const fake={...L,rest:async(path,token,options)=>{
+  if(path.startsWith('rpc/')){canonical=options.body.p_items;return {ok:true,data:{removedCount:1}};}
+  if(path.startsWith('assignments?'))return {ok:true,data:[{id:assignmentId,member_id:person.id,service_date:'2026-11-03',shift:'day',route_id:a.路線ID,village:'復華里'}]};
+  if(path.startsWith('visit_tasks?'))return {ok:true,data:[{id:taskId,assignment_id:assignmentId,member_id:person.id}]};return {ok:true,data:[]};
+ }};
+ await saveBatch({batchId:'3bc211b4-bc21-4cd7-a7c2-a960958a96d4',items:[{action:'remove',taskId,volunteerId:second.id,route_id:'fake'}]},{token:'admin'},fake);
+ assert.equal(canonical[0].member_id,person.id);assert.equal(canonical[0].route_id,a.路線ID);assert.equal(canonical[0].action,'remove');
+});
+
+test('opening the application starts on the map and task dispatch is the second tab in both navigation bars',()=>{
+ const html=fs.readFileSync(require.resolve('../index.html'),'utf8'),app=fs.readFileSync(require.resolve('../app.js'),'utf8');
+ for(const type of ['desktop-nav','bottom-nav']){const nav=html.match(new RegExp('<nav class="'+type+'"[^>]*>(.*?)</nav>','s'))[1];assert.deepEqual([...nav.matchAll(/data-page="([^"]+)"/g)].map(x=>x[1]),['map','reports','areas','planner','people']);}
+ assert.match(html,/id="page-map" class="page active/);assert.match(app,/routes=\[\],page='map'/);assert.doesNotMatch(app,/await refreshOnline\(\);go\('areas'\)/);
+});

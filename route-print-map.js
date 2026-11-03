@@ -5,6 +5,11 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
  'use strict';
  const WIDTH=1200,HEIGHT=800,PIXEL_RATIO=2;
+ function commonCrew(stations){
+  if(!stations.length||!stations[0].length)return [];
+  const first=[...new Map(stations[0].map(p=>[p.id,p])).values()],signature=first.map(p=>p.id).sort().join('|');
+  return stations.every(people=>[...new Set(people.map(p=>p.id))].sort().join('|')===signature)?first:[];
+ }
  const mercator=([lon,lat])=>[lon*Math.PI/180,Math.log(Math.tan(Math.PI/4+lat*Math.PI/360))];
  function filterByIds(full,stopIds){
   const ids=new Set(stopIds),stops=full.stops.filter(stop=>ids.has(stop.id)),orders=new Set(stops.map(stop=>`${stop.route}|${stop.order}`));
@@ -60,10 +65,10 @@
   for(const stop of model.stops){
    if(!stop.position)continue;const [x,y]=project(stop.position);
    make('circle',{cx:x,cy:y,r:10,fill:stop.color,stroke:'#fff','stroke-width':3,'data-route-stop':stop.id});
-   make('text',{x:x+14,y:y-13,'font-size':24,'font-family':'Arial, sans-serif','font-weight':700,fill:'#17384f',stroke:'#fff','stroke-width':5,'paint-order':'stroke','data-stop-number':stop.order}).textContent=String(stop.order);
+   make('text',{x:x+16,y:y-16,'font-size':36,'font-family':'Arial, sans-serif','font-weight':800,fill:'#17384f',stroke:'#fff','stroke-width':7,'paint-order':'stroke','data-stop-number':stop.order}).textContent=String(stop.order);
   }
   make('text',{x:12,y:HEIGHT-12,'font-size':14,fill:'#17384f',stroke:'#fff','stroke-width':3,'paint-order':'stroke'}).textContent='© OpenFreeMap · © OpenMapTiles · © OpenStreetMap contributors · 依站序連線';
   return svg;
  }
- return {filterByIds,baseStyle,buildSvg};
+ return {filterByIds,baseStyle,buildSvg,commonCrew};
 });

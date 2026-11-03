@@ -33,11 +33,11 @@ test('map startup has bounded failure, cleanup and retry guards', () => {
 });
 
 test('map asset revision and service-worker cache advance together', () => {
-  assert.match(html, /styles\.css\?v=211/);
+  assert.match(html, /styles\.css\?v=212/);
   assert.match(html, /route-time-filter\.js\?v=2/);
-  assert.match(html, /app\.js\?v=229/);
-  assert.match(html, /route-directory\.js\?v=18/);
-  assert.match(sw, /achang-pwa-shell-v216-route-card-leaders/);
+  assert.match(html, /app\.js\?v=230/);
+  assert.match(html, /route-directory\.js\?v=19/);
+  assert.match(sw, /achang-pwa-shell-v217-route-multiselect-print/);
 });
 
 test('truck directory keeps the route view concise and renders directional route arrows', () => {

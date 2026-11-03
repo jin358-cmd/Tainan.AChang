@@ -28,3 +28,7 @@
 .route-assignment-review{flex:none;max-height:95px;margin:8px 0}.route-assignment-actions{padding-top:8px;border-top:1px solid #e7d6ad;background:#fffaf0}#routeAssignmentStatus{margin:7px 0;font-size:12px;line-height:1.5}
 .route-assignment-person .member-actions{max-width:62%}.route-assignment-person button.leader-on{background:#fff0bf;color:#965c00;border-color:#e2b347}
 @media(max-width:1199px){.route-assignment-panel{border-radius:12px}.route-assignment-panel .route-assignment-candidates{min-height:90px}}
+
+.route-assignment-person button.route-person-delete{color:#a52b39;background:#fff3f4;border-color:#e9b0b7}.route-stop{touch-action:manipulation;user-select:none}.route-person-chip[data-route-leader="true"]{border:1px solid #e0b136;background:#fff0b8;color:#765111}
+
+#routeFullDiagram .route-stop.assignment-target{background:#edf4ff;outline:2px solid #3d78bd;border-radius:10px}#routeFullDiagram .stop-number.assignment-selected{background:#245ea8!important;color:#fff!important;border-color:#153f76!important;outline:3px solid #a9ccf5;outline-offset:3px}
