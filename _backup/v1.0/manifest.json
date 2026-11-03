@@ -1,0 +1,614 @@
+{
+  "backup_id": "ACHANG-UI-FUNCTIONS-20261102-V1.0",
+  "backup_version": "v1.0",
+  "project": "阿昌志工地圖／永康十里",
+  "source_date": "2026-11-02",
+  "timezone": "Asia/Taipei",
+  "snapshot_selection": "Last READY production deployment created before 2026-11-03T00:00:00+08:00",
+  "source_deployment_created_at": "2026-11-02T17:29:40.495+08:00",
+  "created_at": "2026-11-03T14:49:26+08:00",
+  "repository": "jin358-cmd/Tainan.AChang",
+  "source_commit": "133cbee20e4e0cf86ad36c188535bb5c4f3104a6",
+  "source_tree": "3f751353111a88bd043bbbec7b6a3927b4240e47",
+  "source_commit_time": "2026-11-02T17:25:17+08:00",
+  "deployment_id": "dpl_FSv1T87sA2kBiHR4ixWr4yvS3MsK",
+  "historical_deployment_url": "https://tainan-achang-online-lz3oonzlz-tjc1.vercel.app",
+  "backup_branch": "backup/achang-v1.0-20261102",
+  "scope": [
+    "Desktop and mobile UI",
+    "Map and service-area logic",
+    "Patrol planning and task assignment logic",
+    "30-vehicle directory and route diagrams",
+    "Administrator and volunteer authentication / device authorization code",
+    "API server functions and Supabase Edge Function source",
+    "SQL schema and migrations",
+    "PWA service worker and local assets",
+    "Published day/night schedule source copies",
+    "Original tests and deployment configuration"
+  ],
+  "external_dependencies": [
+    "Supabase project and existing live database",
+    "Vercel environment variable configuration",
+    "OAuth provider configuration",
+    "External map tiles and GPS data services"
+  ],
+  "excluded": [
+    "Live database records and auth users",
+    "Private environment values and credentials",
+    "External service data and map tile downloads",
+    "Changes made on 2026-11-03"
+  ],
+  "original_package_version": "0.9.1",
+  "verification": {
+    "source_file_count": 80,
+    "git_blob_readback_match": "PASS",
+    "historical_test_command": "npm test",
+    "tests": 117,
+    "passed": 117,
+    "failed": 0,
+    "test_status": "PASS",
+    "new_production_deployment_for_backup": false
+  },
+  "files": [
+    {
+      "path": ".env.example",
+      "git_mode": "100644",
+      "git_blob": "c6ab3dd27720d43a1f9735b499ce1292d9e45785",
+      "bytes": 391,
+      "sha256": "7a4d801c195b59f57ebc7629d9823bafe2a33b94344bc4ad1df8f9fd226a8580"
+    },
+    {
+      "path": ".gitignore",
+      "git_mode": "100644",
+      "git_blob": "d21a446d63ca57c592c4a7384ac4ae55caff24dd",
+      "bytes": 100,
+      "sha256": "4e814c416dd50ec2cf5f04082eaecb89187a771fd85c446dc62d1c231d5e9dce"
+    },
+    {
+      "path": "README.md",
+      "git_mode": "100644",
+      "git_blob": "6810ce010b2b20d2b9d227f425f3f838b4ba7022",
+      "bytes": 1009,
+      "sha256": "8ad6b7fb8d3300e8776cbf3e4edb7b9b71097077f692def7e342a1edf3f9c30b"
+    },
+    {
+      "path": "api/bootstrap.js",
+      "git_mode": "100644",
+      "git_blob": "7d7f81a90f5c3bf4c95415b69a7ba33e21b42772",
+      "bytes": 247,
+      "sha256": "fb1ec53f179e9120a112f13ef77f33f24617e74ba1f76c9ae39235e5a93a7ee7"
+    },
+    {
+      "path": "api/day-route-catalog.js",
+      "git_mode": "100644",
+      "git_blob": "ca7b8178ed1367c2330608d436aa96ce92768d59",
+      "bytes": 449,
+      "sha256": "8d4eb9adcd619dc6c04d620c082562bab2b195da5d03ee330e809409d2059bda"
+    },
+    {
+      "path": "api/gps-vehicles.js",
+      "git_mode": "100644",
+      "git_blob": "886620aa537a723e8e5110c2441dfe084a621d07",
+      "bytes": 3302,
+      "sha256": "0ad3f79b00d117a668c548229a747d7466699f71eff0b7b221ecbde4b48a72d9"
+    },
+    {
+      "path": "api/health.js",
+      "git_mode": "100644",
+      "git_blob": "65ca65a989f53ec7fb13b07cf06a741065a322ec",
+      "bytes": 253,
+      "sha256": "d9d800df50a625dcf7ac1b6096eb918221a438a4b0868af7c4e624880961ac3d"
+    },
+    {
+      "path": "api/member-admin-v2.js",
+      "git_mode": "100644",
+      "git_blob": "56cf89c60050ea3e075f97efa4d47aa78bde76fc",
+      "bytes": 1292,
+      "sha256": "af07fcca2e42032375feae7e92b9a2424de8f93eb10ccc4ac8a9e3d77773ee35"
+    },
+    {
+      "path": "api/members.js",
+      "git_mode": "100644",
+      "git_blob": "f6b203942e80b9a7f2cc650d482676aec3169ba3",
+      "bytes": 1939,
+      "sha256": "4d9bbf3746ef92053149e74a3c00dde479b01dfa1bafaaa970f5da110491fc21"
+    },
+    {
+      "path": "api/oauth-session.js",
+      "git_mode": "100644",
+      "git_blob": "40869cff43c8fc96fee6f62d892c87233d237947",
+      "bytes": 802,
+      "sha256": "2956ddb6e1a0fb32412592fc3596eafe6276b2400b0e64c1f9286e5808da3ccc"
+    },
+    {
+      "path": "api/roster.js",
+      "git_mode": "100644",
+      "git_blob": "8e66dd7b82b6787fd4b012d0e73a017402c2470f",
+      "bytes": 4299,
+      "sha256": "9b28530819d48903a4ba3776d687cfc0be5f34af0ae482dee8dccfff1f7cdc01"
+    },
+    {
+      "path": "api/route-stops.js",
+      "git_mode": "100644",
+      "git_blob": "028ff87b0bd4ee7e2fa6ae612d54f9b40669960a",
+      "bytes": 2063,
+      "sha256": "3f53717cb204ca8b151e05fe79b075edcb850e0fa0cc91de821fe1fc51da1546"
+    },
+    {
+      "path": "api/session.js",
+      "git_mode": "100644",
+      "git_blob": "cfd94f2585490310a098eadf48a6e0421dd6f735",
+      "bytes": 1811,
+      "sha256": "eaa5398c8c6b5fd574383771a7ccd87ff10b478fc89ab662d061caf3dcc49ffc"
+    },
+    {
+      "path": "api/tasks.js",
+      "git_mode": "100644",
+      "git_blob": "c3fe18392620f20d4929f3281bde833b59ce9e3f",
+      "bytes": 7848,
+      "sha256": "89a6a2a9c50d2f1071f979940c9b8a71be2f6e89975ac771bf8147bdb5dcb316"
+    },
+    {
+      "path": "app.js",
+      "git_mode": "100644",
+      "git_blob": "35a699d6339edf545f36cb0d81dc928f89013d26",
+      "bytes": 140399,
+      "sha256": "3019dbdd1ab1c73e3b9bf7ba0b32c5ddd825c6da76fc048adf90b9afe72eb42c"
+    },
+    {
+      "path": "assets/icon-192.png",
+      "git_mode": "100644",
+      "git_blob": "3ad7f06ef7df9bf8d95b60f017ac2db0845d58aa",
+      "bytes": 1630,
+      "sha256": "09e67116419e891c16469f62bdec8d7fc544990e2d59c46df21f42c7d7d2ad68"
+    },
+    {
+      "path": "assets/icon-512.png",
+      "git_mode": "100644",
+      "git_blob": "0237ced21a41565a0fd61f8f904e9c178876f2ae",
+      "bytes": 3849,
+      "sha256": "1edcdde685a126b1733bd9b4889566d55752dc92aabd08ac1c10de089b56d3be"
+    },
+    {
+      "path": "assets/icon.svg",
+      "git_mode": "100644",
+      "git_blob": "f9667cf7b3f3cf6dcd438e5d53cc56c051661334",
+      "bytes": 650,
+      "sha256": "4a6a23fa4e442069083464e1550b694ad9b0d3d2e79d8723048bfeea0c2a8843"
+    },
+    {
+      "path": "backups/day-routes/20261029-before-replacement/data-day-routes-20250402.json",
+      "git_mode": "100644",
+      "git_blob": "30249df9f8ffeedae96b21a7a200a2a56d8413a2",
+      "bytes": 9563,
+      "sha256": "ced141b15b25ffc64bcf52166b3576181a10e214ccdf7386c5483e629f1d1c24"
+    },
+    {
+      "path": "backups/day-routes/20261029-before-replacement/day-routes.js",
+      "git_mode": "100644",
+      "git_blob": "f26e94f37d0e7b3691c210554481ac9e01ad15c9",
+      "bytes": 3176,
+      "sha256": "457da33a48f36607ba5df69264cbd2dc6f34f14ed78713caac8d924a2e4c3a1b"
+    },
+    {
+      "path": "data-day-routes-20250402.json",
+      "git_mode": "100644",
+      "git_blob": "40829e2bfcf354f83a9ef3a1f4caa29912add6f2",
+      "bytes": 9699,
+      "sha256": "23f99ec7e8bc17edf8a7d386346f1319e2e33c91cd382ae11ea54dcc9e5b7f2d"
+    },
+    {
+      "path": "data-day-routes-six-20261029.json",
+      "git_mode": "100644",
+      "git_blob": "4e81bcd92d0b67cfb0373e624ac9db9f75c5338e",
+      "bytes": 1805,
+      "sha256": "a3ac620f18a151ef3f9c183fb793c5fac7d8e8a03b237d287d484e031623930a"
+    },
+    {
+      "path": "data-day-shift-windows-20261029.json",
+      "git_mode": "100644",
+      "git_blob": "bdd78b75cf85730c1f7da22aab2747ce68bd714b",
+      "bytes": 562,
+      "sha256": "fcb8ab4e266e4b441e687232a13c3d3a1740091f1625f0fabc183ad084b6eeb0"
+    },
+    {
+      "path": "data-gps-snapshot-20261028.json",
+      "git_mode": "100644",
+      "git_blob": "c451777acc080c6f5b53bd3a1c5e00d755c60072",
+      "bytes": 8383,
+      "sha256": "bdab4b046f46bec93ce1dc0e6cedc961268b8c3a262ecb5fc55fcbdcef99c5ed"
+    },
+    {
+      "path": "data-legacy-source-archive-20261030.json",
+      "git_mode": "100644",
+      "git_blob": "7b6c8db13a3088f4511c483b6e54d2dc98dd9467",
+      "bytes": 429,
+      "sha256": "25dff32b0b81cb0e2465d4377e47846fcceae8839f4df5e21ca52d4b264152a1"
+    },
+    {
+      "path": "data-official-day-20261030.source.json",
+      "git_mode": "100644",
+      "git_blob": "9fb6755fecd8fb976d14de8d0119fe02dfe333ae",
+      "bytes": 73151,
+      "sha256": "f8fb5fd77a31c543d976d614d20355e5cd171bf32938a67bc4e1356cb6062c29"
+    },
+    {
+      "path": "data-official-night-20261030.source.json",
+      "git_mode": "100644",
+      "git_blob": "6080022fe74862f2179bad5a9ba0bc1709cf1a67",
+      "bytes": 719582,
+      "sha256": "5d638bf56dcd851179408eb3ee27f911d3df82922410a685e9ca7f8bd254639e"
+    },
+    {
+      "path": "data-public.json",
+      "git_mode": "100644",
+      "git_blob": "525489955a2e46e1b6d3e7b476d9a7d338557058",
+      "bytes": 24198,
+      "sha256": "dd740e893d4d65b37c089cf914e4fc4919507e80003b8229fb63bf293fc9fa9d"
+    },
+    {
+      "path": "data-yongkang-district-boundary.json",
+      "git_mode": "100644",
+      "git_blob": "a8d8565d0248815379251803449293b1a0b12f9e",
+      "bytes": 1190,
+      "sha256": "022473968d1968fe3a1c4ed1daf5901b5cbaf980bb6b9a1206406166b3a723b3"
+    },
+    {
+      "path": "day-routes.js",
+      "git_mode": "100644",
+      "git_blob": "5def5daa6fbc38c4e65cb8b878367144a190b2f9",
+      "bytes": 3182,
+      "sha256": "05f2f10bdcf8a0d2f94b64f998b6d05386abf7100720066347220d3e13ad55be"
+    },
+    {
+      "path": "dispatch-view.js",
+      "git_mode": "100644",
+      "git_blob": "ee815d6abe7eee789d65f094685f34313c7e70c5",
+      "bytes": 3491,
+      "sha256": "beb6f6d7e3c539a12fae97b54dacfac426f4875618cf10d505a554ab75e90d71"
+    },
+    {
+      "path": "docs/day-route-batch-rollout.md",
+      "git_mode": "100644",
+      "git_blob": "76c9e5d137748f49eea2da392d7f45adb50e5510",
+      "bytes": 3299,
+      "sha256": "0eb7e31ae3d2b992d62737ac76465cc335300177f8baebf3cf404ce1ce32ade7"
+    },
+    {
+      "path": "index.html",
+      "git_mode": "100644",
+      "git_blob": "d1c0b457642ba8a909f0ac3990e365a9bc2df5fb",
+      "bytes": 15630,
+      "sha256": "8de7e2d52930ed5f8faa27770b7b28854de04607943c0b13b99128b965793489"
+    },
+    {
+      "path": "lib/gps-vehicles.js",
+      "git_mode": "100644",
+      "git_blob": "c6490ccd21c5255fffcce66dddc761b7cd485118",
+      "bytes": 4576,
+      "sha256": "0c44ba27a89f9eb94a4f1a603b8d34372605798d89d5a348f7eaab67b719ae98"
+    },
+    {
+      "path": "lib/server.js",
+      "git_mode": "100644",
+      "git_blob": "316050ed44253add99c932e36b6ad918e46161dc",
+      "bytes": 7685,
+      "sha256": "8508a97d53af21a7f6e7d0fbcacb6378c8275a42360eea7004df534369274d50"
+    },
+    {
+      "path": "manifest.webmanifest",
+      "git_mode": "100644",
+      "git_blob": "eb87541296e8705de9ed539bb20f791ab9984df7",
+      "bytes": 877,
+      "sha256": "bffbdbf49454c447e3e7cd84bb6023bef9d0baec50dbc9c4fafa20c6f1452930"
+    },
+    {
+      "path": "official-routes.js",
+      "git_mode": "100644",
+      "git_blob": "db2e12267bc8ebfbaf59f8f8a591fb09b9a8f961",
+      "bytes": 2059,
+      "sha256": "8f1d8eebd78a4c83757a839ea4e1b187f1e8e20af4c3c00c955b0b534fbeeb70"
+    },
+    {
+      "path": "package.json",
+      "git_mode": "100644",
+      "git_blob": "b87cd0366e2886197fd1f3fa01c5137aad912d72",
+      "bytes": 192,
+      "sha256": "4d91aa56f1eb2b3a3370e3f78b938ab9ade3689b497e61e2088c6dd2fd8e6309"
+    },
+    {
+      "path": "route-directory.css",
+      "git_mode": "100644",
+      "git_blob": "51e3460b234f22237b768651372d5f29fb9eae0d",
+      "bytes": 4153,
+      "sha256": "0dd8c4e5bf9768f871e831fbfac127f59effbbbb4b2d96cd869c8cf0e4f86bd5"
+    },
+    {
+      "path": "route-directory.html",
+      "git_mode": "100644",
+      "git_blob": "a32d85df75f439617a79289630dd2c00c57cee2c",
+      "bytes": 2590,
+      "sha256": "511a9ac2ba40bb9dfe74a846aca0d041d9005b258c7bddc8b9157043f223fa56"
+    },
+    {
+      "path": "route-directory.js",
+      "git_mode": "100644",
+      "git_blob": "8f34d35228c039a1b43c4753726586bf83739046",
+      "bytes": 6855,
+      "sha256": "149083b5596bfcd486add62256056b7654fa424834030fbfffb592950e0dd6a3"
+    },
+    {
+      "path": "route-progress.css",
+      "git_mode": "100644",
+      "git_blob": "d18eca95fccd4ed9effc2702ff8f34371fd108a2",
+      "bytes": 896,
+      "sha256": "68dd7d1058c96494759dd0aa6733830bd796a4e22b183a6ebdaf204966db64ae"
+    },
+    {
+      "path": "route-time-filter.js",
+      "git_mode": "100644",
+      "git_blob": "152209bdef9bb3c4ebcd0af9fec4715da08baa53",
+      "bytes": 2254,
+      "sha256": "2e8c501de71d525a044f724936483785b95cd4d23a4ab6c0737c230fd1c4c3df"
+    },
+    {
+      "path": "schema.sql",
+      "git_mode": "100644",
+      "git_blob": "553273ed14212f9fc029299690f1d84eec15eac1",
+      "bytes": 330,
+      "sha256": "82831c34ade8624b52bf138e779961a5815ef056a99c769553d6f043e8da7d83"
+    },
+    {
+      "path": "styles.css",
+      "git_mode": "100644",
+      "git_blob": "245cd644e676a1f16932ebaae05ae653cad261b3",
+      "bytes": 134609,
+      "sha256": "0dd587fdd1882a048a3a941cf53632ea0baa266bfb5c7f9d0d0211ad60fe86ca"
+    },
+    {
+      "path": "supabase/functions/_shared/member-admin-v2-core.mjs",
+      "git_mode": "100644",
+      "git_blob": "a190918e292c12b82adf16bf47f06f11254887aa",
+      "bytes": 9239,
+      "sha256": "a42e4a654afeb84c9fa13e3263cab4bd8e73be564bda95fd90393b095aa2e701"
+    },
+    {
+      "path": "supabase/functions/achang-admin-provision/index.ts",
+      "git_mode": "100644",
+      "git_blob": "2af817587a7d5387e4a0a69c41d050b9731e9d6c",
+      "bytes": 2696,
+      "sha256": "88a8842f8596619c7c9b71f80c09155b62e88efd7cb74a3357890aa12e8e2afa"
+    },
+    {
+      "path": "supabase/functions/achang-member-admin-v2/index.ts",
+      "git_mode": "100644",
+      "git_blob": "66350056232329ed7c49a7736b35c4abbc58ffff",
+      "bytes": 12749,
+      "sha256": "1d625da0fa1250ce8cef4ccd89348047b6053968b601891e2e81a359270a3772"
+    },
+    {
+      "path": "supabase/migrations/20261028090000_achang_member_admin_v2_atomic_transition.sql",
+      "git_mode": "100644",
+      "git_blob": "afbca32488e905c7afd404e64e7328f6cba28544",
+      "bytes": 3338,
+      "sha256": "f6c2dd109bb282ce246f314add2bc7b0db78ca088e84fd94ecb23697263b7211"
+    },
+    {
+      "path": "supabase/migrations/20261028094500_achang_member_auth_operation_identity.sql",
+      "git_mode": "100644",
+      "git_blob": "ae1328543c8e139c2bea2b2cafe485f9181cbe57",
+      "bytes": 2001,
+      "sha256": "3f5776f19746e5f1de4c34faa414c85932161d5d5850c9c97fa58039a2f72964"
+    },
+    {
+      "path": "supabase/migrations/20261028115000_achang_member_auth_operation_invoker_hardening.sql",
+      "git_mode": "100644",
+      "git_blob": "d9f0a5fd1943d6bb00ff8de7dcbab5c3f29e98b3",
+      "bytes": 914,
+      "sha256": "a6965e67d8491ed8d91a6c2088efb35ccc5465325078ad3b2dae95419958d2fe"
+    },
+    {
+      "path": "supabase/migrations/20261028140901_achang_member_admin_v2_archive_member.sql",
+      "git_mode": "100644",
+      "git_blob": "350f90412a7b6769a18b8ab8d72d28ddcabf0023",
+      "bytes": 4360,
+      "sha256": "a111775b5411994a279f64ec952cdf0dbeccd904384a97dcd05717a254a40b7f"
+    },
+    {
+      "path": "supabase/migrations/20261028143000_achang_member_admin_v2_promote_admin.sql",
+      "git_mode": "100644",
+      "git_blob": "fd45016517d26ab1400f71e94b8625d665c9d411",
+      "bytes": 2742,
+      "sha256": "c3d5b876872630d4142785b41e508049d251ea0f5d528ad1713ce9e05942cdf4"
+    },
+    {
+      "path": "supabase/migrations/20261028144500_achang_member_admin_v2_archived_guard.sql",
+      "git_mode": "100644",
+      "git_blob": "8138baac0ff993cb08e4757b555a851a67f8a523",
+      "bytes": 3323,
+      "sha256": "1ef62fe2e4dc45df54918e80a7cadc6ea3a5ad8481ef0fb655c5f89c763bcd05"
+    },
+    {
+      "path": "supabase/migrations/20261028144700_achang_member_admin_v2_promote_active_semantics.sql",
+      "git_mode": "100644",
+      "git_blob": "664d75e7e32226c70664e97b091ead77df0e506d",
+      "bytes": 2663,
+      "sha256": "e0f6456deeef3549b8bf4ec5e1a45ae3d588eb6d36f44f96542993625c513c5a"
+    },
+    {
+      "path": "supabase/migrations/20261028145500_achang_member_admin_v2_lock_member_rows.sql",
+      "git_mode": "100644",
+      "git_blob": "5148fad9913315552618d90c043344d24be74417",
+      "bytes": 6363,
+      "sha256": "c5bcdacaba4313e15f06c2a5af45e2e5238d7dbbb8a784201df4f0cfb2b08061"
+    },
+    {
+      "path": "supabase/migrations/20261028150000_achang_member_admin_v2_promote_approval_provenance.sql",
+      "git_mode": "100644",
+      "git_blob": "3ca3b6bcae00c7e5259038493349a63ab20ef014",
+      "bytes": 2859,
+      "sha256": "00d46c89f5d206f00ba77895914a7a8c12ced668e909ff90bda5cb4209e3c14a"
+    },
+    {
+      "path": "supabase/migrations/20261028151000_achang_member_admin_v2_promotion_audit_event.sql",
+      "git_mode": "100644",
+      "git_blob": "987522569b931d1497d2805693c062f82bdc9383",
+      "bytes": 901,
+      "sha256": "8a049b478487d3edbf957d8ac0d9388047e1207a90effa56a474cfc50273076f"
+    },
+    {
+      "path": "supabase/migrations/20261029195500_achang_route_stop_overlays.sql",
+      "git_mode": "100644",
+      "git_blob": "a0b09cd5b32d5bb102f0c9d122cec69f1f39c90f",
+      "bytes": 6817,
+      "sha256": "67e16caa286a25699533753427f6d22f9bdc6f75a4e8765ae7b270b298059251"
+    },
+    {
+      "path": "supabase/migrations/20261029200500_reorder_day6_owner_overlay.sql",
+      "git_mode": "100644",
+      "git_blob": "d4b7a5ec9656b9d69307179533ccd45e5b4a39e5",
+      "bytes": 1895,
+      "sha256": "d2b005d881430381774bc8205f44e348745b55ef54ae42b4fa1a9e5e4deab31d"
+    },
+    {
+      "path": "sw.js",
+      "git_mode": "100644",
+      "git_blob": "8e2f940fe066e3a44cd5db3c7e3c695da5b1cea5",
+      "bytes": 1729,
+      "sha256": "267cbbced88300e45adb72bf4256dccb68eff4a0b229b13909d0768409a971d3"
+    },
+    {
+      "path": "test/day-routes.browser.cjs",
+      "git_mode": "100644",
+      "git_blob": "a25f18e644635e6d24e68e3eeb35e3dde08fafe6",
+      "bytes": 29907,
+      "sha256": "d82122c371bdec4018371a42bc64d28505f352d6703bb9d6b542aac022162fb2"
+    },
+    {
+      "path": "test/day-routes.test.cjs",
+      "git_mode": "100644",
+      "git_blob": "24404bcb53918024302393d7a3c21322e8b27abd",
+      "bytes": 16002,
+      "sha256": "10e8cfc7a11f942af175b965f8e3135441b4b50adc655a97da5a6217c23eb1d3"
+    },
+    {
+      "path": "test/deno.import-map.json",
+      "git_mode": "100644",
+      "git_blob": "d80198916850c75a3b648f4dedc1b234a9584cd7",
+      "bytes": 83,
+      "sha256": "8f0dc0e807d4673d9f63d1fd5d81f555e70723876b1b551b65a2faa25cc55cf6"
+    },
+    {
+      "path": "test/dispatch-view.test.cjs",
+      "git_mode": "100644",
+      "git_blob": "c7db3a7065bb1f14c53c3866363baf95644067ce",
+      "bytes": 7916,
+      "sha256": "4efad7c52f5e63249b181487ea92f0e9ef49b27b30c957087e77ee720b1c8acf"
+    },
+    {
+      "path": "test/gps-vehicles.test.cjs",
+      "git_mode": "100644",
+      "git_blob": "3e381dd92fc768af9764f5801806617233857716",
+      "bytes": 7688,
+      "sha256": "d1116c3818b81d070fe653e3aedd187291be1d2f6e9faff518a967b3058a81b3"
+    },
+    {
+      "path": "test/login-hotfix.browser.cjs",
+      "git_mode": "100644",
+      "git_blob": "48e1ab6564a09daaf7387411e91cf1a98890f03d",
+      "bytes": 10345,
+      "sha256": "a72dfeef0a2aab5ce15190f87c8e478260760ba3117720200fe0233fc127ef53"
+    },
+    {
+      "path": "test/login-ui.test.cjs",
+      "git_mode": "100644",
+      "git_blob": "49486a519b9e01935990b4ccca3f9b8988940cb5",
+      "bytes": 959,
+      "sha256": "1e68c7d58c6d61ad6a89c5c8b88b12a8fae67f85561caa92b4bd7abcb0a01cb9"
+    },
+    {
+      "path": "test/map-recovery.test.cjs",
+      "git_mode": "100644",
+      "git_blob": "47e95bf1c5f7830446ce05eb670ea34f58e80b7d",
+      "bytes": 3561,
+      "sha256": "9081d2d8e4835ceea7bffb0b09ff61125fe659154d5ef14de53254eb2aba3fbb"
+    },
+    {
+      "path": "test/member-admin-v2.browser.cjs",
+      "git_mode": "100644",
+      "git_blob": "35c4aad41b00b2aa8ca541f2665d8d60ccfd20d3",
+      "bytes": 18732,
+      "sha256": "64abd04002f35599f90ec39f9da024689a6a99511fb0c18b73b8cfea10d57026"
+    },
+    {
+      "path": "test/member-admin-v2.test.cjs",
+      "git_mode": "100644",
+      "git_blob": "040d9db2f2b879f06cc2fad9964d5e06781b749e",
+      "bytes": 36935,
+      "sha256": "a7ad9d1960451f052fca4e839e771e0c21ffd4f78b12ca85ec0cc4642ccdd2aa"
+    },
+    {
+      "path": "test/mobile-ui-sync.browser.cjs",
+      "git_mode": "100644",
+      "git_blob": "4c17e6f64606cf1bdcfcb3c524a18973408c8038",
+      "bytes": 8742,
+      "sha256": "33162a39abed0fa4cf77aaaa56990623af81fbbb71fad2703031ffeb2851a298"
+    },
+    {
+      "path": "test/official-routes.test.cjs",
+      "git_mode": "100644",
+      "git_blob": "fd3e3add4f21c3ce390a1fb60c0bb352865f0394",
+      "bytes": 3372,
+      "sha256": "69969ec96d7035ee45eca30b29978968ea98e8ee9f5e1892d3e12b87de0c920a"
+    },
+    {
+      "path": "test/route-stops.test.cjs",
+      "git_mode": "100644",
+      "git_blob": "1e906be946d3d1a1e791a3ca7cf9e88e45458a4c",
+      "bytes": 5606,
+      "sha256": "4725c61e1ffcc25580a7e845e1c4e027af2c5caf90527cadb35e63baffaa3c3f"
+    },
+    {
+      "path": "test/route-time-filter.test.cjs",
+      "git_mode": "100644",
+      "git_blob": "ea923621ebd0934ed796f01869777efbe741d6a0",
+      "bytes": 2424,
+      "sha256": "3cf1b85fd5ba47080329d352b6be6d58ff0f8a3199a6be5455a68b7496bdd0bc"
+    },
+    {
+      "path": "test/security.test.cjs",
+      "git_mode": "100644",
+      "git_blob": "c5d3b31b23a5ba17643c68ffd0c6b4ada60fcfff",
+      "bytes": 1785,
+      "sha256": "194dc8362bf3fb6ea35b8a4e64936eba4fa887d8449df96d1f7b8a5db030c756"
+    },
+    {
+      "path": "test/supabase-js-stub.ts",
+      "git_mode": "100644",
+      "git_blob": "1a997ed81b3f0e5e78c45c67c85e05d93facc01a",
+      "bytes": 118,
+      "sha256": "8d03abc2279b250fc9f75f37e87b51b80deda756a03ddf66c4cef2c8587fe79f"
+    },
+    {
+      "path": "test/task-date-groups.test.cjs",
+      "git_mode": "100644",
+      "git_blob": "0e4b41bb8acd1af61e796f6710126dfdde6eda47",
+      "bytes": 15141,
+      "sha256": "0f8b43123069b59313868926c3e70000dfe91c4da2e2ea26700978a108992337"
+    },
+    {
+      "path": "truck-directory-tab.css",
+      "git_mode": "100644",
+      "git_blob": "c45169c9a293a996a483ccc0b0dda03dcb03d623",
+      "bytes": 4209,
+      "sha256": "960c173863e7ae52e57c6277741c0acbf5614b8db3ca334a6ae14e4afb126a7f"
+    },
+    {
+      "path": "vercel.json",
+      "git_mode": "100644",
+      "git_blob": "b052236580fd5b2361faad7cfc4911882c133c4f",
+      "bytes": 1054,
+      "sha256": "e506d546617c03afa49238919fce95f428415593c0ab7165ad42a77e7e934a8b"
+    }
+  ]
+}

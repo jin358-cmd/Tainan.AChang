@@ -1,0 +1,30 @@
+阿昌志工地圖 UI 與功能備份 v1.0
+備份識別：ACHANG-UI-FUNCTIONS-20261102-V1.0
+
+基準
+台灣時間 2026/11/02 最後一個成功建立的正式部署：17:29:40。
+原始 commit：133cbee20e4e0cf86ad36c188535bb5c4f3104a6
+原始 tree：3f751353111a88bd043bbbec7b6a3927b4240e47
+版本備份分支：backup/achang-v1.0-20261102
+
+v1.0 為本次備份版本。原始 package.json 與 README.md 內的歷史版本字樣原樣保留。
+原始 80 個追蹤檔案均與指定 commit 的 Git blob 核對一致。
+117 項原始自動測試通過。
+
+涵蓋
+電腦／手機 UI、地圖、人員分區、跟巡排班、任務發派、清潔車列表、名冊、
+管理員／志工登入與裝置授權程式、API、Supabase Edge Functions、SQL 結構與遷移、
+PWA、日間 160 列及夜間 1,626 列來源副本、圖示、部署設定及測試。
+
+還原方式
+1. 將 ZIP 解壓縮至獨立目錄；或從備份分支建立新的工作分支。
+   git clone --branch backup/achang-v1.0-20261102 https://github.com/jin358-cmd/Tainan.AChang.git
+2. 使用 Node.js 22 或以上版本，在根目錄執行 npm test。
+3. 先在獨立的 Vercel 專案檢查 UI；依 .env.example、api 與原部署設定配置外部服務。
+4. 核對 Supabase 結構與相依服務，經核准後再決定是否替換正式網站。
+5. SHA256SUMS.txt 提供所有原始檔校驗值；manifest.json 保存檔案大小、Git blob 與版本識別。
+
+範圍說明
+本包保存 UI 與功能原始碼，不含正式資料庫資料、Auth 帳號、私密環境變數或金鑰。
+既有外部地圖圖磚、GPS 服務及 OAuth／Supabase 設定仍需原服務正常運作。
+11/03 的新功能不在此歷史版本內；建立本備份沒有回退或重新部署現行網站。

@@ -1,0 +1,190 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> tainan-achang-online@0.9.1 test
+> node --test test/*.test.cjs
+
+✔ Taipei calendar dates select only Wednesday and Friday fixed daytime catalogs (1.727413ms)
+✔ 114.4.2 notice enables all 32 rows while retaining prior review notes for audit (1.702965ms)
+✔ an explicit service exception closes only the selected date without inventing a holiday calendar (0.339441ms)
+✔ single times stay single, intervals stay intervals, and uncertain rows remain pending (0.277378ms)
+✔ day adapter preserves document order instead of numerically or chronologically re-sorting stops (0.259321ms)
+✔ weekday quick picks select this week and night filters default to 19:00 through the final option (0.49794ms)
+✔ frontend and backend keep route identity separate from an optional truck number (1.028479ms)
+✔ actual tasks handler persists a fixed daytime route with no fabricated plate and rolls its end time forward (2.280666ms)
+✔ tasks handler appends adjacent stops to the same route without duplicating its assignment or original task (1.628924ms)
+✔ tasks handler is idempotent for an existing stop and rejects a conflicting route in the same day shift (2.589281ms)
+✔ Taiwan service date and weekday do not inherit the server timezone (18.695132ms)
+✔ route numbers turn red after arrival, highlight exactly one next stop and advance with Taiwan time (1.181349ms)
+✔ invalid times and struck source rows remain grey and never become the next stop (0.445612ms)
+✔ upcoming four follow directory vehicle order, preserve source order and never repeat past stops (3.61119ms)
+✔ a current fixed stop remains visible until departure; excluded and non-service rows stay hidden (1.205686ms)
+✔ source position wins over repeated printed stop numbers and overlays retain their merged position (0.249436ms)
+✔ all people remain present in owner area order, with both 神州 spellings and stable roster order (0.45104ms)
+✔ a cross-area assignment matches the precise route and stop without changing the original people area (0.268664ms)
+✔ the actual person picker lists every member directly, keeps busy people visible and disables them (2.605696ms)
+✔ the actual assignment posts one task under the selected person original area and does not change the roster (1.557456ms)
+✔ the actual task projection restores cross-area member chips to their original source stop (1.390284ms)
+GPS upstream source completed {
+  source_mode: 'official_json_api',
+  elapsed_ms: 3,
+  upstream_status: 200,
+  normalized_count: 1
+}
+GPS upstream fetch completed {
+  source_mode: 'official_json_api',
+  elapsed_ms: 4,
+  upstream_status: 200,
+  normalized_count: 1
+}
+GPS upstream source failed {
+  source_mode: 'official_json_api',
+  error_stage: 'connect',
+  elapsed_ms: 0,
+  upstream_status: null,
+  content_type: '',
+  error_name: 'TypeError',
+  cause_code: 'UND_ERR_CONNECT_TIMEOUT',
+  cause_name: '',
+  cause_syscall: '',
+  timed_out: false
+}
+GPS upstream source completed {
+  source_mode: 'official_resource_page_fallback',
+  elapsed_ms: 1,
+  upstream_status: 200,
+  normalized_count: 1
+}
+GPS upstream fetch completed {
+  source_mode: 'official_resource_page_fallback',
+  elapsed_ms: 1,
+  upstream_status: 200,
+  normalized_count: 1
+}
+GPS upstream source failed {
+  source_mode: 'official_json_api',
+  error_stage: 'body',
+  elapsed_ms: 0,
+  upstream_status: undefined,
+  content_type: 'application/json',
+  error_name: 'AbortError',
+  cause_code: '',
+  cause_name: '',
+  cause_syscall: '',
+  timed_out: true
+}
+GPS upstream source failed {
+  source_mode: 'official_resource_page_fallback',
+  error_stage: 'body',
+  elapsed_ms: 0,
+  upstream_status: undefined,
+  content_type: 'application/json',
+  error_name: 'AbortError',
+  cause_code: '',
+  cause_name: '',
+  cause_syscall: '',
+  timed_out: true
+}
+✔ official GPS rows normalize timestamps and keep only Yongkang service data (12.183874ms)
+✔ GPS same-origin adapter fetches the fixed official HTTPS JSON endpoint without redirects or cache (6.536697ms)
+✔ official Resource HTML fallback accepts only embedded verifiable vehicle JSON (2.40954ms)
+✔ GPS adapter keeps the timeout active until the response body is fully read (1.862385ms)
+✔ GPS adapter emits bounded non-sensitive timing telemetry for success and failure (0.422407ms)
+✔ GPS layer is hidden and runtime polling is disabled while rollback adapter remains available (1.561212ms)
+✔ failed authenticated startup stops GPS polling before returning to logged-out UI (0.742148ms)
+✔ login screen omits the top-right return action while preserving login controls (2.315509ms)
+✔ MapLibre worker CSP is narrow and does not relax scripts (1.296143ms)
+✔ map startup has bounded failure, cleanup and retry guards (0.53807ms)
+✔ map asset revision and service-worker cache advance together (0.23858ms)
+✔ truck directory keeps the route view concise and renders directional route arrows (0.374123ms)
+✔ map uses only the provider native compact attribution entry (0.310438ms)
+✔ volunteer map layer uses the short label and a stable white person icon (0.733055ms)
+✔ TEST-01 valid active admin session can query member status (2.631725ms)
+✔ TEST-03 volunteer/non-admin session is forbidden (0.560334ms)
+✔ TEST-04 missing or invalid session is unauthorized (0.37806ms)
+✔ TEST-05 create validates six-digit PIN and stores it only through Auth (0.880917ms)
+✔ TEST-05 preserves a leading zero because PIN remains an ASCII string (0.699113ms)
+✔ TEST-06 account creation remains compatible with shared-phone PIN identities (2.23045ms)
+✔ TEST-07 pending volunteer can be approved with compare-and-set (0.500954ms)
+✔ TEST-08 active admin can create a pending admin without device approval gate (0.226271ms)
+✔ active volunteer including migrated rows without approved_at can be promoted without recreating Auth (1.038214ms)
+✔ promotion rejects pending, suspended, existing admin, and self targets (1.043873ms)
+✔ promotion RPC is invoker-authorized, CAS protected, and audits the role change (0.448997ms)
+✔ promotion audit event is accepted without removing existing event types (0.614476ms)
+✔ legacy active promotion records approval provenance so suspend then reactivate remains valid (0.48509ms)
+✔ TEST-02 current server session contract authenticates active admins without an approved-device gate (0.586934ms)
+✔ TEST-09 no self escalation or self suspension (0.399752ms)
+✔ TEST-10 protected principal cannot be suspended (0.188043ms)
+✔ member archive is recoverable, atomic, and refuses self or protected principals (0.894508ms)
+✔ archive migration revokes access, retains history, audits, and protects the final administrator (0.481516ms)
+✔ archived members are removed from current roster and authorization list (1.071144ms)
+✔ legacy roster removal is labeled as recoverable archive and routes authorized accounts to protected member archive (0.76361ms)
+✔ suspend and reactivate use one atomic transition RPC contract (0.436037ms)
+✔ archived members cannot be approved, reactivated, promoted, or authenticated (1.495583ms)
+✔ session authorization distinguishes missing, pending, suspended, and archived membership without changing access (0.394394ms)
+✔ archiving an allocation cannot cascade into retained assignments, tasks, events, or authorization history (0.238349ms)
+✔ duplicate create is idempotent and never resets PIN or role (1.305246ms)
+✔ partial create retains the deterministic Auth identity for ownership-safe retry (0.474825ms)
+✔ unknown insert outcome never deletes Auth blindly and a retry reconciles the committed account (0.53781ms)
+✔ unknown non-commit retry reuses one persisted Auth identity instead of creating another alias (0.569528ms)
+✔ Auth operation alias is persisted before Auth creation and survives credential rotation (0.826485ms)
+✔ interleaved failed A never deletes the shared Auth identity successfully inserted by B (2.792416ms)
+✔ Auth commit with lost response retries the same identity before any account insert (0.393673ms)
+✔ application email route blocks synthetic identities without changing existing Auth protections (0.260964ms)
+✔ concurrent retry returns the committed matching account but rejects role mismatch (0.749318ms)
+✔ TEST-12 Edge adapter uses user-scoped RLS writes and has no device or hard-delete gate (0.492993ms)
+✔ API proxy forwards only authenticated admin commands to v2 and no device proof (0.918764ms)
+✔ API proxy accepts explicit archive and promotion lifecycle actions but rejects hard delete (0.443448ms)
+✔ actual server wrapper preserves stable v2 application error codes (2.180615ms)
+✔ actual API phone parser accepts only 09xx-xxx-xxx, bare 09, or +886 before the v2 handler (0.772363ms)
+✔ database transition RPC is atomic, invoker-authorized, CAS protected, and preserves device revocation on rollback (0.855349ms)
+✔ legacy members route keeps protected device management but rejects account lifecycle bypasses (0.746134ms)
+✔ official PDF transcription validates exact row and vehicle counts (8.543465ms)
+✔ normalization preserves PDF source order, duplicate visible numbers and raw fields (4.457586ms)
+✔ early-shift defaults contain only the six public route windows and no personal data (0.681086ms)
+✔ struck PDF row remains visible source evidence but is non-assignable (7.030412ms)
+✔ invalid or original unusual time text is preserved, never corrected (1.897348ms)
+✔ route stop API authorizes only admins and forwards bounded create to atomic RPC (3.543108ms)
+✔ volunteer is rejected before any route stop read or mutation (0.997122ms)
+✔ migration keeps overlays soft-deletable, audited, RLS protected and seeds two owner-authorized stops (0.479022ms)
+✔ day 6 reorder keeps the original PDF first stop and records a reversible audit snapshot (0.324919ms)
+✔ planner initializes the selected shift as daytime without overriding later click state (0.91631ms)
+✔ route-time preferences are local, bounded, subject-isolated, and never business data (1.138505ms)
+✔ frontend distinguishes immutable PDF rows from active overlay total and defaults all-village preview safely (0.74368ms)
+✔ all-time view preserves every PDF row in source order without mutation (1.507481ms)
+✔ time options keep first source occurrence and exclude invalid or struck values (0.408255ms)
+✔ active filters preserve duplicate station numbers and source order (0.509318ms)
+✔ invalid filter values fail closed and a valid empty range is explicit (0.12653ms)
+✔ fixed daytime start and end options come from the source interval endpoints (0.41152ms)
+✔ 拒絕任意電話格式 (2.534499ms)
+✔ 日期、時間格式有驗證 (0.754937ms)
+✔ 公鑰可公開但絕不包含 Service Role 密鑰 (0.360393ms)
+✔ 檢查來路不明的跨網站寫入 (0.668117ms)
+✔ 任意 token 不能通過 bootstrap 機密比對 (0.539824ms)
+✔ ID 只接受 UUID (0.276487ms)
+✔ 已授權 PWA 工作階段為受保護的 HttpOnly cookie；90 天滑動有效 (0.401184ms)
+✔ task dates use Asia/Taipei midnight and ignore completion status (21.687737ms)
+✔ administrator task teams use one consistent two-row card with leader contact and route metadata (2.666397ms)
+✔ map popup enlarges member identity and centers the existing assignment button (1.250944ms)
+✔ mobile settings sheet is content-sized with the device card directly after exports (0.554986ms)
+✔ settings install callout enlarges only its heading and keeps a compact touch-safe action (0.415156ms)
+✔ service-area leader and remove controls match phone sizing without forced equal widths (0.330568ms)
+✔ planner removes the redundant current-area summary without changing scheduling controls (0.478921ms)
+✔ planner empty route hint spans the full available row without tiny or clipped text (0.426483ms)
+✔ roster status filter uses the requested order and starts at pending without resetting later refreshes (1.000958ms)
+✔ member authorization cards distinguish administrators without changing account status controls (0.237678ms)
+✔ new-member form leaves service-area assignment for the existing allocation workflow (1.384426ms)
+✔ fourth task page exposes three requested groups without changing task APIs (0.578372ms)
+✔ desktop task categories stack history and future at left while mobile keeps DOM order (0.589038ms)
+✔ desktop navigation reuses the five mobile icons without changing labels (0.428465ms)
+✔ service-area assignment picker enlarges only desktop village and action text (0.646604ms)
+✔ desktop service-area counts match and village tiles show people units without changing mobile (0.309627ms)
+✔ service-area pager and planner selector use the owner order without changing backend IDs (0.238389ms)
+✔ desktop create and edit member forms share readable field labels and controls (0.270207ms)
+ℹ tests 117
+ℹ suites 0
+ℹ pass 117
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 284.7373
