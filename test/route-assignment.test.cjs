@@ -88,7 +88,7 @@ test('removal API derives the member and vehicle from the saved allocation rathe
 
 test('opening the application starts on the map and task dispatch is the second tab in both navigation bars',()=>{
  const html=fs.readFileSync(require.resolve('../index.html'),'utf8'),app=fs.readFileSync(require.resolve('../app.js'),'utf8');
- for(const type of ['desktop-nav','bottom-nav']){const nav=html.match(new RegExp('<nav class="'+type+'"[^>]*>(.*?)</nav>','s'))[1];assert.deepEqual([...nav.matchAll(/data-page="([^"]+)"/g)].map(x=>x[1]),['map','reports','areas','planner','people']);}
+ for(const type of ['desktop-nav','bottom-nav']){const nav=html.match(new RegExp('<nav class="'+type+'"[^>]*>(.*?)</nav>','s'))[1];assert.deepEqual([...nav.matchAll(/data-page="([^"]+)"/g)].map(x=>x[1]),['map','reports','people']);}
  assert.match(html,/id="page-map" class="page active/);assert.match(app,/routes=\[\],page='map'/);assert.doesNotMatch(app,/await refreshOnline\(\);go\('areas'\)/);
 });
 

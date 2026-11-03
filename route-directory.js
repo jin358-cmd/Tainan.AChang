@@ -15,7 +15,7 @@ function renderDirectoryTimeOptions(rows){
  const source=rows||groups.filter(g=>!$('shift').value||g.shift===$('shift').value).flatMap(g=>g.rows);
  const times=[...new Set(source.filter(r=>!r._extras?.['刪除線']).map(r=>String(r['到達時間']||'').trim()).filter(legal))].sort();
  const preset=defaultDirectoryTimeWindow($('shift').value);
- for(const id of ['directoryStartTime','directoryEndTime']){const select=$(id),selected=select.value||'',options=[...new Set([...times,...[preset.start,preset.end].filter(legal),...(legal(selected)?[selected]:[])])].sort();select.innerHTML=`<option value="">全部時段（${id==='directoryStartTime'?'開始':'結束'}）</option>`+options.map(value=>`<option value="${value}">${directoryTimeOptionLabel(value,id,times)}</option>`).join('');select.value=selected;}
+ for(const id of ['directoryStartTime','directoryEndTime']){const select=$(id),selected=select.value||'',options=[...new Set([...times,...[preset.start,preset.end].filter(legal),...(legal(selected)?[selected]:[])])].sort();select.innerHTML=`<option value="">全部（${id==='directoryStartTime'?'開始時段':'結束時段'}）</option>`+options.map(value=>`<option value="${value}">${directoryTimeOptionLabel(value,id,times)}</option>`).join('');select.value=selected;}
 }
 function defaultDirectoryTimeWindow(shift){return shift==='日間'?{start:'06:15',end:'07:50'}:shift==='夜間'?{start:'16:30',end:'18:30'}:{start:'',end:''};}
 function directoryTimeOptionLabel(value,id,times){

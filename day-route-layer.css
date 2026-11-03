@@ -124,3 +124,5 @@
 .route-print-compact[data-print-mode="list"] table,.route-print-compact[data-print-mode="list"] th,.route-print-compact[data-print-mode="list"] td{font-size:18px!important;line-height:1.6}
 .route-print-compact[data-print-mode="list"] th,.route-print-compact[data-print-mode="list"] td{padding:10px 8px!important}
 .route-print-compact[data-print-mode="list"] tr{break-inside:avoid;page-break-inside:avoid}.route-print-compact[data-print-mode="list"] thead{display:table-header-group}
+
+.day-route-navigate{gap:5px}.day-route-navigate svg{width:20px;height:24px;flex:none}
