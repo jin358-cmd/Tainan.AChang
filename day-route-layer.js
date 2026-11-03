@@ -14,6 +14,12 @@
  const LAYERS=['day-route-lines','day-route-arrows','day-route-points','day-route-numbers'];
  const norm=value=>String(value??'').replace(/[\s()（）]/g,'').replace(/臺/g,'台');
  const empty=()=>({type:'FeatureCollection',features:[]});
+ function mergeCatalogOverrides(catalog,overrides){
+  if(overrides?.version!==1||!Array.isArray(overrides.stops))return catalog;
+  const stops=new Map((catalog.stops||[]).map(stop=>[stop.source_id,stop]));
+  for(const stop of overrides.stops)if(typeof stop?.source_id==='string'&&typeof stop.source_name==='string')stops.set(stop.source_id,stop);
+  return {...catalog,stops:[...stops.values()]};
+ }
  function build(rows,catalog,route='all'){
   const positions=new Map((catalog?.stops||[]).map(stop=>[stop.source_id,stop]));
   const groups=new Map(),sequence=new Map(),pending=[],stops=[],points=empty(),lines=empty();
@@ -25,8 +31,9 @@
    if(!groups.has(token))groups.set(token,[]);
    const group=groups.get(token),location=positions.get(row['站點ID']);
    const matched=location&&norm(location.source_name)===norm(row['停靠點原文']);
-   const valid=matched&&location.status==='official_stop'&&Number.isFinite(location.longitude)&&Number.isFinite(location.latitude)&&location.longitude>120&&location.longitude<121&&location.latitude>22&&location.latitude<24;
-   const stop={id:row['站點ID'],route:token,plate:row['車牌']||'',order,name:row['停靠點原文']||'',addressNote:row['地址備註']||'',time:row['到達']||'',end:row['離開']||'',village:row['里別']||'',color:routeColor(token),position:valid?[location.longitude,location.latitude]:null,notes:matched?(location.notes||[]):['尚無可核對的官方清運點座標'],status:valid?'官方清運點（門牌精準度待驗證）':matched&&location.address_confirmed?'地址已確認；座標待定位':'待確認'};
+   const verifiedAddress=location?.status==='address_match'&&location.verification?.exact_match===true&&location.verification?.source_url;
+   const valid=matched&&(location.status==='official_stop'||verifiedAddress)&&Number.isFinite(location.longitude)&&Number.isFinite(location.latitude)&&location.longitude>120&&location.longitude<121&&location.latitude>22&&location.latitude<24;
+   const stop={id:row['站點ID'],route:token,plate:row['車牌']||'',order,name:row['停靠點原文']||'',addressNote:row['地址備註']||'',time:row['到達']||'',end:row['離開']||'',village:row['里別']||'',color:routeColor(token),position:valid?[location.longitude,location.latitude]:null,notes:matched?(location.notes||[]):['尚無可核對的官方清運點座標'],status:valid?(verifiedAddress?'門牌資料比對':'官方清運點（門牌精準度待驗證）'):matched&&location.address_confirmed?'地址已確認；座標待定位':'待確認'};
    group.push(stop);stops.push(stop);
    if(!valid){pending.push(stop);continue;}
    points.features.push({type:'Feature',geometry:{type:'Point',coordinates:stop.position},properties:{id:stop.id,route:stop.route,order:stop.order,color:stop.color}});
@@ -193,8 +200,8 @@
   function renderLegend(){legend.hidden=true;legend.replaceChildren();}
   renderLegend();
   const loadCatalog=async(file,prefix,count)=>{const response=await fetch(file,{cache:'no-store'});if(!response.ok)throw Error('route locations unavailable');const value=await response.json();if(value.version!==1||value.stops?.filter(stop=>String(stop.source_id||'').startsWith(prefix)).length!==count)throw Error('invalid route location catalog');return value;};
-  Promise.all([loadCatalog('./data-day-route-locations-20261103.json?v=2','PDF:DAY:',160),loadCatalog('./data-night-route-locations-20261103.json','PDF:NIGHT:',1626)]).then(([day,night])=>{
-   catalog={...day,stops:[...day.stops,...night.stops]};sync(map);onChange?.();
+  Promise.all([loadCatalog('./data-day-route-locations-20261103.json?v=3','PDF:DAY:',160),loadCatalog('./data-night-route-locations-20261103.json','PDF:NIGHT:',1626),fetch('./api/route-locations',{cache:'no-store'}).then(response=>response.ok?response.json():null).catch(()=>null)]).then(([day,night,overrides])=>{
+   catalog=mergeCatalogOverrides({...day,stops:[...day.stops,...night.stops]},overrides);sync(map);onChange?.();
   }).catch(error=>{failed=true;renderControls();console.warn('車次路線座標未能載入',error.message);});
   window.AChangRouteMapPrint=async(route,selection={})=>{
    if(!catalog||!isRoute(route))return null;
@@ -210,7 +217,7 @@
   setInterval(()=>{if(document.hidden||!toggle.checked||!map?.getLayer('day-route-next-glow'))return;const phase=(Date.now()%1800)/1800;for(let index=0;index<2;index++){const wave=(phase+index/2)%1,id=`day-route-next-ring-${index}`;map.setPaintProperty(id,'circle-radius',10+26*wave);map.setPaintProperty(id,'circle-stroke-opacity',1-wave);map.setPaintProperty(id,'circle-opacity',.12*(1-wave));}},100);
   return {sync,renderFallback,closeDetail,focusStop};
  }
- return {build,bounds,create,nextStopIds,filterModelWindow,isRoute,routeShift};
+ return {build,bounds,create,nextStopIds,filterModelWindow,isRoute,routeShift,mergeCatalogOverrides};
 });
 
 
