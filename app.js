@@ -58,7 +58,7 @@ function sourceExcluded(row){return window.AChangRouteTime?.struck(row)===true}
 function schedulableRouteRows(){return routeRows().filter(row=>!sourceExcluded(row))}
 function visitPreferenceSubject(){const role=liveRole||'guest',raw=`${role}|${liveMemberId||liveAccountId||'none'}`;let hash=2166136261;for(let i=0;i<raw.length;i++){hash^=raw.charCodeAt(i);hash=Math.imul(hash,16777619)}return `${role}:${(hash>>>0).toString(36)}`}
 function visitPreferenceWeekday(){const parts=date.split('-').map(Number);return parts.length===3&&parts.every(Number.isFinite)?new Date(Date.UTC(parts[0],parts[1]-1,parts[2])).getUTCDay():-1}
-function visitTimePreferenceKey(){if(!chosenRoute)return '';const group=shift==='日間'?dayRouteCategory:'night',calendar=group==='ab'?`weekday-${visitPreferenceWeekday()}`:'all-dates';return [shift,group,calendar,chosenRoute].join('|')}
+function visitTimePreferenceKey(){if(!chosenRoute)return '';const group=shift==='日間'?dayRouteCategory:'night-1630-1830-v2',calendar=group==='ab'?`weekday-${visitPreferenceWeekday()}`:'all-dates';return [shift,group,calendar,chosenRoute].join('|')}
 function readVisitPreferenceStore(){try{const parsed=JSON.parse(localStorage.getItem(VISIT_TIME_PREF_KEY)||'null');return parsed?.version===1&&parsed.subjects&&typeof parsed.subjects==='object'?parsed:{version:1,subjects:{}}}catch{return {version:1,subjects:{}}}}
 function readVisitTimePreference(key=visitTimePreferenceKey()){if(!key)return null;const value=readVisitPreferenceStore().subjects?.[visitPreferenceSubject()]?.[key];return value&&typeof value.start==='string'&&typeof value.end==='string'?value:null}
 function writeVisitPreferenceStore(store){try{localStorage.setItem(VISIT_TIME_PREF_KEY,JSON.stringify(store))}catch{}}
@@ -66,7 +66,7 @@ function rememberVisitTimePreference(){const key=visitTimePreferenceKey();if(!ke
 function forgetVisitTimePreference(key=visitTimePreferenceKey()){if(!key)return;const store=readVisitPreferenceStore(),subject=visitPreferenceSubject();if(!store.subjects[subject]?.[key])return;delete store.subjects[subject][key];writeVisitPreferenceStore(store)}
 function resetVisitTime(){visitTimeStart='';visitTimeEnd='';visitTimeCustomized=false;visitTimeLoadedKey=''}
 function dayShiftWindow(){return shift==='日間'&&dayRouteCategory==='six'?{start:'',end:'08:05'}:null}
-function visitTimePreset(){if(shift==='夜間')return {start:'19:00',end:''};return dayShiftWindow()}
+function visitTimePreset(){if(shift==='夜間')return {start:'16:30',end:'18:30'};return dayShiftWindow()}
 function timeOptionsWithEndpoint(options,value){const result=[...options];if(value&&!result.includes(value))result.push(value);return result.sort((a,b)=>a.localeCompare(b))}
 function weekRouteDate(weekday){
  const parts=today().split('-').map(Number),local=new Date(parts[0],parts[1]-1,parts[2],12),mondayOffset=(local.getDay()+6)%7,weekdayOffset=weekday===3?2:weekday===5?4:null;
@@ -616,7 +616,7 @@ function openSecureLogin(){if(liveRole==='admin')return openMemberAdmin();previe
 function updateAccessControls(){
  document.body.classList.toggle('volunteer-session',liveRole==='volunteer');
  const admin=liveRole==='admin';
- for(const b of $$('[data-page]')){const pg=b.dataset.page;if(liveRole==='volunteer'){b.hidden=pg==='areas'||pg==='planner'||pg==='people';b.querySelector('span')&&(b.querySelector('span').textContent=pg==='people'?'小組任務':pg==='reports'?'任務':pg==='trucks'?'清潔車列表':'地圖');}else{b.hidden=false;if(pg==='people'&&b.querySelector('span'))b.querySelector('span').textContent='名冊';}}
+ for(const b of $$('[data-page]')){const pg=b.dataset.page;if(liveRole==='volunteer'){b.hidden=pg==='areas'||pg==='planner'||pg==='people';b.querySelector('span')&&(b.querySelector('span').textContent=pg==='people'?'小組任務':pg==='reports'?'任務':pg==='trucks'?'查看完整路線':'地圖');}else{b.hidden=false;if(pg==='people'&&b.querySelector('span'))b.querySelector('span').textContent='名冊';}}
  for(const id of ['addPerson','addMember','openRosterAuthorization','clearArea']){const control=document.getElementById(id);if(control)control.hidden=!admin;}
  $('#rosterLocked').hidden=admin||liveRole==='volunteer';const rosterFilters=$('#peopleSearch')?.closest('.filter-bar');if(rosterFilters)rosterFilters.hidden=liveRole==='volunteer';$('#peopleList').hidden=!(admin||liveRole==='volunteer');
  $('#volunteerLoginBtn').hidden=!!liveRole;

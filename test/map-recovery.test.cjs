@@ -35,9 +35,9 @@ test('map startup has bounded failure, cleanup and retry guards', () => {
 test('map asset revision and service-worker cache advance together', () => {
   assert.match(html, /styles\.css\?v=211/);
   assert.match(html, /route-time-filter\.js\?v=2/);
-  assert.match(html, /app\.js\?v=222/);
+  assert.match(html, /app\.js\?v=223/);
   assert.match(html, /route-directory\.js\?v=3/);
-  assert.match(sw, /achang-pwa-shell-v194-auth-safe-weekday-shortcuts/);
+  assert.match(sw, /achang-pwa-shell-v195-night-window-route-directory/);
 });
 
 test('truck directory keeps the route view concise and renders directional route arrows', () => {
@@ -64,3 +64,4 @@ test('volunteer map layer uses the short label and a stable white person icon', 
   const styles = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
   assert.match(styles, /\.map-switches \.legend-pin \.legend-person-icon\{[^}]*fill:#fff/);
 });
+

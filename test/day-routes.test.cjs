@@ -64,11 +64,11 @@ test('day adapter preserves document order instead of numerically or chronologic
  assert.deepEqual(result.stops.map(row=>row['清運次序']),[1,2]);
 });
 
-test('weekday quick picks select this week and night filters default to 19:00 through the final option',()=>{
+test('weekday quick picks select this week and night filters default to 16:30 through 18:30',()=>{
  assert.match(html,/data-weekday-route="3"/);assert.match(html,/data-weekday-route="5"/);
  assert.match(app,/function weekRouteDate\(weekday\)/);assert.match(app,/function selectWeekdayRoute\(weekday\)/);
  assert.match(app,/\$\$\('\[data-day-category\]'\)\.forEach/);assert.match(app,/\$\$\('\[data-weekday-route\]'\)\.forEach/);assert.doesNotMatch(app,/(?<!\$)\$\('\[data-(?:day-category|weekday-route)\]'\)\.forEach/);
- assert.match(app,/function visitTimePreset\(\)\{if\(shift==='夜間'\)return \{start:'19:00',end:''\};return dayShiftWindow\(\)\}/);
+ assert.match(app,/function visitTimePreset\(\)\{if\(shift==='夜間'\)return \{start:'16:30',end:'18:30'\};return dayShiftWindow\(\)\}/);
  assert.match(app,/visitTimeEnd=windowPreset\?\.end\|\|endOptions\.at\(-1\)\|\|''/);
 });
 
@@ -171,3 +171,4 @@ test('tasks handler is idempotent for an existing stop and rejects a conflicting
   const overlap=await invoke('OTHER-ROUTE');assert.equal(overlap.error?.status,409);assert.match(overlap.error.message,/已有其他跟巡排班/);assert.equal(overlap.writes.some(x=>x.opt.method==='POST'),false);
  }finally{delete require.cache[handlerPath];if(originalHandler)require.cache[handlerPath]=originalHandler;if(originalServer)require.cache[serverPath]=originalServer;else delete require.cache[serverPath]}
 });
+
