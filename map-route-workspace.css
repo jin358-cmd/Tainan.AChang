@@ -82,3 +82,5 @@
  .map-route-right #routeTable td:nth-child(n+4),.map-route-right #routeFullTable td:nth-child(n+4){grid-column:1/-1}
  .map-route-right #routeTable .service-day,.map-route-right #routeFullTable .service-day{white-space:normal;overflow-wrap:anywhere}
 }
+
+.desktop-nav button{font-size:18px;gap:9px}.desktop-nav button i{font-size:26px}.bottom-nav button i{font-size:25px!important;line-height:1.1!important}.bottom-nav button span{font-size:15px!important;line-height:1.2!important}.bottom-nav button{min-height:56px!important;gap:3px!important}

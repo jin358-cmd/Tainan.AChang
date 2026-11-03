@@ -100,3 +100,20 @@ test('six-column print returns left after stations 32 and 38, then down toward 3
  assert.match(transitions[0],/points="349,216 361,211 361,221"/,'the return arrow points left inside the row gutter');
  assert.equal((html.match(/data-connection="between-cards"/g)||[]).length,11);
 });
+
+
+test('print action opens an isolated document, waits for styling and images, then invokes its native print function',async()=>{
+ const events=[],copied={style:{},dataset:{printPages:'1'}},sheet={privateFixture:true};
+ const node=tag=>({tag,children:[],style:{},dataset:{},append(...children){this.children.push(...children);for(const child of children)if(child.rel==='stylesheet')queueMicrotask(()=>{events.push('style-loaded');child.onload();});}});
+ const doc={title:'',head:node('head'),body:node('body'),createElement:node,importNode:(value,deep)=>{assert.equal(value,sheet);assert.equal(deep,true);return copied;},querySelectorAll:selector=>{assert.equal(selector,'img');return [{decode:async()=>events.push('image-decoded')}];},fonts:{ready:Promise.resolve()}};
+ doc.body.replaceChildren=(...children)=>{doc.body.children=children;events.push('document-ready');};
+ const target={document:doc,opener:{},requestAnimationFrame:fn=>queueMicrotask(fn),focus:()=>events.push('focus'),print:()=>events.push('print'),close(){}};
+ const source={baseURI:'https://achang.pmos.space/',querySelectorAll:selector=>{assert.equal(selector,'link[rel="stylesheet"]');return [{href:'https://achang.pmos.space/styles.css'},{href:'https://achang.pmos.space/day-route-layer.css'}];}};
+ const result=await printer.printDocument(sheet,{document:source,window:{open:(url,name,features)=>{assert.equal(url,'');assert.equal(name,'_blank');assert.match(features,/popup/);return target;}}});
+ assert.equal(result,target);assert.equal(doc.title,'路線列印');assert.equal(doc.body.children[1],copied);assert.equal(copied.className,'route-print-compact truck-directory-host');assert.equal(copied.dataset.printPages,undefined);assert.equal(target.opener,null);assert.equal(events.at(-1),'print');assert.equal(events.filter(x=>x==='print').length,1);assert.ok(events.indexOf('style-loaded')<events.indexOf('print'));assert.ok(events.indexOf('image-decoded')<events.indexOf('print'));assert.deepEqual(sheet,{privateFixture:true});
+ doc.body.children[0].children[0].onclick();assert.equal(events.filter(x=>x==='print').length,2,'the separate print page also provides a working manual print button');
+});
+
+test('a blocked print popup produces an actionable error instead of silently doing nothing',async()=>{
+ await assert.rejects(()=>printer.printDocument({}, {window:{open:()=>null},document:{}}),/允許.*彈出視窗/);
+});

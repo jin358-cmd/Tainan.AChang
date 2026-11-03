@@ -11,6 +11,20 @@
   const first=[...new Map(stations[0].map(p=>[p.id,p])).values()],signature=first.map(p=>p.id).sort().join('|');
   return stations.every(people=>[...new Set(people.map(p=>p.id))].sort().join('|')===signature)?first:[];
  }
+ async function printDocument(sheet,{window:host,document:source}){
+  const target=host.open('','_blank','popup,width=1000,height=800');
+  if(!target)throw Error('瀏覽器阻擋列印視窗，請允許此網站開啟彈出視窗後再試。');
+  const doc=target.document;doc.title='路線列印';
+  const base=doc.createElement('base');base.href=source.baseURI;doc.head.append(base);
+  const meta=doc.createElement('meta');meta.name='viewport';meta.content='width=device-width,initial-scale=1';doc.head.append(meta);
+  const styles=[...source.querySelectorAll('link[rel="stylesheet"]')].map(link=>new Promise(resolve=>{const copy=doc.createElement('link');copy.rel='stylesheet';copy.href=link.href;copy.onload=copy.onerror=resolve;doc.head.append(copy);}));
+  const style=doc.createElement('style');style.textContent='html,body{height:auto!important;min-height:0!important;overflow:visible!important;background:white!important}body{margin:0;padding:18px}#routePrintSurface{display:block!important;position:static!important;inset:auto!important;width:190mm!important;max-width:100%;height:auto!important;max-height:none!important;overflow:visible!important;margin:0 auto;box-shadow:none}#routePrintSurface .route-print-content{position:static!important;inset:auto!important;transform:none!important;width:100%!important}#routePrintSurface table,#routePrintSurface th,#routePrintSurface td{font-size:18px!important;line-height:1.6}#routePrintSurface th,#routePrintSurface td{padding:10px 8px!important}.route-document-actions{display:flex;gap:12px;margin:0 auto 20px;max-width:190mm}.route-document-actions button{font:700 18px Arial;padding:10px 16px;border:1px solid #aac1cf;border-radius:8px;background:white;color:#244c64}@media print{@page{size:A4 portrait;margin:10mm}body{padding:0!important}.route-document-actions{display:none!important}#routePrintSurface{break-inside:auto!important;page-break-inside:auto!important}}';doc.head.append(style);
+  const actions=doc.createElement('div');actions.className='route-document-actions';const print=doc.createElement('button');print.type='button';print.textContent='列印／另存 PDF';print.onclick=()=>{target.focus();target.print();};const close=doc.createElement('button');close.type='button';close.textContent='關閉';close.onclick=()=>target.close();actions.append(print,close);
+  const copy=doc.importNode(sheet,true);copy.className='route-print-compact truck-directory-host';copy.style.height='auto';delete copy.dataset.printPages;doc.body.replaceChildren(actions,copy);target.opener=null;
+  await Promise.all(styles);await doc.fonts?.ready;await Promise.all([...doc.querySelectorAll('img')].map(img=>img.decode?.().catch(()=>{})));
+  await new Promise(resolve=>target.requestAnimationFrame(()=>target.requestAnimationFrame(resolve)));
+  target.focus();target.print();return target;
+ }
  const mercator=([lon,lat])=>[lon*Math.PI/180,Math.log(Math.tan(Math.PI/4+lat*Math.PI/360))];
  function filterByIds(full,stopIds){
   const ids=new Set(stopIds),stops=full.stops.filter(stop=>ids.has(stop.id)),orders=new Set(stops.map(stop=>`${stop.route}|${stop.order}`));
@@ -66,10 +80,10 @@
   for(const stop of model.stops){
    if(!stop.position)continue;const [x,y]=project(stop.position);
    make('circle',{cx:x,cy:y,r:10,fill:stop.color,stroke:'#fff','stroke-width':3,'data-route-stop':stop.id});
-   make('text',{x:x+16,y:y-16,'font-size':68,'font-family':'Arial, sans-serif','font-weight':800,fill:'#17384f',stroke:'#fff','stroke-width':9,'paint-order':'stroke','data-stop-number':stop.order}).textContent=String(stop.order);
+   make('text',{x:x+16,y:y-16,'font-size':48,'font-family':'Arial, sans-serif','font-weight':800,fill:'#17384f',stroke:'#fff','stroke-width':7,'paint-order':'stroke','data-stop-number':stop.order}).textContent=String(stop.order);
   }
   make('text',{x:12,y:HEIGHT-12,'font-size':14,fill:'#17384f',stroke:'#fff','stroke-width':3,'paint-order':'stroke'}).textContent='© OpenFreeMap · © OpenMapTiles · © OpenStreetMap contributors · 依站序連線';
   return svg;
  }
- return {filterByIds,baseStyle,buildSvg,commonCrew,paperScale};
+ return {filterByIds,baseStyle,buildSvg,commonCrew,paperScale,printDocument};
 });

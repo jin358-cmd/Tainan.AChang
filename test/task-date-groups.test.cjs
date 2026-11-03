@@ -134,7 +134,7 @@ test('desktop task categories stack history and future at left while mobile keep
 test('desktop navigation keeps primary tabs while personnel and patrol pages move into settings',()=>{
  const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
  const desktop=html.match(/<nav class="desktop-nav"[\s\S]*?<\/nav>/)?.[0]||'';
- assert.match(desktop,/data-page="map"><i[^>]*>◉<\/i><span>地圖<\/span>/);
+ assert.match(desktop,/data-page="map"><i[^>]*>◉<\/i><span>地圖總覽<\/span>/);
  assert.doesNotMatch(desktop,/data-page="areas"/);assert.match(app,/data-settings-page="areas"/);
  assert.doesNotMatch(desktop,/data-page="planner"/);assert.match(app,/data-settings-page="planner"/);
  assert.match(desktop,/data-page="reports"><i[^>]*>✓<\/i><span>任務發派<\/span>/);

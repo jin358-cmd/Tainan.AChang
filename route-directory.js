@@ -56,7 +56,7 @@ function stationCards(rows,route){let html='';for(let i=0;i<rows.length;i+=3){ht
 function stationTable(rows){return '<table><thead><tr><th>順序</th><th>時間</th><th>里別</th><th>站點</th><th>🗑️ 清運／♻️ 回收</th></tr></thead><tbody>'+rows.map((r,i)=>`<tr><td data-label="順序">${i+1}</td><td data-label="時間">${esc(r['到達時間'])}</td><td data-label="里別">${esc(r['里別'])}</td><td data-label="站點">${esc(r['站點名稱／地址'])}${r._addressNote?`<span class="station-address-note">備註：${esc(r._addressNote)}</span>`:''}${r._extras?.['刪除線']?'（原表刪除線）':''}</td><td data-label="清運／回收"><span class="service-day">🗑️ ${esc(r['清運星期']||'未提供')}</span><span class="service-day">♻️ ${esc(r['資源回收星期']||'未提供')}</span></td></tr>`).join('')+'</tbody></table>';}
 function renderFullRoute(){
  const holder=$('routeFullContent'),button=$('routeFullToggle'),source=groups.find(g=>g.route===active?.route),open=!!source&&expandedRoute===source.route;
- holder.hidden=!open;$('detail').classList?.toggle('full-route-open',open);button.setAttribute('aria-expanded',String(open));button.textContent=open?'▾ 收合全部站點':'▸ 查看全部站點';button.title='查看全部路線，定位到目前下一站';
+ holder.hidden=!open;$('detail').classList?.toggle('full-route-open',open);button.setAttribute('aria-expanded',String(open));button.textContent='全部站點';button.title=open?'收合全部站點':'查看全部路線，定位到目前下一站';
  if(open){$('routeFullDiagram').innerHTML=stationCards(source.rows.map((r,i)=>({...r,_directoryOrder:i+1})),source.route);$('routeFullTable').innerHTML=stationTable(source.rows);}else{$('routeFullDiagram').innerHTML='';$('routeFullTable').innerHTML='';}
 }
 function scrollToRouteProgress(){
@@ -101,7 +101,7 @@ async function printActiveRoute(){
  const title=document.createElement('h1');title.textContent=titleText;
  const stationCrew=[...diagram.querySelectorAll('.route-stop')].map(card=>[...card.querySelectorAll('.route-person-chip[data-member-id]')].map(chip=>({id:chip.dataset.memberId,name:chip.dataset.memberName,leader:chip.dataset.routeLeader==='true'})));
  const common=window.AChangRoutePrint?.commonCrew(stationCrew)||[];
- if(common.length){const names=document.createElement('p');names.className='route-print-crew';names.textContent='（'+common.map(person=>(person.leader?'👑 ':'')+person.name).join('，')+'）';content.append(title,names);diagram.querySelectorAll('.route-assigned-people').forEach(box=>box.remove());}else content.append(title);
+ if(common.length){const names=document.createElement('span');names.className='route-print-crew';names.innerHTML='（'+[...common].sort((a,b)=>Number(!!b.leader)-Number(!!a.leader)).map(person=>esc(person.name)+(person.leader?'<span class="print-leader-crown" aria-label="組長">👑</span>':'')).join('／')+'）';title.append(names);diagram.querySelectorAll('.route-assigned-people').forEach(box=>box.remove());}content.append(title);
  const windowLabel=document.createElement('p');windowLabel.className='route-print-window';windowLabel.textContent=`選定到站時段：${start||'不限'}～${end||'不限'}｜站點 ${snapshot.rows.length} 站`;content.append(windowLabel);
  const visual=document.createElement('div');visual.className='route-print-visuals';content.append(visual);
  const mapTitle=document.createElement('h2');mapTitle.textContent='選定時段地圖路徑';visual.append(mapTitle);
@@ -114,7 +114,7 @@ async function printActiveRoute(){
  const measureSheet=()=>{
   content.style.transform='none';content.style.position='static';content.style.inset='auto';content.style.width='190mm';sheet.style.height='auto';
   if(!visual.hidden)connectDiagram(diagram);
-  if(snapshot.shift==='日間'&&!visual.hidden){const scale=window.AChangRoutePrint?.paperScale(content.scrollHeight,sheet.getBoundingClientRect().width)||1;sheet.style.height=Math.ceil(content.scrollHeight*scale)+'px';sheet.dataset.printPages='1';content.style.transform=`scale(${scale})`;content.style.transformOrigin='top left';content.style.position='absolute';content.style.inset='0 auto auto 0';}
+
  };
  document.getElementById('routePrintPreview')?.remove();
  const preview=document.createElement('section');preview.id='routePrintPreview';preview.className='route-print-preview';preview.setAttribute('role','dialog');preview.setAttribute('aria-modal','true');preview.setAttribute('aria-label','路線列印預覽');
@@ -122,12 +122,12 @@ async function printActiveRoute(){
  const modes=document.createElement('div');modes.className='route-print-modes';modes.setAttribute('role','group');modes.setAttribute('aria-label','列印內容');
  const fullButton=document.createElement('button');fullButton.type='button';fullButton.textContent='完整全部';fullButton.title='地圖、時段路線圖及列表清單';
  const listButton=document.createElement('button');listButton.type='button';listButton.textContent='僅列表清單';modes.append(fullButton,listButton);
- const printButton=document.createElement('button');printButton.type='button';printButton.textContent='列印／另存 PDF';printButton.onclick=()=>window.print();
+ const printButton=document.createElement('button');printButton.type='button';printButton.textContent='列印／另存 PDF';printButton.onclick=async()=>{printButton.disabled=true;try{if(!window.AChangRoutePrint?.printDocument)throw Error('列印功能尚未載入，請重新整理後再試。');await window.AChangRoutePrint.printDocument(sheet,{window,document});}catch(error){label.textContent=error.message||'無法開啟列印，請稍後重試。';}finally{printButton.disabled=false;}};
  const closeButton=document.createElement('button');closeButton.type='button';closeButton.textContent='返回地圖';closeButton.onclick=()=>{preview.remove();sheet.remove();button.focus();};preview.onkeydown=event=>{if(event.key==='Escape'){event.preventDefault();event.stopPropagation();closeButton.onclick();}};
  actions.append(label,modes,printButton,closeButton);preview.append(actions);document.body.append(preview);let paper=null;
  const setMode=mode=>{
-  const listOnly=mode==='list';visual.hidden=listOnly;sheet.dataset.printMode=listOnly?'list':'full';sheet.classList.toggle('route-print-day',snapshot.shift==='日間'&&!listOnly);if(listOnly)delete sheet.dataset.printPages;fullButton.setAttribute('aria-pressed',String(!listOnly));listButton.setAttribute('aria-pressed',String(listOnly));
-  label.textContent=(listOnly?'僅列表清單':'完整全部')+(listOnly?' · A4 大字列印':snapshot.shift==='日間'?' · A4 一張':' · 路線列印');measureSheet();
+  const listOnly=mode==='list';visual.hidden=listOnly;sheet.dataset.printMode=listOnly?'list':'full';sheet.classList.remove('route-print-day');delete sheet.dataset.printPages;fullButton.setAttribute('aria-pressed',String(!listOnly));listButton.setAttribute('aria-pressed',String(listOnly));
+  label.textContent=(listOnly?'僅列表清單':'完整全部')+' · A4 大字列印';measureSheet();
   const next=sheet.cloneNode(true);next.removeAttribute('id');next.className='route-print-review-paper route-print-compact truck-directory-host';if(paper)paper.replaceWith(next);else preview.append(next);paper=next;
   status.textContent='';status.hidden=true;
  };
