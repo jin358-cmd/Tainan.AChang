@@ -61,3 +61,24 @@
 @media(max-width:600px){.route-detail-heading #routeTitle{font-size:16px}.route-detail-heading #print{font-size:12px;padding:8px}}
 
 #routeTitle.assignment-route-selected{background:#e4efff;outline:2px solid #387abd} .route-detail-heading #routeTitle:focus-visible{outline:3px solid #387abd}
+
+@media screen and (max-width:1199px){
+ .map-route-right .route-detail-heading #routeTitle{font-size:22px!important;line-height:1.55}
+ .map-route-right #routeDiagram,.map-route-right #routeFullDiagram{display:flex!important;flex-direction:column;gap:38px;padding:12px 0!important;overflow:visible}
+ .map-route-right #routeDiagram .route-row,.map-route-right #routeFullDiagram .route-row{display:contents!important}
+ .map-route-right #routeDiagram .route-stop,.map-route-right #routeFullDiagram .route-stop{display:grid;grid-template-columns:68px minmax(0,1fr);gap:8px 12px;flex:none!important;width:100%!important;max-width:100%;padding:12px!important;text-align:left}
+ .map-route-right .route-stop>time{grid-column:1;grid-row:1;text-align:center;font-size:18px}
+ .map-route-right .route-stop>button.stop-number{grid-column:1;grid-row:2 / span 2;align-self:start;margin:0 auto}
+ .map-route-right .route-stop>a{grid-column:2;grid-row:1;align-self:start;font-size:18px;line-height:1.6}
+ .map-route-right .route-stop>small:not(.station-address-note){grid-column:2;grid-row:2;margin:0;font-size:15px;line-height:1.65}
+ .map-route-right .route-stop>.station-address-note{grid-column:2;grid-row:3;margin:0;font-size:14px}
+ .map-route-right .route-assigned-people{grid-column:1/-1;grid-row:4;margin:0}.map-route-right .route-assigned-people:empty{display:none}
+ .map-route-right #routeTable,.map-route-right #routeFullTable{width:100%;max-width:100%;min-width:0;overflow:visible!important}
+ .map-route-right #routeTable table,.map-route-right #routeFullTable table,.map-route-right #routeTable tbody,.map-route-right #routeFullTable tbody{display:block;width:100%;min-width:0!important;max-width:100%}
+ .map-route-right #routeTable thead,.map-route-right #routeFullTable thead{display:none}
+ .map-route-right #routeTable tr,.map-route-right #routeFullTable tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:12px;margin-bottom:12px;border:1px solid #d2dfe8;border-radius:10px;background:#fff}
+ .map-route-right #routeTable td,.map-route-right #routeFullTable td{display:block;min-width:0;padding:0!important;border:0!important;text-align:left;white-space:normal;overflow-wrap:anywhere;font-size:16px;line-height:1.65}
+ .map-route-right #routeTable td::before,.map-route-right #routeFullTable td::before{content:attr(data-label);display:block;font-size:13px;font-weight:800;color:#607b8f}
+ .map-route-right #routeTable td:nth-child(n+4),.map-route-right #routeFullTable td:nth-child(n+4){grid-column:1/-1}
+ .map-route-right #routeTable .service-day,.map-route-right #routeFullTable .service-day{white-space:normal;overflow-wrap:anywhere}
+}
