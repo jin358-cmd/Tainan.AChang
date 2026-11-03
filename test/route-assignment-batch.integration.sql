@@ -21,6 +21,15 @@ begin
  again:=public.achang_assign_route_batch(gen_random_uuid(),items);
  if (again->>'createdCount')::int<>0 or (again->>'reusedCount')::int<>3 then raise exception 'existing-task idempotency assertion failed';end if;
  if exists(select 1 from public.service_allocations where member_id in(one,two)) then raise exception 'service-area allocation must remain unchanged';end if;
+ -- Choosing or replacing a vehicle leader reuses existing tasks and leaves service areas alone.
+ again:=public.achang_assign_route_batch(gen_random_uuid(),jsonb_build_array((items->0)||jsonb_build_object('is_route_leader',true)));
+ if (again->>'createdCount')::int<>0 or not exists(select 1 from public.assignments where member_id=one and is_route_leader) then raise exception 'leader save assertion failed';end if;
+ again:=public.achang_assign_route_batch(gen_random_uuid(),jsonb_build_array((items->0)||jsonb_build_object('member_id',three,'is_route_leader',true)));
+ if exists(select 1 from public.assignments where member_id=one and is_route_leader) or not exists(select 1 from public.assignments where member_id=three and is_route_leader) then raise exception 'leader replacement assertion failed';end if;
+ -- Remove this disposable third crew member so the rollback test below starts clean.
+ delete from public.visit_tasks where member_id=three;
+ delete from public.assignments where member_id=three;
+ if exists(select 1 from public.service_allocations where member_id in(one,two,three)) then raise exception 'leader must not change service areas';end if;
  select count(*) into before_count from public.route_assignment_batches;
  begin
   perform public.achang_assign_route_batch(gen_random_uuid(),jsonb_build_array((items->0)||jsonb_build_object('member_id',three),(items->0)||jsonb_build_object('route_id','CONFLICT-OTHER-ROUTE')));
@@ -39,4 +48,4 @@ begin
  end;
 end $$;
 rollback;
-select 'PASS: multi-route commit, pending-member allocation without changing service areas, retry idempotency, source/time identity, full rollback, role denial; fixtures rolled back' as verification;
+select 'PASS: multi-route commit, pending-member allocation without changing service areas, retry idempotency, source/time identity, full rollback, role denial, vehicle leader replacement; fixtures rolled back' as verification;

@@ -59,3 +59,12 @@ test('whole-route API retains the existing route area for an unallocated member'
  let saved;const fake={...L,rest:async(path,token,options)=>{if(path.startsWith('rpc/')){saved=options.body.p_items;return {ok:true,data:{ok:true}};}if(path.startsWith('assignments?'))return {ok:true,data:[{member_id:person.id,service_date:'2026-11-03',shift:'day',route_id:a.路線ID,village:'復國里'}]};return {ok:true,data:[]};}};
  await saveBatch({batchId:'3bc211b4-bc21-4cd7-a7c2-a960958a96d4',items:[a,b].map(row=>({volunteerId:person.id,date:'2026-11-03',stopId:row.站點ID}))},{token:'admin'},fake);assert.equal(saved.length,2);assert.ok(saved.every(item=>item.village==='復國里'));
 });
+
+test('vehicle leader selection is staged, exclusive per route, and saved with the same batch',async()=>{
+ const d=createDraft();d.stageRoute(person,[a,b],'2026-11-03');d.stageRoute(second,[a,b],'2026-11-03');d.chooseLeader(person,a,'2026-11-03');
+ assert.equal(d.items().filter(x=>x.isRouteLeader).length,1);assert.equal(d.payload(()=> 'first').items.find(x=>x.isRouteLeader).volunteerId,person.id);
+ d.chooseLeader(second,b,'2026-11-03');assert.equal(d.payload(()=> 'second').batchId,'second');assert.equal(d.items().find(x=>x.isRouteLeader).volunteerId,second.id);
+ let canonical;const fake={...L,rest:async(path,token,options)=>{if(path.startsWith('rpc/'))canonical=options.body.p_items;return {ok:true,data:path.startsWith('rpc/')?{ok:true}:[]};}};
+ await saveBatch({...d.payload(()=> 'ignored'),batchId:'3bc211b4-bc21-4cd7-a7c2-a960958a96d4'},{token:'admin'},fake);assert.equal(canonical.filter(x=>x.is_route_leader).length,1);assert.equal(canonical.find(x=>x.is_route_leader).member_id,second.id);
+ d.clear();assert.deepEqual(d.items(),[]);
+});

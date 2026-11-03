@@ -12,6 +12,9 @@ create policy route_assignment_batches_admin_insert on public.route_assignment_b
 revoke all on public.route_assignment_batches from anon,authenticated;
 grant select,insert on public.route_assignment_batches to authenticated;
 
+alter table public.assignments add column if not exists is_route_leader boolean not null default false;
+create unique index if not exists assignments_one_route_leader on public.assignments(service_date,shift,route_id) where is_route_leader and route_id is not null;
+
 create function public.achang_assign_route_batch(p_batch_id uuid,p_items jsonb)
 returns jsonb language plpgsql security invoker set search_path='' as $$
 declare
@@ -27,6 +30,10 @@ begin
   if previous.actor_user_id<>auth.uid() or previous.request<>p_items then raise exception using errcode='23505',message='確認編號已使用，請重新確認草稿'; end if;
   return previous.result;
  end if;
+ -- Serialize updates to each vehicle roster, including its leader selection.
+ perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(k,1)) from
+ (select distinct concat_ws('|',x->>'service_date',x->>'shift',x->>'route_id') k from jsonb_array_elements(p_items)x) routes order by k;
+ if exists(select 1 from jsonb_array_elements(p_items)x where x->>'is_route_leader'='true' group by x->>'service_date',x->>'shift',x->>'route_id' having count(distinct x->>'member_id')>1) then raise exception using errcode='22023',message='同一車次只能選擇一位組長'; end if;
  -- Acquire member locks in a stable order, serializing concurrent allocation batches.
  perform m.id from public.members m where m.id in (select (x->>'member_id')::uuid from jsonb_array_elements(p_items)x) order by m.id for update;
  for item in select value from jsonb_array_elements(p_items) loop
@@ -52,6 +59,10 @@ begin
    added:=added+1;
   end if;
   update public.assignments a set starts_at=least(coalesce(a.starts_at,start_time),start_time),ends_at=greatest(coalesce(a.ends_at,end_time),end_time) where a.id=assignment.id;
+  if item->>'is_route_leader'='true' then
+   update public.assignments a set is_route_leader=false where a.service_date=day and a.shift=sh and a.route_id=route and a.is_route_leader and a.id<>assignment.id;
+   update public.assignments a set is_route_leader=true where a.id=assignment.id;
+  end if;
   ids:=ids||jsonb_build_array(task.id);
  end loop;
  result:=jsonb_build_object('ok',true,'batchId',p_batch_id,'taskIds',ids,'createdCount',added,'reusedCount',reused,'allocationCount',allocated);

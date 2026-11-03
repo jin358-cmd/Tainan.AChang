@@ -5,6 +5,7 @@ const legalTime=value=>/^([01]\d|2[0-3]):[0-5]\d$/.test(value||'');
 const key=item=>[item.volunteerId,item.date,item.stopId].join('|');
 function createDraft(){
  let items=[],batchId=null;
+ const group=item=>[item.date,item.shift,item.routeId].join('|');
  return {
   items:()=>items.map(x=>({...x})),
   clear(){items=[];batchId=null;},
@@ -21,10 +22,16 @@ function createDraft(){
    if(!items.some(x=>key(x)===key(item)))items.push(item);batchId=null;return item;
   },
   stageRoute(person,stops,date,tasks=[]){const before=items.map(x=>({...x})),previousBatch=batchId;try{for(const stop of stops)this.stage(person,stop,date,person.assignment||stop.里別,tasks);}catch(error){items=before;batchId=previousBatch;throw error;}},
-  payload(uuid){if(!batchId)batchId=uuid();return {action:'batch',batchId,items:items.map(x=>({volunteerId:x.volunteerId,stopId:x.stopId,date:x.date}))};}
+  chooseLeader(person,stop,date,tasks=[]){
+   this.stage(person,stop,date,person.assignment||stop.里別,tasks);
+   const chosen=items.find(x=>x.volunteerId===person.id&&x.date===date&&x.stopId===stop.站點ID),scope=group(chosen);
+   for(const item of items)if(group(item)===scope)delete item.isRouteLeader;
+   chosen.isRouteLeader=true;batchId=null;
+  },
+  payload(uuid){if(!batchId)batchId=uuid();return {action:'batch',batchId,items:items.map(x=>({volunteerId:x.volunteerId,stopId:x.stopId,date:x.date,...(x.isRouteLeader?{isRouteLeader:true}:{})}))};}
  };
 }
-function create({getContext,getRows,submit,onLeader}){
+function create({getContext,getRows,submit}){
  const draft=createDraft(),$=id=>document.getElementById(id),esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  let selected=null,routeScope=null,session='',serviceDate='',message='',busy=false,opened=false;
  const panel=document.createElement('aside');panel.id='routeAssignmentPanel';panel.className='route-assignment-panel';panel.setAttribute('aria-label','站點人員分配');panel.hidden=true;
@@ -52,7 +59,7 @@ function create({getContext,getRows,submit,onLeader}){
    if(ctx.role!=='admin')return;
    const box=document.createElement('div');box.className='route-assigned-people';
    const existing=tasksAt(row);for(const task of existing){const person=ctx.people.find(p=>p.id===task.volunteer_id);if(!person)continue;const chip=document.createElement('span');chip.className='route-person-chip saved';chip.textContent=person.name+' · 已分配';box.append(chip);}
-   for(const item of currentDraft.filter(x=>x.stopId===row.站點ID&&x.date===serviceDate)){const chip=document.createElement('span');chip.className='route-person-chip draft';chip.textContent=item.name+' · 暫排';const remove=document.createElement('button');remove.type='button';remove.textContent='×';remove.setAttribute('aria-label','移除'+item.name+'的本站暫排');remove.disabled=busy;remove.onclick=event=>{event.stopPropagation();draft.remove(key(item));message='';render();};chip.append(remove);box.append(chip);}
+   for(const item of currentDraft.filter(x=>x.stopId===row.站點ID&&x.date===serviceDate&&!existing.some(t=>t.volunteer_id===x.volunteerId))){const chip=document.createElement('span');chip.className='route-person-chip draft';chip.textContent=item.name+' · 暫排';const remove=document.createElement('button');remove.type='button';remove.textContent='×';remove.setAttribute('aria-label','移除'+item.name+'的本站暫排');remove.disabled=busy;remove.onclick=event=>{event.stopPropagation();draft.remove(key(item));message='';render();};chip.append(remove);box.append(chip);}
    card.append(box);
   });
  }
@@ -70,8 +77,9 @@ function create({getContext,getRows,submit,onLeader}){
    const already=scope.length>0&&scope.every(stop=>tasksAt(stop).some(t=>t.volunteer_id===person.id));
    const blocked=scope.some(stop=>saved.some(t=>t.shift===stop.時段&&(t.route_id||t.truck)!==stop.路線ID)||staged.some(x=>x.shift===stop.時段&&x.routeId!==stop.路線ID));
    const labels=[...staged.map(x=>`暫排：${x.route} 第${x.order}站 ${x.time}`),...saved.map(t=>`已分配：${String(t.route_id||t.truck).replace(/^PDF:(日間|夜間):([^:]+):.*$/,'$2')} 第${t.stop_order}站 ${t.eta}`)];
-   const leader=ctx.leaders?.[person.assignment]===person.id;
-   const crown=atRoute(person)?`<button type="button" data-route-person-leader="${esc(person.id)}" class="${leader?'leader-on':''}" ${busy||!person.assignment||!person.phone?'disabled':''} title="${person.assignment?'設定原服務里組長':'尚未設定服務里，請至人員分區設定組長'}">${leader?'👑 組長':'♛ 設組長'}</button>`:'';
+   const routeId=scope[0]?.路線ID,chosen=records.find(x=>x.date===serviceDate&&x.routeId===routeId&&x.isRouteLeader);
+   const leader=chosen?chosen.volunteerId===person.id:saved.some(t=>(t.route_id||t.truck)===routeId&&t.is_route_leader);
+   const crown=atRoute(person)?`<button type="button" data-route-person-leader="${esc(person.id)}" class="${leader?'leader-on':''}" ${busy?'disabled':''} title="選擇本車次組長，確認分配後儲存">${leader?'👑 組長':'♛ 設組長'}</button>`:'';
    return window.AChangMemberCards.renderCard(person,{area:person.assignment||'',leader,allocations:labels,className:`route-assignment-person ${atRoute(person)?'has-assignment':''}`,actions:`${crown}<button type="button" data-stage-person="${esc(person.id)}" ${busy||!scope.length||already||blocked?'disabled':''}>${already?'已分配':here?'移出暫排':blocked?'其他車次':routeScope?'＋ 加入本車次':'＋ 加入本站'}</button>`});
   };
   panel.innerHTML=`<div class="route-assignment-heading"><h3>${routeScope?'車次人員分配':'站點人員分配'}</h3><button type="button" data-assignment-close aria-label="收合人員分配">×</button></div><label>分配日期<input id="routeAssignmentDate" type="date" value="${esc(serviceDate)}" ${busy?'disabled':''}></label><p class="route-assignment-target">${routeScope?`${esc(routeScope.route)} · 目前選定範圍 ${scope.length} 站`:row?`${esc(row.車次)} · 第${row._taskOrder}站 · ${esc(row.到達)}<br>${esc(row.停靠點原文)}`:'請點選站點卡片或車次標題'}</p><div class="route-assignment-candidates"><section class="assigned-route-people" aria-label="本車次已分配人員"><h4>本車次已分配（${assigned.length}人）</h4>${assigned.map(cardFor).join('')||'<p class="assignment-empty">此車次尚未分配人員</p>'}</section><section class="waiting-route-people" aria-label="本車次未分配人員"><h4>未分配（${waiting.length}人）</h4>${waiting.map(cardFor).join('')||'<p class="assignment-empty">全部人員已分配</p>'}</section></div><details class="route-assignment-review"><summary>草稿：${count}人／${records.length}筆站點分配</summary>${records.map(x=>`<p>${esc(x.date)} ${esc(x.name)} → ${esc(x.route)} 第${x.order}站 <button type="button" data-remove-draft="${esc(key(x))}" ${busy?'disabled':''}>移除</button></p>`).join('')}</details><p id="routeAssignmentStatus" role="status" aria-live="polite">${esc(message||'可切換車次繼續選人，最後一次確認儲存。')}</p><div class="route-assignment-actions"><button type="button" data-clear-draft ${busy||!records.length?'disabled':''}>清空草稿</button><button type="button" class="primary" data-confirm-draft ${busy||!records.length?'disabled':''}>${busy?'儲存中…':`確認分配（${records.length}筆）`}</button></div>`;
@@ -83,7 +91,16 @@ function create({getContext,getRows,submit,onLeader}){
   if(button.hasAttribute('data-assignment-close')){opened=false;render();return;}
   if(button.hasAttribute('data-clear-draft')){draft.clear();message='草稿已清空';render();return;}
   if(button.hasAttribute('data-remove-draft')){draft.remove(button.dataset.removeDraft);message='';render();return;}
-  if(button.hasAttribute('data-route-person-leader')){busy=true;try{await onLeader?.(button.dataset.routePersonLeader);}catch(error){message=error.message;}finally{busy=false;render();}return;}
+  if(button.hasAttribute('data-route-person-leader')){
+   try{
+    const ctx=context(),person=ctx.people.find(p=>p.id===button.dataset.routePersonLeader),routeId=targets()[0]?.路線ID;
+    if(ctx.role!=='admin')throw Error('請以管理員登入');
+    const staged=draft.items().find(x=>x.volunteerId===person?.id&&x.date===serviceDate&&x.routeId===routeId);
+    const stop=staged?rows().find(x=>x.站點ID===staged.stopId):rows().find(x=>x.路線ID===routeId&&tasksAt(x).some(t=>t.volunteer_id===person?.id));
+    if(!stop)throw Error('請先將此人加入本車次');
+    draft.chooseLeader(person,stop,serviceDate,ctx.tasks);message='已暫選 '+person.name+' 為本車次組長；確認分配後儲存';
+   }catch(error){message=error.message;}render();return;
+  }
   if(button.hasAttribute('data-stage-person')){
    const ctx=context(),person=ctx.people.find(p=>p.id===button.dataset.stagePerson),scope=targets(),records=draft.items();
    const here=scope.length>0&&scope.every(stop=>records.some(x=>x.volunteerId===person?.id&&x.stopId===stop.站點ID&&x.date===serviceDate));
