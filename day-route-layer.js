@@ -36,10 +36,19 @@
   if(!coords.length)return null;
   return [[Math.min(...coords.map(c=>c[0])),Math.min(...coords.map(c=>c[1]))],[Math.max(...coords.map(c=>c[0])),Math.max(...coords.map(c=>c[1]))]];
  }
+ function nextStopIds(model,rows,progress,now=new Date()){
+  const ids=new Set();if(!progress)return ids;
+  const originals=new Map(rows.map(r=>[r['站點ID'],r]));
+  for(const stops of model.groups.values()){
+   const source=stops.map(s=>({...originals.get(s.id),'到達時間':s.time,_extras:{'刪除線':false}}));
+   const eligible=source.map((r,i)=>progress.runsToday(r,now)?i:-1).filter(i=>i>=0),result=progress.routeProgress(eligible.map(i=>source[i]),now);
+   if(result.nextIndex>=0)ids.add(stops[eligible[result.nextIndex]].id);
+  }return ids;
+ }
  function create({getRows,onChange,onSelect}){
   const toggle=document.getElementById('layerRoutes'),select=document.getElementById('mapRouteLayerSelect'),status=document.getElementById('mapRouteLayerStatus'),legend=document.getElementById('mapRouteLayerLegend'),pending=document.getElementById('mapRoutePending'),pendingList=document.getElementById('mapRoutePendingList'),mapBox=document.getElementById('mapBox');
   if(!toggle||!select||!status||!mapBox)return null;
-  let catalog=null,map=null,attachedMap=null,model=build([],null),fitRequested=true,failed=false,detail=null;
+  let catalog=null,map=null,attachedMap=null,model=build([],null),fitRequested=true,failed=false,detail=null,focusId=null;
   const byId=id=>model.stops.find(stop=>stop.id===id);
   const closeDetail=()=>{detail?.remove();detail=null;};
   function showStop(id){
@@ -70,6 +79,23 @@
    instance.on('mouseenter','day-route-points',()=>{instance.getCanvas().style.cursor='pointer';});
    instance.on('mouseleave','day-route-points',()=>{instance.getCanvas().style.cursor='';});
   }
+  function nextIds(){return nextStopIds(model,getRows(),globalThis.AChangDispatchView);}
+  function nextFeatures(){const ids=nextIds();return {type:'FeatureCollection',features:model.points.features.filter(f=>ids.has(f.properties.id))};}
+  function refreshGlow(){
+   if(map?.getSource(SOURCE+'-next'))map.getSource(SOURCE+'-next').setData(toggle.checked?nextFeatures():empty());
+   const fallback=document.getElementById('mapFallback');if(fallback&&!fallback.hidden)renderFallback(fallback);
+  }
+  function focusStop({id,route}){
+   if(!catalog)return;
+   if(!/^日間[1-6]$/.test(route||'')){closeDetail();detail=document.createElement('aside');detail.className='day-route-point-detail';detail.textContent='此車次尚無已核對的站點座標，暫無法定位。';mapBox.append(detail);return;}
+   toggle.checked=true;select.value=route;focusId=id;fitRequested=false;sync(map);
+   const stop=byId(id);if(!stop)return;
+   showStop(id);
+   if(!stop.position)return;
+   if(map){map.flyTo({center:stop.position,zoom:Math.max(map.getZoom?.()||13,16),duration:650});}
+   else{const fallback=document.getElementById('mapFallback');if(fallback)renderFallback(fallback);}
+  }
+  document.addEventListener('achang:focus-route-stop',event=>focusStop(event.detail||{}));
   function renderMap(){
    if(!map||!catalog)return;
    if(!map.getSource(SOURCE)){
@@ -82,6 +108,12 @@
    }else{
     map.getSource(SOURCE).setData(model.lines);map.getSource(SOURCE+'-points').setData(model.points);
    }
+   if(!map.getSource(SOURCE+'-next')){
+    map.addSource(SOURCE+'-next',{type:'geojson',data:nextFeatures()});
+    map.addLayer({id:'day-route-next-glow',type:'circle',source:SOURCE+'-next',paint:{'circle-radius':16,'circle-color':'#4dff98','circle-opacity':.45,'circle-blur':.35}});
+    map.addLayer({id:'day-route-next-core',type:'circle',source:SOURCE+'-next',paint:{'circle-radius':7,'circle-color':'#34f58b','circle-stroke-color':'#ffffff','circle-stroke-width':2}});
+   }else map.getSource(SOURCE+'-next').setData(nextFeatures());
+   for(const id of ['day-route-next-glow','day-route-next-core'])map.setLayoutProperty(id,'visibility',toggle.checked?'visible':'none');
    attachEvents(map);
    for(const id of LAYERS)if(map.getLayer(id))map.setLayoutProperty(id,'visibility',toggle.checked?'visible':'none');
    if(toggle.checked&&fitRequested){
@@ -109,15 +141,19 @@
     const [p,q]=feature.geometry.coordinates.map(project),mid=[(p[0]+q[0])/2,(p[1]+q[1])/2],index=Number(feature.properties.route.slice(-1))-1;
     make('path',{d:`M${p}L${mid}L${q}`,fill:'none',stroke:feature.properties.color,'stroke-width':6,'stroke-linecap':'round','stroke-linejoin':'round','marker-mid':`url(#day-route-arrow-${index})`});
    }
+   const upcoming=nextIds();
    for(const stop of model.stops){
-    if(!stop.position)continue;const p=project(stop.position),circle=make('circle',{cx:p[0],cy:p[1],r:select.value==='all'?5:7,fill:stop.color,stroke:'#fff','stroke-width':2,'data-route-stop':stop.id,tabindex:0,role:'button','aria-label':`${stop.route}第${stop.order}站 ${stop.time} ${stop.name}`});
+    if(!stop.position)continue;const p=project(stop.position);
+    if(upcoming.has(stop.id)){const halo=make('circle',{cx:p[0],cy:p[1],r:15,fill:'#41ff91',opacity:.5,'pointer-events':'none','data-next-stop':stop.id});make('animate',{attributeName:'r',values:'10;22;10',dur:'1.6s',repeatCount:'indefinite'},halo);make('animate',{attributeName:'opacity',values:'.7;.18;.7',dur:'1.6s',repeatCount:'indefinite'},halo);}
+    const circle=make('circle',{cx:p[0],cy:p[1],r:select.value==='all'?5:7,fill:upcoming.has(stop.id)?'#29e782':stop.color,stroke:'#fff','stroke-width':2,'data-route-stop':stop.id,tabindex:0,role:'button','aria-label':`${stop.route}第${stop.order}站 ${stop.time} ${stop.name}`});
     circle.onclick=event=>{event.stopPropagation();showStop(stop.id);};circle.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();showStop(stop.id);}};
     if(select.value!=='all'&&(stop.order===1||stop.order%Math.max(1,Math.ceil(model.located/(width<500?15:24)))===0))make('text',{x:p[0]+9,y:p[1]-8,'font-size':13,fill:'#18384f',stroke:'#fff','stroke-width':3,'paint-order':'stroke','pointer-events':'none'}).textContent=String(stop.order);
    }
    make('text',{x:10,y:height-12,'font-size':11,fill:'#18384f',stroke:'#fff','stroke-width':3,'paint-order':'stroke'}).textContent='© Esri · 官方清運點 · 依站序連線';
+   const focused=byId(focusId);if(focused?.position){const p=project(focused.position),w=width*.48,h=height*.48;svg.setAttribute('viewBox',`${p[0]-w/2} ${p[1]-h/2} ${w} ${h}`);make('circle',{cx:p[0],cy:p[1],r:12,fill:'none',stroke:'#ff7c25','stroke-width':3,'pointer-events':'none'});}
    prior.replaceWith(svg);
   }
-  function changed(){fitRequested=true;closeDetail();onChange?.();}
+  function changed(){focusId=null;fitRequested=true;closeDetail();onChange?.();}
   toggle.addEventListener('change',changed);select.addEventListener('change',changed);
   legend.replaceChildren();
   COLORS.forEach((color,index)=>{const key=document.createElement('span'),swatch=document.createElement('i');swatch.style.backgroundColor=color;key.append(swatch,document.createTextNode(`日間${index+1}`));legend.append(key);});
@@ -125,7 +161,10 @@
   fetch('./data-day-route-locations-20261103.json',{cache:'no-store'}).then(response=>{if(!response.ok)throw Error('route locations unavailable');return response.json();}).then(value=>{
    if(value.version!==1||value.stops?.filter(stop=>String(stop.source_id||'').startsWith('PDF:DAY:')).length!==160)throw Error('invalid route location catalog');catalog=value;onChange?.();
   }).catch(error=>{failed=true;renderControls();console.warn('日間路線座標未能載入',error.message);});
-  return {sync,renderFallback,closeDetail};
+  setInterval(()=>{if(!document.hidden)refreshGlow();},30000);
+  setInterval(()=>{if(document.hidden||!toggle.checked||!map?.getLayer('day-route-next-glow'))return;const phase=(Date.now()%1600)/1600;map.setPaintProperty('day-route-next-glow','circle-radius',11+11*Math.sin(phase*Math.PI)**2);map.setPaintProperty('day-route-next-glow','circle-opacity',.25+.35*Math.cos(phase*Math.PI)**2);},100);
+  return {sync,renderFallback,closeDetail,focusStop};
  }
- return {build,bounds,create};
+ return {build,bounds,create,nextStopIds};
 });
+

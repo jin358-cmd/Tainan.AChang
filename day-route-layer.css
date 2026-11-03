@@ -20,3 +20,6 @@
 .day-route-detail-close{position:absolute;right:5px;top:5px;min-width:36px;min-height:36px;border-radius:8px;background:#edf3f6;color:#244c64}
 .day-route-offline-map{background:#edf2ee}
 @media(max-width:640px){.map-route-toolbar{gap:5px 9px;padding:8px 10px}.map-route-toolbar .map-route-vehicle{flex:1;justify-content:flex-end}.map-route-toolbar select{min-width:0;width:100%;max-width:205px;font-size:16px}.map-route-layer-legend{gap:7px 11px}.map-route-toolbar .map-route-toggle{font-size:13px}}
+
+.route-stop button.stop-number{padding:0;cursor:pointer;font:inherit;font-weight:700;border:2px solid currentColor;line-height:28px;min-height:32px;display:block}
+.route-stop button.stop-number:hover,.route-stop button.stop-number:focus-visible{outline:3px solid #ff982b;outline-offset:3px;box-shadow:0 0 14px #ff982b90}
