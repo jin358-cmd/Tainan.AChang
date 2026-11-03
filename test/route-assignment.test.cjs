@@ -92,7 +92,7 @@ test('opening the application starts on the map and task dispatch is the second 
  assert.match(html,/id="page-map" class="page active/);assert.match(app,/routes=\[\],page='map'/);assert.doesNotMatch(app,/await refreshOnline\(\);go\('areas'\)/);
 });
 
-function assignmentHarness({people=[],tasks=[]}={}){
+function assignmentHarness({people=[],tasks=[],visible=[a.站點ID,b.站點ID]}={}){
  const listeners=new Map(),nodes=new Map();
  class Node{
   constructor(){this.dataset={};this.style={};this.attributes={};this.handlers={};this.hidden=false;this.children=[];this.states=new Set();this.classList={contains:k=>this.states.has(k),add:k=>this.states.add(k),toggle:(k,force)=>{const on=force===undefined?!this.states.has(k):!!force;if(on)this.states.add(k);else this.states.delete(k);return on;}};}
@@ -101,10 +101,10 @@ function assignmentHarness({people=[],tasks=[]}={}){
  const node=id=>{if(!nodes.has(id))nodes.set(id,new Node());return nodes.get(id);};node('page-map').states.add('active');
  const cards=[new Node(),new Node()],buttons=[a,b].map((r,i)=>{const n=new Node();n.dataset.focusStop=r.站點ID;n.closest=()=>cards[i];return n;});
  const document={getElementById:node,createElement:()=>new Node(),body:new Node(),documentElement:{clientWidth:1400,clientHeight:1000},querySelectorAll:()=>buttons,addEventListener:(type,fn)=>{if(!listeners.has(type))listeners.set(type,[]);listeners.get(type).push(fn);}};
- const window={AChangRouteDirectory:{activeRoute:()=>a.車次},AChangMemberCards:require('../member-cards'),addEventListener(){}};
+ const window={AChangRouteDirectory:{activeRoute:()=>a.車次,activeStopIds:()=>visible},AChangMemberCards:require('../member-cards'),addEventListener(){}};
  document.dispatchEvent=()=>{};const ctx=vm.createContext({document,window,Intl,Date,console,CustomEvent:class{constructor(type,options={}){this.type=type;this.detail=options.detail;}}});vm.runInContext(fs.readFileSync(require.resolve('../route-assignment'),'utf8'),ctx);
  const controller=ctx.AChangRouteAssignment.create({getContext:()=>({role:'admin',subject:'admin-test',people,tasks,date:'2026-11-03'}),getRows:()=>[a,b],submit:()=>{throw Error('must not save during selection');}});
- return {controller,cards,node,emit:(type,detail)=>listeners.get(type).forEach(fn=>fn({detail})),panel:()=>node('detail').children[0]};
+ return {controller,cards,node,setWindow:ids=>{visible=ids;},emit:(type,detail)=>listeners.get(type).forEach(fn=>fn({detail})),panel:()=>node('detail').children[0]};
 }
 test('one card click opens the attached personnel picker; title all-select toggles off and restores its hint',()=>{
  const {cards,node,emit,panel}=assignmentHarness();
@@ -143,4 +143,11 @@ test('clearing a vehicle stages only that date and route, preserves other work, 
  const tasks=[{id:'one',volunteer_id:person.id,visit_date:date,route_id:a.路線ID},{id:'two',volunteer_id:second.id,visit_date:date,truck:a.路線ID},{id:'another-date',visit_date:'2026-11-04',route_id:a.路線ID},{id:'another-route',visit_date:date,route_id:other.路線ID}];
  assert.deepEqual(d.clearRoute(a.路線ID,date,tasks,[person,second]),{draftsRemoved:1,removalsAdded:2});assert.equal(d.items().length,2);assert.deepEqual(d.removals().map(x=>x.taskId),['one','two']);assert.equal(tasks.length,4);assert.equal(d.clearRoute(a.路線ID,date,tasks).removalsAdded,0);
  const payload=d.payload(()=> 'clear-vehicle');assert.equal(payload.items.filter(x=>x.action==='remove').length,2);d.clear();assert.equal(d.size(),0);
+});
+
+test('all-selection uses the selected time window, follows range changes, and can be cancelled again',()=>{
+ const {emit,node,panel,cards,setWindow}=assignmentHarness({visible:[a.站點ID]});
+ emit('achang:focus-route-stop',{id:a.站點ID,route:a.車次,all:true,stopIds:[a.站點ID]});assert.equal(cards.filter(c=>c.states.has('assignment-target')).length,1);assert.equal(node('routeTitle').children.at(-1).textContent,'（站點已全選）');assert.match(panel().innerHTML,/目前時段 1 站/);
+ setWindow([b.站點ID]);emit('achang:directory-route',{route:a.車次});assert.equal(cards[0].states.has('assignment-target'),false);assert.equal(cards[1].states.has('assignment-target'),true);assert.equal(node('routeTitle').children.at(-1).textContent,'（站點已全選）');
+ emit('achang:focus-route-stop',{id:b.站點ID,route:a.車次,all:true,stopIds:[b.站點ID]});assert.equal(cards.filter(c=>c.states.has('assignment-target')).length,0);assert.equal(panel().hidden,true);assert.equal(node('routeTitle').children.at(-1).textContent,'（點擊全選站點）');
 });

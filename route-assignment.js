@@ -67,10 +67,11 @@ function create({getContext,getRows,submit}){
   const top=Math.max(74,Math.min(diagram.top,document.documentElement.clientHeight-360));
   panel.style.width=width+'px';panel.style.left=(desktop?Math.max(12,diagram.left-width+2):12)+'px';panel.style.top=top+'px';const height=Math.max(300,document.documentElement.clientHeight-top-24);panel.style.maxHeight=height+'px';panel.style.height=Math.min(800,height)+'px';$('detail')?.classList.add('has-allocation-extension');
  }
- const allSelected=()=>{const all=rows().filter(r=>r.車次===routeScope?.route&&legalTime(r.到達)&&!r.來源刪除線);return all.length>0&&all.every(r=>routeScope?.ids.includes(r.站點ID));};
+ const windowRows=()=>{const ids=new Set(window.AChangRouteDirectory?.activeStopIds?.()||[]),route=window.AChangRouteDirectory?.activeRoute?.();return rows().filter(r=>r.車次===route&&ids.has(r.站點ID)&&legalTime(r.到達)&&!r.來源刪除線);};
+ const allSelected=()=>{const all=windowRows();return all.length>0&&all.length===routeScope?.ids.length&&all.every(r=>routeScope.ids.includes(r.站點ID));};
  function paintStops(){
   const all=rows(),ctx=context(),currentDraft=draft.items(),allPicked=ctx.role==='admin'&&allSelected();$('routeTitle')?.classList.toggle('assignment-route-selected',Boolean(routeScope?.ids.length&&ctx.role==='admin'));$('routeTitle')?.setAttribute('aria-pressed',String(allPicked));
-  $('routeTitle')?.querySelector('.route-all-selected')?.remove();if(ctx.role==='admin'){const badge=document.createElement('span');badge.className='route-all-selected';badge.textContent=allPicked?'（站點已全選）':'（點擊全選站點）';$('routeTitle')?.append(badge);}
+  $('routeTitle')?.querySelector('.route-all-selected')?.remove();if(ctx.role==='admin'){const badge=document.createElement('span');badge.className='route-all-selected'+(allPicked?' is-all-selected':'');badge.textContent=allPicked?'（站點已全選）':'（點擊全選站點）';$('routeTitle')?.append(badge);}
   document.querySelectorAll('#routeDiagram [data-focus-stop],#routeFullDiagram [data-focus-stop]').forEach(button=>{
    const row=all.find(r=>r.站點ID===button.dataset.focusStop);if(!row)return;
    const picked=Boolean((selected===row.站點ID||routeScope?.ids.includes(row.站點ID))&&ctx.role==='admin');button.classList.toggle('assignment-selected',picked);button.setAttribute('aria-pressed',String(picked));
@@ -152,10 +153,10 @@ function create({getContext,getRows,submit}){
   if(context().role!=='admin'||busy)return;const detail=event.detail||{},same=routeScope?.route===detail.route;
   if(detail.all&&same&&detail.stopIds?.length&&detail.stopIds.every(id=>routeScope.ids.includes(id))&&routeScope.ids.length===detail.stopIds.length){clearSelection();return;}
   const ids=detail.all?detail.stopIds||[]:same?(routeScope.ids.includes(detail.id)?routeScope.ids.filter(id=>id!==detail.id):[...routeScope.ids,detail.id]):[detail.id];
-  selected=null;routeScope=ids.length?{route:detail.route,ids,mode:detail.all?'all':'selection'}:null;opened=ids.length>0;message='可直接加入人員，切換站點或車次繼續暫排，最後一次確認儲存。';render();
+  selected=null;routeScope=ids.length?{route:detail.route,ids,mode:detail.all?'window':'selection'}:null;opened=ids.length>0;message='可直接加入人員，切換站點或車次繼續暫排，最後一次確認儲存。';render();
  });
  document.addEventListener('achang:assign-route',event=>{if(context().role!=='admin'||busy)return;selected=null;routeScope={route:event.detail.route,ids:event.detail.stopIds,mode:'window'};opened=true;message='已選定目前時段站點，可直接加入人員';render();});
- document.addEventListener('achang:directory-route',event=>{if(routeScope){routeScope=routeScope.route===event.detail?.route?{...routeScope,ids:routeScope.mode==='window'?(window.AChangRouteDirectory?.activeStopIds?.()||routeScope.ids):routeScope.ids.filter(id=>rows().some(row=>row.站點ID===id))}:null;}render();});
+ document.addEventListener('achang:directory-route',event=>{if(routeScope){const visible=windowRows().map(row=>row.站點ID);routeScope=routeScope.route===event.detail?.route?{...routeScope,ids:routeScope.mode==='window'?visible:routeScope.ids.filter(id=>visible.includes(id))}:null;if(!routeScope?.ids.length){routeScope=null;opened=false;}}render();});
  const clearSelection=()=>{if(busy)return;selected=null;routeScope=null;opened=false;message='已取消站點選取，分配草稿仍保留';render();};
  document.addEventListener('achang:clear-route-selection',clearSelection);
  document.addEventListener('achang:clear-route-assignments',event=>{
