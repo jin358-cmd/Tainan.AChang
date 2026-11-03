@@ -35,14 +35,13 @@ test('expanding scrolls the next station below fixed controls while preserving e
  assert.equal(selector,'routeFullDiagram');assert.equal(scrolled.top,360);assert.equal(scrolled.behavior,'smooth');assert.equal(cards.length,3,'previous and future cards remain in the complete sequence');
 });
 
-test('mobile navigation links open driving directions without turning the click into a staffing selection',()=>{
- const source=fs.readFileSync(path.join(root,'route-directory.js'),'utf8'),events=[];
- const context=vm.createContext({encodeURIComponent,esc:value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),document:{dispatchEvent:event=>events.push(event)},CustomEvent:class{constructor(type,options){this.type=type;this.detail=options.detail;}}});
- vm.runInContext(source.slice(source.indexOf('function stationNavigation('),source.indexOf('function stationCards(')),context);
- const link=context.stationNavigation({'站點名稱／地址':'大橋國小後側門',_addressNote:'大橋一街103巷204號'},'route-stop-navigation');
- assert.match(link,/google\.com\/maps\/dir\/\?api=1/);assert.match(link,/travelmode=driving/);assert.match(link,/<svg/);assert.match(link,/<span>導航<\/span>/);assert.match(decodeURIComponent(link),/destination=臺南市永康區大橋一街103巷204號/);assert.match(link,/rel="noopener noreferrer"/);
- vm.runInContext(source.slice(source.indexOf('function selectCard('),source.indexOf('function openRoute(')),context);
- let prevented=false;const card={getAttribute:()=> 'false',dataset:{assignStop:'one',assignRoute:'日間2'}},navigation={};
- context.selectCard({type:'click',target:{closest:selector=>selector==='[data-assign-stop]'?card:selector==='.route-stop-navigation'?navigation:null},preventDefault:()=>{prevented=true;}});
- assert.equal(prevented,false);assert.equal(events.length,0);
+test('mobile table keeps directions while station cards have no navigation button',()=>{
+ const source=fs.readFileSync(path.join(root,'route-directory.js'),'utf8');
+ const context=vm.createContext({encodeURIComponent,esc:value=>String(value)});
+ vm.runInContext(source.slice(source.indexOf('function stationNavigation('),source.indexOf('function renderFullRoute(')),context);
+ const row={'站點名稱／地址':'大橋國小後側門',_addressNote:'大橋一街103巷204號','到達時間':'07:00',_directoryOrder:3};
+ const card=context.stationCards([row],'日間6'),table=context.stationTable([row]);
+ assert.doesNotMatch(card,/route-stop-navigation|maps\/dir|<span>導航<\/span>/);
+ assert.match(card,/data-assign-stop=/);
+ assert.match(table,/class="station-table-navigate"/);assert.match(table,/google\.com\/maps\/dir\/\?api=1/);assert.match(table,/travelmode=driving/);assert.match(decodeURIComponent(table),/destination=臺南市永康區大橋一街103巷204號/);
 });
