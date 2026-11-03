@@ -46,3 +46,6 @@
 .map-route-right .route-stop a{font-size:16px;font-weight:700;line-height:1.65;padding:8px 6px}
 .map-route-right .route-stop time{font-size:18px;font-weight:800}
 .map-route-right .route-stop small{font-size:13px;line-height:1.7}
+
+
+.service-day{display:block;white-space:nowrap;line-height:1.8;text-align:left}

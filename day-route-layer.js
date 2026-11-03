@@ -36,6 +36,14 @@
   if(!coords.length)return null;
   return [[Math.min(...coords.map(c=>c[0])),Math.min(...coords.map(c=>c[1]))],[Math.max(...coords.map(c=>c[0])),Math.max(...coords.map(c=>c[1]))]];
  }
+ function filterModelWindow(full,start='',end=''){
+  if(!start&&!end)return full;
+  const within=stop=>/^([01]\d|2[0-3]):[0-5]\d$/.test(stop.time)&&(start&&end&&start>end?stop.time>=start||stop.time<=end:(!start||stop.time>=start)&&(!end||stop.time<=end));
+  const stops=full.stops.filter(within),ids=new Set(stops.map(s=>s.id)),orders=new Set(stops.map(s=>`${s.route}|${s.order}`));
+  const groups=new Map([...full.groups].map(([route,items])=>[route,items.filter(s=>ids.has(s.id))]));
+  const points={type:'FeatureCollection',features:full.points.features.filter(f=>ids.has(f.properties.id))},lines={type:'FeatureCollection',features:full.lines.features.filter(f=>orders.has(`${f.properties.route}|${f.properties.from}`)&&orders.has(`${f.properties.route}|${f.properties.to}`))};
+  return {groups,stops,pending:full.pending.filter(s=>ids.has(s.id)),points,lines,total:stops.length,located:points.features.length};
+ }
  function nextStopIds(model,rows,progress,now=new Date()){
   const ids=new Set();if(!progress)return ids;
   const originals=new Map(rows.map(r=>[r['站點ID'],r]));
@@ -48,7 +56,7 @@
  function create({getRows,onChange,onSelect}){
   const toggle=document.getElementById('layerRoutes'),select=document.getElementById('mapRouteLayerSelect'),status=document.getElementById('mapRouteLayerStatus'),legend=document.getElementById('mapRouteLayerLegend'),pending=document.getElementById('mapRoutePending'),pendingList=document.getElementById('mapRoutePendingList'),mapBox=document.getElementById('mapBox');
   if(!toggle||!select||!status||!mapBox)return null;
-  let catalog=null,map=null,attachedMap=null,model=build([],null),fitRequested=true,failed=false,detail=null,focusId=null;
+  let catalog=null,map=null,attachedMap=null,model=build([],null),fitRequested=true,failed=false,detail=null,focusId=null,rangeStart='',rangeEnd='',fullModel=model;
   const byId=id=>model.stops.find(stop=>stop.id===id);
   const closeDetail=()=>{detail?.remove();detail=null;};
   function showStop(id){
@@ -79,7 +87,7 @@
    instance.on('mouseenter','day-route-points',()=>{instance.getCanvas().style.cursor='pointer';});
    instance.on('mouseleave','day-route-points',()=>{instance.getCanvas().style.cursor='';});
   }
-  function nextIds(){return nextStopIds(model,getRows(),globalThis.AChangDispatchView);}
+  function nextIds(){return nextStopIds(fullModel,getRows(),globalThis.AChangDispatchView);}
   function nextFeatures(){const ids=nextIds();return {type:'FeatureCollection',features:model.points.features.filter(f=>ids.has(f.properties.id))};}
   function refreshGlow(){
    if(map?.getSource(SOURCE+'-next'))map.getSource(SOURCE+'-next').setData(toggle.checked?nextFeatures():empty());
@@ -95,6 +103,10 @@
    if(map){map.flyTo({center:stop.position,zoom:Math.max(map.getZoom?.()||13,16),duration:650});}
    else{const fallback=document.getElementById('mapFallback');if(fallback)renderFallback(fallback);}
   }
+  document.addEventListener('achang:route-time-filter',event=>{
+   const next=event.detail||{};if(rangeStart===(next.start||'')&&rangeEnd===(next.end||''))return;
+   rangeStart=next.start||'';rangeEnd=next.end||'';focusId=null;fitRequested=true;closeDetail();sync(map);onChange?.();
+  });
   document.addEventListener('achang:focus-route-stop',event=>focusStop(event.detail||{}));
   function renderMap(){
    if(!map||!catalog)return;
@@ -122,7 +134,7 @@
    }
   }
   function sync(instance){
-   map=instance||null;model=build(getRows(),catalog,select.value);renderControls();renderMap();
+   map=instance||null;fullModel=build(getRows(),catalog,select.value);model=filterModelWindow(fullModel,rangeStart,rangeEnd);renderControls();renderMap();
   }
   function renderFallback(container){
    if(!toggle.checked||!catalog||!model.located)return;
@@ -174,6 +186,7 @@
   setInterval(()=>{if(document.hidden||!toggle.checked||!map?.getLayer('day-route-next-glow'))return;const phase=(Date.now()%1600)/1600;map.setPaintProperty('day-route-next-glow','circle-radius',11+11*Math.sin(phase*Math.PI)**2);map.setPaintProperty('day-route-next-glow','circle-opacity',.25+.35*Math.cos(phase*Math.PI)**2);},100);
   return {sync,renderFallback,closeDetail,focusStop};
  }
- return {build,bounds,create,nextStopIds};
+ return {build,bounds,create,nextStopIds,filterModelWindow};
 });
+
 
