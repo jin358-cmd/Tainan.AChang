@@ -35,9 +35,9 @@ test('map startup has bounded failure, cleanup and retry guards', () => {
 test('map asset revision and service-worker cache advance together', () => {
   assert.match(html, /styles\.css\?v=211/);
   assert.match(html, /route-time-filter\.js\?v=2/);
-  assert.match(html, /app\.js\?v=224/);
-  assert.match(html, /route-directory\.js\?v=15/);
-  assert.match(sw, /achang-pwa-shell-v211-route-preset-labels/);
+  assert.match(html, /app\.js\?v=225/);
+  assert.match(html, /route-directory\.js\?v=16/);
+  assert.match(sw, /achang-pwa-shell-v212-route-draft-allocation/);
 });
 
 test('truck directory keeps the route view concise and renders directional route arrows', () => {

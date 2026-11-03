@@ -56,7 +56,7 @@ test('night and A/B rows stay outside the six-route layer; changed names invalid
 });
 test('the route layer is placed above the existing map and cached without changing auth or existing layers',()=>{
  const root=path.join(__dirname,'..'),html=fs.readFileSync(path.join(root,'index.html'),'utf8'),app=fs.readFileSync(path.join(root,'app.js'),'utf8'),sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
- assert.ok(html.indexOf('id="layerRoutes"')<html.indexOf('id="mapBox"'));
+ assert.ok(html.indexOf('id="mapLayerSettings"')<html.indexOf('id="layerRoutes"'));assert.ok(html.indexOf('id="mapBox"')<html.indexOf('id="layerRoutes"'));
  for(const id of ['layerVolunteer','layerDay','layerNight','mapRouteLayerSelect'])assert.ok(html.includes(`id="${id}"`));
  assert.match(app,/dayMapRouteLayer\?\.sync\(mapLoaded\?map:null\)/);
  assert.match(app,/dayMapRouteLayer\?\.renderFallback\(root\)/);

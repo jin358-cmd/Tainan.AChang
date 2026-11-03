@@ -81,11 +81,13 @@
    legend.hidden=!toggle.checked;
    if(!toggle.checked){status.textContent='車次路線已關閉';pending.hidden=true;return;}
    if(!catalog){status.textContent=failed?'路線座標載入失敗，重新整理後可再試':'正在載入路線座標…';pending.hidden=true;return;}
+   const aggregate=filterModelWindow(build(getRows(),catalog,directoryShift==='夜間'?'night-all':directoryShift==='日間'?'all':'all-routes'),rangeStart,rangeEnd),summary=document.getElementById('directoryRouteSummary');
+   if(summary)summary.textContent=`${directoryShift==='日間'?'全部日間6車次':directoryShift==='夜間'?'全部夜間24車次':'全部30車次'}．共${String(aggregate.total).replace(/\d/g,d=>String.fromCharCode(d.charCodeAt(0)+0xfee0))}站點`;
    const count=String(model.total).replace(/\d/g,digit=>String.fromCharCode(digit.charCodeAt(0)+0xfee0));
    status.textContent=`${select.value==='all'?'全部日間6車次':select.value==='night-all'?'全部夜間24車次':select.value==='all-routes'?'全部30車次':select.value}．共${count}站點`;
    pending.hidden=true;
    renderLegend();
-   const summary=pending.querySelector('summary');summary.textContent=`待定位 ${model.pending.length} 站`;
+   const pendingSummary=pending.querySelector('summary');pendingSummary.textContent=`待定位 ${model.pending.length} 站`;
    pendingList.replaceChildren();
    for(const stop of model.pending){const li=document.createElement('li');li.textContent=`${stop.route} 第${stop.order}站 ${stop.time} ${stop.name}：${stop.notes.join('；')}`;pendingList.append(li);}
   }
@@ -181,14 +183,7 @@
   }
   function changed(){const selected=select.value;alignDirectory();select.value=selected;focusId=null;fitRequested=true;closeDetail();sync(map);onChange?.();}
   toggle.addEventListener('change',changed);select.addEventListener('change',changed);
-  let legendShift=null;
-  function renderLegend(){
-   const shift=routeShift(select.value);if(legendShift===shift)return;legendShift=shift;legend.replaceChildren();
-   for(const route of ROUTES.filter(route=>!shift||routeShift(route)===shift)){
-    const key=document.createElement('button'),swatch=document.createElement('i');key.type='button';key.className='route-color-choice';key.setAttribute('aria-label',`切換${route}`);key.onclick=()=>{toggle.checked=true;select.value=route;select.dispatchEvent(new Event('change',{bubbles:true}));};swatch.style.backgroundColor=routeColor(route);key.append(swatch,document.createTextNode(`${routeShift(route)==='日間'?'☀️':'🌙'} ${route}`));legend.append(key);
-   }
-   const note=document.createElement('span');note.className='route-sequence-note';note.textContent='→ 依站序連線';legend.append(note);
-  }
+  function renderLegend(){legend.hidden=true;legend.replaceChildren();}
   renderLegend();
   const loadCatalog=async(file,prefix,count)=>{const response=await fetch(file,{cache:'no-store'});if(!response.ok)throw Error('route locations unavailable');const value=await response.json();if(value.version!==1||value.stops?.filter(stop=>String(stop.source_id||'').startsWith(prefix)).length!==count)throw Error('invalid route location catalog');return value;};
   Promise.all([loadCatalog('./data-day-route-locations-20261103.json','PDF:DAY:',160),loadCatalog('./data-night-route-locations-20261103.json','PDF:NIGHT:',1626)]).then(([day,night])=>{

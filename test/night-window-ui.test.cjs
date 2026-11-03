@@ -18,5 +18,5 @@ test('old night memories cannot mask new defaults; new manual choices persist wi
 });
 test('desktop and mobile nav swap dispatch and planning and route entry contains list and search',()=>{
  for(const id of ['desktopNav','手機功能列']){const nav=id==='desktopNav'?html.match(/<nav[^>]*id="desktopNav"[\s\S]*?<\/nav>/)[0]:html.match(/<nav[^>]*aria-label="手機功能列"[\s\S]*?<\/nav>/)[0];assert.ok(nav.indexOf('data-page="reports"')<nav.indexOf('data-page="planner"'));assert.match(nav,/data-page="trucks"[^]*?查看完整路線/);}
- const page=html.slice(html.indexOf('<section id="page-trucks"'),html.indexOf('</main>'));assert.match(page,/aria-label="查看完整路線"/);assert.match(page,/id="search"[^]*?id="directory"/);assert.match(page,/>☀️ 日間<\/option>/);assert.match(page,/>🌙 夜間<\/option>/);
+ const page=html.slice(html.indexOf('<section id="page-trucks"'),html.indexOf('</main>'));assert.match(page,/aria-label="查看完整路線"/);assert.match(page,/id="search"[^]*?id="directory"/);assert.match(page,/data-directory-shift="日間"/);assert.match(page,/class="night-shift" data-directory-shift="夜間"/);
 });

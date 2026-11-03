@@ -25,6 +25,7 @@ module.exports=L.run(async(req,res)=>{
  const b=L.body(req);
  if(req.method==='POST'){
   if(p.role!=='admin')L.problem(403,'志工不能指定排班');
+  if(b.action==='batch')return L.json(res,200,await require('../lib/route-assignment-batch').saveBatch(b,p,L));
   const mid=L.uuid(b.volunteerId),village=L.checkText(b.area,'里別',30),d=L.validDate(b.date),sh=shiftMap[b.shift];
   const truck=String(b.truck||'').trim();if(truck.length>30)L.problem(400,'車號過長');
   const routeId=L.checkText(b.routeId||truck,'路線 ID',80),routeEnd=b.routeEnd?L.time(b.routeEnd):null;
