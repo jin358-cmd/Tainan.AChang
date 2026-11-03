@@ -102,7 +102,7 @@ async function printActiveRoute(){
  const stationCrew=[...diagram.querySelectorAll('.route-stop')].map(card=>[...card.querySelectorAll('.route-person-chip[data-member-id]')].map(chip=>({id:chip.dataset.memberId,name:chip.dataset.memberName,leader:chip.dataset.routeLeader==='true'})));
  const common=window.AChangRoutePrint?.commonCrew(stationCrew)||[];
  if(common.length){const names=document.createElement('p');names.className='route-print-crew';names.textContent='（'+common.map(person=>(person.leader?'👑 ':'')+person.name).join('，')+'）';content.append(title,names);diagram.querySelectorAll('.route-assigned-people').forEach(box=>box.remove());}else content.append(title);
- const windowLabel=document.createElement('p');windowLabel.textContent=`選定到站時段：${start||'不限'}～${end||'不限'}｜站點 ${snapshot.rows.length} 站`;content.append(windowLabel);
+ const windowLabel=document.createElement('p');windowLabel.className='route-print-window';windowLabel.textContent=`選定到站時段：${start||'不限'}～${end||'不限'}｜站點 ${snapshot.rows.length} 站`;content.append(windowLabel);
  const visual=document.createElement('div');visual.className='route-print-visuals';content.append(visual);
  const mapTitle=document.createElement('h2');mapTitle.textContent='選定時段地圖路徑';visual.append(mapTitle);
  const svg=await window.AChangRouteMapPrint?.(snapshot.route,{start,end,stopIds:snapshot.rows.map(row=>row._mapStopId)});

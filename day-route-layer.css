@@ -76,7 +76,7 @@
 .route-print-compact{width:190mm!important;font:11px Arial,sans-serif;color:#172f40}
 .route-print-content{width:100%;padding:0}
 .route-print-compact h1{font-size:18px;line-height:1.3;margin:0 0 4px}
-.route-print-compact h2{font-size:13px;line-height:1.3;margin:7px 0 4px;break-after:avoid}
+.route-print-compact h2{font-size:18px;line-height:1.3;margin:7px 0 4px;break-after:avoid}
 .route-print-compact p{font-size:11px;line-height:1.35;margin:3px 0 6px}
 .route-print-compact .route-print-crew{font-size:12px;line-height:1.4;font-weight:700}
 .route-print-compact svg{display:block;width:100%;height:auto;max-height:88mm}
@@ -97,7 +97,7 @@
  #routePrintSurface.route-print-compact{font-size:11px}
  #routePrintSurface.route-print-day{position:relative!important;width:190mm!important;max-height:275mm;break-inside:avoid;page-break-inside:avoid;overflow:hidden}
  #routePrintSurface.route-print-compact h1{font-size:18px;margin:0 0 4px}
- #routePrintSurface.route-print-compact h2{font-size:13px;margin:7px 0 4px}
+ #routePrintSurface.route-print-compact h2{font-size:18px;margin:7px 0 4px}
  #routePrintSurface.route-print-compact svg{max-height:88mm}
  #routePrintSurface.route-print-compact .diagram{display:grid!important;padding:7px 0!important}
  #routePrintSurface.route-print-compact .route-row{display:contents!important}
@@ -126,3 +126,5 @@
 .route-print-compact[data-print-mode="list"] tr{break-inside:avoid;page-break-inside:avoid}.route-print-compact[data-print-mode="list"] thead{display:table-header-group}
 
 .day-route-navigate{gap:5px}.day-route-navigate svg{width:20px;height:24px;flex:none}
+
+.route-print-compact .route-print-window{font-size:18px!important;line-height:1.5;font-weight:700;margin:6px 0 10px}

@@ -135,7 +135,7 @@
     map.addLayer({id:LAYERS[0],type:'line',source:SOURCE,paint:{'line-color':['get','color'],'line-width':6,'line-opacity':.9}});
     map.addLayer({id:LAYERS[1],type:'symbol',source:SOURCE,layout:{'symbol-placement':'line','symbol-spacing':90,'text-field':'›','text-font':['Noto Sans Regular'],'text-size':23,'text-keep-upright':false,'text-rotation-alignment':'map','text-allow-overlap':false},paint:{'text-color':['get','color'],'text-halo-color':'#ffffff','text-halo-width':1}});
     map.addLayer({id:LAYERS[2],type:'circle',source:SOURCE+'-points',paint:{'circle-radius':6,'circle-color':['get','color'],'circle-stroke-color':'#ffffff','circle-stroke-width':2}});
-    map.addLayer({id:LAYERS[3],type:'symbol',source:SOURCE+'-points',layout:{'text-field':['to-string',['get','order']],'text-font':['Noto Sans Regular'],'text-size':12,'text-offset':[0,-1.1],'text-allow-overlap':false},paint:{'text-color':'#18384f','text-halo-color':'#ffffff','text-halo-width':2}});
+    map.addLayer({id:LAYERS[3],type:'symbol',source:SOURCE+'-points',layout:{'text-field':['to-string',['get','order']],'text-font':['Noto Sans Bold'],'text-size':20,'text-offset':[0,-.9],'text-allow-overlap':false},paint:{'text-color':'#18384f','text-halo-color':'#ffffff','text-halo-width':3}});
    }else{
     map.getSource(SOURCE).setData(model.lines);map.getSource(SOURCE+'-points').setData(model.points);
    }
@@ -179,7 +179,7 @@
     if(upcoming.has(stop.id)){for(let index=0;index<2;index++){const halo=make('circle',{cx:p[0],cy:p[1],r:12,fill:'#ffdd00','fill-opacity':.12,stroke:'#ffcc00','stroke-width':3,'pointer-events':'none','data-next-stop':stop.id});make('animate',{attributeName:'r',values:'10;36',dur:'1.8s',begin:`-${index*.9}s`,repeatCount:'indefinite'},halo);make('animate',{attributeName:'opacity',values:'1;0',dur:'1.8s',begin:`-${index*.9}s`,repeatCount:'indefinite'},halo);}}
     const circle=make('circle',{cx:p[0],cy:p[1],r:isAggregate(select.value)?5:7,fill:upcoming.has(stop.id)?'#fff34d':stop.color,stroke:'#fff','stroke-width':2,'data-route-stop':stop.id,tabindex:0,role:'button','aria-label':`${stop.route}第${stop.order}站 ${stop.time} ${stop.name}`});
     circle.onclick=event=>{event.stopPropagation();showStop(stop.id);};circle.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();showStop(stop.id);}};
-    if(!isAggregate(select.value)&&(stop.order===1||stop.order%Math.max(1,Math.ceil(model.located/(width<500?15:24)))===0))make('text',{x:p[0]+9,y:p[1]-8,'font-size':13,fill:'#18384f',stroke:'#fff','stroke-width':3,'paint-order':'stroke','pointer-events':'none'}).textContent=String(stop.order);
+    if(!isAggregate(select.value)&&(stop.order===1||stop.order%Math.max(1,Math.ceil(model.located/(width<500?15:24)))===0))make('text',{x:p[0]+10,y:p[1]-10,'font-size':20,'font-weight':800,fill:'#18384f',stroke:'#fff','stroke-width':4,'paint-order':'stroke','pointer-events':'none'}).textContent=String(stop.order);
    }
    make('text',{x:10,y:height-12,'font-size':11,fill:'#18384f',stroke:'#fff','stroke-width':3,'paint-order':'stroke'}).textContent='© Esri · 官方清運點 · 依站序連線';
    const focused=byId(focusId);if(focused?.position){const p=project(focused.position),w=width*.48,h=height*.48;svg.setAttribute('viewBox',`${p[0]-w/2} ${p[1]-h/2} ${w} ${h}`);make('circle',{cx:p[0],cy:p[1],r:12,fill:'none',stroke:'#ff7c25','stroke-width':3,'pointer-events':'none'});}
