@@ -51,3 +51,5 @@
 
 
 .service-day{display:block;white-space:nowrap;line-height:1.8;text-align:left}
+
+.map-route-layer-legend{max-height:140px;overflow:auto;padding:3px}

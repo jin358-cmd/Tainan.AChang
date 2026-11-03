@@ -55,7 +55,8 @@ test('requested route labels and every daytime option carry the requested text a
  const html=fs.readFileSync(require.resolve('../index.html'),'utf8'),js=fs.readFileSync(require.resolve('../day-route-layer.js'),'utf8'),directory=fs.readFileSync(require.resolve('../route-directory.js'),'utf8');
  assert.match(html,/checked \/> 車次路線/);
  const options=html.match(/<select id="mapRouteLayerSelect"[^>]*>(.*?)<\/select>/s)[1].match(/<option[^>]*>[^<]+<\/option>/g);
- assert.equal(options.length,7);assert.ok(options.every(option=>option.includes('>☀️ ')));
+ const dayOptions=options.filter(option=>/value="(?:all|日間[1-6])"/.test(option));assert.equal(dayOptions.length,7);assert.ok(dayOptions.every(option=>option.includes('>☀️ ')));
+ const nightOptions=options.filter(option=>/value="(?:night-all|夜間\d+)"/.test(option));assert.equal(nightOptions.length,25);assert.ok(nightOptions.every(option=>option.includes('>🌙 ')));
  assert.match(js,/．共\$\{count\}站點/);
  assert.match(directory,/await window\.AChangRouteMapPrint\?\.\(snapshot\.route,\{start,end,stopIds:snapshot\.rows\.map/);
 });

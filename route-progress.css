@@ -3,8 +3,10 @@
 #detail .route-progress-legend span{display:inline-flex;align-items:center;gap:7px}
 #detail .stop-key{width:12px;height:12px;border:2px solid currentColor;border-radius:50%;display:inline-block}
 #detail .progress-past{color:#b42318}
-#detail .progress-next{color:#157347}
+#detail .progress-next{color:#8a6100}
 #detail .progress-upcoming{color:#68757e}
 #detail .stop-number{display:flex;align-items:center;justify-content:center;box-sizing:border-box;border:2px solid #929da6;background:white;color:#68757e;line-height:1;font-weight:700}
 #detail .stop-number[data-progress="past"]{border-color:#c43b32;background:#fff0ee;color:#b42318}
-#detail .stop-number[data-progress="next"]{border-color:#16804a;background:#e7f7ed;color:#126438;box-shadow:0 0 0 3px #e7f7ed}
+#detail .stop-number[data-progress="next"]{position:relative;z-index:1;border-color:#a16b00;background:#fff34d;color:#624300;box-shadow:0 0 15px #ffdc00;animation:next-stop-yellow-ripple 1.8s ease-out infinite}
+@keyframes next-stop-yellow-ripple{0%{box-shadow:0 0 12px #ffdc00,0 0 0 0 #ffcc00cc}100%{box-shadow:0 0 18px #ffdc00,0 0 0 20px #ffcc0000}}
+@media(prefers-reduced-motion:reduce){#detail .stop-number[data-progress="next"]{animation:none;box-shadow:0 0 0 5px #ffe677,0 0 16px #ffdc00}}

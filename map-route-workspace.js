@@ -26,11 +26,11 @@ document.addEventListener('achang:directory-route',event=>{
  directory.hidden=false;
  if(event.detail?.syncMap===false)return;
  const name=event.detail.route,select=byId('mapRouteLayerSelect'),toggle=byId('layerRoutes');
- if(/^日間[1-6]$/.test(name)&&select&&toggle){toggle.checked=true;select.value=name;select.dispatchEvent(new Event('change',{bubbles:true}));}
+ if(window.AChangDayRouteLayer?.isRoute(name)&&select&&toggle){toggle.checked=true;select.value=name;select.dispatchEvent(new Event('change',{bubbles:true}));}
  else if(toggle){toggle.checked=false;toggle.dispatchEvent(new Event('change',{bubbles:true}));}
 });
 byId('mapRouteLayerSelect')?.addEventListener('change',()=>{
- const name=byId('mapRouteLayerSelect').value;if(desktop.matches&&name!=='all')window.AChangRouteDirectory?.openRoute(name,{syncMap:false});
+ const name=byId('mapRouteLayerSelect').value;if(desktop.matches&&window.AChangDayRouteLayer?.isRoute(name))window.AChangRouteDirectory?.openRoute(name,{syncMap:false});
 });
 document.addEventListener('click',event=>{
  if(!desktop.matches)return;
