@@ -9,6 +9,7 @@ const right=document.createElement('aside');right.className='map-route-right tru
 const empty=document.createElement('p');empty.className='map-route-empty';empty.textContent='請從車次列表選擇車次，再點選站點號碼分配人員。';right.append(empty);
 [...page.children].forEach(node=>center.append(node));left.append(controls,directory);right.append(detail);workspace.append(left,center,right);page.append(workspace);host.hidden=true;host.setAttribute('aria-hidden','true');
 const jump=document.createElement('button');jump.type='button';jump.className='map-route-list-jump';jump.textContent='選擇車次／人員分配';jump.onclick=()=>left.scrollIntoView({block:'start',behavior:'smooth'});center.prepend(jump);
+document.body.classList.add('map-route-integrated');
 function resize(){document.body.classList.toggle('map-route-desktop',desktop.matches);const active=window.AChangRouteDirectory?.activeRoute?.();if(active)window.AChangRouteDirectory.openRoute(active,{syncMap:false,reveal:false});window.dispatchEvent(new Event('resize'));}
 document.addEventListener('achang:directory-route',event=>{
  empty.hidden=true;directory.hidden=false;if(event.detail?.syncMap===false)return;
@@ -19,3 +20,4 @@ document.addEventListener('achang:directory-route',event=>{
 byId('mapRouteLayerSelect')?.addEventListener('change',()=>{const name=byId('mapRouteLayerSelect').value;if(window.AChangDayRouteLayer?.isRoute(name))window.AChangRouteDirectory?.openRoute(name,{syncMap:false,reveal:false});});
 desktop.addEventListener('change',resize);resize();
 })();
+

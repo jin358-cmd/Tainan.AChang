@@ -1,10 +1,11 @@
-const CACHE = 'achang-pwa-shell-v213-shared-member-map-workspace';
+const CACHE = 'achang-pwa-shell-v214-pwa-responsive';
 const SHELL=['./member-cards.js','./route-assignment.js','./route-assignment.css','./map-settings.js','./map-settings.css','./data-night-route-locations-20261103.json','./route-print-map.js','./map-route-workspace.js','./map-route-workspace.css','./day-route-layer.js','./day-route-layer.css','./data-day-route-locations-20261103.json','./assets/day-route-basemap.jpg','./','./index.html','./styles.css','./day-routes.js','./official-routes.js','./route-time-filter.js','./app.js','./dispatch-view.js','./route-directory.html','./route-directory.css','./route-progress.css','./route-directory.js','./truck-directory-tab.css','./data-public.json','./data-legacy-source-archive-20261030.json','./data-day-routes-20250402.json','./data-day-shift-windows-20261029.json','./data-official-day-20261030.source.json','./data-official-night-20261030.source.json','./manifest.webmanifest','./assets/icon.svg','./assets/icon-192.png','./assets/icon-512.png'];
 self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())});
 self.addEventListener('activate',event=>{event.waitUntil((async()=>{const names=await caches.keys();await Promise.all(names.filter(name=>name.startsWith('achang-pwa-shell-')&&name!==CACHE).map(name=>caches.delete(name)));await self.clients.claim()})())});
 self.addEventListener('fetch',event=>{const request=event.request;if(request.method!=='GET')return;const url=new URL(request.url);if(url.origin!==self.location.origin||url.pathname.startsWith('/api/'))return;const paths=new Set(SHELL.map(path=>new URL(path,self.registration.scope).pathname));if(!paths.has(url.pathname))return;
 // Network-first prevents old JavaScript from surviving a new production deployment.
 event.respondWith((async()=>{try{const live=await fetch(request,{cache:'no-store'});if(live.ok&&live.type!=='opaque'){const cache=await caches.open(CACHE);await cache.put(request,live.clone())}return live}catch(err){const cached=await caches.match(request,{ignoreSearch:true});if(cached)return cached;throw err}})())});
+
 
 
 

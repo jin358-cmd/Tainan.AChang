@@ -195,7 +195,9 @@
    if(!renderer)throw Error('列印功能尚未載入，請重新整理後再試。');
    let snapshot=filterModelWindow(build(getRows(),catalog,route),selection.start??rangeStart,selection.end??rangeEnd);
    if(Array.isArray(selection.stopIds))snapshot=renderer.filterByIds(snapshot,selection.stopIds);
-   return renderer.buildSvg(snapshot,{map,lib:window.maplibregl,document});
+   if(map){try{return await renderer.buildSvg(snapshot,{map,lib:window.maplibregl,document});}catch(error){console.warn('使用備用路線列印圖',error.message);}}
+   const old=model,oldFocus=focusId,checked=toggle.checked,holder=document.createElement('div');holder.append(document.createElementNS('http://www.w3.org/2000/svg','svg'));
+   try{model=snapshot;focusId=null;toggle.checked=true;renderFallback(holder);return holder.querySelector('svg');}finally{model=old;focusId=oldFocus;toggle.checked=checked;}
   };
   setInterval(()=>{if(!document.hidden)refreshGlow();},30000);
   setInterval(()=>{if(document.hidden||!toggle.checked||!map?.getLayer('day-route-next-glow'))return;const phase=(Date.now()%1800)/1800;for(let index=0;index<2;index++){const wave=(phase+index/2)%1,id=`day-route-next-ring-${index}`;map.setPaintProperty(id,'circle-radius',10+26*wave);map.setPaintProperty(id,'circle-stroke-opacity',1-wave);map.setPaintProperty(id,'circle-opacity',.12*(1-wave));}},100);
@@ -203,5 +205,6 @@
  }
  return {build,bounds,create,nextStopIds,filterModelWindow,isRoute,routeShift};
 });
+
 
 
