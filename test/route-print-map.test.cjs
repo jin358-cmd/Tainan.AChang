@@ -117,3 +117,10 @@ test('print action opens an isolated document, waits for styling and images, the
 test('a blocked print popup produces an actionable error instead of silently doing nothing',async()=>{
  await assert.rejects(()=>printer.printDocument({}, {window:{open:()=>null},document:{}}),/允許.*彈出視窗/);
 });
+
+test('borderless daytime fit uses the full 210 by 297 mm A4 page and keeps long content on one page',()=>{
+ const width=210*96/25.4,pageHeight=297*96/25.4;
+ assert.equal(printer.borderlessA4Scale(700,width),1);
+ for(const height of [pageHeight,1800,4000]){const scale=printer.borderlessA4Scale(height,width);assert.ok(scale>0&&scale<=1);assert.ok(height*scale<pageHeight);}
+ assert.equal(printer.borderlessA4Scale(0,width),1);
+});

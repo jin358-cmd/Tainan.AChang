@@ -6,6 +6,7 @@
  'use strict';
  const WIDTH=1200,HEIGHT=800,PIXEL_RATIO=2;
  function paperScale(height,width){const available=width*274/190;return height>0&&width>0?Math.min(1,available/height):1;}
+ function borderlessA4Scale(height,width){return height>0&&width>0?Math.min(1,Math.max(0,width*297/210-2)/height):1;}
  function commonCrew(stations){
   if(!stations.length||!stations[0].length)return [];
   const first=[...new Map(stations[0].map(p=>[p.id,p])).values()],signature=first.map(p=>p.id).sort().join('|');
@@ -20,7 +21,7 @@
   const styles=[...source.querySelectorAll('link[rel="stylesheet"]')].map(link=>new Promise(resolve=>{const copy=doc.createElement('link');copy.rel='stylesheet';copy.href=link.href;copy.onload=copy.onerror=resolve;doc.head.append(copy);}));
   const style=doc.createElement('style');style.textContent='html,body{height:auto!important;min-height:0!important;overflow:visible!important;background:white!important}body{margin:0;padding:18px}#routePrintSurface{display:block!important;position:static!important;inset:auto!important;width:190mm!important;max-width:100%;height:auto!important;max-height:none!important;overflow:visible!important;margin:0 auto;box-shadow:none}#routePrintSurface .route-print-content{position:static!important;inset:auto!important;transform:none!important;width:100%!important}#routePrintSurface table,#routePrintSurface th,#routePrintSurface td{font-size:18px!important;line-height:1.6}#routePrintSurface th,#routePrintSurface td{padding:10px 8px!important}.route-document-actions{display:flex;gap:12px;margin:0 auto 20px;max-width:190mm}.route-document-actions button{font:700 18px Arial;padding:10px 16px;border:1px solid #aac1cf;border-radius:8px;background:white;color:#244c64}@media print{@page{size:A4 portrait;margin:10mm}body{padding:0!important}.route-document-actions{display:none!important}#routePrintSurface{break-inside:auto!important;page-break-inside:auto!important}}';doc.head.append(style);
   const actions=doc.createElement('div');actions.className='route-document-actions';const print=doc.createElement('button');print.type='button';print.textContent='列印／另存 PDF';print.onclick=()=>{target.focus();target.print();};const close=doc.createElement('button');close.type='button';close.textContent='關閉';close.onclick=()=>target.close();actions.append(print,close);
-  const copy=doc.importNode(sheet,true);copy.className='route-print-compact truck-directory-host';copy.style.height='auto';delete copy.dataset.printPages;doc.body.replaceChildren(actions,copy);target.opener=null;
+  const borderless=sheet.dataset?.printMode==='full'&&sheet.classList?.contains('route-print-day-a4');const copy=doc.importNode(sheet,true);copy.className='route-print-compact truck-directory-host'+(borderless?' route-print-day-a4':'');if(borderless){copy.dataset.printPages='1';const pageStyle=doc.createElement('style');pageStyle.textContent='@page achang-day-a4{size:A4 portrait;margin:0}#routePrintSurface.route-print-day-a4{page:achang-day-a4;position:relative!important;width:210mm!important;max-width:none!important;height:297mm!important;max-height:297mm!important;overflow:hidden!important;box-sizing:border-box;padding:0!important;margin:0!important;break-inside:avoid!important;page-break-inside:avoid!important}#routePrintSurface.route-print-day-a4 .route-print-content{position:absolute!important;inset:0 auto auto 0!important;width:210mm!important;transform:var(--route-print-scale)!important;transform-origin:top left!important}';doc.head.append(pageStyle);}else{copy.style.height='auto';delete copy.dataset.printPages;}doc.body.replaceChildren(actions,copy);target.opener=null;
   await Promise.all(styles);await doc.fonts?.ready;await Promise.all([...doc.querySelectorAll('img')].map(img=>img.decode?.().catch(()=>{})));
   await new Promise(resolve=>target.requestAnimationFrame(()=>target.requestAnimationFrame(resolve)));
   target.focus();target.print();return target;
@@ -85,5 +86,5 @@
   make('text',{x:12,y:HEIGHT-12,'font-size':14,fill:'#17384f',stroke:'#fff','stroke-width':3,'paint-order':'stroke'}).textContent='© OpenFreeMap · © OpenMapTiles · © OpenStreetMap contributors · 依站序連線';
   return svg;
  }
- return {filterByIds,baseStyle,buildSvg,commonCrew,paperScale,printDocument};
+ return {filterByIds,baseStyle,buildSvg,commonCrew,paperScale,borderlessA4Scale,printDocument};
 });
