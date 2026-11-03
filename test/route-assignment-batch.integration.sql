@@ -13,13 +13,14 @@ begin
  jsonb_build_object('member_id',one,'service_date','2099-11-02','shift','day','village','復華里','route_id','TEST-DAY-1','truck','TEST-1','source_id','TEST-1-B','address','測試站二','stop_order',2,'time','06:50','end_time','06:55'),
  jsonb_build_object('member_id',two,'service_date','2099-11-02','shift','day','village','勝利里','route_id','TEST-DAY-2','truck','TEST-2','source_id','TEST-2-A','address','測試站三','stop_order',1,'time','07:00','end_time','07:05'));
  result:=public.achang_assign_route_batch(batch,items);
- if (result->>'createdCount')::int<>3 or (result->>'allocationCount')::int<>2 then raise exception 'batch creation assertion failed';end if;
+ if (result->>'createdCount')::int<>3 or (result->>'allocationCount')::int<>0 then raise exception 'batch creation assertion failed';end if;
  if (select count(*) from public.assignments where member_id in(one,two))<>2 then raise exception 'assignment grouping assertion failed';end if;
  if not exists(select 1 from public.visit_tasks where member_id=one and stop_order=1 and scheduled_at='2099-11-02T06:30:00+08:00') then raise exception 'Taiwan time assertion failed';end if;
  again:=public.achang_assign_route_batch(batch,items);
  if result<>again or (select count(*) from public.visit_tasks where member_id in(one,two))<>3 then raise exception 'same-batch idempotency assertion failed';end if;
  again:=public.achang_assign_route_batch(gen_random_uuid(),items);
  if (again->>'createdCount')::int<>0 or (again->>'reusedCount')::int<>3 then raise exception 'existing-task idempotency assertion failed';end if;
+ if exists(select 1 from public.service_allocations where member_id in(one,two)) then raise exception 'service-area allocation must remain unchanged';end if;
  select count(*) into before_count from public.route_assignment_batches;
  begin
   perform public.achang_assign_route_batch(gen_random_uuid(),jsonb_build_array((items->0)||jsonb_build_object('member_id',three),(items->0)||jsonb_build_object('route_id','CONFLICT-OTHER-ROUTE')));
@@ -38,4 +39,4 @@ begin
  end;
 end $$;
 rollback;
-select 'PASS: multi-route commit, pending-area allocation, retry idempotency, source/time identity, full rollback, role denial; fixtures rolled back' as verification;
+select 'PASS: multi-route commit, pending-member allocation without changing service areas, retry idempotency, source/time identity, full rollback, role denial; fixtures rolled back' as verification;

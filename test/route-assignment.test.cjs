@@ -10,12 +10,12 @@ test('multi-vehicle draft preserves selections, permits adjacent stops, and remo
  const snapshot=d.items();snapshot[0].name='changed';assert.equal(d.items()[0].name,person.name);
 });
 test('draft reuses a confirmation ID after failure and rotates it after editing',()=>{
- const d=createDraft();d.stage(person,a,'2026-11-03','復華里');const first=d.payload(()=> 'first');assert.equal(d.payload(()=> 'other').batchId,'first');assert.deepEqual(Object.keys(first.items[0]),['volunteerId','stopId','date','area']);
+ const d=createDraft();d.stage(person,a,'2026-11-03','復華里');const first=d.payload(()=> 'first');assert.equal(d.payload(()=> 'other').batchId,'first');assert.deepEqual(Object.keys(first.items[0]),['volunteerId','stopId','date']);
  d.stage(second,a,'2026-11-03','勝利里');assert.equal(d.payload(()=> 'second').batchId,'second');d.clear();assert.equal(d.items().length,0);
 });
 test('draft rejects excluded members, invalid dates, struck stops, and persisted route conflicts',()=>{
- assert.equal(eligible({...person,name:'@測試員'}),false);assert.equal(eligible({...person,name:'PMOS管理員'}),false);
- const d=createDraft();assert.throws(()=>d.stage(person,a,'2026-02-30','復華里'),/日期/);assert.throws(()=>d.stage(person,{...a,來源刪除線:true},'2026-11-03','復華里'),/停用/);assert.throws(()=>d.stage(person,a,'2026-11-03',''),/服務里/);
+ assert.equal(eligible({...person,name:'@測試員'}),false);assert.equal(eligible({...person,name:'＠測試員'}),false);assert.equal(eligible({...person,name:'PMOS管理員'}),false);
+ const d=createDraft();assert.throws(()=>d.stage(person,a,'2026-02-30','復華里'),/日期/);assert.throws(()=>d.stage(person,{...a,來源刪除線:true},'2026-11-03','復華里'),/停用/);assert.throws(()=>d.stage(person,a,'2026-11-03',''),/里別/);
  assert.throws(()=>d.stage(person,a,'2026-11-03','復華里',[{volunteer_id:person.id,visit_date:'2026-11-03',shift:'日間',route_id:'other',area:'復華里'}]),/其他車次/);
  d.stage(person,a,'2026-11-03','復華里',[{volunteer_id:person.id,visit_date:'2026-11-03',shift:'夜間',route_id:'other'}]);assert.equal(d.items().length,1);
 });
@@ -41,4 +41,11 @@ test('UI exposes day/night buttons, default labels and only the settings panel o
  const menu=html.slice(html.indexOf('id="mapLayerSettings"'),html.indexOf('</aside>',html.indexOf('id="mapLayerSettings"')));for(const id of ['layerRoutes','layerVolunteer','layerDay','layerNight'])assert.ok(menu.includes('id="'+id+'"'));
  assert.match(html,/id="directoryRouteSummary"/);assert.match(css,/\.map-route-layer-legend\{display:none!important\}/);
  const ctx=vm.createContext({$:()=>({value:'日間'})});vm.runInContext(dir.slice(dir.indexOf('function defaultDirectoryTimeWindow('),dir.indexOf('function matchesDirectoryTime(')),ctx);assert.equal(ctx.directoryTimeOptionLabel('06:15','directoryStartTime',['06:15','10:00']),'06:15（預設）');
+});
+
+test('area and route allocation reuse the same escaped member card and phone rendering',()=>{
+ const cards=require('../member-cards'),p={id:'safe-id',name:'<測試人員>',phone:'+886912345678',assignment:'復華里'};
+ const html=cards.renderCard(p,{allocations:['日間2 第1站'],actions:'<button data-stage-person="safe-id">加入本站</button>'});
+ assert.ok(html.includes('class="member '));assert.ok(html.includes('class="member-info"'));assert.ok(html.includes('class="member-actions"'));assert.ok(html.includes('class="phone-link service-phone"'));assert.ok(html.includes('0912-345-678'));assert.ok(html.includes('&lt;測試人員&gt;'));assert.ok(html.includes('日間2 第1站'));
+ const app=fs.readFileSync(require.resolve('../app.js'),'utf8'),route=fs.readFileSync(require.resolve('../route-assignment.js'),'utf8');assert.ok(app.includes('window.AChangMemberCards.renderCard'));assert.ok(route.includes('window.AChangMemberCards.renderCard'));
 });

@@ -32,3 +32,5 @@
  .map-route-right #routeTitle{font-size:20px}
  .map-route-empty{padding:24px 12px;color:#53677a;line-height:1.8}
 }
+.map-route-list-jump{display:none}
+@media(max-width:1199px){.map-route-workspace{display:flex;flex-direction:column;gap:16px}.map-route-center{order:0;width:100%;min-width:0}.map-route-left{order:1;width:100%;min-width:0;padding:12px;background:#f3f7fa;border:1px solid #d3e0e8;border-radius:12px}.map-route-right{order:2;width:100%;min-width:0}.map-route-list-jump{display:block;margin:0 0 10px;padding:10px 14px;border:1px solid #accbd6;border-radius:8px;background:#fff;color:#24586c;font-size:15px;font-weight:700}.map-route-right #detail{scroll-margin-top:75px}.map-route-left #directory{scroll-margin-top:75px}}

@@ -8,11 +8,11 @@ test('selecting day2 opens its complete diagram and table together and emits a m
 });
 test('selecting a nighttime directory route synchronizes the map on a narrow screen',()=>{
  const handlers=new Map(),nodes=new Map(),changes=[];
- const node=id=>{if(!nodes.has(id))nodes.set(id,{hidden:true,value:'',querySelector:()=>({before(){}}),before(){},addEventListener(type,fn){this[type]=fn;},dispatchEvent(e){changes.push([id,this.value,e.type]);}});return nodes.get(id);};
- const document={getElementById:node,createElement:()=>({className:'',setAttribute(){},append(){},hidden:false}),createComment:()=>({}),addEventListener:(type,fn)=>handlers.set(type,fn)};
+ const node=id=>{if(!nodes.has(id))nodes.set(id,{hidden:true,value:'',children:[],append(){},setAttribute(){},querySelector:()=>({before(){}}),before(){},addEventListener(type,fn){this[type]=fn;},dispatchEvent(e){changes.push([id,this.value,e.type]);}});return nodes.get(id);};
+ const document={body:{classList:{toggle(){}}},getElementById:node,createElement:()=>({className:'',setAttribute(){},append(){},prepend(){},hidden:false}),createComment:()=>({}),addEventListener:(type,fn)=>handlers.set(type,fn)};
  const window={AChangDayRouteLayer:require('../day-route-layer'),AChangRouteDirectory:{activeRoute:()=>''},dispatchEvent(){}};
  vm.runInNewContext(fs.readFileSync(path.join(root,'map-route-workspace.js'),'utf8'),{document,window,matchMedia:()=>({matches:false,addEventListener(){}}),Event:class{constructor(type){this.type=type;}}});
  handlers.get('achang:directory-route')({detail:{route:'夜間42',syncMap:true}});
- assert.equal(node('mapRouteLayerSelect').value,'夜間42');assert.equal(node('layerRoutes').checked,true);assert.equal(node('directory').hidden,true);assert.deepEqual(changes,[['mapRouteLayerSelect','夜間42','change']]);
+ assert.equal(node('mapRouteLayerSelect').value,'夜間42');assert.equal(node('layerRoutes').checked,true);assert.equal(node('directory').hidden,false);assert.deepEqual(changes,[['mapRouteLayerSelect','夜間42','change']]);
  handlers.get('achang:directory-route')({detail:{route:'日間3',syncMap:false}});assert.equal(changes.length,1);
 });
