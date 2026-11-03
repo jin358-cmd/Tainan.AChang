@@ -9,6 +9,18 @@
  }).map(x=>x.p);}
  function routeRank(value){const v=String(value||'').replace(/\s/g,''),m=/^(日間|夜間)0*(\d+)/.exec(v);if(m)return (m[1]==='夜間'?10000:0)+Number(m[2]);return v.includes('A線')?100:v.includes('B線')?101:20000;}
  function compareRoutes(a,b){return routeRank(a)-routeRank(b)||String(a).localeCompare(String(b),'zh-Hant');}
+ function sortTasks(tasks){
+  const shiftRank=value=>/日|day/.test(String(value))?0:/夜|night/.test(String(value))?1:2;
+  const time=value=>{const m=/^([01]\d|2[0-3]):([0-5]\d)/.exec(String(value||''));return m?m[0]:'99:99';};
+  return [...tasks].sort((a,b)=>String(a.visit_date||'').localeCompare(String(b.visit_date||''))||shiftRank(a.shift)-shiftRank(b.shift)||time(a.eta).localeCompare(time(b.eta))||Number(a.stop_order||0)-Number(b.stop_order||0));
+ }
+ function taskLeader(tasks,group,people,legacyId=''){
+  const first=group[0];if(!first)return null;
+  const token=t=>t.route_id||t.truck||'';
+  const leader=tasks.find(t=>t.is_route_leader===true&&t.visit_date===first.visit_date&&t.shift===first.shift&&token(t)===token(first));
+  const id=leader?.volunteer_id||(group.some(t=>t.volunteer_id===legacyId)?legacyId:'');
+  return people.find(person=>person.id===id)||null;
+ }
  function clock(now=new Date()){
   const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(now);
   const p=Object.fromEntries(parts.map(x=>[x.type,x.value]));const day=`${p.year}-${p.month}-${p.day}`;
@@ -35,5 +47,5 @@
   if(task.visit_date!==serviceDate||task.shift!==row['時段']||(task.route_id||task.truck||'')!==(row['路線ID']||row['車牌']||'')||task.stop_address!==row['停靠點原文'])return false;
   return task.stop_order===undefined||task.stop_order===null||row['清運次序']===''||Number(task.stop_order)===Number(row._taskOrder??row['清運次序']);
  }
- return {AREA_ORDER,area,sortPeople,compareRoutes,clock,runsToday,sortStops,nextStops,routeProgress,taskMatchesStop};
+ return {AREA_ORDER,area,sortPeople,compareRoutes,sortTasks,taskLeader,clock,runsToday,sortStops,nextStops,routeProgress,taskMatchesStop};
 });

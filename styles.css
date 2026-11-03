@@ -1092,3 +1092,5 @@ body.restored-admin-map #page-map #areaPopup.restored-map-popup[hidden]{display:
  #page-reports #reportsContent.task-date-layout>.task-date-left-stack>.task-date-history:not([open])>summary{min-height:28px;line-height:28px}
  #page-reports #reportsContent.task-date-layout>.task-date-left-stack>.task-date-future:not([open]){flex:0 0 auto}
 }
+
+#page-reports .task-member-itinerary{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}#page-reports .task-member-itinerary li{display:grid;grid-template-columns:66px minmax(0,1fr);gap:8px;align-items:start;line-height:1.6}#page-reports .task-member-itinerary time{font-size:17px;font-weight:900;color:#94460e}#page-reports .task-member-itinerary li>span{font-size:15px;overflow-wrap:anywhere}

@@ -247,7 +247,7 @@ function taskDateCategory(t){
  const date=String(t.visit_date||''),day=taipeiToday();
  if(date<day)return 'history';if(date>day)return 'future';return 'current';
 }
-function volunteerGroups(){const groups=new Map();for(const t of myTasks()){const key=[t.visit_date,t.shift,taskRouteToken(t),t.area].join('|');if(!groups.has(key))groups.set(key,[]);groups.get(key).push(t)}return [...groups.values()].sort((a,b)=>a[0].visit_date.localeCompare(b[0].visit_date));}
+function volunteerGroups(){const groups=new Map();for(const t of window.AChangDispatchView.sortTasks(myTasks())){const key=[t.visit_date,t.shift,taskRouteToken(t),t.area].join('|');if(!groups.has(key))groups.set(key,[]);groups.get(key).push(t)}return [...groups.values()];}
 function renderVolunteerTaskList(root){
  const groups=volunteerGroups(),cats={history:[],current:[],future:[]};
  for(const g of groups)cats[taskDateCategory(g[0])].push(g);
@@ -260,7 +260,7 @@ function renderVolunteerTaskList(root){
  out+='</div><div class="volunteer-task-unified-body">';
  if(!selected.length){root.innerHTML=out+'<div class="empty">目前沒有'+catLabels[volunteerTaskCategory]+'跟巡任務</div></div></section>';return;}
  for(const [groupIndex,g] of selected.entries()){
-  const t=g[0],stops=[...new Map(g.map(x=>[x.id,x])).values()].sort((a,b)=>Number(a.stop_order)-Number(b.stop_order));
+  const t=g[0],stops=window.AChangDispatchView.sortTasks([...new Map(g.map(x=>[x.id,x])).values()]);
   const completed=g.every(x=>x.status==='完成'),groupKey=[t.visit_date,t.shift,taskRouteToken(t),t.area].join('|');
   const expanded=volunteerGroupOpen.has(groupKey)?volunteerGroupOpen.get(groupKey):volunteerTaskCategory==='current',panelId='volunteer-stops-'+volunteerTaskCategory+'-'+groupIndex;
   const shiftIsNight=/夜/.test(t.shift),isHistory=volunteerTaskCategory==='history';
@@ -301,15 +301,15 @@ function renderReports(){const root=document.getElementById('reportsContent');if
  root.classList.remove('task-date-layout');
  if(liveRole==='volunteer'){renderVolunteerTaskList(root);return;}
  if(liveRole!=='admin'){root.innerHTML='<div class="access-notice"><strong>登入後查看任務</strong><p>管理員與志工請先登入帳號。</p><button class="primary" id="loginFromTasks" type="button">🔐 登入查看任務</button></div>';return;}
- const daily=new Map();for(const t of liveTasks){if(!daily.has(t.visit_date))daily.set(t.visit_date,[]);daily.get(t.visit_date).push(t)}
+ const daily=new Map();for(const t of window.AChangDispatchView.sortTasks(liveTasks)){if(!daily.has(t.visit_date))daily.set(t.visit_date,[]);daily.get(t.visit_date).push(t)}
  const days=[...daily.keys()].sort(),dateLabels={history:'歷史跟巡',current:'當日跟巡',future:'下次跟巡'},dateGroups={history:[],current:[],future:[]};for(const day of days)dateGroups[taskDateCategory({visit_date:day})].push(day);
  const dayHtml=day=>{
  const tasks=daily.get(day),groups=new Map();for(const t of tasks){const key=[t.area,t.shift,taskRouteToken(t)].join('|');if(!groups.has(key))groups.set(key,[]);groups.get(key).push(t)}
  return '<details class="surface task-day" '+(day===taskSelectedDay||taskDateCategory({visit_date:day})==='current'?'open':'')+'><summary data-task-day="'+esc(day)+'">'+esc(day)+' · '+groups.size+' 組跟巡 · '+tasks.filter(t=>t.status==='完成').length+'/'+tasks.length+' 已完成</summary>'+
- [...groups.entries()].map(([key,entries])=>{const [area,shift]=key.split('|'),routeDisplay=taskRouteDisplay(entries[0]),shiftClass=shift==='日間'?'day':'night',shiftIcon=shift==='日間'?'☀':'☾',lead=state.people.find(p=>p.id===leaderId(area)),members=new Map();
+ [...groups.entries()].map(([key,entries])=>{const [area,shift]=key.split('|'),routeDisplay=taskRouteDisplay(entries[0]),shiftClass=shift==='日間'?'day':'night',shiftIcon=shift==='日間'?'☀':'☾',lead=window.AChangDispatchView.taskLeader(tasks,entries,state.people,leaderId(area)),members=new Map();
  for(const t of entries){if(!members.has(t.volunteer_id))members.set(t.volunteer_id,[]);members.get(t.volunteer_id).push(t)}
  const done=entries.filter(t=>t.status==='完成').length;
- return '<details class="task-team"><summary class="task-team-head"><span class="task-team-row task-team-primary"><span class="task-team-identity"><strong>'+esc(lead?.name||'未指派組長')+' <span class="task-leader-crown" aria-hidden="true">👑</span></strong>'+(lead?.phone?'<a class="task-team-phone" href="tel:'+esc(canDial(lead))+'" onclick="event.stopPropagation()">☎ '+esc(prettyPhone(lead.phone))+'</a>':'')+'</span>'+taskProgress(done,entries.length)+'</span><span class="task-team-row task-team-route"><strong>'+esc(area)+'</strong><span class="task-route-separator" aria-hidden="true">・</span><span class="task-team-shift"><span class="legend-pin '+shiftClass+'" aria-hidden="true">'+shiftIcon+'</span>'+esc(shift)+'</span><span class="task-team-plate">'+esc(routeDisplay)+'</span></span></summary><div class="task-member-list">'+[...members.entries()].map(([id,jobs])=>{const p=state.people.find(x=>x.id===id),completed=jobs.filter(x=>x.status==='完成').length;return '<div class="task-member-progress"><div><strong>'+esc(p?.name||'志工')+'</strong><small>'+esc(area)+' · '+esc(shift)+' · '+esc(routeDisplay)+'</small></div>'+taskProgress(completed,jobs.length)+'</div>'}).join('')+'</div></details>';
+ return '<details class="task-team"><summary class="task-team-head"><span class="task-team-row task-team-primary"><span class="task-team-identity"><strong>'+esc(lead?.name||'未指派組長')+(lead?' <span class="task-leader-crown" aria-hidden="true">👑</span>':'')+'</strong>'+(lead?.phone?'<a class="task-team-phone" href="tel:'+esc(canDial(lead))+'" onclick="event.stopPropagation()">☎ '+esc(prettyPhone(lead.phone))+'</a>':'')+'</span>'+taskProgress(done,entries.length)+'</span><span class="task-team-row task-team-route"><strong>'+esc(area)+'</strong><span class="task-route-separator" aria-hidden="true">・</span><span class="task-team-shift"><span class="legend-pin '+shiftClass+'" aria-hidden="true">'+shiftIcon+'</span>'+esc(shift)+'</span><span class="task-team-plate">'+esc(routeDisplay)+'</span></span></summary><div class="task-member-list">'+[...members.entries()].sort(([a],[b])=>Number(b===lead?.id)-Number(a===lead?.id)).map(([id,jobs])=>{const p=state.people.find(x=>x.id===id),completed=jobs.filter(x=>x.status==='完成').length;return '<div class="task-member-progress"><div><strong>'+esc(p?.name||'志工')+(id===lead?.id?' <span class="task-leader-crown" aria-label="組長">👑</span>':'')+'</strong><small>'+esc(area)+' · '+esc(shift)+' · '+esc(routeDisplay)+'</small><ol class="task-member-itinerary">'+jobs.map(job=>'<li><time>'+esc(job.eta||'時間待核')+'</time><span>'+esc(job.stop_address||'站點待核')+'</span></li>').join('')+'</ol></div>'+taskProgress(completed,jobs.length)+'</div>'}).join('')+'</div></details>';
  }).join('')+'</details>';
  };
  root.classList.toggle('task-date-layout',days.length>0);

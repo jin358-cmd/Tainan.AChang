@@ -173,3 +173,23 @@ test('desktop create and edit member forms share readable field labels and contr
  assert.match(styles,/\.modal-backdrop\.member-create-open \.member-create-fields\{flex:1 1 auto;min-height:0;overflow-y:auto;padding-right:3px\}/);
  assert.match(styles,/\.modal-backdrop\.member-create-open \.member-create-footer\{flex:0 0 auto;background:#fff;padding-top:8px\}/);
 });
+
+test('task schedule orders dates, day before night, and valid arrival times before original stop order',()=>{
+ const view=require('../dispatch-view'),rows=[{id:'night-late',visit_date:'2026-11-04',shift:'夜間',eta:'18:20',stop_order:1},{id:'day-late',visit_date:'2026-11-04',shift:'日間',eta:'07:50',stop_order:1},{id:'night-early',visit_date:'2026-11-04',shift:'夜間',eta:'17:00',stop_order:30},{id:'day-early',visit_date:'2026-11-04',shift:'日間',eta:'06:30',stop_order:50},{id:'history',visit_date:'2026-11-03',shift:'夜間',eta:'20:00'},{id:'unknown',visit_date:'2026-11-04',shift:'日間',eta:'unknown'}];
+ assert.deepEqual(view.sortTasks(rows).map(x=>x.id),['history','day-early','day-late','unknown','night-early','night-late']);assert.equal(rows[0].id,'night-late');
+});
+
+test('task team resolves the saved vehicle leader for its date and shift, even across service villages',()=>{
+ const view=require('../dispatch-view'),group=[{volunteer_id:'crew',visit_date:'2026-11-04',shift:'夜間',route_id:'night6',area:'東橋里'}],people=[{id:'leader',name:'車次組長'},{id:'wrong',name:'其他日期組長'},{id:'legacy',name:'里組長'}];
+ const tasks=[...group,{volunteer_id:'wrong',visit_date:'2026-11-03',shift:'夜間',route_id:'night6',is_route_leader:true},{volunteer_id:'leader',visit_date:'2026-11-04',shift:'夜間',route_id:'night6',area:'復華里',is_route_leader:true}];
+ assert.equal(view.taskLeader(tasks,group,people,'legacy').id,'leader');assert.equal(view.taskLeader(tasks.slice(0,2),group,people,'legacy'),null);
+ assert.equal(view.taskLeader(tasks,[{...group[0],shift:'日間'}],people),null);assert.equal(view.taskLeader(tasks,[{...group[0],route_id:'other'}],people),null);
+ assert.equal(view.taskLeader([], [{...group[0],volunteer_id:'legacy'}],people,'legacy').id,'legacy');
+});
+
+test('administrator task view renders the vehicle leader and chronological station itineraries',()=>{
+ const view=require('../dispatch-view'),root={classList:{remove(){},toggle(){}},innerHTML:''},rows=[{id:'late',volunteer_id:'lead',visit_date:'2026-11-04',shift:'夜間',route_id:'night6',truck:'180-UT',area:'東橋里',eta:'18:20',stop_order:1,stop_address:'晚站',status:'待訪',is_route_leader:true},{id:'day',volunteer_id:'day',visit_date:'2026-11-04',shift:'日間',route_id:'day1',truck:'KEP-5860',area:'二王里',eta:'06:30',stop_order:1,stop_address:'早班站',status:'待訪'},{id:'early',volunteer_id:'lead',visit_date:'2026-11-04',shift:'夜間',route_id:'night6',truck:'180-UT',area:'東橋里',eta:'17:00',stop_order:50,stop_address:'早站',status:'待訪',is_route_leader:true}];
+ const ctx=vm.createContext({document:{getElementById:()=>root},window:{AChangDispatchView:view},liveRole:'admin',liveTasks:rows,state:{people:[{id:'lead',name:'車次組長'},{id:'day',name:'日班員'}]},leaderId:()=> 'unrelated',taskRouteToken:t=>t.route_id,taskRouteDisplay:t=>t.truck,taskDateCategory:()=> 'current',taskProgress:(done,total)=>`<span>${done}/${total}</span>`,esc:String});
+ vm.runInContext(app.slice(app.indexOf("let taskSelectedDay=''"),app.indexOf('function phoneDigits(')),ctx);ctx.renderReports();
+ assert.ok(root.innerHTML.indexOf('KEP-5860')<root.innerHTML.indexOf('180-UT'));assert.match(root.innerHTML,/<strong>車次組長 <span class="task-leader-crown"/);assert.ok(root.innerHTML.indexOf('<time>17:00</time>')<root.innerHTML.indexOf('<time>18:20</time>'));assert.match(root.innerHTML,/task-member-itinerary/);
+});
