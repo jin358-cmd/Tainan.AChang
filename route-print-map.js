@@ -5,7 +5,7 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
  'use strict';
  const WIDTH=1200,HEIGHT=800,PIXEL_RATIO=2;
- function paperScale(height,width){const available=width*277/190-6;return height>0&&width>0?Math.min(1,available/height):1;}
+ function paperScale(height,width){const available=width*274/190;return height>0&&width>0?Math.min(1,available/height):1;}
  function commonCrew(stations){
   if(!stations.length||!stations[0].length)return [];
   const first=[...new Map(stations[0].map(p=>[p.id,p])).values()],signature=first.map(p=>p.id).sort().join('|');

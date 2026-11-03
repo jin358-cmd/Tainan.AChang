@@ -7,3 +7,5 @@
 .directory-heading{gap:4px 8px}.directory-heading h3{font-size:15px}.directory-route-summary{font-size:13px;flex:1;min-width:220px}.directory-route-summary:before{content:'／';margin-right:5px}.map-route-left .controls #resultCount{display:none!important}
 
 .map-route-left .directory-heading h3{font-size:20px;font-weight:900;line-height:1.4}.map-route-left #vehicles .route-row-selected{background:#dcecff!important;box-shadow:inset 5px 0 #2379bc}.map-route-left #vehicles .route-row-selected td{font-weight:800}
+
+.map-route-left .directory-route-summary{font-size:16px;color:#1769b0;font-weight:850;line-height:1.65}.map-route-left #vehicles td:nth-child(2),.map-route-left #vehicles td:nth-child(5){font-size:20px;font-weight:800;white-space:nowrap}

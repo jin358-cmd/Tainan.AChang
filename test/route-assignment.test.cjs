@@ -116,3 +116,11 @@ test('map popup staffing keeps private contacts behind the current session and v
  const context=vm.createContext({liveRole:'',routeAssignmentController:{staffing:()=>privateData},mapScheduleDate:()=> '2026-11-03',data:{stops:[{站點ID:'one'}]},mapTasksForStop:()=>[{volunteer_id:'own',is_route_leader:true}],groupContacts:[{id:'own',name:'本人',phone:'0911111111'},{id:'other',name:'其他車次',phone:'0922222222'}]});
  vm.runInContext(app.slice(start,end),context);assert.equal(context.routeStopStaffing('one').people.length,0);context.liveRole='admin';assert.equal(context.routeStopStaffing('one'),privateData);context.liveRole='volunteer';assert.deepEqual(Array.from(context.routeStopStaffing('one').people,p=>p.id),['own']);context.liveRole='';assert.equal(context.routeStopStaffing('one').people.length,0);
 });
+
+test('a station chip removal affects only that member at that station and keeps other drafts and saved tasks intact',()=>{
+ const date='2026-11-03',d=createDraft();d.stageRoute(person,[a,b],date);d.stage(second,a,date,'復華里');
+ const task=(id,p,row,day=date)=>({id,volunteer_id:p.id,visit_date:day,shift:row.時段,route_id:row.路線ID,stop_address:row.停靠點原文,stop_order:row._taskOrder});
+ const tasks=[task('target',person,a),task('other-stop',person,b),task('other-person',second,a),task('other-day',person,a,'2026-11-04')];
+ d.removePersonAt(person,a,date,tasks);
+ assert.deepEqual(d.removals().map(x=>x.taskId),['target']);assert.deepEqual(d.items().map(x=>[x.volunteerId,x.stopId]),[[person.id,b.站點ID],[second.id,a.站點ID]]);assert.equal(tasks.length,4,'saved tasks remain unchanged until final confirmation');
+});

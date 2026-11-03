@@ -14,6 +14,10 @@ function createDraft(){
   cancelRemoval(id){removals=removals.filter(x=>x.taskId!==id);batchId=null;},
   removeSaved(task,name){if(!removals.some(x=>x.taskId===task.id))removals.push({taskId:task.id,name,date:task.visit_date,routeId:task.route_id||task.truck,order:task.stop_order});batchId=null;},
   remove(id){items=items.filter(x=>key(x)!==id);batchId=null;},
+  removePersonAt(person,stop,date,tasks=[]){
+   for(const item of this.items().filter(x=>x.volunteerId===person.id&&x.stopId===stop.站點ID&&x.date===date))this.remove(key(item));
+   for(const task of tasks.filter(t=>t.volunteer_id===person.id&&t.visit_date===date&&t.shift===stop.時段&&(t.route_id||t.truck)===stop.路線ID&&t.stop_address===stop.停靠點原文&&Number(t.stop_order)===stop._taskOrder))this.removeSaved(task,person.name);
+  },
   stage(person,stop,date,area,tasks=[]){
    if(!eligible(person))throw Error('此人員不在可分配名冊');
    if(!legalTime(stop.到達)||stop.來源刪除線)throw Error('此站時間待核對或已停用，無法分配');
@@ -69,8 +73,9 @@ function create({getContext,getRows,submit}){
    const chosen=currentDraft.find(x=>x.date===serviceDate&&x.routeId===row.路線ID&&x.isRouteLeader);
    const isLeader=id=>chosen?chosen.volunteerId===id:activeTasks().some(t=>t.volunteer_id===id&&t.visit_date===serviceDate&&(t.route_id||t.truck)===row.路線ID&&t.is_route_leader);
    const identity=(chip,id,name)=>{chip.dataset.memberId=id;chip.dataset.memberName=name;chip.dataset.routeLeader=String(isLeader(id));};
-   const existing=tasksAt(row);for(const task of existing){const person=ctx.people.find(p=>p.id===task.volunteer_id);if(!person)continue;const chip=document.createElement('span');chip.className='route-person-chip saved';identity(chip,person.id,person.name);chip.textContent=(isLeader(person.id)?'👑 ':'')+person.name+' · 已分配';box.append(chip);}
-   for(const item of currentDraft.filter(x=>x.stopId===row.站點ID&&x.date===serviceDate&&!existing.some(t=>t.volunteer_id===x.volunteerId))){const chip=document.createElement('span');chip.className='route-person-chip draft';identity(chip,item.volunteerId,item.name);chip.textContent=(isLeader(item.volunteerId)?'👑 ':'')+item.name+' · 暫排';const remove=document.createElement('button');remove.type='button';remove.textContent='×';remove.setAttribute('aria-label','移除'+item.name+'的本站暫排');remove.disabled=busy;remove.onclick=event=>{event.stopPropagation();draft.remove(key(item));message='';render();};chip.append(remove);box.append(chip);}
+   const addRemove=(chip,person)=>{const remove=document.createElement('button');remove.type='button';remove.className='route-person-remove';remove.textContent='×';remove.setAttribute('aria-label','移除'+person.name+'的本站分配');remove.title='僅移除此人於本站的分配，確認後儲存';remove.disabled=busy;remove.onclick=event=>{event.preventDefault();event.stopPropagation();if(busy||context().role!=='admin')return;draft.removePersonAt(person,row,serviceDate,activeTasks());if(!routeScope||!routeScope.ids.includes(row.站點ID))routeScope={route:row.車次,ids:[row.站點ID],mode:'selection'};opened=true;message=`已暫列移除 ${person.name} 於 ${row.車次} 第${row._taskOrder}站的配員；確認後儲存`;render();};chip.append(remove);};
+   const existing=tasksAt(row);for(const task of existing){const person=ctx.people.find(p=>p.id===task.volunteer_id);if(!person)continue;const chip=document.createElement('span');chip.className='route-person-chip saved';identity(chip,person.id,person.name);chip.textContent=(isLeader(person.id)?'👑 ':'')+person.name+' · 已分配';addRemove(chip,person);box.append(chip);}
+   for(const item of currentDraft.filter(x=>x.stopId===row.站點ID&&x.date===serviceDate&&!existing.some(t=>t.volunteer_id===x.volunteerId))){const person=ctx.people.find(p=>p.id===item.volunteerId);if(!person)continue;const chip=document.createElement('span');chip.className='route-person-chip draft';identity(chip,item.volunteerId,item.name);chip.textContent=(isLeader(item.volunteerId)?'👑 ':'')+item.name+' · 暫排';addRemove(chip,person);box.append(chip);}
    card.append(box);
   });
  }

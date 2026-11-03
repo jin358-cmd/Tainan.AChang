@@ -17,6 +17,7 @@ document.addEventListener('achang:directory-route',event=>{
  if(window.AChangDayRouteLayer?.isRoute(name)&&select&&toggle){toggle.checked=true;select.value=name;select.dispatchEvent(new Event('change',{bubbles:true}));}
  else if(toggle){toggle.checked=false;toggle.dispatchEvent(new Event('change',{bubbles:true}));}
 });
+document.addEventListener('achang:directory-overview',event=>{empty.hidden=false;detail.hidden=true;const select=byId('mapRouteLayerSelect'),toggle=byId('layerRoutes');if(select&&toggle){toggle.checked=true;select.value=event.detail?.shift==='夜間'?'night-all':event.detail?.shift==='日間'?'all':'all-routes';select.dispatchEvent(new Event('change',{bubbles:true}));}});
 byId('mapRouteLayerSelect')?.addEventListener('change',()=>{const name=byId('mapRouteLayerSelect').value;if(window.AChangDayRouteLayer?.isRoute(name))window.AChangRouteDirectory?.openRoute(name,{syncMap:false,reveal:false});});
 desktop.addEventListener('change',resize);resize();
 })();
