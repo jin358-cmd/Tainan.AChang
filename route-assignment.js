@@ -18,6 +18,13 @@ function createDraft(){
    for(const item of this.items().filter(x=>x.volunteerId===person.id&&x.stopId===stop.站點ID&&x.date===date))this.remove(key(item));
    for(const task of tasks.filter(t=>t.volunteer_id===person.id&&t.visit_date===date&&t.shift===stop.時段&&(t.route_id||t.truck)===stop.路線ID&&t.stop_address===stop.停靠點原文&&Number(t.stop_order)===stop._taskOrder))this.removeSaved(task,person.name);
   },
+  clearRoute(routeId,date,tasks=[],people=[]){
+   const remaining=items.filter(x=>x.routeId!==routeId||x.date!==date),saved=tasks.filter(t=>t.visit_date===date&&(t.route_id||t.truck)===routeId),pending=saved.filter(t=>!removals.some(x=>x.taskId===t.id));
+   if(remaining.length+removals.length+pending.length>1000)throw Error('清理後超過一次1000筆上限，請先確認目前草稿');
+   const draftsRemoved=items.length-remaining.length;items=remaining;
+   for(const task of pending)this.removeSaved(task,people.find(p=>p.id===task.volunteer_id)?.name||'已分配人員');
+   batchId=null;return {draftsRemoved,removalsAdded:pending.length};
+  },
   stage(person,stop,date,area,tasks=[]){
    if(!eligible(person))throw Error('此人員不在可分配名冊');
    if(!legalTime(stop.到達)||stop.來源刪除線)throw Error('此站時間待核對或已停用，無法分配');
@@ -62,8 +69,8 @@ function create({getContext,getRows,submit}){
  }
  const allSelected=()=>{const all=rows().filter(r=>r.車次===routeScope?.route&&legalTime(r.到達)&&!r.來源刪除線);return all.length>0&&all.every(r=>routeScope?.ids.includes(r.站點ID));};
  function paintStops(){
-  const all=rows(),ctx=context(),currentDraft=draft.items();$('routeTitle')?.classList.toggle('assignment-route-selected',Boolean(routeScope?.ids.length&&ctx.role==='admin'));$('routeTitle')?.setAttribute('aria-pressed',String(Boolean(routeScope?.ids.length&&ctx.role==='admin')));
-  $('routeTitle')?.querySelector('.route-all-selected')?.remove();if(context().role==='admin'&&allSelected()){const badge=document.createElement('span');badge.className='route-all-selected';badge.textContent='（站點已全選）';$('routeTitle')?.append(badge);}if($('routeSelectAll')){$('routeSelectAll').textContent=allSelected()?'取消站點全選':'站點全選（整個車次）';$('routeSelectAll').setAttribute('aria-pressed',String(allSelected()));}
+  const all=rows(),ctx=context(),currentDraft=draft.items(),allPicked=ctx.role==='admin'&&allSelected();$('routeTitle')?.classList.toggle('assignment-route-selected',Boolean(routeScope?.ids.length&&ctx.role==='admin'));$('routeTitle')?.setAttribute('aria-pressed',String(allPicked));
+  $('routeTitle')?.querySelector('.route-all-selected')?.remove();if(ctx.role==='admin'){const badge=document.createElement('span');badge.className='route-all-selected';badge.textContent=allPicked?'（站點已全選）':'（點擊全選站點）';$('routeTitle')?.append(badge);}
   document.querySelectorAll('#routeDiagram [data-focus-stop],#routeFullDiagram [data-focus-stop]').forEach(button=>{
    const row=all.find(r=>r.站點ID===button.dataset.focusStop);if(!row)return;
    const picked=Boolean((selected===row.站點ID||routeScope?.ids.includes(row.站點ID))&&ctx.role==='admin');button.classList.toggle('assignment-selected',picked);button.setAttribute('aria-pressed',String(picked));
@@ -81,7 +88,7 @@ function create({getContext,getRows,submit}){
  }
  function render(){
   const ctx=context();if(!serviceDate)serviceDate=ctx.date||today();if(ctx.role!=='admin'||ctx.subject!==session){if(session&&ctx.subject!==session||ctx.role!=='admin'){draft.clear();selected=null;routeScope=null;opened=false;message='';}session=ctx.role==='admin'?ctx.subject:'';}
-  const scopeCount=targets().length,toolbar=$('routeSelectionToolbar');if(toolbar)toolbar.hidden=ctx.role!=='admin';if($('routeSelectionStatus'))$('routeSelectionStatus').textContent=scopeCount?`${routeScope?.route||''} · 已選 ${scopeCount} 站`:'尚未選取站點';for(const id of ['routePickPeople','routeClearSelection'])if($(id))$(id).disabled=busy||!scopeCount;if($('routeSelectAll'))$('routeSelectAll').disabled=busy||!window.AChangRouteDirectory?.activeRoute?.();
+  const clearButton=$('routeClearAssignments');if(clearButton){clearButton.hidden=ctx.role!=='admin';clearButton.disabled=busy||!window.AChangRouteDirectory?.activeRoute?.();clearButton.title=`清理目前車次於 ${serviceDate} 的分配，確認後儲存`;}
   const inMap=$('page-map')?.classList.contains('active');panel.hidden=ctx.role!=='admin'||!opened||!inMap;if(ctx.role!=='admin')panel.replaceChildren();launcher.hidden=ctx.role!=='admin'||opened||draft.size()===0||!inMap;launcher.textContent=`開啟分配草稿（${draft.size()}）`;paintStops();document.dispatchEvent(new CustomEvent('achang:route-crew-view'));document.dispatchEvent(new CustomEvent('achang:route-card-layout'));$('detail')?.classList.toggle('has-allocation-extension',!panel.hidden);if(panel.hidden)return;
   mount();const row=target(),scope=targets(),route=routeScope?.route||row?.車次;if(!serviceDate)serviceDate=ctx.date||today();
   const records=draft.items(),removals=draft.removals(),changeCount=draft.size(),people=ctx.people.filter(eligible);
@@ -99,7 +106,7 @@ function create({getContext,getRows,submit}){
    const leader=leaderFor(person);
    const crown=atRoute(person)?`<button type="button" data-route-person-leader="${esc(person.id)}" class="${leader?'leader-on':''}" ${busy?'disabled':''} title="選擇本車次組長，確認分配後儲存">${leader?'<span class="route-leader-icon" aria-hidden="true">👑</span> 組長':'♛ 設組長'}</button>`:'';
    const removable=scope.some(stop=>tasksAt(stop).some(t=>t.volunteer_id===person.id))||staged.some(x=>scope.some(stop=>stop.站點ID===x.stopId));
-   const removeButton=atRoute(person)?`<button type="button" class="route-person-delete" data-remove-person="${esc(person.id)}" ${busy||!removable?'disabled':''} title="移除目前所選站點的配員，確認後儲存">移除配員</button>`:'';
+   const removeButton=saved.some(t=>(t.route_id||t.truck)===routeId)?`<button type="button" class="route-person-delete" data-remove-person="${esc(person.id)}" ${busy||!removable?'disabled':''} title="移除目前所選站點的配員，確認後儲存">移除配員</button>`:'';
    return window.AChangMemberCards.renderCard(person,{area:person.assignment||'',leader,allocations:labels,className:`route-assignment-person ${atRoute(person)?'has-assignment':''}`,actions:`${crown}${removeButton}<button type="button" data-stage-person="${esc(person.id)}" ${busy||!scope.length||already||blocked?'disabled':''}>${already?'已分配':here?'移出暫排':blocked?'其他車次':scope.length>1?'＋ 加入所選站點':'＋ 加入本站'}</button>`});
   };
   panel.innerHTML=`<div class="route-assignment-heading"><h3>${routeScope?.mode==='window'||routeScope?.mode==='all'?'車次人員分配':'站點人員分配'}</h3><button type="button" data-assignment-close aria-label="收合人員分配">×</button></div><label>分配日期<input id="routeAssignmentDate" type="date" value="${esc(serviceDate)}" ${busy?'disabled':''}></label><p class="route-assignment-target">${routeScope?`${esc(routeScope.route)} · ${routeScope.mode==='all'?'全路線':routeScope.mode==='window'?'目前時段':'已複選'} ${scope.length} 站${scope.length===1?`<br>第${scope[0]._taskOrder}站 · ${esc(scope[0].到達)} · ${esc(scope[0].停靠點原文)}`:''}`:row?`${esc(row.車次)} · 第${row._taskOrder}站 · ${esc(row.到達)}<br>${esc(row.停靠點原文)}`:'請點選站點卡片或車次標題'}</p><div class="route-assignment-candidates"><section class="assigned-route-people" aria-label="本車次已分配人員"><h4>本車次已分配（${assigned.length}人）</h4>${assigned.map(cardFor).join('')||'<p class="assignment-empty">此車次尚未分配人員</p>'}</section><section class="waiting-route-people" aria-label="本車次未分配人員"><h4>未分配（${waiting.length}人）</h4>${waiting.map(cardFor).join('')||'<p class="assignment-empty">全部人員已分配</p>'}</section></div><details class="route-assignment-review"><summary>草稿：${count}人／新增 ${records.length} 筆／移除 ${removals.length} 筆</summary>${records.map(x=>`<p>${esc(x.date)} ${esc(x.name)} → ${esc(x.route)} 第${x.order}站 <button type="button" data-remove-draft="${esc(key(x))}" ${busy?'disabled':''}>移除</button></p>`).join('')}${removals.map(x=>`<p>${esc(x.date)} ${esc(x.name)} 第${x.order}站 → 待移除 <button type="button" data-undo-removal="${esc(x.taskId)}" ${busy?'disabled':''}>復原</button></p>`).join('')}</details><p id="routeAssignmentStatus" role="status" aria-live="polite">${esc(message||'可切換車次繼續選人，最後一次確認儲存。')}</p><div class="route-assignment-actions"><button type="button" data-clear-draft ${busy||!changeCount?'disabled':''}>清空草稿</button><button type="button" class="primary" data-confirm-draft ${busy||!changeCount?'disabled':''}>${busy?'儲存中…':`確認分配（${changeCount}筆）`}</button></div>`;
@@ -145,14 +152,18 @@ function create({getContext,getRows,submit}){
   if(context().role!=='admin'||busy)return;const detail=event.detail||{},same=routeScope?.route===detail.route;
   if(detail.all&&same&&detail.stopIds?.length&&detail.stopIds.every(id=>routeScope.ids.includes(id))&&routeScope.ids.length===detail.stopIds.length){clearSelection();return;}
   const ids=detail.all?detail.stopIds||[]:same?(routeScope.ids.includes(detail.id)?routeScope.ids.filter(id=>id!==detail.id):[...routeScope.ids,detail.id]):[detail.id];
-  selected=null;routeScope={route:detail.route,ids,mode:detail.all?'all':'selection'};opened=false;message='已選定站點，請按「人員選擇」安排同一人或同組人員';render();
+  selected=null;routeScope=ids.length?{route:detail.route,ids,mode:detail.all?'all':'selection'}:null;opened=ids.length>0;message='可直接加入人員，切換站點或車次繼續暫排，最後一次確認儲存。';render();
  });
- document.addEventListener('achang:assign-route',event=>{if(context().role!=='admin'||busy)return;selected=null;routeScope={route:event.detail.route,ids:event.detail.stopIds,mode:'window'};opened=false;message='已選定目前時段站點，請按「人員選擇」';render();});
+ document.addEventListener('achang:assign-route',event=>{if(context().role!=='admin'||busy)return;selected=null;routeScope={route:event.detail.route,ids:event.detail.stopIds,mode:'window'};opened=true;message='已選定目前時段站點，可直接加入人員';render();});
  document.addEventListener('achang:directory-route',event=>{if(routeScope){routeScope=routeScope.route===event.detail?.route?{...routeScope,ids:routeScope.mode==='window'?(window.AChangRouteDirectory?.activeStopIds?.()||routeScope.ids):routeScope.ids.filter(id=>rows().some(row=>row.站點ID===id))}:null;}render();});
  const clearSelection=()=>{if(busy)return;selected=null;routeScope=null;opened=false;message='已取消站點選取，分配草稿仍保留';render();};
  document.addEventListener('achang:clear-route-selection',clearSelection);
- document.addEventListener('achang:open-route-people',()=>{if(context().role!=='admin'||busy||!targets().length)return;opened=true;render();});
- document.addEventListener('click',event=>{if(!routeScope||busy||!$('page-map')?.classList.contains('active'))return;if(event.target.closest('#routePrintPreview,#routeAssignmentPanel,.route-assignment-launcher,.route-selection-toolbar,.route-stop,button,input,select,textarea,label,a,summary,[role=button],[data-open],.day-route-point-detail,#mapLayerSettings'))return;clearSelection();});
+ document.addEventListener('achang:clear-route-assignments',event=>{
+  if(context().role!=='admin'||busy)return;
+  const route=event.detail?.route,stops=rows().filter(row=>row.車次===route),routeId=stops[0]?.路線ID;if(!routeId)return;
+  try{const result=draft.clearRoute(routeId,serviceDate,context().tasks,context().people);selected=null;routeScope={route,ids:stops.filter(row=>legalTime(row.到達)&&!row.來源刪除線).map(row=>row.站點ID),mode:'all'};opened=true;message=result.removalsAdded||result.draftsRemoved?`已將 ${route} ${serviceDate} 的 ${result.removalsAdded} 筆分配列入移除，清除 ${result.draftsRemoved} 筆暫排；按「確認分配」後儲存。`:'此車次於所選日期沒有新的可清理分配；既有草稿仍保留。';}catch(error){message=error.message;opened=true;}render();
+ });
+ document.addEventListener('click',event=>{if(!routeScope||busy||!$('page-map')?.classList.contains('active'))return;if(event.target.closest('#routePrintPreview,#routeAssignmentPanel,.route-assignment-launcher,.route-stop,button,input,select,textarea,label,a,summary,[role=button],[data-open],.day-route-point-detail,#mapLayerSettings'))return;clearSelection();});
  document.addEventListener('keydown',event=>{if(!routeScope||busy||event.target.closest('#routePrintPreview'))return;const editable=event.target.closest('button,input,select,textarea,a,summary,[role=button],[contenteditable=true]');if(event.key==='Escape'||event.key===' '&&!editable){event.preventDefault();clearSelection();}});
  document.addEventListener('achang:route-view',()=>render());document.addEventListener('achang:assignment-context',()=>render());window.addEventListener('resize',()=>{mount();render();});document.addEventListener('scroll',placePanel,true);document.addEventListener('click',event=>{const nav=event.target.closest('[data-page]');if(nav){if(nav.dataset.page!=='map')opened=false;render();}});
  window.addEventListener('beforeunload',event=>{if(draft.size()){event.preventDefault();event.returnValue='';}});

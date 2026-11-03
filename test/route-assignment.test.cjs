@@ -92,23 +92,36 @@ test('opening the application starts on the map and task dispatch is the second 
  assert.match(html,/id="page-map" class="page active/);assert.match(app,/routes=\[\],page='map'/);assert.doesNotMatch(app,/await refreshOnline\(\);go\('areas'\)/);
 });
 
-test('selecting stations waits for the personnel button and clearing removes every highlight',()=>{
+function assignmentHarness({people=[],tasks=[]}={}){
  const listeners=new Map(),nodes=new Map();
  class Node{
-  constructor(){this.dataset={};this.hidden=false;this.children=[];this.states=new Set();this.classList={contains:k=>this.states.has(k),add:k=>this.states.add(k),toggle:(k,force)=>{const on=force===undefined?!this.states.has(k):!!force;if(on)this.states.add(k);else this.states.delete(k);return on;}};}
-  append(x){x.parentElement=this;this.children.push(x);}setAttribute(){}addEventListener(){}querySelector(){return null;}getBoundingClientRect(){return {left:800,top:100};}
+  constructor(){this.dataset={};this.style={};this.attributes={};this.handlers={};this.hidden=false;this.children=[];this.states=new Set();this.classList={contains:k=>this.states.has(k),add:k=>this.states.add(k),toggle:(k,force)=>{const on=force===undefined?!this.states.has(k):!!force;if(on)this.states.add(k);else this.states.delete(k);return on;}};}
+  append(x){x.parentElement=this;this.children.push(x);}setAttribute(k,v){this.attributes[k]=v;}addEventListener(type,fn){this.handlers[type]=fn;}querySelector(){return null;}getBoundingClientRect(){return {left:800,top:100};}
  }
  const node=id=>{if(!nodes.has(id))nodes.set(id,new Node());return nodes.get(id);};node('page-map').states.add('active');
  const cards=[new Node(),new Node()],buttons=[a,b].map((r,i)=>{const n=new Node();n.dataset.focusStop=r.站點ID;n.closest=()=>cards[i];return n;});
  const document={getElementById:node,createElement:()=>new Node(),body:new Node(),documentElement:{clientWidth:1400,clientHeight:1000},querySelectorAll:()=>buttons,addEventListener:(type,fn)=>{if(!listeners.has(type))listeners.set(type,[]);listeners.get(type).push(fn);}};
- const window={AChangRouteDirectory:{activeRoute:()=>a.車次},addEventListener(){}};
+ const window={AChangRouteDirectory:{activeRoute:()=>a.車次},AChangMemberCards:require('../member-cards'),addEventListener(){}};
  document.dispatchEvent=()=>{};const ctx=vm.createContext({document,window,Intl,Date,console,CustomEvent:class{constructor(type,options={}){this.type=type;this.detail=options.detail;}}});vm.runInContext(fs.readFileSync(require.resolve('../route-assignment'),'utf8'),ctx);
- const controller=ctx.AChangRouteAssignment.create({getContext:()=>({role:'admin',subject:'admin-test',people:[],tasks:[],date:'2026-11-03'}),getRows:()=>[a,b],submit:()=>{throw Error('must not save during selection');}});
- const emit=(type,detail)=>listeners.get(type).forEach(fn=>fn({detail}));
- assert.equal(cards.filter(c=>c.states.has('assignment-target')).length,0);
- emit('achang:focus-route-stop',{id:a.站點ID,route:a.車次});emit('achang:focus-route-stop',{id:b.站點ID,route:b.車次});
- assert.equal(cards.filter(c=>c.states.has('assignment-target')).length,2);assert.equal(node('detail').children.length,0,'the personnel picker must wait until explicitly requested');
- emit('achang:focus-route-stop',{id:a.站點ID,route:a.車次,all:true,stopIds:[a.站點ID,b.站點ID]});assert.equal(cards.filter(c=>c.states.has('assignment-target')).length,0,'pressing all again cancels all');emit('achang:focus-route-stop',{id:a.站點ID,route:a.車次,all:true,stopIds:[a.站點ID,b.站點ID]});assert.equal(cards.filter(c=>c.states.has('assignment-target')).length,2);emit('achang:clear-route-selection');assert.equal(cards.filter(c=>c.states.has('assignment-target')).length,0);assert.equal(node('routePickPeople').disabled,true);
+ const controller=ctx.AChangRouteAssignment.create({getContext:()=>({role:'admin',subject:'admin-test',people,tasks,date:'2026-11-03'}),getRows:()=>[a,b],submit:()=>{throw Error('must not save during selection');}});
+ return {controller,cards,node,emit:(type,detail)=>listeners.get(type).forEach(fn=>fn({detail})),panel:()=>node('detail').children[0]};
+}
+test('one card click opens the attached personnel picker; title all-select toggles off and restores its hint',()=>{
+ const {cards,node,emit,panel}=assignmentHarness();
+ assert.equal(cards.filter(c=>c.states.has('assignment-target')).length,0);assert.equal(node('routeTitle').children.at(-1).textContent,'（點擊全選站點）');
+ emit('achang:focus-route-stop',{id:a.站點ID,route:a.車次});assert.equal(panel().hidden,false,'a single card click opens personnel immediately');
+ emit('achang:focus-route-stop',{id:b.站點ID,route:b.車次});assert.equal(cards.filter(c=>c.states.has('assignment-target')).length,2);assert.equal(node('routeTitle').children.at(-1).textContent,'（站點已全選）');
+ emit('achang:focus-route-stop',{id:a.站點ID,route:a.車次,all:true,stopIds:[a.站點ID,b.站點ID]});assert.equal(cards.filter(c=>c.states.has('assignment-target')).length,0);assert.equal(panel().hidden,true);assert.equal(node('routeTitle').children.at(-1).textContent,'（點擊全選站點）');
+ emit('achang:focus-route-stop',{id:a.站點ID,route:a.車次,all:true,stopIds:[a.站點ID,b.站點ID]});assert.equal(cards.filter(c=>c.states.has('assignment-target')).length,2);assert.equal(panel().hidden,false);emit('achang:clear-route-selection');assert.equal(cards.filter(c=>c.states.has('assignment-target')).length,0);
+});
+test('a staged-only person has draft removal while saved vehicle members alone have remove-allocation controls',()=>{
+ const {controller,emit,panel}=assignmentHarness({people:[person,second],tasks:[{id:'saved',volunteer_id:second.id,visit_date:'2026-11-03',shift:a.時段,route_id:a.路線ID,stop_order:1,stop_address:a.停靠點原文}]});
+ controller.draft.stage(person,a,'2026-11-03','復華里');emit('achang:focus-route-stop',{id:a.站點ID,route:a.車次});
+ assert.doesNotMatch(panel().innerHTML,new RegExp('data-remove-person="'+person.id+'"'));assert.match(panel().innerHTML,/移出暫排/);assert.match(panel().innerHTML,new RegExp('data-remove-person="'+second.id+'"'));
+});
+test('obsolete station toolbar is removed and route cards retain only service icons',()=>{
+ for(const name of ['index.html','route-directory.html']){const html=fs.readFileSync(require.resolve('../'+name),'utf8');assert.doesNotMatch(html,/routeSelectionToolbar|routePickPeople|routeSelectAll|routeClearSelection/);assert.match(html,/route-progress-clock-row.*?routeProgressClock.*?routeClearAssignments/s);}
+ const directory=fs.readFileSync(require.resolve('../route-directory'),'utf8');assert.doesNotMatch(directory,/已準備 \$\{snapshot|🗑️ 清運：|♻️ 回收：/);assert.match(directory,/點擊全選站點/);
 });
 
 test('map popup staffing keeps private contacts behind the current session and volunteer task scope',()=>{
@@ -123,4 +136,11 @@ test('a station chip removal affects only that member at that station and keeps 
  const tasks=[task('target',person,a),task('other-stop',person,b),task('other-person',second,a),task('other-day',person,a,'2026-11-04')];
  d.removePersonAt(person,a,date,tasks);
  assert.deepEqual(d.removals().map(x=>x.taskId),['target']);assert.deepEqual(d.items().map(x=>[x.volunteerId,x.stopId]),[[person.id,b.站點ID],[second.id,a.站點ID]]);assert.equal(tasks.length,4,'saved tasks remain unchanged until final confirmation');
+});
+
+test('clearing a vehicle stages only that date and route, preserves other work, and never alters saved tasks directly',()=>{
+ const d=createDraft(),date='2026-11-03';d.stage(person,a,date,'復華里');d.stage(second,other,date,'勝利里');d.stage(person,a,'2026-11-04','復華里');
+ const tasks=[{id:'one',volunteer_id:person.id,visit_date:date,route_id:a.路線ID},{id:'two',volunteer_id:second.id,visit_date:date,truck:a.路線ID},{id:'another-date',visit_date:'2026-11-04',route_id:a.路線ID},{id:'another-route',visit_date:date,route_id:other.路線ID}];
+ assert.deepEqual(d.clearRoute(a.路線ID,date,tasks,[person,second]),{draftsRemoved:1,removalsAdded:2});assert.equal(d.items().length,2);assert.deepEqual(d.removals().map(x=>x.taskId),['one','two']);assert.equal(tasks.length,4);assert.equal(d.clearRoute(a.路線ID,date,tasks).removalsAdded,0);
+ const payload=d.payload(()=> 'clear-vehicle');assert.equal(payload.items.filter(x=>x.action==='remove').length,2);d.clear();assert.equal(d.size(),0);
 });
