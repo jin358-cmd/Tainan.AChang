@@ -36,8 +36,8 @@ test('map asset revision and service-worker cache advance together', () => {
   assert.match(html, /styles\.css\?v=211/);
   assert.match(html, /route-time-filter\.js\?v=2/);
   assert.match(html, /app\.js\?v=224/);
-  assert.match(html, /route-directory\.js\?v=3/);
-  assert.match(sw, /achang-pwa-shell-v196-day-route-map-layer/);
+  assert.match(html, /route-directory\.js\?v=4/);
+  assert.match(sw, /achang-pwa-shell-v197-directory-time-range/);
 });
 
 test('truck directory keeps the route view concise and renders directional route arrows', () => {
@@ -64,4 +64,5 @@ test('volunteer map layer uses the short label and a stable white person icon', 
   const styles = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
   assert.match(styles, /\.map-switches \.legend-pin \.legend-person-icon\{[^}]*fill:#fff/);
 });
+
 
