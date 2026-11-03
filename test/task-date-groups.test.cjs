@@ -138,7 +138,7 @@ test('desktop navigation reuses the five mobile icons without changing labels',(
  assert.match(desktop,/data-page="areas"><i[^>]*>⌖<\/i><span>人員分區<\/span>/);
  assert.match(desktop,/data-page="planner"><i[^>]*>🚛<\/i><span>跟巡排班<\/span>/);
  assert.match(desktop,/data-page="reports"><i[^>]*>✓<\/i><span>任務發派<\/span>/);
- assert.match(desktop,/data-page="people"><i[^>]*>☷<\/i><span>名冊<\/span>/);
+ assert.match(desktop,/data-page="people"><i[^>]*>☷<\/i><span>志工名冊<\/span>/);
  assert.doesNotMatch(desktop,/[①②③④⑤]/);
 });
 

@@ -49,3 +49,13 @@ test('area and route allocation reuse the same escaped member card and phone ren
  assert.ok(html.includes('class="member '));assert.ok(html.includes('class="member-info"'));assert.ok(html.includes('class="member-actions"'));assert.ok(html.includes('class="phone-link service-phone"'));assert.ok(html.includes('0912-345-678'));assert.ok(html.includes('&lt;測試人員&gt;'));assert.ok(html.includes('日間2 第1站'));
  const app=fs.readFileSync(require.resolve('../app.js'),'utf8'),route=fs.readFileSync(require.resolve('../route-assignment.js'),'utf8');assert.ok(app.includes('window.AChangMemberCards.renderCard'));assert.ok(route.includes('window.AChangMemberCards.renderCard'));
 });
+
+test('whole-route draft stages every selected station atomically with one area for a pending person',()=>{
+ const d=createDraft(),stops=[{...a,里別:'勝利里'},{...b,里別:'復華里'}];d.stageRoute(person,stops,'2026-11-03');assert.equal(d.items().length,2);assert.deepEqual(d.items().map(x=>x.area),['勝利里','勝利里']);
+ const before=d.items();assert.throws(()=>d.stageRoute(second,[...stops,{...b,到達:'invalid'}],'2026-11-03'),/時間/);assert.deepEqual(d.items(),before);
+});
+
+test('whole-route API retains the existing route area for an unallocated member',async()=>{
+ let saved;const fake={...L,rest:async(path,token,options)=>{if(path.startsWith('rpc/')){saved=options.body.p_items;return {ok:true,data:{ok:true}};}if(path.startsWith('assignments?'))return {ok:true,data:[{member_id:person.id,service_date:'2026-11-03',shift:'day',route_id:a.路線ID,village:'復國里'}]};return {ok:true,data:[]};}};
+ await saveBatch({batchId:'3bc211b4-bc21-4cd7-a7c2-a960958a96d4',items:[a,b].map(row=>({volunteerId:person.id,date:'2026-11-03',stopId:row.站點ID}))},{token:'admin'},fake);assert.equal(saved.length,2);assert.ok(saved.every(item=>item.village==='復國里'));
+});

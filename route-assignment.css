@@ -19,3 +19,12 @@
 /* The picker floats immediately left of the complete route diagram. */
 .route-assignment-panel{position:fixed!important;z-index:45;margin:0;bottom:auto!important;right:auto!important;overflow:auto;box-shadow:0 8px 35px #10294740}
 .route-assignment-candidates{max-height:45vh}
+/* An attached extension of the complete-route block, with the action bar always visible. */
+#detail.has-allocation-extension{border-left-color:#d7a846!important}
+.route-assignment-panel{display:flex;flex-direction:column;gap:0;border-radius:12px 0 0 12px;border-right-width:1px;overflow:hidden!important}
+.route-assignment-heading,.route-assignment-target,.route-assignment-panel>label,.route-assignment-actions,#routeAssignmentStatus{flex:none}
+.route-assignment-panel .route-assignment-candidates{display:block;flex:1 1 auto;min-height:100px;max-height:none;overflow:auto}
+.route-assignment-candidates section{display:grid;gap:8px}.route-assignment-candidates h4{margin:5px 0;padding:8px;background:#edf4f8;border-radius:7px;color:#244c64;font-size:15px;position:sticky;top:0;z-index:1}.route-assignment-candidates .assigned-route-people h4{background:#dff1e6;color:#1d6846}.waiting-route-people{margin-top:12px}.assignment-empty{margin:0 3px 8px;font-size:13px;color:#61768a}
+.route-assignment-review{flex:none;max-height:95px;margin:8px 0}.route-assignment-actions{padding-top:8px;border-top:1px solid #e7d6ad;background:#fffaf0}#routeAssignmentStatus{margin:7px 0;font-size:12px;line-height:1.5}
+.route-assignment-person .member-actions{max-width:62%}.route-assignment-person button.leader-on{background:#fff0bf;color:#965c00;border-color:#e2b347}
+@media(max-width:1199px){.route-assignment-panel{border-radius:12px}.route-assignment-panel .route-assignment-candidates{min-height:90px}}
