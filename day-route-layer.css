@@ -1,0 +1,22 @@
+.map-route-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:10px 0 6px;padding:10px 12px;background:#fff;border:1px solid #cfdde5;border-radius:11px;color:#244c64}
+.map-route-toolbar .map-route-toggle{display:inline-flex;align-items:center;gap:7px;min-height:36px;font-size:14px;font-weight:800;white-space:nowrap}
+.map-route-toolbar input{width:17px;height:17px;accent-color:#087e79}
+.map-route-toolbar .map-route-vehicle{display:flex;align-items:center;gap:7px;font-size:13px;min-width:0}
+.map-route-toolbar select{min-height:42px;max-width:100%;min-width:190px;border:1px solid #bfd2dc;border-radius:8px;padding:7px 10px;background:#fff;color:#244c64;font-size:14px}
+.map-route-toolbar select:disabled{opacity:.55}
+.map-route-layer-status{font-size:12px;color:#536e80;flex-basis:100%}
+.map-route-layer-legend{display:flex;flex-wrap:wrap;align-items:center;gap:8px 15px;font-size:12px;margin:5px 0 10px;color:#36576c}
+.map-route-layer-legend[hidden],.map-route-pending[hidden]{display:none}
+.map-route-layer-legend span{display:inline-flex;align-items:center;gap:5px}
+.map-route-layer-legend i{display:inline-block;width:19px;height:3px}
+.map-route-layer-legend .route-sequence-note{color:#6b7d8c}
+.map-route-pending{margin:6px 0 9px;font-size:12px;color:#8a571c}
+.map-route-pending summary{cursor:pointer;min-height:30px;display:list-item}
+.map-route-pending ul{margin:5px 0;padding-left:22px;line-height:1.7;overflow-wrap:anywhere}
+#page-map .day-route-point-detail{position:absolute;z-index:15;left:12px;bottom:50px;width:min(340px,calc(100% - 24px));max-height:55%;overflow:auto;background:#fff;border:1px solid #bfd2dc;border-radius:11px;padding:13px;color:#244c64;box-shadow:0 6px 24px #18384f30}
+.day-route-point-detail strong{display:block;padding-right:28px;font-size:15px}
+.day-route-point-detail p{margin:8px 0;font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.day-route-point-detail small{display:block;font-size:12px;line-height:1.5;color:#536e80}
+.day-route-detail-close{position:absolute;right:5px;top:5px;min-width:36px;min-height:36px;border-radius:8px;background:#edf3f6;color:#244c64}
+.day-route-offline-map{background:#edf2ee}
+@media(max-width:640px){.map-route-toolbar{gap:5px 9px;padding:8px 10px}.map-route-toolbar .map-route-vehicle{flex:1;justify-content:flex-end}.map-route-toolbar select{min-width:0;width:100%;max-width:205px;font-size:16px}.map-route-layer-legend{gap:7px 11px}.map-route-toolbar .map-route-toggle{font-size:13px}}

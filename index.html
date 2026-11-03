@@ -14,6 +14,7 @@
 <title>永康十里｜志工與垃圾車跟巡 PWA</title>
 <link rel="stylesheet" href="./truck-directory-tab.css" />
 <link rel="stylesheet" href="./route-progress.css?v=1" />
+<link rel="stylesheet" href="./day-route-layer.css?v=1" />
 <script defer src="./dispatch-view.js?v=2"></script>
 <script defer src="./route-directory.js?v=3"></script>
 </head>
@@ -30,6 +31,13 @@
 <section id="page-map" class="page map-page map-v04-reference" aria-label="地圖檢視">
  <div class="section-heading"><div><h1>永康十里服務地圖</h1></div></div>
  <div class="map-switches" aria-label="圖層篩選"><label><input id="layerVolunteer" type="checkbox" /> <span class="legend-pin volunteer" aria-hidden="true"><svg class="legend-person-icon" viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="7" r="4"/><path d="M4.5 21c.5-5 3-8 7.5-8s7 3 7.5 8z"/></svg></span>志工</label><label title="只顯示目前排班日，且已指派人員的 06:15–08:10 站點"><input id="layerDay" type="checkbox" /> <span class="legend-pin day" aria-hidden="true">✓</span>日間已排入（06:15–08:10）</label><label title="只顯示目前排班日，且已指派人員的 19:00–20:30 站點"><input id="layerNight" type="checkbox" /> <span class="legend-pin night" aria-hidden="true">✓</span>夜間已排入（19:00–20:30）</label></div>
+ <div class="map-route-toolbar" role="group" aria-label="日間路線圖層">
+  <label class="map-route-toggle"><input id="layerRoutes" type="checkbox" checked /> 路線圖層</label>
+  <label class="map-route-vehicle">車次<select id="mapRouteLayerSelect" aria-label="路線圖層車次"><option value="all">全部日間6車次</option><option value="日間1">日間1 · KEP-5860</option><option value="日間2">日間2 · 008-UT</option><option value="日間3">日間3 · 009-UT</option><option value="日間4">日間4 · KER-3760</option><option value="日間5">日間5 · KER-2025</option><option value="日間6">日間6 · AAQ-059</option></select></label>
+  <span id="mapRouteLayerStatus" class="map-route-layer-status" role="status" aria-live="polite">正在載入路線座標…</span>
+ </div>
+ <div id="mapRouteLayerLegend" class="map-route-layer-legend" aria-label="六車次路線顏色"></div>
+ <details id="mapRoutePending" class="map-route-pending" hidden><summary>待確認站點</summary><ul id="mapRoutePendingList"></ul></details>
  <p id="mapLayerNotice" class="map-layer-notice" role="status" hidden></p>
  <div class="map-box" id="mapBox"><div id="mapLibre" aria-label="永康十里地圖"></div><div id="mapFallback" class="map-fallback" hidden></div><div id="areaPopup" class="area-popup map-attached-popup" hidden></div><div class="map-float"> <span id="mapLegendStatus"></span></div></div>
 </section>
@@ -80,6 +88,7 @@
 <script defer src="./day-routes.js?v=222"></script>
 <script defer src="./official-routes.js"></script>
 <script defer src="./route-time-filter.js?v=2"></script>
-<script defer src="./app.js?v=223"></script>
+<script defer src="./day-route-layer.js?v=1"></script>
+<script defer src="./app.js?v=224"></script>
 </body>
 </html>
