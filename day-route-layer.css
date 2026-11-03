@@ -28,6 +28,8 @@
 .map-route-layer-legend .route-color-choice{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #cbdbe4;border-radius:7px;padding:6px 9px;font-size:14px;color:#244c64;cursor:pointer}
 .map-route-layer-legend .route-color-choice:hover,.map-route-layer-legend .route-color-choice:focus-visible{background:#e5f6ee;outline:2px solid #16877e;outline-offset:1px}
 .route-print-surface{display:none}
+.route-print-map-renderer{position:fixed!important;left:-20000px!important;top:0!important;width:1200px!important;height:800px!important;opacity:0;pointer-events:none}
+#routePrintStatus{font-size:13px;line-height:1.5;color:#36576c;margin:7px 0}
 @media print{
  @page{size:A4 portrait;margin:12mm}
  body>*:not(#routePrintSurface){display:none!important}

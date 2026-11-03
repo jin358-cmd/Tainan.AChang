@@ -41,25 +41,32 @@ function openRoute(name,options={}){
 let html='';for(let i=0;i<g.rows.length;i+=3){html+=`<div class="route-row ${Math.floor(i/3)%2?'reverse':''}">`+g.rows.slice(i,i+3).map((r,j)=>{const address=r['站點名稱／地址']||'未提供站名';return `<article class="route-stop ${r._extras?.['刪除線']?'struck':''}"><time>${esc(r['到達時間']||'時間待核')}</time><button type="button" class="stop-number" data-focus-stop="${esc(r._mapStopId||'')}" data-focus-route="${esc(g.route)}" aria-label="定位第${r._directoryOrder}站 ${esc(address)}">${r._directoryOrder}</button><a target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent('臺南市永康區'+address)}">${esc(address)}</a><small>${esc(r['里別'])}｜原表序號 ${esc(r['站點序號'])}<br>🗑️ 清運：${esc(r['清運星期']||'未提供')}<br>♻️ 回收：${esc(r['資源回收星期']||'未提供')}</small></article>`}).join('')+'</div>';}$('routeDiagram').innerHTML=html||'<p class="empty" role="status">此車次在選定時段內沒有站點。</p>';
 $('routeTable').innerHTML='<table><thead><tr><th>順序</th><th>時間</th><th>里別</th><th>站點</th><th>🗑️ 清運／♻️ 回收</th></tr></thead><tbody>'+g.rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r['到達時間'])}</td><td>${esc(r['里別'])}</td><td>${esc(r['站點名稱／地址'])}${r._extras?.['刪除線']?'（原表刪除線）':''}</td><td><span class="service-day">🗑️ ${esc(r['清運星期']||'未提供')}</span><span class="service-day">♻️ ${esc(r['資源回收星期']||'未提供')}</span></td></tr>`).join('')+'</tbody></table>';updateProgress();setTab('diagram');document.dispatchEvent(new CustomEvent('achang:directory-route',{detail:{route:name,syncMap:options.syncMap!==false}}));history.replaceState(null,'','#'+encodeURIComponent(name));window.scrollTo(0,0);}
 async function printActiveRoute(){
- if(!active)return;
+ if(!active||$('print').disabled)return;
+ const button=$('print'),buttonLabel=button.textContent,snapshot={...active,rows:[...active.rows]},start=$('directoryStartTime').value,end=$('directoryEndTime').value;
+ const diagram=$('routeDiagram').cloneNode(true),table=$('routeTable').cloneNode(true),titleText=$('routeTitle').textContent;
+ let status=$('routePrintStatus');if(!status){status=document.createElement('p');status.id='routePrintStatus';status.setAttribute('role','status');status.setAttribute('aria-live','polite');$('detail').querySelector('.detail-head').after(status);}
+ button.disabled=true;button.textContent='準備清晰地圖…';status.textContent='正在準備選定時段的列印地圖…';
+ try{
  document.getElementById('routePrintSurface')?.remove();
  const sheet=document.createElement('article');sheet.id='routePrintSurface';sheet.className='route-print-surface truck-directory-host';
- const title=document.createElement('h1');title.textContent=$('routeTitle').textContent;
- const windowLabel=document.createElement('p');windowLabel.textContent=`選定到站時段：${$('directoryStartTime').value||'不限'}～${$('directoryEndTime').value||'不限'}｜站點 ${active.rows.length} 站`;
+ const title=document.createElement('h1');title.textContent=titleText;
+ const windowLabel=document.createElement('p');windowLabel.textContent=`選定到站時段：${start||'不限'}～${end||'不限'}｜站點 ${snapshot.rows.length} 站`;
  sheet.append(title,windowLabel);
- const mapTitle=document.createElement('h2');mapTitle.textContent='完整地圖路徑';sheet.append(mapTitle);
- const svg=window.AChangRouteMapPrint?.(active.route);
+ const mapTitle=document.createElement('h2');mapTitle.textContent='選定時段地圖路徑';sheet.append(mapTitle);
+ const svg=await window.AChangRouteMapPrint?.(snapshot.route,{start,end,stopIds:snapshot.rows.map(row=>row._mapStopId)});
  if(svg){
-  for(const image of svg.querySelectorAll('image')){try{const response=await fetch(image.getAttribute('href'));if(!response.ok)throw Error('底圖載入失敗');const blob=await response.blob();const data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(blob);});image.setAttribute('href',data);}catch{const note=document.createElement('p');note.textContent='底圖未能載入，以下保留已核對站點及路徑。';sheet.append(note);}}
   sheet.append(svg);
  }else{const note=document.createElement('p');note.textContent='此車次尚無可列印的已核對地圖座標。';sheet.append(note);}
  const diagramTitle=document.createElement('h2');diagramTitle.textContent='選定時段路線圖';sheet.append(diagramTitle);
- const diagram=$('routeDiagram').cloneNode(true);diagram.removeAttribute('id');diagram.hidden=false;diagram.querySelector('.connector')?.remove();sheet.append(diagram);
+ diagram.removeAttribute('id');diagram.hidden=false;diagram.querySelector('.connector')?.remove();sheet.append(diagram);
  const tableTitle=document.createElement('h2');tableTitle.textContent='選定時段完整站點列表';sheet.append(tableTitle);
- const table=$('routeTable').cloneNode(true);table.removeAttribute('id');table.hidden=false;sheet.append(table);
+ table.removeAttribute('id');table.hidden=false;sheet.append(table);
  document.body.append(sheet);
  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+ status.textContent=`已準備 ${snapshot.rows.length} 站的列印內容`;
  window.print();
+ }catch(error){document.getElementById('routePrintSurface')?.remove();status.textContent=error.message||'列印地圖未能載入，請稍後重試。';}
+ finally{button.disabled=false;button.textContent=buttonLabel;}
 }
 function setTab(tab){const both=document.body.classList.contains('map-route-desktop');$('routeDiagram').hidden=!both&&tab!=='diagram';$('routeTable').hidden=!both&&tab!=='list';$('diagramTab').setAttribute('aria-pressed',String(tab==='diagram'));$('listTab').setAttribute('aria-pressed',String(tab==='list'));requestAnimationFrame(connectors);}
 $('routeDiagram').onclick=e=>{const button=e.target.closest('[data-focus-stop]');if(button)document.dispatchEvent(new CustomEvent('achang:focus-route-stop',{detail:{id:button.dataset.focusStop,route:button.dataset.focusRoute}}));};$('shift').onchange=()=>{active=null;$('detail').hidden=true;$('directory').hidden=false;renderDirectoryTimeOptions();const night=$('shift').value==='夜間';$('directoryStartTime').value=night?'16:30':'';$('directoryEndTime').value=night?'18:30':'';filterDirectory()};$('search').oninput=filterDirectory;$('directoryStartTime').onchange=filterDirectory;$('directoryEndTime').onchange=filterDirectory;$('vehicles').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){const row=e.target.closest('tr[data-open]');if(row){e.preventDefault();openRoute(row.dataset.open)}}};$('vehicles').onclick=e=>{const b=e.target.closest('[data-open]');if(b)openRoute(b.dataset.open)};$('back').onclick=()=>{$('detail').hidden=true;$('directory').hidden=false;history.replaceState(null,'',location.pathname);window.scrollTo(0,0)};$('diagramTab').onclick=()=>setTab('diagram');$('listTab').onclick=()=>setTab('list');$('print').onclick=printActiveRoute;window.addEventListener('resize',connectors);

@@ -73,9 +73,10 @@
   function renderControls(){
    select.disabled=!toggle.checked;
    legend.hidden=!toggle.checked;
-   if(!toggle.checked){status.textContent='路線圖層已關閉';pending.hidden=true;return;}
+   if(!toggle.checked){status.textContent='車次路線已關閉';pending.hidden=true;return;}
    if(!catalog){status.textContent=failed?'路線座標載入失敗，重新整理後可再試':'正在載入路線座標…';pending.hidden=true;return;}
-   status.textContent=`${select.value==='all'?'全部6車次':select.value} · ${model.total}站`;
+   const count=String(model.total).replace(/\d/g,digit=>String.fromCharCode(digit.charCodeAt(0)+0xfee0));
+   status.textContent=`${select.value==='all'?'全部6車次':select.value}．共${count}站點`;
    pending.hidden=true;
    const summary=pending.querySelector('summary');summary.textContent=`待定位 ${model.pending.length} 站`;
    pendingList.replaceChildren();
@@ -173,14 +174,13 @@
   fetch('./data-day-route-locations-20261103.json',{cache:'no-store'}).then(response=>{if(!response.ok)throw Error('route locations unavailable');return response.json();}).then(value=>{
    if(value.version!==1||value.stops?.filter(stop=>String(stop.source_id||'').startsWith('PDF:DAY:')).length!==160)throw Error('invalid route location catalog');catalog=value;onChange?.();
   }).catch(error=>{failed=true;renderControls();console.warn('日間路線座標未能載入',error.message);});
-  window.AChangRouteMapPrint=route=>{
+  window.AChangRouteMapPrint=async(route,selection={})=>{
    if(!catalog||!/^日間[1-6]$/.test(route))return null;
-   const oldModel=model,oldFocus=focusId,checked=toggle.checked;
-   try{
-    model=build(getRows(),catalog,route);focusId=null;toggle.checked=true;
-    const holder=document.createElement('div');holder.append(document.createElementNS('http://www.w3.org/2000/svg','svg'));renderFallback(holder);
-    const svg=holder.querySelector('svg');if(svg){svg.removeAttribute('class');svg.setAttribute('width','780');svg.setAttribute('height','640');}return svg;
-   }finally{model=oldModel;focusId=oldFocus;toggle.checked=checked;}
+   const renderer=window.AChangRoutePrint;
+   if(!renderer)throw Error('列印功能尚未載入，請重新整理後再試。');
+   let snapshot=filterModelWindow(build(getRows(),catalog,route),selection.start??rangeStart,selection.end??rangeEnd);
+   if(Array.isArray(selection.stopIds))snapshot=renderer.filterByIds(snapshot,selection.stopIds);
+   return renderer.buildSvg(snapshot,{map,lib:window.maplibregl,document});
   };
   setInterval(()=>{if(!document.hidden)refreshGlow();},30000);
   setInterval(()=>{if(document.hidden||!toggle.checked||!map?.getLayer('day-route-next-glow'))return;const phase=(Date.now()%1600)/1600;map.setPaintProperty('day-route-next-glow','circle-radius',11+11*Math.sin(phase*Math.PI)**2);map.setPaintProperty('day-route-next-glow','circle-opacity',.25+.35*Math.cos(phase*Math.PI)**2);},100);
