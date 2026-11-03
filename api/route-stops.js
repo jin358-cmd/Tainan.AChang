@@ -7,7 +7,7 @@ module.exports=L.run(async(req,res)=>{
  L.method(req,['GET','POST','PATCH']);
  const actor=await L.authorized(req,res,['admin']);
  if(req.method==='GET'){
-  const result=await L.rest('route_stop_overlays?select=id,shift,route_token,vehicle,area,stop_name,start_time,end_time,display_order,status,position_before_source_id,created_at,archived_at&order=shift.asc,route_token.asc,display_order.asc,created_at.asc',actor.token);
+  const result=await L.rest('route_stop_overlays?select=id,shift,route_token,vehicle,area,stop_name,start_time,end_time,collection_days,display_order,status,position_before_source_id,created_at,archived_at&order=shift.asc,route_token.asc,display_order.asc,created_at.asc',actor.token);
   return L.json(res,200,{stops:L.need(result,'自訂站點讀取失敗')});
  }
  const body=L.body(req),action=String(body.action||'');
