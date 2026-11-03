@@ -1,0 +1,29 @@
+@media(min-width:1200px){
+ body.map-route-desktop main{max-width:none!important;width:100%!important;padding:14px!important}
+ body.map-route-desktop #page-map{max-width:none!important;width:100%!important}
+ .map-route-workspace{display:grid;grid-template-columns:minmax(250px,.8fr) minmax(480px,1.65fr) minmax(320px,1fr);gap:14px;align-items:start;height:calc(100dvh - 145px);min-height:620px}
+ .map-route-left,.map-route-right{height:100%;min-width:0;overflow:auto;padding:12px;background:#f3f7fa;border:1px solid #d3e0e8;border-radius:12px}
+ .map-route-center{height:100%;min-width:0;display:flex;flex-direction:column;overflow:hidden}
+ .map-route-center .section-heading{display:none!important}
+ .map-route-center #mapBox{flex:1 1 auto;height:auto!important;min-height:350px!important;width:100%!important;margin-top:12px}
+ .map-route-left .controls{display:grid!important;grid-template-columns:1fr 1fr;gap:10px}
+ .map-route-left .controls label{min-width:0;width:100%}
+ .map-route-left .controls label:nth-child(2),.map-route-left #resultCount{grid-column:1/-1}
+ .map-route-left .controls input,.map-route-left .controls select{min-width:0!important;width:100%;box-sizing:border-box}
+ .map-route-left #directory,.map-route-right #detail{padding:10px!important;margin-top:12px}
+ .map-route-left table{min-width:0!important;font-size:13px}
+ .map-route-left th,.map-route-left td{padding:10px 5px!important;word-break:break-word}
+ .map-route-left th:nth-child(3),.map-route-left td:nth-child(3),.map-route-left th:nth-child(4),.map-route-left td:nth-child(4){display:none}
+ .map-route-left .route-open{font-size:12px;padding:8px!important}
+ .map-route-right #detail .tabs,.map-route-right #back{display:none!important}
+ .map-route-right #routeDiagram,.map-route-right #routeTable{display:block!important}
+ .map-route-right #routeDiagram{margin:16px 0;min-height:180px}
+ .map-route-right #routeTable{margin-top:20px}
+ .map-route-right #routeTable table{min-width:0!important;font-size:13px}
+ .map-route-right #routeTable td,.map-route-right #routeTable th{padding:9px 5px;word-break:break-word}
+ .map-route-right .route-row{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ .map-route-right .route-stop{min-width:0!important;width:auto!important;font-size:12px}
+ .map-route-right .route-stop a{word-break:break-word}
+ .map-route-right #routeTitle{font-size:20px}
+ .map-route-empty{padding:24px 12px;color:#53677a;line-height:1.8}
+}
