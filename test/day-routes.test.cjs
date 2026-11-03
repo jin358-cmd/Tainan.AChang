@@ -85,7 +85,7 @@ test('frontend and backend keep route identity separate from an optional truck n
  assert.match(app,/目前顯示完整官方路線/);
  assert.match(app,/visitTitle\.textContent=rows\.length\?`依車次順序拜訪・共 \$\{rows\.length\} 站點`/);
  assert.match(app,/classList\.toggle\('planner-picker-open',kind==='team'\|\|kind==='stop'\)/);
- assert.match(app,/areaLabel=r\['固定日間'\]\?'站點里別待核':area\|\|'未指定服務里'/);
+ assert.match(app,/areaLabel=r\['固定日間'\]\?'':area\|\|'未指定服務里'/);
  assert.doesNotMatch(app,/areas\.indexOf\(selectedArea\)/);
  assert.match(app,/areaPage=Math\.floor\(serviceAreaIndex\(selectedArea\)\/CARD_PAGE_SIZE\)/);
  assert.match(app,/canAssign=!excluded/);
@@ -185,4 +185,27 @@ test('planner can reuse a released route through the atomic batch instead of bei
   await handler({method:'POST',body:{volunteerId:'member',area:'復華里',date:'2026-11-03',shift:'日間',routeId:'TARGET',truck:'TEST',address:'原站',time:'06:50',routeEnd:'07:00',stopOrder:1}},res);
   assert.deepEqual(res.body,{ok:true,taskIds:['original-task'],reused:true});assert.equal(writes.filter(x=>x.options.method==='POST').length,1);
  }finally{delete require.cache[handlerPath];if(originalHandler)require.cache[handlerPath]=originalHandler;if(originalServer)require.cache[serverPath]=originalServer;else delete require.cache[serverPath]}
+});
+
+test('Wednesday and Friday addresses omit city and district while preserving identity and order',()=>{
+ const routes=adapter.normalize(source);
+ assert.equal(routes.length,32);
+ assert.equal(routes.find(row=>row.id==='ACHANG-W三-A-02').address,'西勢路19巷60號');
+ assert.equal(routes.find(row=>row.id==='ACHANG-W三-A-04').address,'永大一路255號');
+ assert.equal(routes.find(row=>row.id==='ACHANG-W五-A-19').address,'中華二路358巷43號');
+ assert.ok(routes.every(row=>!/[臺台]南市|永康區/.test(row.address)));
+ const fixture={routes:[{id:'legacy',weekday:'星期三',route:'A',name:'測試站',start:'10:00',address:'台南市永康區西勢路19巷60號'}]};
+ assert.equal(adapter.stopsForDate(fixture,'2026-11-04').stops[0]['補充地址'],'西勢路19巷60號');
+ assert.doesNotMatch(html,/PDF 日間站點依原頁面與列序顯示/);
+ assert.doesNotMatch(app,/站點里別待核/);
+});
+
+test('planner station removal cancels only the matched task even when the person has other route stops',async()=>{
+ const vm=require('node:vm'),calls=[],row={key:'station-1'},task={id:'task-1'};
+ const body=app.slice(app.indexOf('removeStopMember=async function'),app.indexOf('\nsetStatus=async'));
+ const context={data:{stops:[row]},stopKey:r=>r.key,matchedMemberTask:(r,id)=>{assert.equal(id,'member-1');return task},crypto:{randomUUID:()=> 'test-batch'},doLive:async fn=>fn(),onlineApi:async(...args)=>calls.push(args)};
+ vm.runInNewContext(body,context);
+ await context.removeStopMember('station-1','member-1');
+ assert.deepEqual(JSON.parse(JSON.stringify(calls)),[['tasks','POST',{action:'batch',batchId:'test-batch',items:[{action:'remove',taskId:'task-1'}]}]]);
+ await context.removeStopMember('missing','member-1');assert.equal(calls.length,1);
 });

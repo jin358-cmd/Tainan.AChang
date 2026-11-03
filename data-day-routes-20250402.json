@@ -26,7 +26,9 @@
       "color": "#8B5CF6",
       "review_required": false,
       "review_note": "114.4.2 公告正確版已確認班次與來源順序；保留原候審紀錄供稽核",
-      "location_verified": false
+      "location_verified": false,
+      "address": "西勢路19巷60號",
+      "address_status": "landmark_address"
     },
     {
       "id": "ACHANG-W三-A-03",
@@ -37,7 +39,9 @@
       "name": "東灣里活動中心",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "民族路291號",
+      "address_status": "landmark_address"
     },
     {
       "id": "ACHANG-W三-A-04",
@@ -48,7 +52,9 @@
       "name": "網寮里里長服務處",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "永大一路255號",
+      "address_status": "owner_provided"
     },
     {
       "id": "ACHANG-W三-A-05",
@@ -59,7 +65,9 @@
       "name": "北興路213號旁（大灣七街路口）",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "北興路213號旁（大灣七街路口）",
+      "address_status": "reference_location"
     },
     {
       "id": "ACHANG-W三-A-06",
@@ -71,7 +79,9 @@
       "color": "#8B5CF6",
       "review_required": false,
       "review_note": "114.4.2 公告正確版確認為北灣里國聖宮；保留 XLSX 異文供稽核",
-      "location_verified": false
+      "location_verified": false,
+      "address": "大同街100號",
+      "address_status": "landmark_address"
     },
     {
       "id": "ACHANG-W三-A-07",
@@ -82,7 +92,9 @@
       "name": "龍埔里活動中心",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "永大路三段618巷111號",
+      "address_status": "landmark_address"
     },
     {
       "id": "ACHANG-W三-A-08",
@@ -93,7 +105,9 @@
       "name": "烏竹里活動中心",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "烏竹北街85號",
+      "address_status": "landmark_address"
     },
     {
       "id": "ACHANG-W三-B-09",
@@ -104,7 +118,9 @@
       "name": "中正二街161號（正德宮）",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "中正二街161號",
+      "address_status": "landmark_address"
     },
     {
       "id": "ACHANG-W三-B-10",
@@ -116,7 +132,9 @@
       "color": "#8B5CF6",
       "review_required": false,
       "review_note": "114.4.2 公告正確版已確認大橋活動中心；保留原候審紀錄供稽核",
-      "location_verified": false
+      "location_verified": false,
+      "address": "大橋三街230號",
+      "address_status": "landmark_address"
     },
     {
       "id": "ACHANG-W三-B-11",
@@ -128,7 +146,9 @@
       "color": "#8B5CF6",
       "review_required": false,
       "review_note": "114.4.2 公告正確版確認為如意居；保留 XLSX 異文供稽核",
-      "location_verified": false
+      "location_verified": false,
+      "address": "永明街261-12號",
+      "address_status": "landmark_address"
     },
     {
       "id": "ACHANG-W三-B-12",
@@ -139,7 +159,9 @@
       "name": "龍埔街（慈聖宮）",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "龍埔街488號",
+      "address_status": "landmark_address"
     },
     {
       "id": "ACHANG-W三-B-13",
@@ -150,7 +172,9 @@
       "name": "龍埔街50號",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "龍埔街50號",
+      "address_status": "landmark_address"
     },
     {
       "id": "ACHANG-W三-B-14",
@@ -161,7 +185,9 @@
       "name": "國光八街&大勇路(9-1公園)",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "國光八街與大勇路口",
+      "address_status": "reference_location"
     },
     {
       "id": "ACHANG-W三-B-15",
@@ -172,7 +198,9 @@
       "name": "自強路468巷（中正廟）",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "自強路468巷內",
+      "address_status": "reference_location"
     },
     {
       "id": "ACHANG-W三-B-16",
@@ -195,7 +223,10 @@
       "color": "#8B5CF6",
       "review_required": false,
       "review_note": "114.4.2 公告正確版確認為統領國；保留 XLSX 異文供稽核",
-      "location_verified": false
+      "location_verified": false,
+      "address": "中山南路544巷48號",
+      "address_note": "原站名提供門牌；實際停靠位置與活動中心位置待核對。",
+      "address_status": "reference_location"
     },
     {
       "id": "ACHANG-W五-A-18",
@@ -206,7 +237,10 @@
       "name": "振興路與五福街82巷口",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "振興路與五福街82巷口",
+      "address_note": "路口位置，無唯一門牌，實際停靠點待確認。",
+      "address_status": "reference_location"
     },
     {
       "id": "ACHANG-W五-A-19",
@@ -217,7 +251,10 @@
       "name": "六合里活動中心",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "中華二路358巷43號",
+      "address_note": "市府活動中心資料；實際停靠點待現場確認。",
+      "address_status": "landmark_address"
     },
     {
       "id": "ACHANG-W五-A-20",
@@ -228,7 +265,10 @@
       "name": "中興里天后宮",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "中山東路368號",
+      "address_note": "廟宇名錄的候選地址，尚未確認為本路線站點，請勿作精準定位。",
+      "address_status": "candidate_needs_review"
     },
     {
       "id": "ACHANG-W五-A-21",
@@ -239,7 +279,10 @@
       "name": "中華西街（長億城公園）",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "中華西街長億城公園附近",
+      "address_note": "僅為附近地標描述，具體停靠位置待確認。",
+      "address_status": "reference_location"
     },
     {
       "id": "ACHANG-W五-A-22",
@@ -250,7 +293,10 @@
       "name": "東橋活動中心",
       "color": "#8B5CF6",
       "review_required": false,
-      "location_verified": false
+      "location_verified": false,
+      "address": "東橋十街158號",
+      "address_note": "市府活動中心資料；實際停靠點待現場確認。",
+      "address_status": "landmark_address"
     },
     {
       "id": "ACHANG-W五-A-23",
@@ -262,7 +308,10 @@
       "color": "#8B5CF6",
       "review_required": false,
       "review_note": "114.4.2 公告正確版已確認復華里活動中心；保留原候審紀錄供稽核",
-      "location_verified": false
+      "location_verified": false,
+      "address": "國華街110號",
+      "address_note": "市府活動中心資料；實際停靠點待現場確認。",
+      "address_status": "landmark_address"
     },
     {
       "id": "ACHANG-W五-A-24",
@@ -274,7 +323,10 @@
       "color": "#8B5CF6",
       "review_required": false,
       "review_note": "114.4.2 公告正確版已確認復國里活動中心；保留原候審紀錄供稽核",
-      "location_verified": false
+      "location_verified": false,
+      "address": "復國二路46號",
+      "address_note": "市府活動中心資料；實際停靠點待現場確認。",
+      "address_status": "landmark_address"
     },
     {
       "id": "ACHANG-W五-B-25",

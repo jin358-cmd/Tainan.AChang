@@ -7,6 +7,7 @@
  const WEEKDAYS=['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
  const ALLOWED=new Set(['星期三','星期五']);
  const timeValue=value=>/^([01]\d|2[0-3]):[0-5]\d$/.test(String(value||''))?String(value):'';
+ const streetAddress=value=>String(value||'').trim().replace(/^(?:臺|台)南市\s*永康區\s*/,'').replace(/^網寮里(?=永大一路)/,'');
  function weekdayForDate(value){
   const match=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value||''));if(!match)return'';
   const year=Number(match[1]),month=Number(match[2]),day=Number(match[3]),parsed=new Date(Date.UTC(year,month-1,day));
@@ -24,7 +25,7 @@
    if(!name)reasons.push('站名待確認');
    if(!route)reasons.push('路線待確認');
    if(source?.review_required===true)reasons.push('來源衝突待核');
-   return {id,weekday,route,name,address:String(source?.address||'').trim(),start,end,sourceOrder:index+1,enabled:reasons.length===0,pendingReasons:reasons,reviewNote:String(source?.review_note||'').trim()};
+   return {id,weekday,route,name,address:streetAddress(source?.address),start,end,sourceOrder:index+1,enabled:reasons.length===0,pendingReasons:reasons,reviewNote:String(source?.review_note||'').trim()};
   });
  }
  function stopsForDate(document,date){

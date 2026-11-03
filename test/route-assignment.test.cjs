@@ -39,7 +39,7 @@ test('UI exposes day/night buttons, default labels and only the settings panel o
  const html=fs.readFileSync(require.resolve('../index.html'),'utf8'),dir=fs.readFileSync(require.resolve('../route-directory.js'),'utf8'),css=fs.readFileSync(require.resolve('../map-settings.css'),'utf8');
  assert.doesNotMatch(html,/<select id="shift"/);assert.match(html,/data-directory-shift="日間"/);assert.match(html,/class="night-shift" data-directory-shift="夜間"/);
  const menu=html.slice(html.indexOf('id="mapLayerSettings"'),html.indexOf('</aside>',html.indexOf('id="mapLayerSettings"')));for(const id of ['layerRoutes','layerVolunteer','layerDay','layerNight'])assert.ok(menu.includes('id="'+id+'"'));
- assert.match(html,/id="directoryRouteSummary"/);assert.match(css,/\.map-route-layer-legend\{display:none!important\}/);
+ assert.doesNotMatch(html,/id="directoryRouteSummary"/);assert.match(css,/\.map-route-layer-legend\{display:none!important\}/);
  const ctx=vm.createContext({$:()=>({value:'日間'})});vm.runInContext(dir.slice(dir.indexOf('function defaultDirectoryTimeWindow('),dir.indexOf('function matchesDirectoryTime(')),ctx);assert.equal(ctx.directoryTimeOptionLabel('06:15','directoryStartTime',['06:15','10:00']),'06:15（預設）');
 });
 
