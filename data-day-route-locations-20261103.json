@@ -1230,10 +1230,13 @@
       "official_name": "中正五街506號",
       "longitude": null,
       "latitude": null,
-      "status": "review_required",
+      "status": "owner_confirmed",
       "notes": [
-        "原表：中正三街506號；官方：中正五街506號，尚未確認"
-      ]
+        "地址已由Owner確認為中正三街506號；門牌座標待定位"
+      ],
+      "address_confirmed": true,
+      "confirmed_address": "臺南市永康區中正三街506號",
+      "confirmation_source": "Owner於2026-11-03指定"
     },
     {
       "source_id": "PDF:DAY:0100",
@@ -1968,6 +1971,41 @@
       "latitude": 23.020578,
       "status": "official_stop",
       "notes": []
+    },
+    {
+      "source_id": "OVERLAY:d6000000-0000-4000-8000-000000000001",
+      "source_name": "大橋一街228號",
+      "route": "日間6",
+      "original_order": 2,
+      "longitude": null,
+      "latitude": null,
+      "status": "owner_confirmed",
+      "address_confirmed": true,
+      "confirmed_address": "臺南市永康區大橋一街228號",
+      "confirmation_source": "Owner於2026-11-03指定",
+      "previous_name": "大橋一街103巷口",
+      "notes": [
+        "地址已由Owner確認為大橋一街228號；門牌座標待定位"
+      ]
+    }
+  ],
+  "owner_corrections": [
+    {
+      "date": "2026-11-03",
+      "source_id": "PDF:DAY:0099",
+      "address": "臺南市永康區中正三街506號",
+      "source_name_retained": true,
+      "external_name_before": "中正五街506號",
+      "reason": "Owner指定以中正三街506號為準；外部來源原文保留供追溯"
+    },
+    {
+      "date": "2026-11-03",
+      "source_id": "OVERLAY:d6000000-0000-4000-8000-000000000001",
+      "address": "臺南市永康區大橋一街228號",
+      "previous_name": "大橋一街103巷口",
+      "database_updated_at": "2026-11-03T05:06:24.076033Z",
+      "time": "06:52–06:54",
+      "display_order": 2
     }
   ]
 }

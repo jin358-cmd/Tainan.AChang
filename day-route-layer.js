@@ -19,7 +19,7 @@
    const group=groups.get(token),location=positions.get(row['站點ID']);
    const matched=location&&norm(location.source_name)===norm(row['停靠點原文']);
    const valid=matched&&location.status==='official_stop'&&Number.isFinite(location.longitude)&&Number.isFinite(location.latitude)&&location.longitude>120&&location.longitude<121&&location.latitude>22&&location.latitude<24;
-   const stop={id:row['站點ID'],route:token,plate:row['車牌']||'',order:group.length+1,name:row['停靠點原文']||'',time:row['到達']||'',end:row['離開']||'',village:row['里別']||'',color:COLORS[Number(token.slice(-1))-1],position:valid?[location.longitude,location.latitude]:null,notes:matched?(location.notes||[]):['尚無可核對的官方清運點座標'],status:valid?'官方清運點（門牌精準度待驗證）':'待確認'};
+   const stop={id:row['站點ID'],route:token,plate:row['車牌']||'',order:group.length+1,name:row['停靠點原文']||'',time:row['到達']||'',end:row['離開']||'',village:row['里別']||'',color:COLORS[Number(token.slice(-1))-1],position:valid?[location.longitude,location.latitude]:null,notes:matched?(location.notes||[]):['尚無可核對的官方清運點座標'],status:valid?'官方清運點（門牌精準度待驗證）':matched&&location.address_confirmed?'地址已確認；座標待定位':'待確認'};
    group.push(stop);stops.push(stop);
    if(!valid){pending.push(stop);continue;}
    points.features.push({type:'Feature',geometry:{type:'Point',coordinates:stop.position},properties:{id:stop.id,route:stop.route,order:stop.order,color:stop.color}});
@@ -58,9 +58,9 @@
    legend.hidden=!toggle.checked;
    if(!toggle.checked){status.textContent='路線圖層已關閉';pending.hidden=true;return;}
    if(!catalog){status.textContent=failed?'路線座標載入失敗，重新整理後可再試':'正在載入路線座標…';pending.hidden=true;return;}
-   status.textContent=`${select.value==='all'?'全部6車次':select.value} · ${model.total}站 · 已標示${model.located}站 · 待確認${model.pending.length}站`;
+   status.textContent=`${select.value==='all'?'全部6車次':select.value} · ${model.total}站 · 已標示${model.located}站 · 待定位${model.pending.length}站`;
    pending.hidden=model.pending.length===0;
-   const summary=pending.querySelector('summary');summary.textContent=`待確認 ${model.pending.length} 站`;
+   const summary=pending.querySelector('summary');summary.textContent=`待定位 ${model.pending.length} 站`;
    pendingList.replaceChildren();
    for(const stop of model.pending){const li=document.createElement('li');li.textContent=`${stop.route} 第${stop.order}站 ${stop.time} ${stop.name}：${stop.notes.join('；')}`;pendingList.append(li);}
   }
@@ -123,7 +123,7 @@
   COLORS.forEach((color,index)=>{const key=document.createElement('span'),swatch=document.createElement('i');swatch.style.backgroundColor=color;key.append(swatch,document.createTextNode(`日間${index+1}`));legend.append(key);});
   const note=document.createElement('span');note.className='route-sequence-note';note.textContent='→ 依站序連線';legend.append(note);
   fetch('./data-day-route-locations-20261103.json',{cache:'no-store'}).then(response=>{if(!response.ok)throw Error('route locations unavailable');return response.json();}).then(value=>{
-   if(value.version!==1||value.stops?.length!==160)throw Error('invalid route location catalog');catalog=value;onChange?.();
+   if(value.version!==1||value.stops?.filter(stop=>String(stop.source_id||'').startsWith('PDF:DAY:')).length!==160)throw Error('invalid route location catalog');catalog=value;onChange?.();
   }).catch(error=>{failed=true;renderControls();console.warn('日間路線座標未能載入',error.message);});
   return {sync,renderFallback,closeDetail};
  }
