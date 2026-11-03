@@ -20,6 +20,6 @@
 @media(max-width:1199px){.route-filter-card{display:block}.route-filter-card .controls{grid-template-columns:repeat(2,minmax(0,1fr))}.route-filter-card .directory-route-summary{display:block;min-width:0;margin-top:12px}}
 @media(min-width:1200px){.map-route-workspace{height:calc(100dvh - 145px);min-height:480px;grid-template-columns:minmax(280px,.85fr) minmax(400px,1.65fr) minmax(460px,1.15fr)}}
 
-@media(min-width:1200px){.route-filter-card .directory-shift-buttons{margin-top:0}.route-filter-card .directory-shift-control{max-width:260px;width:100%}}
+@media(min-width:1200px){.route-filter-card .directory-shift-buttons{margin-top:0}.route-filter-card .directory-shift-control{max-width:none;width:100%}.route-filter-card .directory-shift-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}}
 
 .map-route-left .route-filter-card{display:block;padding:0;margin:0 0 14px;border:0;border-radius:0;background:transparent}.map-route-left .route-filter-card .controls{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px}.map-route-left .route-filter-card .directory-shift-control,.map-route-left .route-filter-card .controls>label:last-of-type{grid-column:1/-1}.map-route-left .route-filter-card input,.map-route-left .route-filter-card select{font-size:18px;min-height:44px}.map-route-left .route-filter-card .directory-shift-buttons{margin-top:0}
