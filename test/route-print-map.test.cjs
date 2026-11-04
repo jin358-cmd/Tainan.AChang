@@ -25,7 +25,7 @@ test('the print basemap strips route and village overlays without modifying the 
  assert.equal(style.layers.length,4);
 });
 
-test('the printable map uses a 2400×1600 canvas and vector marks, then removes its temporary renderer',async()=>{
+test('the printable map fills the A4 content width at 2400 pixels with vector marks and releases its renderer',async()=>{
  class Node{
   constructor(tag){this.tag=tag;this.attributes={};this.children=[];this.style={};}
   setAttribute(key,value){this.attributes[key]=String(value);}
@@ -38,7 +38,7 @@ test('the printable map uses a 2400×1600 canvas and vector marks, then removes 
   constructor(options){captured=options;}
   once(_,handler){queueMicrotask(handler);}
   on(){}
-  getCanvas(){return {width:2400,height:1600,toDataURL:type=>{assert.equal(type,'image/png');return 'data:image/png;base64,synthetic';}};}
+  getCanvas(){return {width:2400,height:Number(captured.container.style.height.replace('px',''))*2,toDataURL:type=>{assert.equal(type,'image/png');return 'data:image/png;base64,synthetic';}};}
   getBounds(){return {getSouthWest:()=>({lng:120.20,lat:22.99}),getNorthEast:()=>({lng:120.30,lat:23.07})};}
   remove(){removed=true;}
  }
@@ -48,7 +48,7 @@ test('the printable map uses a 2400×1600 canvas and vector marks, then removes 
  assert.equal(svg.attributes['data-station-count'],'3');
  assert.equal(svg.children.filter(node=>node.attributes['data-route-stop']).length,3);
  assert.equal(svg.children.filter(node=>node.attributes['data-route-from']).length,2);
- const image=svg.children.find(node=>node.tag==='image');assert.equal(image.attributes['data-pixel-width'],'2400');assert.equal(image.attributes['data-pixel-height'],'1600');
+ const image=svg.children.find(node=>node.tag==='image');assert.equal(image.attributes['data-pixel-width'],'2400');assert.equal(captured.container.style.height,'529px');assert.equal(image.attributes['data-pixel-height'],'1058');assert.equal(svg.attributes.viewBox,'0 0 1200 529');
  assert.ok(removed);assert.ok(doc.body.children[0].removed);
 });
 test('requested route labels and every daytime option carry the requested text and icon',()=>{
@@ -135,4 +135,17 @@ test('night layout minimizes pages before preferring wider station cards',()=>{
  const layouts=[{columns:3,pages:[1,2,3]},{columns:4,pages:[1,2]},{columns:5,pages:[1,2]},{columns:6,pages:[1,2,3]}];
  assert.equal(printer.chooseA4Layout(layouts),layouts[1]);assert.deepEqual(layouts.map(x=>x.columns),[3,4,5,6]);
  assert.equal(printer.chooseA4Layout([{columns:3,pages:[1,2]},{columns:6,pages:[1]}]).columns,6);
+});
+
+
+test('the native print window preserves prepacked A4 pages and the day fit or night layout class',async()=>{
+ for(const kind of ['day','night']){
+  const copied={style:{},dataset:{printPages:kind==='day'?'1':'3'}},sheet={dataset:{printMode:'full'},classList:{contains:name=>name==='route-print-a4'||name===(kind==='night'?'route-print-night':'route-print-day-a4')}};
+  const node=tag=>({tag,children:[],append(...children){this.children.push(...children);}}),doc={head:node('head'),body:node('body'),createElement:node,importNode:()=>copied,querySelectorAll:()=>[],fonts:{ready:Promise.resolve()}};
+  doc.body.replaceChildren=(...children)=>{doc.body.children=children;};let prints=0;
+  const target={document:doc,requestAnimationFrame:fn=>queueMicrotask(fn),focus(){},print(){prints++;},close(){}};
+  await printer.printDocument(sheet,{window:{open:()=>target},document:{baseURI:'https://achang.pmos.space/',querySelectorAll:()=>[]}});
+  assert.match(copied.className,/route-print-a4/);assert.match(copied.className,kind==='night'?/route-print-night/:/route-print-day-a4/);assert.equal(copied.dataset.printPages,kind==='day'?'1':'3');assert.equal(prints,1);
+  const pageRules=doc.head.children.filter(x=>x.tag==='style').map(x=>x.textContent).join('');assert.match(pageRules,/@page achang-route-a4\{size:A4 portrait;margin:0\}/);assert.match(pageRules,/--day-fit-transform/);
+ }
 });

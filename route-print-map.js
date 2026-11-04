@@ -18,18 +18,18 @@
   if(singlePage){const {page,body,inner}=makePage();inner.replaceWith(content.cloneNode(true));const copy=body.firstElementChild;copy.style.width='199.5mm';connectDiagram(copy.querySelector('.diagram'));const scale=a4FitScale(copy.scrollHeight,body.getBoundingClientRect().width);copy.style.transform=`scale(${scale})`;copy.style.transformOrigin='top left';copy.style.position='absolute';copy.style.left=`${body.getBoundingClientRect().width*(1-scale)/2}px`;copy.style.top='0';copy.style.setProperty('--day-fit-transform',`scale(${scale})`);copy.style.setProperty('--day-fit-left',copy.style.left);page.dataset.fitScale=String(scale);return {pages:finish([page]),columns:Math.min(6,content.querySelectorAll('.route-stop').length)};}
   const cards=[...content.querySelectorAll('.diagram .route-stop')],table=content.querySelector('table'),visual=content.querySelector('.route-print-visuals'),mapNodes=visual?[...visual.children].filter(node=>node.tagName!=='H2'&&!node.classList.contains('diagram')):[];
   const diagramHeading=visual?.querySelector('h2'),tableHeading=[...content.children].find(node=>node.tagName==='H2'),candidates=[];
-  for(const columns of [3,4,5,6]){
+  candidateLayouts:for(const columns of [3,4,5,6]){
    const pages=[];let current,diagram,diagramTitle,tableSection,tbody;
    const nextPage=()=>{current=makePage();pages.push(current.page);header.forEach(node=>current.inner.append(node.cloneNode(true)));diagram=null;tableSection=null;return current;};
    const fits=()=>current.inner.getBoundingClientRect().height<=current.body.clientHeight-2;
    const addDiagram=()=>{diagramTitle=diagramHeading.cloneNode(true);diagram=doc.createElement('div');diagram.className='diagram';diagram.style.setProperty('--print-columns',columns);current.inner.append(diagramTitle,diagram);};
    const addTable=()=>{tableSection=doc.createElement('div');tableSection.className='route-print-table-section';tableSection.append(tableHeading.cloneNode(true));const copy=table.cloneNode(false);if(table.tHead)copy.append(table.tHead.cloneNode(true));tbody=doc.createElement('tbody');copy.append(tbody);tableSection.append(copy);current.inner.append(tableSection);};
    nextPage();mapNodes.forEach(node=>{const copy=node.cloneNode(true);copy.classList.add('route-print-map');current.inner.append(copy);});
-   for(let index=0;index<cards.length;index+=columns){if(!diagram)addDiagram();const row=cards.slice(index,index+columns).map(node=>node.cloneNode(true));diagram.append(...row);if(!fits()){row.forEach(node=>node.remove());if(!diagram.children.length){diagram.remove();diagramTitle.remove();}nextPage();addDiagram();diagram.append(...row);}if(!fits())throw Error('單張站點卡片內容超出 A4 範圍，請縮小列印時段後重試。');}
-   for(const original of table?.tBodies[0]?.rows||[]){if(!tableSection)addTable();const row=original.cloneNode(true);tbody.append(row);if(!fits()){row.remove();if(!tbody.children.length)tableSection.remove();nextPage();addTable();tbody.append(row);}if(!fits())throw Error('單筆站點資料超出 A4 範圍，請檢查站點內容。');}
+   for(let index=0;index<cards.length;index+=columns){if(!diagram)addDiagram();const row=cards.slice(index,index+columns).map(node=>node.cloneNode(true));diagram.append(...row);if(!fits()){row.forEach(node=>node.remove());if(!diagram.children.length){diagram.remove();diagramTitle.remove();}nextPage();addDiagram();diagram.append(...row);}if(!fits()){pages.forEach(page=>page.remove());continue candidateLayouts;}}
+   for(const original of table?.tBodies[0]?.rows||[]){if(!tableSection)addTable();const row=original.cloneNode(true);tbody.append(row);if(!fits()){row.remove();if(!tbody.children.length)tableSection.remove();nextPage();addTable();tbody.append(row);}if(!fits()){pages.forEach(page=>page.remove());continue candidateLayouts;}}
    candidates.push({pages,columns});pages.forEach(page=>page.remove());
   }
-  const best=chooseA4Layout(candidates);best.pages.forEach(page=>host.append(page));best.pages.forEach(page=>page.querySelectorAll('.diagram').forEach(connectDiagram));finish(best.pages);return best;
+  const best=chooseA4Layout(candidates);if(!best)throw Error('單筆站點內容超出 A4 範圍，請檢查站點內容。');best.pages.forEach(page=>host.append(page));best.pages.forEach(page=>page.querySelectorAll('.diagram').forEach(connectDiagram));finish(best.pages);return best;
  }
  function commonCrew(stations){
   if(!stations.length||!stations[0].length)return [];
@@ -73,7 +73,8 @@
   const positions=model.stops.filter(stop=>stop.position).map(stop=>stop.position);
   if(!positions.length)return null;
   const bounds=[[Math.min(...positions.map(p=>p[0])),Math.min(...positions.map(p=>p[1]))],[Math.max(...positions.map(p=>p[0])),Math.max(...positions.map(p=>p[1]))]];
-  const holder=document.createElement('div');holder.className='route-print-map-renderer';holder.setAttribute('aria-hidden','true');document.body.append(holder);
+  const height=Math.round(WIDTH*(model.stops.every(stop=>stop.route?.startsWith('夜間'))?68:88)/a4Metrics().contentWidth);
+  const holder=document.createElement('div');holder.className='route-print-map-renderer';holder.style.height=height+'px';holder.setAttribute('aria-hidden','true');document.body.append(holder);
   let exportMap,timer;
   try{
    exportMap=new lib.Map({container:holder,style:baseStyle(map.getStyle()),bounds,fitBoundsOptions:{padding:65,maxZoom:16.5},bearing:0,pitch:0,interactive:false,attributionControl:false,pixelRatio:PIXEL_RATIO,canvasContextAttributes:{preserveDrawingBuffer:true,antialias:true}});
@@ -83,19 +84,19 @@
     exportMap.on('error',event=>{if(/webgl|context lost|securityerror/i.test(event.error?.message||'')){clearTimeout(timer);reject(event.error);}});
    });
    const canvas=exportMap.getCanvas(),extent=exportMap.getBounds(),sw=extent.getSouthWest(),ne=extent.getNorthEast();
-   if(canvas.width<WIDTH*PIXEL_RATIO||canvas.height<HEIGHT*PIXEL_RATIO)throw Error('無法建立高解析度列印底圖，請稍後重試。');
-   return {dataUrl:canvas.toDataURL('image/png'),extent:[sw.lng,sw.lat,ne.lng,ne.lat],pixelWidth:canvas.width,pixelHeight:canvas.height};
+   if(canvas.width<WIDTH*PIXEL_RATIO||canvas.height<height*PIXEL_RATIO)throw Error('無法建立高解析度列印底圖，請稍後重試。');
+   return {dataUrl:canvas.toDataURL('image/png'),extent:[sw.lng,sw.lat,ne.lng,ne.lat],pixelWidth:canvas.width,pixelHeight:canvas.height,height};
   }finally{clearTimeout(timer);exportMap?.remove();holder.remove();}
  }
  async function buildSvg(model,options){
   const {document}=options,base=await captureBaseMap(model,options);
   if(!base)return null;
-  const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');
-  svg.setAttribute('viewBox',`0 0 ${WIDTH} ${HEIGHT}`);svg.setAttribute('width',WIDTH);svg.setAttribute('height',HEIGHT);svg.setAttribute('role','img');svg.setAttribute('aria-label','選定時段路線地圖');svg.setAttribute('data-station-count',model.total);
+  const height=base.height||HEIGHT,ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');
+  svg.setAttribute('viewBox',`0 0 ${WIDTH} ${height}`);svg.setAttribute('width',WIDTH);svg.setAttribute('height',height);svg.setAttribute('role','img');svg.setAttribute('aria-label','選定時段路線地圖');svg.setAttribute('data-station-count',model.total);
   const make=(tag,attrs,parent=svg)=>{const node=document.createElementNS(ns,tag);for(const [key,value] of Object.entries(attrs))node.setAttribute(key,String(value));parent.append(node);return node;};
   const [west,south,east,north]=base.extent,sw=mercator([west,south]),ne=mercator([east,north]);
-  const project=coord=>{const p=mercator(coord);return [(p[0]-sw[0])/(ne[0]-sw[0])*WIDTH,(ne[1]-p[1])/(ne[1]-sw[1])*HEIGHT];};
-  make('image',{href:base.dataUrl,x:0,y:0,width:WIDTH,height:HEIGHT,'data-pixel-width':base.pixelWidth,'data-pixel-height':base.pixelHeight});
+  const project=coord=>{const p=mercator(coord);return [(p[0]-sw[0])/(ne[0]-sw[0])*WIDTH,(ne[1]-p[1])/(ne[1]-sw[1])*height];};
+  make('image',{href:base.dataUrl,x:0,y:0,width:WIDTH,height,'data-pixel-width':base.pixelWidth,'data-pixel-height':base.pixelHeight});
   const defs=make('defs',{}),colors=[...new Set(model.stops.map(stop=>stop.color))];
   colors.forEach((color,index)=>{const marker=make('marker',{id:`print-route-arrow-${index}`,viewBox:'0 0 10 10',refX:5,refY:5,markerWidth:4,markerHeight:4,orient:'auto'},defs);make('path',{d:'M0 0 L10 5 L0 10 z',fill:color},marker);});
   for(const feature of model.lines.features){
@@ -107,7 +108,7 @@
    make('circle',{cx:x,cy:y,r:10,fill:stop.color,stroke:'#fff','stroke-width':3,'data-route-stop':stop.id});
    make('text',{x:x+16,y:y-16,'font-size':48,'font-family':'Arial, sans-serif','font-weight':800,fill:'#17384f',stroke:'#fff','stroke-width':7,'paint-order':'stroke','data-stop-number':stop.order}).textContent=String(stop.order);
   }
-  make('text',{x:12,y:HEIGHT-12,'font-size':14,fill:'#17384f',stroke:'#fff','stroke-width':3,'paint-order':'stroke'}).textContent='© OpenFreeMap · © OpenMapTiles · © OpenStreetMap contributors · 依站序連線';
+  make('text',{x:12,y:height-12,'font-size':14,fill:'#17384f',stroke:'#fff','stroke-width':3,'paint-order':'stroke'}).textContent='© OpenFreeMap · © OpenMapTiles · © OpenStreetMap contributors · 依站序連線';
   return svg;
  }
  return {filterByIds,baseStyle,buildSvg,commonCrew,paperScale,borderlessA4Scale,a4Metrics,a4FitScale,chooseA4Layout,layoutA4,printDocument};
