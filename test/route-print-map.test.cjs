@@ -49,6 +49,7 @@ test('the printable map fills the A4 content width at 2400 pixels with vector ma
  assert.equal(svg.children.filter(node=>node.attributes['data-route-stop']).length,3);
  assert.equal(svg.children.filter(node=>node.attributes['data-route-from']).length,2);
  const image=svg.children.find(node=>node.tag==='image');assert.equal(image.attributes['data-pixel-width'],'2400');assert.equal(captured.container.style.height,'529px');assert.equal(image.attributes['data-pixel-height'],'1058');assert.equal(svg.attributes.viewBox,'0 0 1200 529');
+ for(const label of svg.children.filter(node=>node.attributes['data-stop-number'])){assert.ok(Number(label.attributes.x)>=12);assert.ok(Number(label.attributes.x)+String(label.textContent).length*30<=1188);assert.ok(Number(label.attributes.y)>=56&&Number(label.attributes.y)<=499);}
  assert.ok(removed);assert.ok(doc.body.children[0].removed);
 });
 test('requested route labels and every daytime option carry the requested text and icon',()=>{
