@@ -131,6 +131,24 @@
 
 .route-print-compact table,.route-print-compact th,.route-print-compact td{font-size:18px!important;line-height:1.6}.route-print-compact th,.route-print-compact td{padding:10px 8px!important}.route-print-compact tr{break-inside:avoid;page-break-inside:avoid}.route-print-compact thead{display:table-header-group}.route-print-compact h1 .route-print-crew{display:inline;margin-left:6px;font:inherit;line-height:inherit}.print-leader-crown{display:inline-block;position:relative;top:-3px;margin-left:3px}.day-route-contact .map-leader-crown{top:-5px;margin-left:4px;margin-right:0}
 
-.route-print-compact.route-print-day-a4{position:relative;width:210mm!important;height:297mm;max-height:297mm;overflow:hidden;box-sizing:border-box;padding:0!important}.route-print-day-a4 .route-print-content{width:210mm}@media print{@page achang-day-a4{size:A4 portrait;margin:0}#routePrintSurface.route-print-day-a4{page:achang-day-a4;width:210mm!important;height:297mm!important;max-height:297mm!important;padding:0!important;margin:0!important;break-inside:avoid!important;page-break-inside:avoid!important}}
 
 .station-village{display:block}.station-service-days{display:inline-grid;max-width:100%;text-align:left}.station-service-day,.service-day{display:grid;grid-template-columns:22px minmax(0,1fr);align-items:start;gap:0 4px}.service-icon{display:inline-grid;place-items:start center;width:22px;line-height:inherit}.station-service-day>span:last-child,.service-day>span:last-child{min-width:0;overflow-wrap:anywhere}
+
+/* Full-route printing uses A4 pages with a centered 95% content rectangle. */
+.route-print-compact.route-print-a4{width:210mm!important;height:auto!important;max-height:none!important;overflow:visible!important;padding:0!important}
+.route-print-a4 .route-print-page{position:relative;width:210mm;height:297mm;box-sizing:border-box;padding:7.425mm 5.25mm;background:#fff;overflow:hidden;break-inside:avoid;page-break-inside:avoid}
+.route-print-a4 .route-print-page-body{position:relative;width:199.5mm;height:282.15mm;box-sizing:border-box;padding:0;overflow:hidden}
+.route-print-a4 .route-print-content{width:199.5mm!important;padding:0;box-sizing:border-box}
+.route-print-a4 .route-print-page-number{position:absolute;right:5.25mm;bottom:2mm;font:12px Arial,sans-serif;color:#566f81}
+.route-print-preview .route-print-a4 .route-print-page{margin-bottom:12px;box-shadow:0 2px 12px #14314b22}
+.route-print-a4.route-print-night .route-print-map{display:block;width:100%;height:auto;max-height:68mm;margin:4px 0 8px}
+.route-print-a4.route-print-night .diagram{gap:24px 8px}
+.route-print-a4.route-print-night th,.route-print-a4.route-print-night td{padding:6px 8px!important;line-height:1.4}
+.route-print-a4.route-print-night .service-day{line-height:1.35}
+.route-print-a4.route-print-night .route-print-table-section h2{margin-top:8px}
+@media print{
+ @page achang-route-a4{size:A4 portrait;margin:0}
+ #routePrintSurface.route-print-a4{page:achang-route-a4;width:210mm!important;height:auto!important;max-height:none!important;padding:0!important;margin:0!important;overflow:visible!important}
+ .route-print-a4 .route-print-page{margin:0!important;box-shadow:none!important;break-after:page;page-break-after:always}
+ .route-print-a4 .route-print-page:last-child{break-after:auto;page-break-after:auto}
+}

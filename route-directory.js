@@ -112,9 +112,8 @@ async function printActiveRoute(){
  const tableTitle=document.createElement('h2');tableTitle.textContent='選定時段完整站點列表';content.append(tableTitle);table.removeAttribute('id');table.hidden=false;content.append(table);
  document.body.append(sheet);await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
  const measureSheet=()=>{
-  const borderless=snapshot.shift==='日間'&&!visual.hidden;content.style.transform='none';content.style.position='static';content.style.inset='auto';content.style.width=borderless?'210mm':'190mm';sheet.style.height='auto';sheet.style.setProperty('--route-print-scale','none');
-  if(!visual.hidden)connectDiagram(diagram);
-  if(borderless){const scale=window.AChangRoutePrint.borderlessA4Scale(content.scrollHeight,sheet.getBoundingClientRect().width);content.style.transform=`scale(${scale})`;content.style.transformOrigin='top left';content.style.position='absolute';content.style.inset='0 auto auto 0';sheet.style.setProperty('--route-print-scale',`scale(${scale})`);sheet.style.height='297mm';sheet.dataset.printPages='1';}
+  sheet.replaceChildren(content);content.style.transform='none';content.style.position='static';content.style.inset='auto';content.style.width='190mm';sheet.style.height='auto';
+  if(!visual.hidden){const layout=window.AChangRoutePrint.layoutA4(content,{host:sheet,document,singlePage:snapshot.shift==='日間',connectDiagram});content.remove();sheet.dataset.printPages=String(layout.pages.length);sheet.dataset.printColumns=String(layout.columns);}
  };
  document.getElementById('routePrintPreview')?.remove();
  const preview=document.createElement('section');preview.id='routePrintPreview';preview.className='route-print-preview';preview.setAttribute('role','dialog');preview.setAttribute('aria-modal','true');preview.setAttribute('aria-label','路線列印預覽');
@@ -126,9 +125,9 @@ async function printActiveRoute(){
  const closeButton=document.createElement('button');closeButton.type='button';closeButton.textContent='返回地圖';closeButton.onclick=()=>{preview.remove();sheet.remove();button.focus();};preview.onkeydown=event=>{if(event.key==='Escape'){event.preventDefault();event.stopPropagation();closeButton.onclick();}};
  actions.append(label,modes,printButton,closeButton);preview.append(actions);document.body.append(preview);let paper=null;
  const setMode=mode=>{
-  const listOnly=mode==='list';visual.hidden=listOnly;sheet.dataset.printMode=listOnly?'list':'full';sheet.classList.remove('route-print-day');sheet.classList.toggle('route-print-day-a4',snapshot.shift==='日間'&&!listOnly);delete sheet.dataset.printPages;fullButton.setAttribute('aria-pressed',String(!listOnly));listButton.setAttribute('aria-pressed',String(listOnly));
-  label.textContent=(listOnly?'僅列表清單':'完整全部')+(snapshot.shift==='日間'&&!listOnly?' · A4 無邊框單頁':' · A4 大字列印');measureSheet();
-  const next=sheet.cloneNode(true);next.removeAttribute('id');next.className='route-print-review-paper route-print-compact truck-directory-host'+(snapshot.shift==='日間'&&!listOnly?' route-print-day-a4':'');if(paper)paper.replaceWith(next);else preview.append(next);paper=next;
+  const listOnly=mode==='list';visual.hidden=listOnly;sheet.dataset.printMode=listOnly?'list':'full';sheet.classList.remove('route-print-day');sheet.classList.toggle('route-print-day-a4',snapshot.shift==='日間'&&!listOnly);sheet.classList.toggle('route-print-a4',!listOnly);delete sheet.dataset.printPages;delete sheet.dataset.printColumns;fullButton.setAttribute('aria-pressed',String(!listOnly));listButton.setAttribute('aria-pressed',String(listOnly));
+  measureSheet();label.textContent=listOnly?'僅列表清單 · A4 大字列印':`完整全部 · A4 95% · ${sheet.dataset.printPages} 頁`;
+  const next=sheet.cloneNode(true);next.removeAttribute('id');next.className='route-print-review-paper route-print-compact truck-directory-host'+(!listOnly?' route-print-a4'+(snapshot.shift==='日間'?' route-print-day-a4':' route-print-night'):'');if(paper)paper.replaceWith(next);else preview.append(next);paper=next;
   status.textContent='';status.hidden=true;
  };
  fullButton.onclick=()=>setMode('full');listButton.onclick=()=>setMode('list');setMode('full');printButton.focus();

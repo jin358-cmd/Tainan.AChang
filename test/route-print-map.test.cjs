@@ -124,3 +124,15 @@ test('borderless daytime fit uses the full 210 by 297 mm A4 page and keeps long 
  for(const height of [pageHeight,1800,4000]){const scale=printer.borderlessA4Scale(height,width);assert.ok(scale>0&&scale<=1);assert.ok(height*scale<pageHeight);}
  assert.equal(printer.borderlessA4Scale(0,width),1);
 });
+
+
+test('A4 full printing reserves a centered 95 percent rectangle and scales a day route into it',()=>{
+ const box=printer.a4Metrics();assert.equal(box.width,210);assert.equal(box.height,297);assert.equal(box.contentWidth,199.5);assert.ok(Math.abs(box.contentHeight-282.15)<1e-8);assert.ok(Math.abs(box.marginX-5.25)<1e-8);assert.ok(Math.abs(box.marginY-7.425)<1e-8);
+ const width=box.contentWidth*96/25.4;
+ for(const height of [400,1200,3000]){const scale=printer.a4FitScale(height,width);assert.ok(scale>0&&scale<=1);assert.ok(height*scale<=box.contentHeight*96/25.4-1);}
+});
+test('night layout minimizes pages before preferring wider station cards',()=>{
+ const layouts=[{columns:3,pages:[1,2,3]},{columns:4,pages:[1,2]},{columns:5,pages:[1,2]},{columns:6,pages:[1,2,3]}];
+ assert.equal(printer.chooseA4Layout(layouts),layouts[1]);assert.deepEqual(layouts.map(x=>x.columns),[3,4,5,6]);
+ assert.equal(printer.chooseA4Layout([{columns:3,pages:[1,2]},{columns:6,pages:[1]}]).columns,6);
+});
